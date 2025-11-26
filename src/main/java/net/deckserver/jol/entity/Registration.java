@@ -1,0 +1,59 @@
+package net.deckserver.jol.entity;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import net.deckserver.jol.enums.Status;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+
+@Entity
+public class Registration extends PanacheEntity {
+    @ManyToOne
+    public User user;
+
+    @ManyToOne
+    public Game game;
+
+    public OffsetDateTime lastUpdated;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    public String deck;
+    public String deckName;
+    public String summary;
+
+    public static Registration invite(Game game, User user) {
+        Registration registration = findByGameAndUser(game, user);
+        if (registration == null) {
+            registration = new Registration();
+        }
+        registration.game = game;
+        registration.user = user;
+        registration.lastUpdated = OffsetDateTime.now();
+        return registration;
+    }
+
+    public static Registration findByGameAndUser(Game game, User user) {
+        return find("game.id = ?1 and user.id = ?2", game.id, user.id).firstResult();
+    }
+
+    public static void delete(Game game, User user) {
+        if (game.status == Status.ACTIVE) {
+            throw new IllegalStateException("Game in progress.  Can't delete.");
+        }
+        Registration registration = findByGameAndUser(game, user);
+        if (registration != null && registration.isPersistent()) {
+            registration.delete();
+        }
+    }
+
+    public void register(String deck, String deckName, String summary) {
+        this.deck = deck;
+        this.deckName = deckName;
+        this.summary = summary;
+        this.lastUpdated = OffsetDateTime.now();
+    }
+}
