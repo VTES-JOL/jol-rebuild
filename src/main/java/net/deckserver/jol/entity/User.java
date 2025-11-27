@@ -7,7 +7,9 @@ import io.quarkus.security.jpa.Roles;
 import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +32,12 @@ public class User extends PanacheEntityBase {
     public String password;
 
     public String email;
+    public String tournamentId;
+    public String discordId;
+
+    public String countryCode;
+    public ZoneId zoneId = ZoneId.systemDefault();
+    public boolean enableImages = true;
 
     @Roles
     public Collection<String> roles = new ArrayList<>();

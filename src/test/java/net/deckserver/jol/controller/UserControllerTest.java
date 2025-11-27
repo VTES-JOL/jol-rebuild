@@ -1,16 +1,22 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.panache.mock.PanacheMock;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.SecurityAttribute;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.authentication.FormAuthConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
+import net.deckserver.jol.entity.User;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.equalTo;
 
 @QuarkusTest
 public class UserControllerTest {
@@ -25,7 +31,33 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .post("/user/register")
                 .then()
-                .statusCode(201);
+                .statusCode(HttpStatus.SC_CREATED);
+    }
+
+    @Test
+    @TestTransaction
+    void registerInvalidEmail() {
+        given().body(new UserController.Register("NewUser", "password", "invalid_email"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .post("/user/register")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    @TestTransaction
+    void registerInvalidPassword() {
+        given().body(new UserController.Register("NewUser", "short", "valie@example.org"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .post("/user/register")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+
+        given().body(new UserController.Register("NewUser", "          ", "valie@example.org"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .post("/user/register")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test
@@ -101,12 +133,19 @@ public class UserControllerTest {
 
     @Test
     void login() {
-        given().auth().form("NewUser", "password", formAuthConfig)
+        String randomUser = "LoginUser" + System.currentTimeMillis();
+        UserController.Register register = new UserController.Register(randomUser, "password", "shannon.dowley@gmail.com");
+        given().body(register)
+                .contentType(MediaType.APPLICATION_JSON)
+                .post("/user/register")
+                .then()
+                .statusCode(HttpStatus.SC_CREATED);
+        given().auth().form(randomUser, "password", formAuthConfig)
                 .when()
-                .get("/user/me")
+                .get("/user/profile")
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body(is("NewUser"));
+                .body("username", equalTo(randomUser));
     }
 
     @Test
@@ -158,7 +197,44 @@ public class UserControllerTest {
                 .post("/user/logout")
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+    }
 
+    @Test
+    @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
+    void updateCountryCode() {
+        PanacheMock.mock(User.class);
+        Mockito.when(User.findById("9999")).thenReturn(new User());
+
+        given()
+                .body("AU")
+                .put("/user/profile/country")
+                .then()
+                .statusCode(HttpStatus.SC_NO_CONTENT);
+
+        given()
+                .body("AUX")
+                .put("/user/profile/country")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
+    void updateTimeZone() {
+        PanacheMock.mock(User.class);
+        Mockito.when(User.findById("9999")).thenReturn(new User());
+
+        given()
+                .body("Australia/Brisbane")
+                .put("/user/profile/timeZone")
+                .then()
+                .statusCode(HttpStatus.SC_NO_CONTENT);
+
+        given()
+                .body("UTC")
+                .put("/user/profile/timeZone")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 
 }
