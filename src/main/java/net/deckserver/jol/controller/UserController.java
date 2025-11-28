@@ -6,7 +6,6 @@ import io.quarkus.vertx.http.runtime.security.FormAuthenticationMechanism;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.Validator;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -27,9 +26,6 @@ public class UserController {
 
     @Inject
     SecurityIdentity identity;
-
-    @Inject
-    Validator validator;
 
     @POST
     @Path("/register")
@@ -73,6 +69,7 @@ public class UserController {
     @PUT
     @Path("/profile/discord")
     @Authenticated
+    @Transactional
     public Response updateDiscordId(@Pattern(regexp = "^\\d{17,20}$") String discordId) {
         String id = identity.getAttribute("id");
         User user = User.findById(id);
@@ -83,6 +80,7 @@ public class UserController {
     @PUT
     @Path("/profile/tournament")
     @Authenticated
+    @Transactional
     public Response updateTournamentId(String tournamentId) {
         String id = identity.getAttribute("id");
         User user = User.findById(id);
@@ -93,6 +91,7 @@ public class UserController {
     @PUT
     @Path("/profile/country")
     @Authenticated
+    @Transactional
     public Response updateCountry(@Pattern(regexp = "^[A-Z]{2}$", message = "{jol.validation.constraints.countryCode}") String countryCode) {
         String id = identity.getAttribute("id");
         User user = User.findById(id);
@@ -103,6 +102,7 @@ public class UserController {
     @PUT
     @Path("/profile/timeZone")
     @Authenticated
+    @Transactional
     public Response updateTimeZone(@Pattern(regexp = "^[A-Za-z]+/[A-Za-z0-9_/.-]+$", message = "{jol.validation.constraints.timeZone}") String zone) {
         String id = identity.getAttribute("id");
         User user = User.findById(id);

@@ -1,19 +1,19 @@
 package net.deckserver.jol.controller;
 
-import io.quarkus.panache.mock.PanacheMock;
-import io.quarkus.test.TestTransaction;
+import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.SecurityAttribute;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.authentication.FormAuthConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MediaType;
 import net.deckserver.jol.entity.User;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -23,8 +23,24 @@ public class UserControllerTest {
 
     private final FormAuthConfig formAuthConfig = new FormAuthConfig("/user/login", "j_username", "j_password");
 
+    @BeforeEach
+    @Transactional
+    void setup() {
+        String passwordHash = BcryptUtil.bcryptHash("password");
+        User.getEntityManager().createNativeQuery("INSERT INTO users (id, username, password, email, enableImages, zoneId) VALUES ('9999', 'existingUser', '" + passwordHash + "', 'test@example.org', true, 'UTC')").executeUpdate();
+    }
+
+    @AfterEach
+    @Transactional
+    void cleanup() {
+        // Clean up child tables first to avoid Foreign Key constraints
+        User.getEntityManager().createNativeQuery("DELETE FROM Registration").executeUpdate();
+        User.getEntityManager().createNativeQuery("DELETE FROM User_roles").executeUpdate();
+        User.getEntityManager().createNativeQuery("DELETE FROM users").executeUpdate();
+        User.getEntityManager().getEntityManagerFactory().getCache().evictAll();
+    }
+
     @Test
-    @TestTransaction
     void register() {
         UserController.Register register = new UserController.Register("NewUser", "password", "shannon.dowley@gmail.com");
         given().body(register)
@@ -35,7 +51,6 @@ public class UserControllerTest {
     }
 
     @Test
-    @TestTransaction
     void registerInvalidEmail() {
         given().body(new UserController.Register("NewUser", "password", "invalid_email"))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -45,7 +60,6 @@ public class UserControllerTest {
     }
 
     @Test
-    @TestTransaction
     void registerInvalidPassword() {
         given().body(new UserController.Register("NewUser", "short", "valie@example.org"))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -61,7 +75,6 @@ public class UserControllerTest {
     }
 
     @Test
-    @TestTransaction
     void registerDuplicate() {
         UserController.Register register = new UserController.Register("DupUser", "password", "dup@gmail.com");
         // First registration
@@ -82,53 +95,21 @@ public class UserControllerTest {
     }
 
     @Test
-    @TestTransaction
+    @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
     void changePassword() {
-        // 0. Register a user to ensure it exists
-        String username = "PasswordChange-" + System.currentTimeMillis();
-        String password = "password";
-        String newPassword = "newPassword";
-        UserController.Register register = new UserController.Register(username, password, "logout@example.com");
-
-        given().body(register)
-                .contentType(MediaType.APPLICATION_JSON)
-                .post("/user/register")
-                .then()
-                .statusCode(HttpStatus.SC_CREATED);
-
-        // Login with new password - should fail
-        given()
-                .contentType(ContentType.URLENC)
-                .formParam("j_username", username)
-                .formParam("j_password", newPassword)
-                .post("/user/login")
-                .then()
-                .statusCode(HttpStatus.SC_UNAUTHORIZED);
-
-        // 1. Log in to obtain a session cookie
-        Response loginResponse = given()
-                .contentType(ContentType.URLENC)
-                .formParam("j_username", username)
-                .formParam("j_password", password)
-                .post("/user/login");
-
-        String sessionId = loginResponse.cookie("quarkus-credential"); // Get the session cookie
-
-        given().body(newPassword)
-                .cookie("quarkus-credential", sessionId)
+        given().auth().form("existingUser", "password", formAuthConfig)
                 .when()
+                .body("newPassword")
                 .post("/user/change-password")
                 .then()
                 .statusCode(HttpStatus.SC_OK);
 
-        // Log in with new password
-        given()
-                .contentType(ContentType.URLENC)
-                .formParam("j_username", username)
-                .formParam("j_password", newPassword)
-                .post("/user/login")
+        given().auth().form("existingUser", "newPassword", formAuthConfig)
+                .when()
+                .get("/user/profile")
                 .then()
-                .statusCode(HttpStatus.SC_OK);
+                .statusCode(HttpStatus.SC_OK)
+                .body("username", equalTo("existingUser"));
     }
 
     @Test
@@ -202,9 +183,6 @@ public class UserControllerTest {
     @Test
     @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
     void updateCountryCode() {
-        PanacheMock.mock(User.class);
-        Mockito.when(User.findById("9999")).thenReturn(new User());
-
         given()
                 .body("AU")
                 .put("/user/profile/country")
@@ -221,9 +199,6 @@ public class UserControllerTest {
     @Test
     @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
     void updateTimeZone() {
-        PanacheMock.mock(User.class);
-        Mockito.when(User.findById("9999")).thenReturn(new User());
-
         given()
                 .body("Australia/Brisbane")
                 .put("/user/profile/timeZone")

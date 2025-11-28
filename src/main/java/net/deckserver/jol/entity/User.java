@@ -40,9 +40,10 @@ public class User extends PanacheEntityBase {
     public boolean enableImages = true;
 
     @Roles
+    @ElementCollection(fetch = FetchType.EAGER)
     public Collection<String> roles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
 
     public static User add(String username, String password, String email, String... roles) {
@@ -53,7 +54,7 @@ public class User extends PanacheEntityBase {
         user.username = username;
         user.password = BcryptUtil.bcryptHash(password);
         user.email = email;
-        user.roles = Arrays.stream(roles).toList();
+        user.roles = new ArrayList<>(Arrays.asList(roles));
         user.persist();
         return user;
     }
