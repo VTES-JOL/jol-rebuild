@@ -63,7 +63,7 @@ public class UserController {
     @Authenticated
     public UserDto me() {
         String userName = identity.getPrincipal().getName();
-        return User.find("username = ?1", userName).project(UserDto.class).firstResult();
+        return User.find("username", userName).project(UserDto.class).firstResult();
     }
 
     @PUT

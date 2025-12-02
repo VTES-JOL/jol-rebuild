@@ -33,11 +33,20 @@ public class Registration extends PanacheEntity {
         registration.game = game;
         registration.user = user;
         registration.lastUpdated = OffsetDateTime.now();
+        registration.persist();
         return registration;
     }
 
     public static Registration findByGameAndUser(Game game, User user) {
         return find("game.id = ?1 and user.id = ?2", game.id, user.id).firstResult();
+    }
+
+    public static List<Registration> getRegistrations(Game game) {
+        return find("game.id = ?1 and deck is not null", game.id).list();
+    }
+
+    public static List<Registration> getInvites(Game game) {
+        return find("game.id = ?1 and deck is null", game.id).list();
     }
 
     public static void delete(Game game, User user) {

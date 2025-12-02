@@ -33,11 +33,7 @@ public class UserControllerTest {
     @AfterEach
     @Transactional
     void cleanup() {
-        // Clean up child tables first to avoid Foreign Key constraints
-        User.getEntityManager().createNativeQuery("DELETE FROM Registration").executeUpdate();
-        User.getEntityManager().createNativeQuery("DELETE FROM User_roles").executeUpdate();
-        User.getEntityManager().createNativeQuery("DELETE FROM users").executeUpdate();
-        User.getEntityManager().getEntityManagerFactory().getCache().evictAll();
+        User.deleteAll();
     }
 
     @Test

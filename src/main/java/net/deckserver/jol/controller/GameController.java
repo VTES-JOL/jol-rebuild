@@ -4,7 +4,10 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import net.deckserver.jol.dto.GameDto;
 import net.deckserver.jol.entity.Game;
+import net.deckserver.jol.entity.Registration;
+import net.deckserver.jol.entity.User;
 
 import java.net.URI;
 import java.util.List;
@@ -51,8 +54,8 @@ public class GameController {
 
     @GET
     @Path("/{id}")
-    public Game get(@PathParam("id") Long id) {
-        return Game.findById(id);
+    public GameDto get(@PathParam("id") Long id) {
+        return Game.find("id", id).project(GameDto.class).firstResult();
     }
 
     @GET
@@ -65,5 +68,14 @@ public class GameController {
     @Path("/open")
     public List<Game> openGames() {
         return Game.findOpenGames();
+    }
+
+    @POST
+    @Path("/{id}/invite")
+    public Response invite(@PathParam("id") String gameId, String playerId) {
+        User user = User.findById(playerId);
+        Game game = Game.findById(gameId);
+        Registration.invite(game, user);
+        return Response.ok().build();
     }
 }

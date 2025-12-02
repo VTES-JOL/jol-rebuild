@@ -7,7 +7,6 @@ import io.quarkus.security.jpa.Roles;
 import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -60,7 +59,15 @@ public class User extends PanacheEntityBase {
     }
 
     public static User findByUsername(String username) {
-        return find("username = ?1", username).firstResult();
+        return find("username", username).firstResult();
+    }
+
+    public static List<Registration> getRegistrations(String username) {
+        return find("select r from Registration r JOIN r.user u where u.username = ?1 and r.deck is not null", username).list();
+    }
+
+    public static List<Registration> getInvites(String username) {
+        return find("select r from Registration r JOIN r.user u where u.username = ?1 and r.deck is null", username).list();
     }
 
     public void updatePassword(String newPassword) {
