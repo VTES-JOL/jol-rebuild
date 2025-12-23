@@ -45,6 +45,9 @@ public class User extends PanacheEntityBase {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<Deck> decks = new ArrayList<>();
+
     public static User add(String username, String password, String email, String... roles) {
         if (findByUsername(username) != null) {
             throw new IllegalArgumentException("Player with that username already exists");

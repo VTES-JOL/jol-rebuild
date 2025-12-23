@@ -59,10 +59,10 @@ public class Registration extends PanacheEntity {
         }
     }
 
-    public void register(String deck, String deckName, String summary) {
-        this.deck = deck;
-        this.deckName = deckName;
-        this.summary = summary;
+    public void register(Deck deck) {
+        this.deck = deck.contents;
+        this.deckName = deck.name;
+        this.summary = deck.summary;
         this.lastUpdated = OffsetDateTime.now();
     }
 }
