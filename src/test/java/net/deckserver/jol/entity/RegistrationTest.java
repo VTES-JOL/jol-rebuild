@@ -18,6 +18,7 @@ public class RegistrationTest {
 
     User user;
     Game game;
+    Deck deck;
 
     private static String contents;
 
@@ -31,6 +32,7 @@ public class RegistrationTest {
     void setup() {
         user = User.add("ShanDow", "password", "test@example.org");
         game = Game.create("Test Game", Visibility.PUBLIC);
+        deck = Deck.create(user, "Test Deck", contents, "Crypt: 12, Library: 90, Groups: 5-6");
     }
 
     @AfterEach
@@ -58,7 +60,7 @@ public class RegistrationTest {
     @Transactional
     public void register() {
         Registration registration = Registration.invite(game, user);
-        registration.register(contents, "Test Deck", "Crypt: 12, Library: 90, Groups: 5-6");
+        registration.register(deck);
         assertThat(Registration.getRegistrations(game).size(), equalTo(1));
         assertThat(Registration.getInvites(game).size(), equalTo(0));
         assertThat(User.getInvites("ShanDow").size(), equalTo(0));
