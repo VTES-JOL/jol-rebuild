@@ -1,6 +1,9 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -8,6 +11,7 @@ import net.deckserver.jol.dto.GameDto;
 import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.entity.Registration;
 import net.deckserver.jol.entity.User;
+import net.deckserver.jol.enums.Visibility;
 
 import java.net.URI;
 import java.util.List;
@@ -15,11 +19,14 @@ import java.util.List;
 @Path("/games")
 public class GameController {
 
+    @Inject
+    SecurityIdentity identity;
+
     @POST
     @Transactional
     @RolesAllowed("USER")
-    public Response createGame(Game game) {
-        game.persist();
+    public Response createGame(GameCreate command) {
+        Game game = Game.create(command.name, command.visibility);
         return Response.created(URI.create("/games/" + game.id)).build();
     }
 
@@ -35,6 +42,7 @@ public class GameController {
     @PUT
     @Path("/{id}")
     @Transactional
+    @Authenticated
     public Game update(@PathParam("id") Long id, Game game) {
         Game entity = Game.findById(id);
         if (entity == null) {
@@ -72,10 +80,17 @@ public class GameController {
 
     @POST
     @Path("/{id}/invite")
+    @RolesAllowed("USER")
     public Response invite(@PathParam("id") String gameId, String playerId) {
         User user = User.findById(playerId);
         Game game = Game.findById(gameId);
         Registration.invite(game, user);
         return Response.ok().build();
+    }
+
+    public record GameCreate(String name, Visibility visibility) {
+        public GameCreate(String name) {
+            this(name, Visibility.PUBLIC);
+        }
     }
 }
