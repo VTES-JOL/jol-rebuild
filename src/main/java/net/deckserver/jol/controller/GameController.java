@@ -24,7 +24,7 @@ public class GameController {
 
     @POST
     @Transactional
-    @RolesAllowed("USER")
+    @RolesAllowed("user")
     public Response createGame(GameCreate command) {
         Game game = Game.create(command.name, command.visibility);
         return Response.created(URI.create("/games/" + game.id)).build();
@@ -33,7 +33,7 @@ public class GameController {
     @DELETE
     @Path("/{id}")
     @Transactional
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("admin")
     public Response delete(@PathParam("id") Long id) {
         Game.deleteById(id);
         return Response.accepted().build();
