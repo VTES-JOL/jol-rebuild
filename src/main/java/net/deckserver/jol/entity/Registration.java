@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,9 +30,13 @@ public class Registration extends PanacheEntity {
         Registration registration = findByGameAndUser(game, user);
         if (registration == null) {
             registration = new Registration();
+            registration.game = game;
+            registration.user = user;
+            if (game.registrations == null) {
+                game.registrations = new ArrayList<>();
+            }
+            game.registrations.add(registration);
         }
-        registration.game = game;
-        registration.user = user;
         registration.lastUpdated = OffsetDateTime.now();
         registration.persist();
         return registration;

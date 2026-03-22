@@ -10,13 +10,14 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.UserDto;
 import net.deckserver.jol.entity.User;
+import net.deckserver.jol.enums.Role;
+import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
+import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 
 import java.net.URI;
 import java.time.ZoneId;
@@ -32,7 +33,7 @@ public class UserController {
     @Transactional
     public Response register(@Valid Register register) {
         try {
-            User user = User.add(register.username, register.password, register.email, "USER");
+            User user = User.add(register.username, register.password, register.email, Role.USER);
             return Response.created(URI.create("/users/" + user.id)).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.CONFLICT).build();
@@ -44,8 +45,11 @@ public class UserController {
     @Transactional
     @Authenticated
     public Response changePassword(@NotBlank @Size(min = 8, max = 50) String newPassword) {
-        String id = identity.getAttribute("id");
-        User user = User.findById(id);
+        String userName = identity.getPrincipal().getName();
+        User user = User.findByUsername(userName);
+        if (user == null) {
+            throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
+        }
         user.updatePassword(newPassword);
         return Response.ok().build();
     }
@@ -63,7 +67,11 @@ public class UserController {
     @Authenticated
     public UserDto me() {
         String userName = identity.getPrincipal().getName();
-        return User.find("username", userName).project(UserDto.class).firstResult();
+        User user = User.findByUsername(userName);
+        if (user == null) {
+            throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
+        }
+        return new UserDto(user.id, user.username, user.email, user.tournamentId, user.discordId, user.preferences.countryCode, user.preferences.zoneId, user.preferences.enableImages);
     }
 
     @PUT
@@ -71,8 +79,11 @@ public class UserController {
     @Authenticated
     @Transactional
     public Response updateDiscordId(@Pattern(regexp = "^\\d{17,20}$") String discordId) {
-        String id = identity.getAttribute("id");
-        User user = User.findById(id);
+        String userName = identity.getPrincipal().getName();
+        User user = User.findByUsername(userName);
+        if (user == null) {
+            throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
+        }
         user.discordId = discordId;
         return Response.noContent().build();
     }
@@ -82,8 +93,11 @@ public class UserController {
     @Authenticated
     @Transactional
     public Response updateTournamentId(String tournamentId) {
-        String id = identity.getAttribute("id");
-        User user = User.findById(id);
+        String userName = identity.getPrincipal().getName();
+        User user = User.findByUsername(userName);
+        if (user == null) {
+            throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
+        }
         user.tournamentId = tournamentId;
         return Response.noContent().build();
     }
@@ -93,9 +107,12 @@ public class UserController {
     @Authenticated
     @Transactional
     public Response updateCountry(@Pattern(regexp = "^[A-Z]{2}$", message = "{jol.validation.constraints.countryCode}") String countryCode) {
-        String id = identity.getAttribute("id");
-        User user = User.findById(id);
-        user.countryCode = countryCode;
+        String userName = identity.getPrincipal().getName();
+        User user = User.findByUsername(userName);
+        if (user == null) {
+            throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
+        }
+        user.preferences.countryCode = countryCode;
         return Response.noContent().build();
     }
 
@@ -104,9 +121,12 @@ public class UserController {
     @Authenticated
     @Transactional
     public Response updateTimeZone(@Pattern(regexp = "^[A-Za-z]+/[A-Za-z0-9_/.-]+$", message = "{jol.validation.constraints.timeZone}") String zone) {
-        String id = identity.getAttribute("id");
-        User user = User.findById(id);
-        user.zoneId = ZoneId.of(zone);
+        String userName = identity.getPrincipal().getName();
+        User user = User.findByUsername(userName);
+        if (user == null) {
+            throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
+        }
+        user.preferences.zoneId = ZoneId.of(zone);
         return Response.noContent().build();
     }
 

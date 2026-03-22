@@ -11,6 +11,7 @@ import net.deckserver.jol.dto.GameDto;
 import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.entity.Registration;
 import net.deckserver.jol.entity.User;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Visibility;
 
 import java.net.URI;
@@ -26,7 +27,7 @@ public class GameController {
     @Transactional
     @RolesAllowed("user")
     public Response createGame(GameCreate command) {
-        Game game = Game.create(command.name, command.visibility);
+        Game game = Game.create(command.name, command.visibility, GameFormat.STANDARD);
         return Response.created(URI.create("/games/" + game.id)).build();
     }
 
@@ -36,6 +37,7 @@ public class GameController {
     @RolesAllowed("admin")
     public Response delete(@PathParam("id") Long id) {
         Game.deleteById(id);
+        Registration.flush();
         return Response.accepted().build();
     }
 

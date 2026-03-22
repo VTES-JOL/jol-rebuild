@@ -3,6 +3,7 @@ package net.deckserver.jol.entity;
 import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
+import net.deckserver.jol.enums.Role;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -13,9 +14,9 @@ public class UserTest {
     @Test
     @TestTransaction
     public void createUser() {
-        User.add("ShanDow", "password", "shannon.dowley@gmail.com", "USER");
+        User.add("ShanDow", "password", "shannon.dowley@gmail.com", Role.USER);
         User.flush();
-        assertThrows(IllegalArgumentException.class, () -> User.add("ShanDow", "password", "shannon.dowley@gmail.com", "USER"));
+        assertThrows(IllegalArgumentException.class, () -> User.add("ShanDow", "password", "shannon.dowley@gmail.com", Role.USER));
     }
 
     @Test
@@ -23,9 +24,8 @@ public class UserTest {
     public void validateUserConstruction() {
         String username = "TestConstruct";
         String password = "password123";
-        User.add(username, password, "test@test.com", "USER", "ADMIN");
+        User user = User.add(username, password, "test@test.com", Role.USER, Role.ADMIN);
 
-        User user = User.findByUsername(username);
         assertNotNull(user);
         // Verify password is hashed and matches
         assertNotEquals(password, user.password);

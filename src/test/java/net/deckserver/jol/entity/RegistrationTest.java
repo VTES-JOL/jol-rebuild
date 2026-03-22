@@ -2,6 +2,7 @@ package net.deckserver.jol.entity;
 
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.transaction.Transactional;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Visibility;
 import org.junit.jupiter.api.*;
 
@@ -11,6 +12,7 @@ import java.nio.file.Paths;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
@@ -31,7 +33,7 @@ public class RegistrationTest {
     @Transactional
     void setup() {
         user = User.add("ShanDow", "password", "test@example.org");
-        game = Game.create("Test Game", Visibility.PUBLIC);
+        game = Game.create("Test Game", Visibility.PUBLIC, GameFormat.STANDARD);
         deck = Deck.create(user, "Test Deck", contents, "Crypt: 12, Library: 90, Groups: 5-6");
     }
 
@@ -65,5 +67,23 @@ public class RegistrationTest {
         assertThat(Registration.getInvites(game).size(), equalTo(0));
         assertThat(User.getInvites("ShanDow").size(), equalTo(0));
         assertThat(User.getRegistrations("ShanDow").size(), equalTo(1));
+    }
+
+    @Test
+    @Transactional
+    public void deleteCascade() {
+        User user2 = User.add("NewUser2", "password", "test@example.org");
+        Game game2 = Game.create("Another Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        Registration.invite(game2, user2);
+
+        long initialCount = Registration.count();
+        assertThat(Registration.getInvites(game2).size(), equalTo(1));
+
+        game2.delete();
+        Registration.flush();
+
+        assertThat(Registration.count(), equalTo(initialCount - 1));
+        assertThat(Registration.findByGameAndUser(game2, user2), nullValue());
+
     }
 }

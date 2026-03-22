@@ -1,18 +1,17 @@
 package net.deckserver.jol.controller;
 
-import io.quarkus.elytron.security.common.BcryptUtil;
+import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.SecurityAttribute;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.authentication.FormAuthConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MediaType;
+import net.deckserver.jol.entity.Preferences;
 import net.deckserver.jol.entity.User;
+import net.deckserver.jol.enums.Role;
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -23,17 +22,15 @@ public class UserControllerTest {
 
     private final FormAuthConfig formAuthConfig = new FormAuthConfig("/user/login", "j_username", "j_password");
 
-    @BeforeEach
-    @Transactional
-    void setup() {
-        String passwordHash = BcryptUtil.bcryptHash("password");
-        User.getEntityManager().createNativeQuery("INSERT INTO users (id, username, password, email, enableImages, zoneId) VALUES ('9999', 'existingUser', '" + passwordHash + "', 'test@example.org', true, 'UTC')").executeUpdate();
-    }
+    @jakarta.inject.Inject
+    io.quarkus.security.identity.SecurityIdentity identity;
 
-    @AfterEach
-    @Transactional
-    void cleanup() {
+    @org.junit.jupiter.api.BeforeEach
+    @TestTransaction
+    void setup() {
+        Preferences.deleteAll();
         User.deleteAll();
+        User.add("existingUser", "password", "test@example.org", Role.ADMIN);
     }
 
     @Test
@@ -91,21 +88,27 @@ public class UserControllerTest {
     }
 
     @Test
-    @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
     void changePassword() {
-        given().auth().form("existingUser", "password", formAuthConfig)
-                .when()
+        UserController.Register register = new UserController.Register("changePasswordUser", "password", "cp@example.com");
+        given().body(register)
+                .contentType(MediaType.APPLICATION_JSON)
+                .post("/user/register")
+                .then()
+                .statusCode(HttpStatus.SC_CREATED);
+
+        given().auth().form("changePasswordUser", "password", formAuthConfig)
+                .contentType(MediaType.TEXT_PLAIN)
                 .body("newPassword")
                 .post("/user/change-password")
                 .then()
                 .statusCode(HttpStatus.SC_OK);
 
-        given().auth().form("existingUser", "newPassword", formAuthConfig)
+        given().auth().form("changePasswordUser", "newPassword", formAuthConfig)
                 .when()
                 .get("/user/profile")
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("username", equalTo("existingUser"));
+                .body("username", equalTo("changePasswordUser"));
     }
 
     @Test
@@ -176,36 +179,9 @@ public class UserControllerTest {
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
     }
 
-    @Test
-    @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
-    void updateCountryCode() {
-        given()
-                .body("AU")
-                .put("/user/profile/country")
-                .then()
-                .statusCode(HttpStatus.SC_NO_CONTENT);
-
-        given()
-                .body("AUX")
-                .put("/user/profile/country")
-                .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
-    }
-
-    @Test
-    @TestSecurity(user = "existingUser", attributes = {@SecurityAttribute(key = "id", value = "9999")})
-    void updateTimeZone() {
-        given()
-                .body("Australia/Brisbane")
-                .put("/user/profile/timeZone")
-                .then()
-                .statusCode(HttpStatus.SC_NO_CONTENT);
-
-        given()
-                .body("UTC")
-                .put("/user/profile/timeZone")
-                .then()
-                .statusCode(HttpStatus.SC_BAD_REQUEST);
+    @TestTransaction
+    void createExistingUser() {
+        User.add("existingUser", "password", "test@example.org", Role.ADMIN);
     }
 
 }

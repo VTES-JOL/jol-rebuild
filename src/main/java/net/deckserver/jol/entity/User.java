@@ -7,8 +7,8 @@ import io.quarkus.security.jpa.Roles;
 import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import jakarta.persistence.*;
+import net.deckserver.jol.enums.Role;
 
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,12 +34,13 @@ public class User extends PanacheEntityBase {
     public String tournamentId;
     public String discordId;
 
-    public String countryCode;
-    public ZoneId zoneId = ZoneId.systemDefault();
-    public boolean enableImages = true;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    public Preferences preferences;
 
     @Roles
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
     public Collection<String> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -48,7 +49,7 @@ public class User extends PanacheEntityBase {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Deck> decks = new ArrayList<>();
 
-    public static User add(String username, String password, String email, String... roles) {
+    public static User add(String username, String password, String email, Role... roles) {
         if (findByUsername(username) != null) {
             throw new IllegalArgumentException("Player with that username already exists");
         }
@@ -56,7 +57,8 @@ public class User extends PanacheEntityBase {
         user.username = username;
         user.password = BcryptUtil.bcryptHash(password);
         user.email = email;
-        user.roles = new ArrayList<>(Arrays.asList(roles));
+        user.roles = new ArrayList<>(Arrays.stream(roles).map(Role::toString).toList());
+        user.preferences = new Preferences(user);
         user.persist();
         return user;
     }
