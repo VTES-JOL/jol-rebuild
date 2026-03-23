@@ -14,9 +14,9 @@ public class UserTest {
     @Test
     @TestTransaction
     public void createUser() {
-        User.add("ShanDow", "password", "shannon.dowley@gmail.com", Role.USER);
+        User.create("ShanDow", "password", "shannon.dowley@gmail.com", Role.USER);
         User.flush();
-        assertThrows(IllegalArgumentException.class, () -> User.add("ShanDow", "password", "shannon.dowley@gmail.com", Role.USER));
+        assertThrows(IllegalArgumentException.class, () -> User.create("ShanDow", "password", "shannon.dowley@gmail.com", Role.USER));
     }
 
     @Test
@@ -24,7 +24,7 @@ public class UserTest {
     public void validateUserConstruction() {
         String username = "TestConstruct";
         String password = "password123";
-        User user = User.add(username, password, "test@test.com", Role.USER, Role.ADMIN);
+        User user = User.create(username, password, "test@test.com", Role.USER, Role.ADMIN);
 
         assertNotNull(user);
         // Verify password is hashed and matches

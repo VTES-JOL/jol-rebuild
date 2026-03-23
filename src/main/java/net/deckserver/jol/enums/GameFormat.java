@@ -8,7 +8,7 @@ public enum GameFormat {
 
     private final String label;
 
-    private GameFormat(String label) {
+    GameFormat(String label) {
         this.label = label;
     }
 

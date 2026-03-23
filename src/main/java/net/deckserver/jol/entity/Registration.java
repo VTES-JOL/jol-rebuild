@@ -8,7 +8,6 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,15 +26,18 @@ public class Registration extends PanacheEntity {
     public String summary;
 
     public static Registration invite(Game game, User user) {
-        Registration registration = findByGameAndUser(game, user);
+        Game managedGame = Game.findById(game.id);
+        User managedUser = User.findById(user.id);
+        if (managedUser == null || managedGame == null) {
+            throw new IllegalArgumentException("Game and user must exist to invite");
+        }
+        Registration registration = findByGameAndUser(managedGame, managedUser);
         if (registration == null) {
             registration = new Registration();
-            registration.game = game;
-            registration.user = user;
-            if (game.registrations == null) {
-                game.registrations = new ArrayList<>();
-            }
-            game.registrations.add(registration);
+            registration.game = managedGame;
+            registration.user = managedUser;
+            managedGame.registrations.add(registration);
+            managedUser.registrations.add(registration);
         }
         registration.lastUpdated = OffsetDateTime.now();
         registration.persist();
@@ -43,7 +45,16 @@ public class Registration extends PanacheEntity {
     }
 
     public static Registration register(Game game, User user, Deck deck) {
-        Registration registration = findByGameAndUser(game, user);
+        Game managedGame = Game.findById(game.id);
+        User managedUser = User.findById(user.id);
+        if (managedUser == null || managedGame == null) {
+            throw new IllegalArgumentException("Game and user must exist to invite");
+        }
+
+        Registration registration = findByGameAndUser(managedGame, managedUser);
+        if (registration == null) {
+            throw new IllegalArgumentException("Must have an invite to register a deck");
+        }
         registration.deck = deck.contents;
         registration.deckName = deck.name;
         registration.summary = deck.summary;

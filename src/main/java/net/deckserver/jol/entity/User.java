@@ -53,7 +53,7 @@ public class User extends PanacheEntityBase {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Deck> decks = new ArrayList<>();
 
-    public static User add(String username, String password, String email, Role... roles) {
+    public static User create(String username, String password, String email, Role... roles) {
         if (findByUsername(username) != null) {
             throw new IllegalArgumentException("Player with that username already exists");
         }
@@ -77,6 +77,15 @@ public class User extends PanacheEntityBase {
 
     public static List<Registration> getInvites(String username) {
         return find("select r from Registration r JOIN r.user u where u.username = ?1 and r.deck is null", username).list();
+    }
+
+    @Override
+    public void delete() {
+        // clean up player decks
+        for (Deck deck : decks) {
+            deck.delete();
+        }
+        super.delete();
     }
 
     public void updatePassword(String newPassword) {

@@ -5,9 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.authentication.FormAuthConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
-import net.deckserver.jol.entity.Preferences;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
 import org.apache.http.HttpStatus;
@@ -22,14 +20,11 @@ public class UserControllerTest {
 
     private final FormAuthConfig formAuthConfig = new FormAuthConfig("/user/login", "j_username", "j_password");
 
-    @Inject
-    io.quarkus.security.identity.SecurityIdentity identity;
-
     @BeforeEach
     @TestTransaction
     void setup() {
         User.deleteAll();
-        User.add("existingUser", "password", "test@example.org", Role.ADMIN);
+        User.create("existingUser", "password", "test@example.org", Role.ADMIN);
     }
 
     @Test
@@ -124,7 +119,8 @@ public class UserControllerTest {
                 .get("/user/profile")
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("username", equalTo(randomUser));
+                .body("username", equalTo(randomUser))
+                .body("zoneId", equalTo("Australia/Brisbane"));
     }
 
     @Test

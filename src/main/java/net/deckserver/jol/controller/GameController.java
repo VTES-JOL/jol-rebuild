@@ -25,40 +25,24 @@ public class GameController {
 
     @POST
     @Transactional
-    @RolesAllowed("user")
-    public Response createGame(GameCreate command) {
-        Game game = Game.create(command.name, command.visibility, GameFormat.STANDARD);
+    @RolesAllowed("USER")
+    public Response createGame(GameCreateCommand command) {
+        User owner = User.findByUsername(identity.getPrincipal().getName());
+        Game game = Game.create(owner, command.name, command.visibility, GameFormat.STANDARD);
         return Response.created(URI.create("/games/" + game.id)).build();
-    }
-
-    @DELETE
-    @Path("/{id}")
-    @Transactional
-    @RolesAllowed("admin")
-    public Response delete(@PathParam("id") Long id) {
-        Game.deleteById(id);
-        Registration.flush();
-        return Response.accepted().build();
     }
 
     @PUT
     @Path("/{id}")
     @Transactional
     @Authenticated
-    public Game update(@PathParam("id") Long id, Game game) {
+    public Game update(@PathParam("id") Long id, GameUpdateCommand game) {
         Game entity = Game.findById(id);
         if (entity == null) {
             throw new NotFoundException();
         }
-        if (game.visibility != null) {
-            entity.visibility = game.visibility;
-        }
-        if (game.status != null) {
-            entity.status = game.status;
-        }
-        if (game.name != null) {
-            entity.name = game.name;
-        }
+        entity.visibility = game.visibility;
+        entity.name = game.name;
         return entity;
     }
 
@@ -90,8 +74,14 @@ public class GameController {
         return Response.ok().build();
     }
 
-    public record GameCreate(String name, Visibility visibility) {
-        public GameCreate(String name) {
+    public record GameCreateCommand(String name, Visibility visibility) {
+        public GameCreateCommand(String name) {
+            this(name, Visibility.PUBLIC);
+        }
+    }
+
+    public record GameUpdateCommand(String name, Visibility visibility) {
+        public GameUpdateCommand(String name) {
             this(name, Visibility.PUBLIC);
         }
     }
