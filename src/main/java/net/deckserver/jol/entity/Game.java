@@ -16,11 +16,7 @@ import java.util.List;
 public class Game extends PanacheEntity {
     public String name;
     public Visibility visibility = Visibility.PUBLIC;
-
-
     public Status status = Status.OPEN;
-
-    @Column(name = "game_format")
     public GameFormat format = GameFormat.STANDARD;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)

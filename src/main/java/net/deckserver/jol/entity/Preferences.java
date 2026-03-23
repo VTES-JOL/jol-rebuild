@@ -9,7 +9,7 @@ import java.time.ZoneId;
 @Table
 public class Preferences extends PanacheEntity {
 
-    @OneToOne
+    @OneToOne(mappedBy = "preferences")
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     public User user;
 
@@ -19,6 +19,7 @@ public class Preferences extends PanacheEntity {
     @Column(name = "zone_id")
     public ZoneId zoneId = ZoneId.systemDefault();
 
+    @Column(name = "enable_images")
     public boolean enableImages = true;
 
     public Preferences(User user) {

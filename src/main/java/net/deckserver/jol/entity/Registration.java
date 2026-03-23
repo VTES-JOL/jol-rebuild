@@ -42,6 +42,15 @@ public class Registration extends PanacheEntity {
         return registration;
     }
 
+    public static Registration register(Game game, User user, Deck deck) {
+        Registration registration = findByGameAndUser(game, user);
+        registration.deck = deck.contents;
+        registration.deckName = deck.name;
+        registration.summary = deck.summary;
+        registration.persist();
+        return registration;
+    }
+
     public static Registration findByGameAndUser(Game game, User user) {
         return find("game.id = ?1 and user.id = ?2", game.id, user.id).firstResult();
     }
@@ -62,12 +71,5 @@ public class Registration extends PanacheEntity {
         if (registration != null && registration.isPersistent()) {
             registration.delete();
         }
-    }
-
-    public void register(Deck deck) {
-        this.deck = deck.contents;
-        this.deckName = deck.name;
-        this.summary = deck.summary;
-        this.lastUpdated = OffsetDateTime.now();
     }
 }

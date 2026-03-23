@@ -12,9 +12,10 @@ public class Deck extends PanacheEntity {
     @ManyToOne(optional = false)
     public User user;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    public String contents;
     public String name;
+    @JdbcTypeCode(SqlTypes.JSON)
+
+    public String contents;
     public String summary;
 
     public static Deck create(User user, String name, String contents, String summary) {

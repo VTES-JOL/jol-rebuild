@@ -48,12 +48,11 @@ public class RegistrationTest {
     @Transactional
     public void invite() {
         Registration registration = Registration.invite(game, user);
-        Registration.flush();
         assertNotNull(registration.id);
         // invite again has no effect
         Registration.invite(game, user);
-        Registration.flush();
         assertThat(Registration.getInvites(game).size(), equalTo(1));
+        assertThat(Registration.getRegistrations(game).size(), equalTo(0));
         assertThat(User.getInvites("ShanDow").size(), equalTo(1));
         assertThat(User.getRegistrations("ShanDow").size(), equalTo(0));
     }
@@ -61,8 +60,8 @@ public class RegistrationTest {
     @Test
     @Transactional
     public void register() {
-        Registration registration = Registration.invite(game, user);
-        registration.register(deck);
+        Registration.invite(game, user);
+        Registration.register(game, user, deck);
         assertThat(Registration.getRegistrations(game).size(), equalTo(1));
         assertThat(Registration.getInvites(game).size(), equalTo(0));
         assertThat(User.getInvites("ShanDow").size(), equalTo(0));
@@ -80,7 +79,6 @@ public class RegistrationTest {
         assertThat(Registration.getInvites(game2).size(), equalTo(1));
 
         game2.delete();
-        Registration.flush();
 
         assertThat(Registration.count(), equalTo(initialCount - 1));
         assertThat(Registration.findByGameAndUser(game2, user2), nullValue());

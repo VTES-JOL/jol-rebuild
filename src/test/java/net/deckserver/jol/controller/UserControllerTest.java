@@ -2,16 +2,16 @@ package net.deckserver.jol.controller;
 
 import io.quarkus.test.TestTransaction;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.security.SecurityAttribute;
-import io.quarkus.test.security.TestSecurity;
 import io.restassured.authentication.FormAuthConfig;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import net.deckserver.jol.entity.Preferences;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
 import org.apache.http.HttpStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
@@ -22,13 +22,12 @@ public class UserControllerTest {
 
     private final FormAuthConfig formAuthConfig = new FormAuthConfig("/user/login", "j_username", "j_password");
 
-    @jakarta.inject.Inject
+    @Inject
     io.quarkus.security.identity.SecurityIdentity identity;
 
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     @TestTransaction
     void setup() {
-        Preferences.deleteAll();
         User.deleteAll();
         User.add("existingUser", "password", "test@example.org", Role.ADMIN);
     }
@@ -177,11 +176,6 @@ public class UserControllerTest {
                 .post("/user/logout")
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
-    }
-
-    @TestTransaction
-    void createExistingUser() {
-        User.add("existingUser", "password", "test@example.org", Role.ADMIN);
     }
 
 }

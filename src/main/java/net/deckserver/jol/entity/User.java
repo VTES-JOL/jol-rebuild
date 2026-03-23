@@ -31,10 +31,14 @@ public class User extends PanacheEntityBase {
     public String password;
 
     public String email;
+
+    @Column(name = "tournament_id")
     public String tournamentId;
+
+    @Column(name = "discord_id")
     public String discordId;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     public Preferences preferences;
 
     @Roles
