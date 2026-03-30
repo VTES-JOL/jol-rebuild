@@ -1,4 +1,4 @@
-import type { User } from "../app/types";
+import type { User } from "./types";
 
 const API = {
     async profile(): Promise<User | null> {
@@ -6,8 +6,8 @@ const API = {
             credentials: "include",
         });
 
-        if (!res.ok) return null;
-        return res.json() as Promise<User>;
+        const data = await res.json();
+        return data ?? null;
     },
 
     async login(username: string, password: string): Promise<boolean> {

@@ -1,4 +1,4 @@
-import Panel from "../ui/Panel";
+import Panel from "../../shared/components/Panel";
 
 export default function ChatPanel() {
     return (

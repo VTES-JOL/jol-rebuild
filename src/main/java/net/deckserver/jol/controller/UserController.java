@@ -14,11 +14,12 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import net.deckserver.jol.dto.UserPreferencesDTO;
+import net.deckserver.jol.dto.UserProfileDTO;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
 
 import java.net.URI;
+import java.util.Set;
 
 @Path("/user")
 public class UserController {
@@ -61,10 +62,16 @@ public class UserController {
 
     @GET
     @Path("/profile")
-    public UserPreferencesDTO me() {
+    public Response me() {
+        if (identity.isAnonymous()) {
+            return Response.ok().entity("null").build();
+        }
         String userName = identity.getPrincipal().getName();
-        return User.find("username", userName).project(UserPreferencesDTO.class).firstResultOptional()
+        Set<String> roles = identity.getRoles();
+        UserProfileDTO dto = User.find("username", userName).project(UserProfileDTO.class).firstResultOptional()
                 .orElseThrow(() -> new WebApplicationException("Not Authenticated", Response.Status.UNAUTHORIZED));
+        dto.roles = roles;
+        return Response.ok(dto).build();
     }
 
     public record Register(@NotBlank String username, @NotBlank @Size(min = 8) String password, @Email String email) {

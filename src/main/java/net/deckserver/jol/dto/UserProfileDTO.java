@@ -4,9 +4,10 @@ import io.quarkus.hibernate.orm.panache.common.ProjectedFieldName;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.time.ZoneId;
+import java.util.Set;
 
 @RegisterForReflection
-public class UserPreferencesDTO {
+public class UserProfileDTO {
     public String id;
     public String username;
     public String email;
@@ -15,11 +16,12 @@ public class UserPreferencesDTO {
     public String countryCode;
     public ZoneId zoneId;
     public boolean enableImages;
+    public Set<String> roles;
 
-    public UserPreferencesDTO(String id, String username, String email, String tournamentId, String discordId,
-                              @ProjectedFieldName("preferences.countryCode") String countryCode,
-                              @ProjectedFieldName("preferences.zoneId") ZoneId zoneId,
-                              @ProjectedFieldName("preferences.enableImages") boolean enableImages) {
+    public UserProfileDTO(String id, String username, String email, String tournamentId, String discordId,
+                          @ProjectedFieldName("preferences.countryCode") String countryCode,
+                          @ProjectedFieldName("preferences.zoneId") ZoneId zoneId,
+                          @ProjectedFieldName("preferences.enableImages") boolean enableImages) {
         this.id = id;
         this.username = username;
         this.email = email;
