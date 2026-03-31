@@ -1,4 +1,4 @@
-import type { RegisterField, RegisterResult, User } from "./types";
+import type {RegisterField, RegisterResult, User} from "./types";
 
 const API = {
     async profile(): Promise<User | null> {
@@ -44,11 +44,11 @@ const API = {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ username, password, email }),
+            body: JSON.stringify({username, password, email}),
         });
 
-        if (res.ok) {
-            return { ok: true, fieldErrors: {} };
+        if (res.status === 201) {
+            return {ok: true, fieldErrors: {}};
         }
 
         if (res.status === 400) {
