@@ -74,6 +74,6 @@ public class UserController {
         return Response.ok(dto).build();
     }
 
-    public record Register(@NotBlank String username, @NotBlank @Size(min = 8) String password, @Email String email) {
+    public record Register(@NotBlank(message = "{jol.validation.constraints.blank}") String username, @Size(min = 8, message = "{jol.validation.constrains.passwordSize}") String password, @Email String email) {
     }
 }

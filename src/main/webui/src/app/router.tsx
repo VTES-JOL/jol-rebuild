@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "../features/auth/HomePage.tsx";
-import LobbyPage from "../features/lobby/LobbyPage";
-import ProtectedRoute from "../shared/components/ProtectedRoute";
+import HomePage from "@/features/auth/HomePage.tsx";
+import LobbyPage from "@/features/lobby/LobbyPage";
+import ProtectedRoute from "@/shared/components/ProtectedRoute";
 
 export default function AppRouter() {
     return (

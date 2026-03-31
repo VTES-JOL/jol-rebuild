@@ -1,4 +1,4 @@
-import type { User } from "./types";
+import type { RegisterField, RegisterResult, User } from "./types";
 
 const API = {
     async profile(): Promise<User | null> {
@@ -38,7 +38,7 @@ const API = {
         username: string,
         password: string,
         email: string
-    ): Promise<boolean> {
+    ): Promise<RegisterResult> {
         const res = await fetch("/user/register", {
             method: "POST",
             headers: {
@@ -47,7 +47,59 @@ const API = {
             body: JSON.stringify({ username, password, email }),
         });
 
-        return res.ok;
+        if (res.ok) {
+            return { ok: true, fieldErrors: {} };
+        }
+
+        if (res.status === 400) {
+            const fieldErrors: Partial<Record<RegisterField, string>> = {};
+
+            try {
+                const data = await res.json();
+                const violations = Array.isArray(data?.violations)
+                    ? data.violations
+                    : Array.isArray(data?.parameterViolations)
+                        ? data.parameterViolations
+                        : [];
+
+                for (const violation of violations) {
+                    const rawField = String(
+                        violation?.field ??
+                        violation?.path ??
+                        violation?.propertyPath ??
+                        ""
+                    );
+                    const field = rawField.split(".").pop() as RegisterField;
+                    const message = String(violation?.message ?? "Invalid value");
+
+                    if (field === "username" || field === "password" || field === "email") {
+                        fieldErrors[field] = message;
+                    }
+                }
+            } catch {
+                // ignore parse errors and fall through with empty/partial errors
+            }
+
+            return {
+                ok: false,
+                fieldErrors,
+                formError: Object.keys(fieldErrors).length ? undefined : "Validation failed.",
+            };
+        }
+
+        if (res.status === 409) {
+            return {
+                ok: false,
+                fieldErrors: {},
+                formError: "Username already exists.",
+            };
+        }
+
+        return {
+            ok: false,
+            fieldErrors: {},
+            formError: "Registration failed. Please try again.",
+        };
     },
 };
 

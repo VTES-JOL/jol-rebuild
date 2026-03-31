@@ -1,4 +1,4 @@
-import AppLayout from "../../shared/layout/AppLayout.tsx";
+import AppLayout from "@/shared/layout/AppLayout.tsx";
 import ChatPanel from "./ChatPanel.tsx";
 import ActiveGames from "./ActiveGames.tsx";
 

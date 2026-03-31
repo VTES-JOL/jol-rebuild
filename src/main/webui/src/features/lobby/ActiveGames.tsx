@@ -1,4 +1,4 @@
-import Panel from "../../shared/components/Panel";
+import Panel from "@/shared/components/Panel";
 import GameRow from "./GameRow";
 
 export default function ActiveGames() {

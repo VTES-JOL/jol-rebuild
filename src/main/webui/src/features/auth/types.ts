@@ -2,5 +2,12 @@ export interface User {
     id: number;
     username: string;
     email?: string;
-    // add preferences etc here
+}
+
+export type RegisterField = "username" | "password" | "email";
+
+export interface RegisterResult {
+    ok: boolean;
+    fieldErrors: Partial<Record<RegisterField, string>>;
+    formError?: string;
 }

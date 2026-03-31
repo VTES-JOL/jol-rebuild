@@ -1,5 +1,5 @@
 import {useNavigate} from "react-router-dom";
-import API from "../../features/auth/api.ts";
+import API from "@/features/auth/api.ts";
 
 export default function NavBar() {
     const navigate = useNavigate();

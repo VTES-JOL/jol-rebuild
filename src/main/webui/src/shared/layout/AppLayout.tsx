@@ -1,5 +1,5 @@
 import type {ReactNode} from "react";
-import NavBar from "../components/NavBar.tsx";
+import NavBar from "@/shared/components/NavBar.tsx";
 
 export default function AppLayout({ children, background }: { children: ReactNode, background?: string }) {
     return (
