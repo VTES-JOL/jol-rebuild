@@ -59,26 +59,25 @@ export function ChatPanel({
     const statusInfo = STATUS_LABELS[status];
 
     return (
-        <div style={styles.panel}>
+        <div className={"flex flex-col h-full min-h-0 rounded-lg border border-white/10 bg-slate-900 opacity-80 text-gray-200 overflow-hidden"}>
             {/* Header */}
-            <div style={styles.header}>
-                <span style={styles.title}>{title}</span>
-                <span style={{ ...styles.statusDot, background: statusInfo.color }} title={statusInfo.label} />
-                <span style={styles.statusLabel}>{statusInfo.label}</span>
+            <div className="flex justify-between items-center px-4 py-2 border-b border-white/10">
+                <h2 className="tracking-wide">{title}</h2>
+                <div className={"flex gap-2 items-center"}>
+                    <span className={"h-2 w-2 rounded-full"} style={{ background: statusInfo.color }} title={statusInfo.label} />
+                    <span className={"text-gray-400"}>{statusInfo.label}</span>
+                </div>
             </div>
 
             {/* Messages */}
-            <div style={styles.messageList}>
+            <div className={"flex-1 overflow-y-auto py-2 px-3 flex flex-col gap-1"}>
                 {messages.length === 0 && (
-                    <div style={styles.empty}>No messages yet. Say hello!</div>
+                    <div className={"text-center text-gray-200 mt-4 text-lg"}>No messages yet. Say hello!</div>
                 )}
                 {messages.map((msg, i) => {
                     const isOwn = msg.sender === currentUser;
                     return (
                         <div key={i} style={{ ...styles.messageBubbleWrap, justifyContent: isOwn ? 'flex-end' : 'flex-start' }}>
-                            {!isOwn && (
-                                <div style={styles.avatar}>{(msg.sender ?? '?')[0].toUpperCase()}</div>
-                            )}
                             <div style={{ maxWidth: '70%' }}>
                                 {!isOwn && (
                                     <div style={styles.senderName}>{msg.sender}</div>
@@ -97,9 +96,8 @@ export function ChatPanel({
             </div>
 
             {/* Input row */}
-            <div style={styles.inputRow}>
-                <input
-                    style={styles.input}
+            <div className={"flex g-2 p-2 border-t border-white/10"}>
+                <input className={"flex-1 border-white/10 rounded-lg p-1 outline-none bg-slate-900 opacity-80"}
                     value={draft}
                     onChange={e => setDraft(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -122,56 +120,6 @@ export function ChatPanel({
 // ── Inline styles (no external CSS dependency) ──────────────────────────────
 
 const styles: Record<string, React.CSSProperties> = {
-    panel: {
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        minHeight: 0,
-        borderRadius: 12,
-        overflow: 'hidden',
-        border: '1px solid rgba(0,0,0,0.1)',
-        background: '#fff',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: 14,
-    },
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '12px 16px',
-        borderBottom: '1px solid rgba(0,0,0,0.08)',
-        background: '#f8f8f7',
-    },
-    title: {
-        fontWeight: 600,
-        fontSize: 15,
-        flex: 1,
-        color: '#1a1a1a',
-    },
-    statusDot: {
-        width: 8,
-        height: 8,
-        borderRadius: '50%',
-        flexShrink: 0,
-    },
-    statusLabel: {
-        fontSize: 12,
-        color: '#6b7280',
-    },
-    messageList: {
-        flex: 1,
-        overflowY: 'auto',
-        padding: '12px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 8,
-    },
-    empty: {
-        textAlign: 'center',
-        color: '#9ca3af',
-        marginTop: 32,
-        fontSize: 13,
-    },
     messageBubbleWrap: {
         display: 'flex',
         alignItems: 'flex-end',
@@ -218,22 +166,6 @@ const styles: Record<string, React.CSSProperties> = {
         marginTop: 2,
         paddingLeft: 4,
         paddingRight: 4,
-    },
-    inputRow: {
-        display: 'flex',
-        gap: 8,
-        padding: '10px 12px',
-        borderTop: '1px solid rgba(0,0,0,0.08)',
-        background: '#f8f8f7',
-    },
-    input: {
-        flex: 1,
-        border: '1px solid #d1d5db',
-        borderRadius: 8,
-        padding: '8px 12px',
-        fontSize: 14,
-        outline: 'none',
-        background: '#fff',
     },
     sendBtn: {
         padding: '8px 16px',

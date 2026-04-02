@@ -35,8 +35,9 @@ public class GameMessage extends PanacheEntity {
 
     // Returns the N most recent messages for a game room, oldest first
     public static List<GameMessage> findRecentForGame(String gameId, int limit) {
-        return find("gameId = ?1 ORDER BY timestamp DESC", gameId)
+        List<GameMessage> messages = find("gameId = ?1 ORDER BY timestamp DESC", gameId)
                 .page(0, limit)
                 .list();
+        return messages.reversed();
     }
 }

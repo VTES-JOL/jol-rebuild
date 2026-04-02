@@ -31,8 +31,9 @@ public class LobbyMessage extends PanacheEntity {
 
     // Returns the N most recent lobby messages, oldest first
     public static List<LobbyMessage> findRecent(int limit) {
-        return find("ORDER BY timestamp DESC")
+        List<LobbyMessage> messages = find("ORDER BY timestamp DESC")
                 .page(0, limit)
                 .list();
+        return messages.reversed();
     }
 }

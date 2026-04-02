@@ -38,7 +38,7 @@ export function LobbyChatPanel({ username, wsBaseUrl }: LobbyChatPanelProps) {
 
     return (
         <ChatPanel
-            title="Lobby"
+            title="Global Chat"
             messages={messages}
             status={status}
             currentUser={username}
