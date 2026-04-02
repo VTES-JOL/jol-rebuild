@@ -13,7 +13,7 @@ export default function AppRouter() {
                 <Route path="/register" element={<RegisterForm/>}/>
                 <Route path="/lobby" element={<ProtectedRoute><LobbyPage/></ProtectedRoute>}/>
                 <Route path="/game/:gameId" element={<GamePage/>}/>
-                <Route path="/*" element={<LoginForm/>}/>
+                <Route path="/*" element={<ProtectedRoute><LobbyPage/></ProtectedRoute>}/>
             </Routes>
         </BrowserRouter>
     );
