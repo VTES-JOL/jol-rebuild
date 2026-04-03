@@ -5,11 +5,9 @@ import { type ChatMessage, useWebSocket } from '@/shared/services/useWebSocket';
 interface LobbyChatPanelProps {
     /** The logged-in user's username */
     username: string;
-    /** Base WS URL, e.g. "ws://localhost:8080" */
-    wsBaseUrl: string;
 }
 
-export function LobbyChatPanel({ username, wsBaseUrl }: LobbyChatPanelProps) {
+export function LobbyChatPanel({ username }: LobbyChatPanelProps) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
 
     const handleMessage = useCallback((msg: ChatMessage) => {
@@ -28,6 +26,8 @@ export function LobbyChatPanel({ username, wsBaseUrl }: LobbyChatPanelProps) {
         }
     }, []);
 
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsBaseUrl = `${protocol}//${window.location.host}`;
     const url = `${wsBaseUrl}/ws/lobby`;
 
     const { status, send } = useWebSocket({ url, onMessage: handleMessage });

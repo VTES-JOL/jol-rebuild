@@ -75,7 +75,7 @@ public class UserController {
     }
 
     public record Register(@NotBlank(message = "{jol.validation.constraints.username.blank}") String username,
-                           @Size(min = 8, message = "{jol.validation.constrains.password.size}") String password,
+                           @NotBlank(message = "{jol.validation.constrains.password.size}") @Size(min = 8, message = "{jol.validation.constrains.password.size}") String password,
                            @NotBlank(message = "{jol.validation.constraints.email.invalid}") @Email(message = "{jol.validation.constraints.email.invalid}") String email) {
     }
 }

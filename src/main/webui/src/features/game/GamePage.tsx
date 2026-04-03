@@ -11,7 +11,7 @@ export default function GamePage() {
 
     return (
         <AppLayout>
-            {!loading && user && (<GameChatPanel username={user.username} wsBaseUrl="ws://localhost:8080" gameId={gameId} />)}
+            {!loading && user && (<GameChatPanel username={user.username} gameId={gameId} />)}
         </AppLayout>
     )
 }

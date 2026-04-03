@@ -12,14 +12,16 @@ export default function AppNavbar() {
     const {user} = useAuth()
 
     return (
-        <div className="bg-slate-950 border-b border-slate-800 text-slate-200">
+        <div className="bg-slate-950 opacity-80 border-b border-slate-800 text-slate-200">
             <div className="h-14 px-6 flex items-center gap-8">
 
                 {/* mobile hamburger */}
                 <MobileMenu />
 
                 {/* logo */}
-                <Link to="/" className="font-semibold text-lg">V:TES Online</Link>
+                <div>
+                    <Link to="/" className="font-semibold text-lg">V:TES Online</Link>
+                </div>
 
                 <nav className="hidden md:flex gap-8 text-sm flex-1">
                     {NAV_ITEMS.map(item => {

@@ -103,6 +103,13 @@ public class UserControllerTest {
                 .then()
                 .statusCode(HttpStatus.SC_OK)
                 .body("username", equalTo("changePasswordUser"));
+
+        given().auth().form("changePasswordUser", "newPassword", formAuthConfig)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body("short")
+                .post("/user/change-password")
+                .then()
+                .statusCode(HttpStatus.SC_BAD_REQUEST);
     }
 
     @Test
