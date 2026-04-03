@@ -8,8 +8,8 @@ export default function LobbyPage() {
     const { user, loading } = useAuth();
 
     return (
-        <AppLayout background="https://static.deckserver.net/assets/images/Locations14.jpg">
-            <div className="grid grid-cols-[1fr_5fr] gap-6 h-[90vh]">
+        <AppLayout background="/Locations76.jpg">
+            <div className="grid grid-cols-[1fr_5fr] gap-6 h-[85dvh]">
                 <ActiveGames/>
                 {!loading && user && (<LobbyChatPanel username={user.username} />)}
             </div>

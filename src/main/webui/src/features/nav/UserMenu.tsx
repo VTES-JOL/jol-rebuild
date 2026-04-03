@@ -33,14 +33,14 @@ export default function UserMenu() {
         <div ref={ref} className="relative">
             <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center gap-3 hover:bg-slate-800 px-3 py-2 rounded"
+                className="flex items-center gap-3 hover: px-3 py-2 rounded"
             >
                 <Avatar username={user.username} />
                 <span className="hidden sm:block">{user.username}</span>
             </button>
 
             {open && (
-                <div className="absolute right-0 mt-2 w-64 z-10 bg-white text-black rounded-xl shadow-xl overflow-hidden">
+                <div className="absolute right-0 mt-2 w-64 z-20 bg-slate-200 text-black rounded-xl shadow-xl overflow-hidden">
 
                     {/* header */}
                     <div className="px-4 py-3 border-b">
@@ -58,7 +58,7 @@ export default function UserMenu() {
 
                     <div className="border-t" />
 
-                    <button onClick={logout} className="w-full text-left px-4 py-3 hover:bg-slate-100">Logout</button>
+                    <button onClick={logout} className="w-full text-left px-4 py-3 hover:">Logout</button>
                 </div>
             )}
         </div>
@@ -67,7 +67,7 @@ export default function UserMenu() {
 
 function MenuLink({ to, children }: any) {
     return (
-        <Link to={to} className="block px-4 py-3 hover:bg-slate-100">
+        <Link to={to} className="block px-4 py-3 hover:">
             {children}
         </Link>
     )

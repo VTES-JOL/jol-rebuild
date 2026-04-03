@@ -14,7 +14,7 @@ export default function MobileMenu() {
             <button onClick={() => setOpen(!open)} className="mr-2">☰</button>
 
             {open && (
-                <div className="absolute left-0 top-14 w-full bg-slate-900 border-t border-slate-800 p-4 space-y-1">
+                <div className="absolute left-0 top-14 w-full  border-t border-slate-800 p-4 space-y-1">
                     {NAV_ITEMS.map(item => {
                         if (item.roles && !item.roles.some(r => user?.roles.includes(r))) {
                             return null
@@ -28,7 +28,7 @@ export default function MobileMenu() {
                                 key={item.to}
                                 to={item.to}
                                 className={`flex items-center gap-3 p-3 rounded 
-                ${active ? "bg-slate-800 text-white" : "text-slate-400"}`}
+                ${active ? " text-white" : "text-slate-400"}`}
                             >
                                 <Icon size={18} />
                                 {item.label}
