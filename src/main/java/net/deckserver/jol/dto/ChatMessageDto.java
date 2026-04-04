@@ -1,70 +1,54 @@
 package net.deckserver.jol.dto;
 
 import java.time.Instant;
+import java.util.List;
 
 /**
  * The JSON message exchanged over both WebSocket endpoints.
- *
+ * <p>
  * Client → Server:  type = CHAT | PING
  * Server → Client:  type = CHAT | HISTORY | ERROR | PONG
  */
 public class ChatMessageDto {
 
-    public enum Type {
-        /**
-         * A regular chat message (both directions).
-         */
-        CHAT,
-        /**
-         * Server sends recent history on connect.
-         */
-        HISTORY,
-        /**
-         * Server signals a problem (e.g. empty content).
-         */
-        ERROR
-    }
-
     public Type type;
-
-    /**
-     * Username of the sender (filled by server on inbound messages).
-     */
     public String sender;
-
-    /**
-     * The chat text (for CHAT type).
-     */
     public String content;
-
-    /**
-     * ISO-8601 timestamp set by the server.
-     */
     public Instant timestamp;
-
-    /**
-     * For HISTORY messages: the ordered list of recent messages.
-     * Null for all other types.
-     */
+    public Long id;                        // message ID — needed for reaction targeting
+    public ReplySnapshotDto replyTo;       // null unless this is a reply
+    public List<ReactionDto> reactions;    // null on outbound CHAT, populated in HISTORY
     public java.util.List<ChatMessageDto> history;
-
-    /**
-     * Optional error detail for ERROR type.
-     */
     public String error;
+    public Long replyToId;   // client sends this when replying
+    public String emoji;     // client sends this for REACTION messages
 
-    // ── Factories ──────────────────────────────────────────────────────────
-
-    public static ChatMessageDto chat(String sender, String content, Instant timestamp) {
+    public static ChatMessageDto chat(Long id, String sender, String content,
+                                      Instant timestamp, ReplySnapshotDto replyTo,
+                                      List<ReactionDto> reactions) {
         ChatMessageDto dto = new ChatMessageDto();
         dto.type = Type.CHAT;
+        dto.id = id;
         dto.sender = sender;
         dto.content = content;
         dto.timestamp = timestamp;
+        dto.replyTo = replyTo;
+        dto.reactions = reactions != null ? reactions : List.of();
         return dto;
     }
 
-    public static ChatMessageDto history(java.util.List<ChatMessageDto> messages) {
+    // ── Factories ──────────────────────────────────────────────────────────
+
+    // Reaction broadcast factory:
+    public static ChatMessageDto reaction(Long messageId, List<ReactionDto> updatedReactions) {
+        ChatMessageDto dto = new ChatMessageDto();
+        dto.type = Type.REACTION;
+        dto.id = messageId;
+        dto.reactions = updatedReactions;
+        return dto;
+    }
+
+    public static ChatMessageDto history(List<ChatMessageDto> messages) {
         ChatMessageDto dto = new ChatMessageDto();
         dto.type = Type.HISTORY;
         dto.history = messages;
@@ -77,4 +61,6 @@ public class ChatMessageDto {
         dto.error = detail;
         return dto;
     }
+
+    public enum Type {CHAT, HISTORY, ERROR, REACTION}
 }

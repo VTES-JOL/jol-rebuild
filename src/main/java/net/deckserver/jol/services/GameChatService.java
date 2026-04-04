@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.entity.GameMessage;
 
+import java.util.Collections;
 import java.util.List;
 
 @ApplicationScoped
@@ -19,7 +20,7 @@ public class GameChatService {
     public ChatMessageDto save(String gameId, String sender, String content) {
         GameMessage entity = GameMessage.create(gameId, sender, content);
         entity.persist();
-        return ChatMessageDto.chat(entity.sender, entity.content, entity.timestamp);
+        return ChatMessageDto.chat(entity.id, entity.sender, entity.content, entity.timestamp, null, Collections.emptyList());
     }
 
     /**
@@ -28,7 +29,7 @@ public class GameChatService {
     public ChatMessageDto historyPayload(String gameId) {
         List<GameMessage> rows = GameMessage.findRecentForGame(gameId, HISTORY_LIMIT);
         List<ChatMessageDto> messages = rows.stream()
-                .map(m -> ChatMessageDto.chat(m.sender, m.content, m.timestamp))
+                .map(m -> ChatMessageDto.chat(m.id, m.sender, m.content, m.timestamp, null, Collections.emptyList()))
                 .toList();
         return ChatMessageDto.history(messages);
     }

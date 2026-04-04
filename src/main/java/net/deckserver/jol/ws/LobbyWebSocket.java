@@ -46,13 +46,12 @@ public class LobbyWebSocket {
 
     @OnTextMessage
     public void onMessage(ChatMessageDto incoming) {
-        String content = incoming.content == null ? "" : incoming.content.trim();
-        if (content.isEmpty()) {
-            connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
+        switch (incoming.type) {
+            case CHAT -> handleChat(incoming);
+            case REACTION -> handleReaction(incoming);
+            default -> connection.sendTextAndAwait(
+                    ChatMessageDto.error("Unsupported message type: " + incoming.type));
         }
-
-        ChatMessageDto saved = chatService.save(userName(), content);
-        connection.broadcast().sendTextAndAwait(saved);
     }
 
     @OnError
@@ -62,5 +61,24 @@ public class LobbyWebSocket {
 
     private String userName() {
         return identity.getPrincipal().getName();
+    }
+
+    private void handleChat(ChatMessageDto incoming) {
+        String content = incoming.content == null ? "" : incoming.content.trim();
+        if (content.isEmpty()) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
+            return;
+        }
+        ChatMessageDto saved = chatService.save(userName(), content, incoming.replyToId);
+        connection.broadcast().sendTextAndAwait(saved);
+    }
+
+    private void handleReaction(ChatMessageDto incoming) {
+        if (incoming.id == null || incoming.emoji == null) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Reaction requires id and emoji"));
+            return;
+        }
+        ChatMessageDto updated = chatService.toggleReaction(incoming.id, userName(), incoming.emoji);
+        connection.broadcast().sendTextAndAwait(updated);
     }
 }

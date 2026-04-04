@@ -1,14 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export type MessageType = 'CHAT' | 'HISTORY' | 'ERROR';
+export type MessageType = 'CHAT' | 'HISTORY' | 'ERROR' | 'REACTION';
+
+export interface ReactionDto   { emoji: string; senders: string[] }
+export interface ReplySnapshot { id: number; sender: string; content: string }
 
 export interface ChatMessage {
     type: MessageType;
+    id?: number;           // present on CHAT and REACTION
     sender?: string;
     content?: string;
     timestamp?: string;
+    replyTo?: ReplySnapshot;
+    reactions?: ReactionDto[];
     history?: ChatMessage[];
     error?: string;
+    // outbound-only fields (never in server responses)
+    replyToId?: number;
+    emoji?: string;
 }
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';

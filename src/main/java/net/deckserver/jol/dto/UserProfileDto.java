@@ -7,7 +7,7 @@ import java.time.ZoneId;
 import java.util.Set;
 
 @RegisterForReflection
-public class UserProfileDTO {
+public class UserProfileDto {
     public String id;
     public String username;
     public String email;
@@ -18,7 +18,7 @@ public class UserProfileDTO {
     public boolean enableImages;
     public Set<String> roles;
 
-    public UserProfileDTO(String id, String username, String email, String tournamentId, String discordId,
+    public UserProfileDto(String id, String username, String email, String tournamentId, String discordId,
                           @ProjectedFieldName("preferences.countryCode") String countryCode,
                           @ProjectedFieldName("preferences.zoneId") ZoneId zoneId,
                           @ProjectedFieldName("preferences.enableImages") boolean enableImages) {

@@ -14,7 +14,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import net.deckserver.jol.dto.UserProfileDTO;
+import net.deckserver.jol.dto.UserProfileDto;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
 
@@ -68,7 +68,7 @@ public class UserController {
         }
         String userName = identity.getPrincipal().getName();
         Set<String> roles = identity.getRoles();
-        UserProfileDTO dto = User.find("username", userName).project(UserProfileDTO.class).firstResultOptional()
+        UserProfileDto dto = User.find("username", userName).project(UserProfileDto.class).firstResultOptional()
                 .orElseThrow(() -> new WebApplicationException("Not Authenticated", Response.Status.UNAUTHORIZED));
         dto.roles = roles;
         return Response.ok(dto).build();
