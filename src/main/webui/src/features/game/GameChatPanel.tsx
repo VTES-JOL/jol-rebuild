@@ -1,6 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useChat } from '@/shared/services/useChat';
 import { ChatPanel } from '@/shared/components/ChatPanel';
-import { type ChatMessage, useWebSocket } from '@/shared/services/useWebSocket';
 
 interface GameChatPanelProps {
     /** The logged-in user's username */
@@ -10,31 +9,12 @@ interface GameChatPanelProps {
 }
 
 export function GameChatPanel({ username, gameId }: GameChatPanelProps) {
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-
-    const handleMessage = useCallback((msg: ChatMessage) => {
-        switch (msg.type) {
-            case 'HISTORY':
-                setMessages(msg.history ?? []);
-                break;
-            case 'CHAT':
-                setMessages(prev => [...prev, msg]);
-                break;
-            case 'ERROR':
-                console.warn(`[Game ${gameId}] Server error:`, msg.error);
-                break;
-        }
-    }, [gameId]);
-
     // Each game room is a distinct WS path — Quarkus scopes broadcasts to the path
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsBaseUrl = `${protocol}//${window.location.host}`;
     const url = `${wsBaseUrl}/ws/game/${encodeURIComponent(gameId)}`;
-    const { status, send } = useWebSocket({ url, onMessage: handleMessage });
 
-    const handleSend = (content: string) => {
-        send({ type: 'CHAT', content });
-    };
+    const { messages, status, send, react } = useChat({ url, username });
 
     return (
         <ChatPanel
@@ -42,7 +22,10 @@ export function GameChatPanel({ username, gameId }: GameChatPanelProps) {
             messages={messages}
             status={status}
             currentUser={username}
-            onSend={handleSend}
+            onSend={send}
+            onReact={react}
+            enableReactions={false}
+            enableReply={false}
             placeholder="Chat with your opponents…"
         />
     );

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type { ChatMessage, ReactionDto, ReplySnapshot } from '@/shared/services/useWebSocket';
+import React, {useEffect, useRef, useState} from 'react';
+import type {ChatMessage, ReactionDto, ReplySnapshot} from '@/shared/services/useWebSocket';
 import Panel from './Panel';
 
-const dateFormat = new Intl.DateTimeFormat('UTC', { dateStyle: 'medium', timeStyle: 'short' });
-const timeOnlyFormat = new Intl.DateTimeFormat('UTC', { timeStyle: 'short' });
+const dateFormat = new Intl.DateTimeFormat('UTC', {dateStyle: 'medium', timeStyle: 'short'});
+const timeOnlyFormat = new Intl.DateTimeFormat('UTC', {timeStyle: 'short'});
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -15,13 +15,15 @@ interface ChatPanelProps {
     onSend: (content: string, replyToId?: number) => void;
     onReact: (messageId: number, emoji: string) => void;
     placeholder?: string;
+    enableReactions?: boolean;
+    enableReply?: boolean;
 }
 
 const STATUS_LABELS: Record<Status, { label: string; color: string }> = {
-    connecting:   { label: 'Connecting…',     color: '#d97706' },
-    connected:    { label: 'Connected',        color: '#16a34a' },
-    disconnected: { label: 'Reconnecting…',    color: '#dc2626' },
-    error:        { label: 'Connection error', color: '#dc2626' },
+    connecting: {label: 'Connecting…', color: '#d97706'},
+    connected: {label: 'Connected', color: '#16a34a'},
+    disconnected: {label: 'Reconnecting…', color: '#dc2626'},
+    error: {label: 'Connection error', color: '#dc2626'},
 };
 
 const EMOJI_PALETTE = ['👍', '❤️', '😂', '😮'];
@@ -40,12 +42,12 @@ function hueFromName(name: string): number {
 
 function avatarStyle(name: string): React.CSSProperties {
     const hue = hueFromName(name);
-    return { background: `hsla(${hue},60%,60%,0.18)`, color: `hsl(${hue},70%,72%)` };
+    return {background: `hsla(${hue},60%,60%,0.18)`, color: `hsl(${hue},70%,72%)`};
 }
 
 function nameColorStyle(name: string): React.CSSProperties {
     const hue = hueFromName(name);
-    return { color: `hsl(${hue},70%,72%)` };
+    return {color: `hsl(${hue},70%,72%)`};
 }
 
 // ─── message grouping ────────────────────────────────────────────────────────
@@ -115,17 +117,17 @@ function groupMessages(messages: ChatMessage[], currentUser: string): MessageGro
 
 // ─── sub-components ──────────────────────────────────────────────────────────
 
-function TimestampDivider({ label }: { label: string }) {
+function TimestampDivider({label}: { label: string }) {
     return (
         <div className="flex items-center gap-2 my-2">
-            <div className="flex-1 h-px bg-slate-200/10" />
+            <div className="flex-1 h-px bg-slate-200/10"/>
             <span className="text-sm text-slate-300 whitespace-nowrap">{label}</span>
-            <div className="flex-1 h-px bg-slate-200/10" />
+            <div className="flex-1 h-px bg-slate-200/10"/>
         </div>
     );
 }
 
-function Avatar({ name, showLine }: { name: string; showLine: boolean }) {
+function Avatar({name, showLine}: { name: string; showLine: boolean }) {
     return (
         <div className="flex flex-col items-center w-7 shrink-0 cursor-default">
             <div
@@ -134,20 +136,21 @@ function Avatar({ name, showLine }: { name: string; showLine: boolean }) {
             >
                 {initials(name)}
             </div>
-            {showLine && <div className="w-px flex-1 bg-white/5 mt-1" />}
+            {showLine && <div className="w-px flex-1 bg-white/5 mt-1"/>}
         </div>
     );
 }
 
 // ── Emoji picker ──────────────────────────────────────────────────────────────
 
-function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose: () => void }) {
+function EmojiPicker({onPick, onClose}: { onPick: (e: string) => void; onClose: () => void }) {
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         function onClick(e: MouseEvent) {
             if (ref.current && !ref.current.contains(e.target as Node)) onClose();
         }
+
         document.addEventListener('mousedown', onClick);
         return () => document.removeEventListener('mousedown', onClick);
     }, [onClose]);
@@ -161,7 +164,10 @@ function EmojiPicker({ onPick, onClose }: { onPick: (e: string) => void; onClose
                 <button
                     key={e}
                     className="text-base hover:scale-125 transition-transform cursor-pointer bg-transparent border-none p-0.5"
-                    onClick={() => { onPick(e); onClose(); }}
+                    onClick={() => {
+                        onPick(e);
+                        onClose();
+                    }}
                 >
                     {e}
                 </button>
@@ -217,7 +223,7 @@ function ReactionPills({
                         +
                     </button>
                     {pickerOpen && (
-                        <EmojiPicker onPick={onReact} onClose={() => setPickerOpen(false)} />
+                        <EmojiPicker onPick={onReact} onClose={() => setPickerOpen(false)}/>
                     )}
                 </div>
             )}
@@ -227,13 +233,14 @@ function ReactionPills({
 
 // ── Reply quote block ─────────────────────────────────────────────────────────
 
-function ReplyQuote({ replyTo, onJumpTo }: { replyTo: ReplySnapshot; onJumpTo: (id: number) => void }) {
+function ReplyQuote({replyTo, onJumpTo}: { replyTo: ReplySnapshot; onJumpTo: (id: number) => void }) {
     return (
         <button
             onClick={() => onJumpTo(replyTo.id)}
             className="flex items-stretch gap-0 mb-1.5 w-full text-left cursor-pointer group"
         >
-            <div className="w-0.5 rounded-full bg-indigo-400/40 group-hover:bg-indigo-400/70 transition-colors shrink-0" />
+            <div
+                className="w-0.5 rounded-full bg-indigo-400/40 group-hover:bg-indigo-400/70 transition-colors shrink-0"/>
             <div className="flex-1 min-w-0 pl-2">
                 <span className="text-[11px] font-medium" style={nameColorStyle(replyTo.sender)}>
                     {replyTo.sender}
@@ -246,10 +253,10 @@ function ReplyQuote({ replyTo, onJumpTo }: { replyTo: ReplySnapshot; onJumpTo: (
 
 // ── Reply banner ──────────────────────────────────────────────────────────────
 
-function ReplyBanner({ replyTo, onCancel }: { replyTo: ReplySnapshot; onCancel: () => void }) {
+function ReplyBanner({replyTo, onCancel}: { replyTo: ReplySnapshot; onCancel: () => void }) {
     return (
         <div className="flex items-center gap-2 px-3 py-1.5 border-t border-white/10 bg-white/5 text-xs text-slate-300">
-            <div className="w-0.5 self-stretch rounded-full bg-indigo-400/60 shrink-0" />
+            <div className="w-0.5 self-stretch rounded-full bg-indigo-400/60 shrink-0"/>
             <div className="flex-1 min-w-0">
                 <span className="font-medium" style={nameColorStyle(replyTo.sender)}>
                     {replyTo.sender}{' '}
@@ -270,7 +277,7 @@ function ReplyBanner({ replyTo, onCancel }: { replyTo: ReplySnapshot; onCancel: 
 // ── Single message line ───────────────────────────────────────────────────────
 
 function MessageLineView({
-                             line, sender, currentUser, onReact, onReply, onJumpTo, disabled, isFirst,
+                             line, sender, currentUser, onReact, onReply, onJumpTo, disabled, enableReactions, enableReply, isFirst,
                          }: {
     line: MessageLine;
     sender: string;
@@ -279,6 +286,8 @@ function MessageLineView({
     onReply: (snapshot: ReplySnapshot) => void;
     onJumpTo: (id: number) => void;
     disabled: boolean;
+    enableReactions: boolean;
+    enableReply: boolean;
     isFirst: boolean;
 }) {
     const [hovered, setHovered] = useState(false);
@@ -290,23 +299,25 @@ function MessageLineView({
             onMouseLeave={() => setHovered(false)}
         >
             {line.replyTo && (
-                <ReplyQuote replyTo={line.replyTo} onJumpTo={onJumpTo} />
+                <ReplyQuote replyTo={line.replyTo} onJumpTo={onJumpTo}/>
             )}
 
             <div className={isFirst ? '' : 'mt-0.5'}>
                 <span className="text-sm text-gray-300 leading-relaxed">{line.content}</span>
             </div>
 
-            <ReactionPills
-                reactions={line.reactions}
-                currentUser={currentUser}
-                onReact={emoji => onReact(line.id, emoji)}
-                disabled={disabled}
-            />
+            {enableReactions && (
+                <ReactionPills
+                    reactions={line.reactions}
+                    currentUser={currentUser}
+                    onReact={emoji => onReact(line.id, emoji)}
+                    disabled={disabled}
+                />
+            )}
 
-            {hovered && !disabled && (
+            {hovered && !disabled && enableReply && (
                 <button
-                    onClick={() => onReply({ id: line.id, sender, content: line.content })}
+                    onClick={() => onReply({id: line.id, sender, content: line.content})}
                     className="absolute -top-0.5 right-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-700/80 border border-white/10 text-[10px] text-slate-300 hover:text-white transition-colors cursor-pointer"
                     title="Reply"
                 >
@@ -321,6 +332,7 @@ function MessageLineView({
 
 function MessageGroupView({
                               group, showLine, currentUser, onReact, onReply, onJumpTo, disabled,
+                              enableReactions, enableReply,
                           }: {
     group: MessageGroup;
     showLine: boolean;
@@ -329,10 +341,12 @@ function MessageGroupView({
     onReply: (snapshot: ReplySnapshot) => void;
     onJumpTo: (id: number) => void;
     disabled: boolean;
+    enableReactions: boolean;
+    enableReply: boolean;
 }) {
     return (
         <div className="flex gap-2.5 mb-2.5">
-            <Avatar name={group.sender} showLine={showLine} />
+            <Avatar name={group.sender} showLine={showLine}/>
             <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-0.5">
                     <span className="text-sm font-medium" style={nameColorStyle(group.sender)}>
@@ -352,6 +366,8 @@ function MessageGroupView({
                         onReply={onReply}
                         onJumpTo={onJumpTo}
                         disabled={disabled}
+                        enableReactions={enableReactions}
+                        enableReply={enableReply}
                         isFirst={i === 0}
                     />
                 ))}
@@ -370,6 +386,8 @@ export function ChatPanel({
                               onSend,
                               onReact = () => {},
                               placeholder = 'Type a message…',
+                              enableReactions = true,
+                              enableReply = true,
                           }: ChatPanelProps) {
     const [draft, setDraft] = useState('');
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
@@ -379,7 +397,7 @@ export function ChatPanel({
     const connected = status === 'connected';
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        bottomRef.current?.scrollIntoView({behavior: 'smooth'});
     }, [messages]);
 
     const handleSend = () => {
@@ -391,12 +409,15 @@ export function ChatPanel({
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
         if (e.key === 'Escape') setReplyingTo(null);
     };
 
     const handleJumpTo = (id: number) => {
-        messageRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        messageRefs.current.get(id)?.scrollIntoView({behavior: 'smooth', block: 'center'});
     };
 
     const statusInfo = STATUS_LABELS[status];
@@ -410,7 +431,7 @@ export function ChatPanel({
                 <div className="flex gap-2 items-center">
                     <span
                         className="h-2 w-2 rounded-full"
-                        style={{ background: statusInfo.color }}
+                        style={{background: statusInfo.color}}
                         title={statusInfo.label}
                     />
                     <span className="text-gray-200">{statusInfo.label}</span>
@@ -429,7 +450,7 @@ export function ChatPanel({
                     {groups.map((group, i) => (
                         <React.Fragment key={i}>
                             {group.dividerTimestamp && (
-                                <TimestampDivider label={group.dividerTimestamp} />
+                                <TimestampDivider label={group.dividerTimestamp}/>
                             )}
                             {/* Anchor divs for jump-to scroll — one per line id */}
                             {group.lines.map(line => (
@@ -449,16 +470,18 @@ export function ChatPanel({
                                 onReply={setReplyingTo}
                                 onJumpTo={handleJumpTo}
                                 disabled={!connected}
+                                enableReactions={enableReactions}
+                                enableReply={enableReply}
                             />
                         </React.Fragment>
                     ))}
 
-                    <div ref={bottomRef} />
+                    <div ref={bottomRef}/>
                 </div>
 
                 {/* Reply banner — shown while composing a reply */}
                 {replyingTo && (
-                    <ReplyBanner replyTo={replyingTo} onCancel={() => setReplyingTo(null)} />
+                    <ReplyBanner replyTo={replyingTo} onCancel={() => setReplyingTo(null)}/>
                 )}
 
                 {/* Input row */}

@@ -2,9 +2,11 @@ package net.deckserver.jol.ws;
 
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.websockets.next.*;
+import io.smallrye.common.annotation.Blocking;
+import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import net.deckserver.jol.dto.ChatMessageDto;
-import net.deckserver.jol.services.GameChatService;
+import net.deckserver.jol.services.ChatService;
 import org.jboss.logging.Logger;
 
 /**
@@ -25,7 +27,7 @@ public class GameWebSocket {
     WebSocketConnection connection;
 
     @Inject
-    GameChatService chatService;
+    ChatService chatService;
 
     @Inject
     SecurityIdentity identity;
@@ -33,6 +35,8 @@ public class GameWebSocket {
     // ── Lifecycle ─────────────────────────────────────────────────────────
 
     @OnOpen
+    @Blocking
+    @ActivateRequestContext
     public void onOpen(@PathParam String gameId) {
         LOG.infof("Game [%s]: %s connected (session %s)", gameId, userName(), connection.id());
         ChatMessageDto history = chatService.historyPayload(gameId);
@@ -46,13 +50,32 @@ public class GameWebSocket {
 
     @OnTextMessage
     public void onMessage(@PathParam String gameId, ChatMessageDto incoming) {
+        switch (incoming.type) {
+            case CHAT -> handleChat(gameId, incoming);
+            case REACTION -> handleReaction(incoming);
+            default -> connection.sendTextAndAwait(
+                    ChatMessageDto.error("Unsupported message type: " + incoming.type));
+        }
+    }
+
+    private void handleChat(String gameId, ChatMessageDto incoming) {
         String content = incoming.content == null ? "" : incoming.content.trim();
         if (content.isEmpty()) {
             connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
+            return;
         }
 
-        ChatMessageDto saved = chatService.save(gameId, userName(), content);
+        ChatMessageDto saved = chatService.save(gameId, userName(), content, incoming.replyToId);
         connection.broadcast().sendTextAndAwait(saved);
+    }
+
+    private void handleReaction(ChatMessageDto incoming) {
+        if (incoming.id == null || incoming.emoji == null) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Reaction requires id and emoji"));
+            return;
+        }
+        ChatMessageDto updated = chatService.toggleReaction(incoming.id, userName(), incoming.emoji);
+        connection.broadcast().sendTextAndAwait(updated);
     }
 
     @OnError

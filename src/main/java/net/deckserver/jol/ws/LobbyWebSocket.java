@@ -6,7 +6,7 @@ import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import net.deckserver.jol.dto.ChatMessageDto;
-import net.deckserver.jol.services.LobbyChatService;
+import net.deckserver.jol.services.ChatService;
 import org.jboss.logging.Logger;
 
 /**
@@ -23,7 +23,7 @@ public class LobbyWebSocket {
     WebSocketConnection connection;
 
     @Inject
-    LobbyChatService chatService;
+    ChatService chatService;
 
     @Inject
     SecurityIdentity identity;
@@ -35,7 +35,7 @@ public class LobbyWebSocket {
     @ActivateRequestContext
     public void onOpen() {
         LOG.infof("Lobby: %s connected (session %s)", userName(), connection.id());
-        ChatMessageDto history = chatService.historyPayload();
+        ChatMessageDto history = chatService.historyPayload(null);
         connection.sendTextAndAwait(history);
     }
 
@@ -69,7 +69,7 @@ public class LobbyWebSocket {
             connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
             return;
         }
-        ChatMessageDto saved = chatService.save(userName(), content, incoming.replyToId);
+        ChatMessageDto saved = chatService.save(null, userName(), content, incoming.replyToId);
         connection.broadcast().sendTextAndAwait(saved);
     }
 
