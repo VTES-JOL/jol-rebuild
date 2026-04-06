@@ -1,7 +1,9 @@
+import type {CardSuggestion} from "@/shared/services/useCardAutocomplete.ts";
+
 interface CardSuggestionsProps {
-    suggestions: string[];
+    suggestions: CardSuggestion[];
     activeIndex: number;
-    onSelect: (name: string) => void;
+    onSelect: (card: CardSuggestion) => void;
 }
 
 export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSuggestionsProps) {
@@ -14,14 +16,14 @@ export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSugg
                        bg-slate-800 border border-white/10 rounded-lg
                        shadow-xl overflow-hidden"
         >
-            {suggestions.map((name, i) => (
+            {suggestions.map((card, i) => (
                 <li
-                    key={name}
+                    key={card.name}
                     role="option"
                     aria-selected={i === activeIndex}
                     onMouseDown={e => {
                         e.preventDefault(); // prevent input blur before selection
-                        onSelect(name);
+                        onSelect(card);
                     }}
                     className={[
                         'px-3 py-2 text-sm cursor-pointer transition-colors duration-75',
@@ -30,7 +32,7 @@ export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSugg
                             : 'text-gray-300 hover:bg-white/5',
                     ].join(' ')}
                 >
-                    {name}
+                    {card.name}
                 </li>
             ))}
             <li className="px-3 py-1 text-[10px] text-slate-500 border-t border-white/5">

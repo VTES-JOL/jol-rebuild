@@ -1,21 +1,26 @@
 import { useState, useCallback, useRef } from 'react';
 
 interface UseCardAutocompleteOptions {
-    onComplete: (newValue: string) => void;
+    onComplete: (newValue: string, newCursorPos: number) => void;
+}
+
+export interface CardSuggestion {
+    id: number;
+    name: string;
 }
 
 export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) {
-    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [suggestions, setSuggestions] = useState<CardSuggestion[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [triggerIndex, setTriggerIndex] = useState<number | null>(null);
     const abortRef = useRef<AbortController | null>(null);
 
-    const handleInputChange = useCallback(async (value: string, cursorPos: number) => {
-        const textUpToCursor = value.slice(0, cursorPos);
+    // The hook only ever sees the encoded draft. triggerIndex points into it.
+    const handleInputChange = useCallback(async (encoded: string, cursorPos: number) => {
+        const textUpToCursor = encoded.slice(0, cursorPos);
         const lastOpen = textUpToCursor.lastIndexOf('[');
 
-        // Close if no `[` found, or if it's already been closed with `]`
         if (lastOpen === -1 || textUpToCursor.indexOf(']', lastOpen) !== -1) {
             setIsOpen(false);
             setSuggestions([]);
@@ -40,7 +45,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
                 `/cards/autocomplete?q=${encodeURIComponent(query)}`,
                 { signal: abortRef.current.signal }
             );
-            const data: string[] = await res.json();
+            const data: CardSuggestion[] = await res.json();
             const limited = data.slice(0, 5);
             setSuggestions(limited);
             setIsOpen(limited.length > 0);
@@ -51,24 +56,25 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
     }, []);
 
     const confirmSelection = useCallback((
-        cardName: string,
-        currentValue: string,
+        card: CardSuggestion,
+        encoded: string,
         cursorPos: number
     ) => {
         if (triggerIndex === null) return;
-        const before = currentValue.slice(0, triggerIndex);
-        const after = currentValue.slice(cursorPos);
-        const completed = `${before}[${cardName}]${after}`;
+        const before = encoded.slice(0, triggerIndex);
+        const after = encoded.slice(cursorPos);
+        const newCardEncoded = `[card:${card.id}:${card.name}]`;
+        const newEncoded = `${before}${newCardEncoded}${after}`;
+
         setIsOpen(false);
         setSuggestions([]);
         setTriggerIndex(null);
-        onComplete(completed);
+        onComplete(newEncoded, before.length + newCardEncoded.length);
     }, [triggerIndex, onComplete]);
 
-    // Returns true if the event was consumed (so the caller can skip its own handling)
     const handleKeyDown = useCallback((
         e: React.KeyboardEvent<HTMLInputElement>,
-        currentValue: string,
+        encoded: string,
         cursorPos: number
     ): boolean => {
         if (!isOpen) return false;
@@ -86,7 +92,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
             case 'Enter':
                 if (suggestions[activeIndex]) {
                     e.preventDefault();
-                    confirmSelection(suggestions[activeIndex], currentValue, cursorPos);
+                    confirmSelection(suggestions[activeIndex], encoded, cursorPos);
                     return true;
                 }
                 return false;
@@ -100,4 +106,12 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
     }, [isOpen, suggestions, activeIndex, confirmSelection]);
 
     return { suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown, confirmSelection };
+}
+
+export function encodedToDisplay(encoded: string): string {
+    return encoded.replace(/\[card:\d+:([^\]]+)\]/g, '[$1]');
+}
+
+export function mapEncodedToDisplayIndex(encoded: string, encodedIndex: number): number {
+    return encodedToDisplay(encoded.slice(0, encodedIndex)).length;
 }

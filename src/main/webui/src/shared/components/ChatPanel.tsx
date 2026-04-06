@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {useCardAutocomplete} from '@/shared/services/useCardAutocomplete';
+import {encodedToDisplay, mapEncodedToDisplayIndex, useCardAutocomplete} from '@/shared/services/useCardAutocomplete';
 import type {ChatMessage, ReactionDto, ReplySnapshot} from '@/shared/services/useWebSocket';
 import Panel from './Panel';
 import {CardSuggestions} from "@/shared/components/CardSuggestions.tsx";
+import {MessageContent} from "@/shared/components/MessageContent.tsx";
 
 const dateFormat = new Intl.DateTimeFormat('UTC', {dateStyle: 'medium', timeStyle: 'short'});
 const timeOnlyFormat = new Intl.DateTimeFormat('UTC', {timeStyle: 'short'});
@@ -258,7 +259,7 @@ function MessageLineView({
     return (
         <div
             className="relative group rounded transition-colors duration-100 -mx-1.5 px-1.5"
-            style={{ background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent' }}
+            style={{background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent'}}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
@@ -267,7 +268,7 @@ function MessageLineView({
             )}
 
             <div className={isFirst ? 'pr-16' : 'mt-0.5 pr-16'}>
-                <span className="text-sm text-gray-300 leading-relaxed">{line.content}</span>
+                <MessageContent content={line.content}/>
             </div>
 
             {enableReactions && (
@@ -281,7 +282,8 @@ function MessageLineView({
 
             {/* Floating action toolbar — inline emojis + reply, hover only */}
             {hovered && !disabled && (
-                <div className="absolute -top-3 right-0 flex items-center bg-slate-800 border border-white/10 rounded-md shadow-lg z-20 divide-x divide-white/10">
+                <div
+                    className="absolute -top-3 right-0 flex items-center bg-slate-800 border border-white/10 rounded-md shadow-lg z-20 divide-x divide-white/10">
                     {enableReactions && (
                         <div className="flex items-center gap-0 px-0.5">
                             {EMOJI_PALETTE.map(e => (
@@ -374,20 +376,36 @@ export function ChatPanel({
                               enableReply = true,
                           }: ChatPanelProps) {
     const [draft, setDraft] = useState('');
+    const [inputValue, setInputValue] = useState('');
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const messageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
     const inputRef = useRef<HTMLInputElement>(null);
-    const {suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection} =
+    const cardMapRef = useRef<Map<number, string>>(new Map());
+
+    const reEncode = useCallback((val: string) => {
+        return val.replace(/\[([^\]]+)\]/g, (match, name) => {
+            for (const [id, n] of cardMapRef.current) {
+                if (n === name) return `[card:${id}:${name}]`;
+            }
+            return match;
+        });
+    }, []);
+
+    const { suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection } =
         useCardAutocomplete({
-            onComplete: (newValue) => {
-                setDraft(newValue);
-                // Restore cursor position to just after the closing `]`
+            onComplete: (newEncoded, newEncodedCursor) => {
+                for (const match of newEncoded.matchAll(/\[card:(\d+):([^\]]+)\]/g)) {
+                    cardMapRef.current.set(Number(match[1]), match[2]);
+                }
+                const newDisplay = encodedToDisplay(newEncoded);
+                const newDisplayCursor = mapEncodedToDisplayIndex(newEncoded, newEncodedCursor);
+                setDraft(newEncoded);
+                setInputValue(newDisplay);
                 requestAnimationFrame(() => {
                     if (inputRef.current) {
-                        const pos = newValue.lastIndexOf(']') + 1;
                         inputRef.current.focus();
-                        inputRef.current.setSelectionRange(pos, pos);
+                        inputRef.current.setSelectionRange(newDisplayCursor, newDisplayCursor);
                     }
                 });
             },
@@ -404,15 +422,15 @@ export function ChatPanel({
         if (!trimmed || !connected) return;
         onSend(trimmed, replyingTo?.id);
         setDraft('');
+        setInputValue('');
         setReplyingTo(null);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        // Let autocomplete consume arrow keys, Tab, Enter, Escape while open
-        const consumed = acHandleKeyDown(e, draft, inputRef.current?.selectionStart ?? draft.length);
+        const selectionStart = inputRef.current?.selectionStart ?? draft.length;
+        const encodedCursor = reEncode(inputValue.slice(0, selectionStart)).length;
+        const consumed = acHandleKeyDown(e, draft, encodedCursor);
         if (consumed) return;
-
-        // Existing behaviour
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -493,15 +511,24 @@ export function ChatPanel({
                         <CardSuggestions
                             suggestions={isOpen ? suggestions : []}
                             activeIndex={activeIndex}
-                            onSelect={name => confirmSelection(name, draft, inputRef.current?.selectionStart ?? draft.length)}
+                            onSelect={card => {
+                                const selectionStart = inputRef.current?.selectionStart ?? draft.length;
+                                const encodedCursor = reEncode(inputValue.slice(0, selectionStart)).length;
+                                confirmSelection(card, draft, encodedCursor);
+                            }}
                         />
                         <input
                             ref={inputRef}
                             className="w-full bg-transparent border border-white/10 rounded-lg p-2 outline-none text-gray-200 placeholder:text-gray-500 disabled:opacity-50 text-sm"
-                            value={draft}
+                            value={inputValue}
                             onChange={e => {
-                                setDraft(e.target.value);
-                                handleInputChange(e.target.value, e.target.selectionStart ?? e.target.value.length);
+                                const val = e.target.value;
+                                setInputValue(val);
+                                const selectionStart = e.target.selectionStart ?? 0;
+                                const reEncoded = reEncode(val);
+                                setDraft(reEncoded);
+                                const encodedCursor = reEncode(val.slice(0, selectionStart)).length;
+                                handleInputChange(reEncoded, encodedCursor);
                             }}
                             onKeyDown={handleKeyDown}
                             placeholder={replyingTo ? `Reply to ${replyingTo.sender}…` : placeholder}

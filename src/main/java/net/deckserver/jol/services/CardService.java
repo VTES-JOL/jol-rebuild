@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.deckserver.jol.config.Config;
+import net.deckserver.jol.dto.CardSuggestionDto;
 import net.deckserver.jol.model.Card;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -50,11 +51,15 @@ public class CardService {
         return cardMap.values().stream().sorted(Comparator.comparing(c -> c.name, String.CASE_INSENSITIVE_ORDER)).toList();
     }
 
-    public List<String> autocomplete(String q) {
+    public List<CardSuggestionDto> autocomplete(String q) {
         return cardMap.keySet().stream()
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .filter(name -> name.toLowerCase().contains(q.toLowerCase()))
                 .limit(5)
+                .map(name -> {
+                    Card card = cardMap.get(name);
+                    return new CardSuggestionDto(card.id, name);
+                })
                 .toList();
     }
 
