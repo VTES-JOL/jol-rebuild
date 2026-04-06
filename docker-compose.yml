@@ -1,12 +1,14 @@
 services:
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,12 +16,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    # Not exposed on host — only reachable by the app container on the internal network
-    expose:
-      - "5432"
 
   app:
-    build: .
+    image: quarkus/code-with-quarkus-jvm
     restart: unless-stopped
     ports:
       - "8080:8080"

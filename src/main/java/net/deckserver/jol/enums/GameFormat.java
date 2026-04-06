@@ -3,9 +3,7 @@ package net.deckserver.jol.enums;
 public enum GameFormat {
     STANDARD("Standard"),
     DUEL("Duel"),
-    V5("V5"),
-    PLAYTEST("Playtest");
-
+    V5("V5");
     private final String label;
 
     GameFormat(String label) {

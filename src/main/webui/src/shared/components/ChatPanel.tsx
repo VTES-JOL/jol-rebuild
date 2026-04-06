@@ -145,39 +145,6 @@ function Avatar({name, showLine}: { name: string; showLine: boolean }) {
 
 // ── Emoji picker ──────────────────────────────────────────────────────────────
 
-function EmojiPicker({onPick, onClose}: { onPick: (e: string) => void; onClose: () => void }) {
-    const ref = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        function onClick(e: MouseEvent) {
-            if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-        }
-
-        document.addEventListener('mousedown', onClick);
-        return () => document.removeEventListener('mousedown', onClick);
-    }, [onClose]);
-
-    return (
-        <div
-            ref={ref}
-            className="absolute bottom-full mb-1 left z-10 flex gap-1 p-1.5 rounded-lg bg-slate-800 border border-white/10"
-        >
-            {EMOJI_PALETTE.map(e => (
-                <button
-                    key={e}
-                    className="text-base hover:scale-125 transition-transform cursor-pointer bg-transparent border-none p-0.5"
-                    onClick={() => {
-                        onPick(e);
-                        onClose();
-                    }}
-                >
-                    {e}
-                </button>
-            ))}
-        </div>
-    );
-}
-
 // ── Reaction pills ────────────────────────────────────────────────────────────
 
 function ReactionPills({
@@ -188,12 +155,11 @@ function ReactionPills({
     onReact: (emoji: string) => void;
     disabled: boolean;
 }) {
-    const [pickerOpen, setPickerOpen] = useState(false);
-
-    if (reactions.length === 0 && disabled) return null;
+    // Only render the pill row when there are actual reactions — no hover needed
+    if (reactions.length === 0) return null;
 
     return (
-        <div className="flex flex-wrap items-center gap-1 mt-1.5">
+        <div className="flex flex-wrap items-center gap-1 mt-1">
             {reactions.map(r => {
                 const mine = r.senders.includes(currentUser);
                 return (
@@ -215,20 +181,6 @@ function ReactionPills({
                     </button>
                 );
             })}
-            {!disabled && (
-                <div className="relative">
-                    <button
-                        onClick={() => setPickerOpen(p => !p)}
-                        className="flex items-center justify-center w-5 h-5 rounded-full bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors cursor-pointer text-xs"
-                        title="Add reaction"
-                    >
-                        +
-                    </button>
-                    {pickerOpen && (
-                        <EmojiPicker onPick={onReact} onClose={() => setPickerOpen(false)}/>
-                    )}
-                </div>
-            )}
         </div>
     );
 }
@@ -305,7 +257,8 @@ function MessageLineView({
 
     return (
         <div
-            className="relative group"
+            className="relative group rounded transition-colors duration-100 -mx-1.5 px-1.5"
+            style={{ background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent' }}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
@@ -313,7 +266,7 @@ function MessageLineView({
                 <ReplyQuote replyTo={line.replyTo} onJumpTo={onJumpTo}/>
             )}
 
-            <div className={isFirst ? '' : 'mt-0.5'}>
+            <div className={isFirst ? 'pr-16' : 'mt-0.5 pr-16'}>
                 <span className="text-sm text-gray-300 leading-relaxed">{line.content}</span>
             </div>
 
@@ -326,14 +279,33 @@ function MessageLineView({
                 />
             )}
 
-            {hovered && !disabled && enableReply && (
-                <button
-                    onClick={() => onReply({id: line.id, sender, content: line.content})}
-                    className="absolute -top-0.5 right-0 flex items-center gap-1 px-1.5 py-0.5 rounded bg-slate-700/80 border border-white/10 text-[10px] text-slate-300 hover:text-white transition-colors cursor-pointer"
-                    title="Reply"
-                >
-                    ↩ Reply
-                </button>
+            {/* Floating action toolbar — inline emojis + reply, hover only */}
+            {hovered && !disabled && (
+                <div className="absolute -top-3 right-0 flex items-center bg-slate-800 border border-white/10 rounded-md shadow-lg z-20 divide-x divide-white/10">
+                    {enableReactions && (
+                        <div className="flex items-center gap-0 px-0.5">
+                            {EMOJI_PALETTE.map(e => (
+                                <button
+                                    key={e}
+                                    onClick={() => onReact(line.id, e)}
+                                    className="flex items-center justify-center w-6 h-6 rounded text-base hover:scale-125 transition-transform cursor-pointer"
+                                    title={e}
+                                >
+                                    {e}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                    {enableReply && (
+                        <button
+                            onClick={() => onReply({id: line.id, sender, content: line.content})}
+                            className="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors cursor-pointer text-sm mx-0.5"
+                            title="Reply"
+                        >
+                            ↩
+                        </button>
+                    )}
+                </div>
             )}
         </div>
     );
