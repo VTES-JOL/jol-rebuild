@@ -6,8 +6,8 @@ import java.util.List;
 /**
  * The JSON message exchanged over both WebSocket endpoints.
  * <p>
- * Client → Server:  type = CHAT | PING
- * Server → Client:  type = CHAT | HISTORY | ERROR | PONG
+ * Client → Server:  type = CHAT | REACTION
+ * Server → Client:  type = CHAT | REACTION | HISTORY | ERROR
  */
 public class ChatMessageDto {
 

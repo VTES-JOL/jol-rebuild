@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
+import {useCardAutocomplete} from '@/shared/services/useCardAutocomplete';
 import type {ChatMessage, ReactionDto, ReplySnapshot} from '@/shared/services/useWebSocket';
 import Panel from './Panel';
+import {CardSuggestions} from "@/shared/components/CardSuggestions.tsx";
 
 const dateFormat = new Intl.DateTimeFormat('UTC', {dateStyle: 'medium', timeStyle: 'short'});
 const timeOnlyFormat = new Intl.DateTimeFormat('UTC', {timeStyle: 'short'});
@@ -277,7 +279,16 @@ function ReplyBanner({replyTo, onCancel}: { replyTo: ReplySnapshot; onCancel: ()
 // ── Single message line ───────────────────────────────────────────────────────
 
 function MessageLineView({
-                             line, sender, currentUser, onReact, onReply, onJumpTo, disabled, enableReactions, enableReply, isFirst,
+                             line,
+                             sender,
+                             currentUser,
+                             onReact,
+                             onReply,
+                             onJumpTo,
+                             disabled,
+                             enableReactions,
+                             enableReply,
+                             isFirst,
                          }: {
     line: MessageLine;
     sender: string;
@@ -384,7 +395,8 @@ export function ChatPanel({
                               status,
                               currentUser,
                               onSend,
-                              onReact = () => {},
+                              onReact = () => {
+                              },
                               placeholder = 'Type a message…',
                               enableReactions = true,
                               enableReply = true,
@@ -393,6 +405,21 @@ export function ChatPanel({
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const messageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const inputRef = useRef<HTMLInputElement>(null);
+    const {suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection} =
+        useCardAutocomplete({
+            onComplete: (newValue) => {
+                setDraft(newValue);
+                // Restore cursor position to just after the closing `]`
+                requestAnimationFrame(() => {
+                    if (inputRef.current) {
+                        const pos = newValue.lastIndexOf(']') + 1;
+                        inputRef.current.focus();
+                        inputRef.current.setSelectionRange(pos, pos);
+                    }
+                });
+            },
+        });
 
     const connected = status === 'connected';
 
@@ -409,6 +436,11 @@ export function ChatPanel({
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Let autocomplete consume arrow keys, Tab, Enter, Escape while open
+        const consumed = acHandleKeyDown(e, draft, inputRef.current?.selectionStart ?? draft.length);
+        if (consumed) return;
+
+        // Existing behaviour
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -484,17 +516,27 @@ export function ChatPanel({
                     <ReplyBanner replyTo={replyingTo} onCancel={() => setReplyingTo(null)}/>
                 )}
 
-                {/* Input row */}
-                <div className="flex gap-2 border-t border-white/10">
-                    <input
-                        className="flex-1 bg-transparent border border-white/10 rounded-lg p-2 outline-none text-gray-200 placeholder:text-gray-500 disabled:opacity-50 text-sm"
-                        value={draft}
-                        onChange={e => setDraft(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={replyingTo ? `Reply to ${replyingTo.sender}…` : placeholder}
-                        disabled={!connected}
-                        maxLength={1000}
-                    />
+                <div className="flex gap-2 items-center border-t border-white/10">
+                    <div className="relative flex-1 min-w-0">
+                        <CardSuggestions
+                            suggestions={isOpen ? suggestions : []}
+                            activeIndex={activeIndex}
+                            onSelect={name => confirmSelection(name, draft, inputRef.current?.selectionStart ?? draft.length)}
+                        />
+                        <input
+                            ref={inputRef}
+                            className="w-full bg-transparent border border-white/10 rounded-lg p-2 outline-none text-gray-200 placeholder:text-gray-500 disabled:opacity-50 text-sm"
+                            value={draft}
+                            onChange={e => {
+                                setDraft(e.target.value);
+                                handleInputChange(e.target.value, e.target.selectionStart ?? e.target.value.length);
+                            }}
+                            onKeyDown={handleKeyDown}
+                            placeholder={replyingTo ? `Reply to ${replyingTo.sender}…` : placeholder}
+                            disabled={!connected}
+                            maxLength={1000}
+                        />
+                    </div>
                     <button
                         className="py-1.5 px-3 rounded-lg bg-slate-500/50 hover:bg-slate-700/50 text-white cursor-pointer transition-opacity duration-75 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                         onClick={handleSend}

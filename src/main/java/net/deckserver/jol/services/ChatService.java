@@ -20,7 +20,6 @@ public class ChatService {
     public ChatMessageDto save(String gameId, String sender, String content, Long replyToId) {
         ChatMessage replyTo = replyToId != null ? ChatMessage.findById(replyToId) : null;
         ChatMessage entity = ChatMessage.create(gameId, sender, content, replyTo);
-        entity.persist();
 
         ReplySnapshotDto replySnapshot = replyTo != null
                 ? ReplySnapshotDto.of(replyTo.id, replyTo.sender, replyTo.content)

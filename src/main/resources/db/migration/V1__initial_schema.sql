@@ -1,14 +1,35 @@
+create sequence chat_message_reactions_SEQ start with 1 increment by 50;
+
+create sequence chat_messages_SEQ start with 1 increment by 50;
+
 create sequence Deck_SEQ start with 1 increment by 50;
 
-create sequence game_messages_SEQ start with 1 increment by 50;
-
 create sequence Game_SEQ start with 1 increment by 50;
-
-create sequence lobby_messages_SEQ start with 1 increment by 50;
 
 create sequence Preferences_SEQ start with 1 increment by 50;
 
 create sequence Registration_SEQ start with 1 increment by 50;
+
+create table chat_message_reactions
+(
+    id         bigint      not null,
+    message_id bigint      not null,
+    emoji      varchar(32) not null,
+    sender     varchar(64) not null,
+    primary key (id),
+    unique (message_id, sender, emoji)
+);
+
+create table chat_messages
+(
+    id          bigint                      not null,
+    reply_to_id bigint,
+    timestamp   timestamp(6) with time zone not null,
+    gameId      varchar(64),
+    sender      varchar(64)                 not null,
+    content     TEXT                        not null,
+    primary key (id)
+);
 
 create table Deck
 (
@@ -28,25 +49,6 @@ create table Game
     id         bigint not null,
     name       varchar(255),
     owner_id   varchar(255),
-    primary key (id)
-);
-
-create table game_messages
-(
-    id        bigint                      not null,
-    timestamp timestamp(6) with time zone not null,
-    gameId    varchar(64)                 not null,
-    sender    varchar(64)                 not null,
-    content   TEXT                        not null,
-    primary key (id)
-);
-
-create table lobby_messages
-(
-    id        bigint                      not null,
-    timestamp timestamp(6) with time zone not null,
-    sender    varchar(64)                 not null,
-    content   TEXT                        not null,
     primary key (id)
 );
 
@@ -88,6 +90,16 @@ create table users
     username       varchar(255) unique,
     primary key (id)
 );
+
+alter table if exists chat_message_reactions
+    add constraint FK5r5vgdnjj6k6ivkdokg4yqrpv
+    foreign key (message_id)
+    references chat_messages;
+
+alter table if exists chat_messages
+    add constraint FKbrvto53oo11ra25g8y5ynlojw
+    foreign key (reply_to_id)
+    references chat_messages;
 
 alter table if exists Deck
     add constraint FK4itpbacchvns32g0tmg9yoxvt

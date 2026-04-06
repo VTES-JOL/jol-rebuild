@@ -37,6 +37,7 @@ public class ChatMessage extends PanacheEntity {
         msg.content = content;
         msg.timestamp = Instant.now();
         msg.replyTo = replyTo;
+        msg.persist();
         return msg;
     }
 
