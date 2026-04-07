@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type {Meta, StoryObj} from '@storybook/react-vite';
 
-import { ChatPanelView, type ChatPanelViewProps } from '../features/chat/ChatPanelView.tsx';
+import {ChatPanelView, type ChatPanelViewProps} from '../features/chat/ChatPanelView.tsx';
 
 const meta = {
     title: 'Chat/ChatPanelView',

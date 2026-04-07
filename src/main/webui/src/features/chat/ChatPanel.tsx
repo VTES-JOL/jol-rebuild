@@ -1,6 +1,6 @@
-import type { ChatMessage } from '@/hooks/useWebSocket.ts';
-import { useChat } from '@/hooks/useChat.ts';
-import { ChatPanelView } from './ChatPanelView.tsx';
+import type {ChatMessage} from '@/hooks/useWebSocket.ts';
+import {useChat} from '@/hooks/useChat.ts';
+import {ChatPanelView} from './ChatPanelView.tsx';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 

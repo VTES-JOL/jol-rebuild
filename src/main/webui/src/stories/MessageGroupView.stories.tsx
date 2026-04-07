@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {fn} from 'storybook/test';
 
-import { MessageGroupView } from '../features/chat/MessageGroupView.tsx';
+import {MessageGroupView} from '../features/chat/MessageGroupView.tsx';
 
 const meta = {
     title: 'Chat/MessageGroupView',

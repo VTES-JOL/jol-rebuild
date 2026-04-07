@@ -1,4 +1,4 @@
-import { ChatPanel } from '@/features/chat/ChatPanel.tsx';
+import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 
 interface LobbyChatPanelProps {
     /** The logged-in user's username */

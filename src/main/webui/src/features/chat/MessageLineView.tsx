@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import type {ReplySnapshot, ReactionDto} from '@/hooks/useWebSocket.ts';
-import { nameColorStyle } from '@/shared/utils/avatarUtils';
-import { MessageContent } from './MessageContent';
+import React, {useState} from 'react';
+import type {ReactionDto, ReplySnapshot} from '@/hooks/useWebSocket.ts';
+import {nameColorStyle} from '@/shared/utils/avatarUtils';
+import {MessageContent} from './MessageContent';
 
 const EMOJI_PALETTE = ['👍', '❤️', '😂', '😮'];
 

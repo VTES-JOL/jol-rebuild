@@ -1,7 +1,7 @@
-import { useEffect, useState, type ReactNode } from "react";
-import type { User } from "./types";
+import {type ReactNode, useEffect, useState} from "react";
+import type {User} from "./types";
 import API from "./api";
-import { authContextValue } from "./authContextValue.ts";
+import {authContextValue} from "./authContextValue.ts";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);

@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type {Meta, StoryObj} from '@storybook/react-vite';
 
-import { ChatStatusBadge } from '../features/chat/ChatStatusBadge.tsx';
+import {ChatStatusBadge} from '../features/chat/ChatStatusBadge.tsx';
 
 const meta = {
     title: 'Chat/ChatStatusBadge',

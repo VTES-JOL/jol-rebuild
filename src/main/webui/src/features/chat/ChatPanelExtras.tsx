@@ -1,5 +1,5 @@
 import type {ReplySnapshot} from '@/hooks/useWebSocket.ts';
-import { nameColorStyle } from '@/shared/utils/avatarUtils';
+import {nameColorStyle} from '@/shared/utils/avatarUtils';
 import {MessageContent} from "@/features/chat/MessageContent.tsx";
 
 interface ReplyBannerProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import type {ReplySnapshot} from '@/hooks/useWebSocket.ts';
-import { nameColorStyle, initials, avatarStyle } from '@/shared/utils/avatarUtils';
-import { MessageLineView } from './MessageLineView';
+import {avatarStyle, initials, nameColorStyle} from '@/shared/utils/avatarUtils';
+import {MessageLineView} from './MessageLineView';
 import type {MessageGroup} from '@/shared/utils/chatUtils.ts';
 
 export type { MessageGroup };

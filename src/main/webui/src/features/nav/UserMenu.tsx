@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react"
-import { Link } from "react-router-dom"
-import { useAuthContext } from "@/hooks/useAuthContext.ts"
+import React, {useEffect, useRef, useState} from "react"
+import {Link} from "react-router-dom"
+import {useAuthContext} from "@/hooks/useAuthContext.ts"
 
 export default function UserMenu() {
     const { user, logout } = useAuthContext()

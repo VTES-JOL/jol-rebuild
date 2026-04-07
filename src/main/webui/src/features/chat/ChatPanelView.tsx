@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type { ChatMessage, ReplySnapshot } from '@/hooks/useWebSocket.ts';
-import { useCardAutocomplete } from '@/hooks/useCardAutocomplete.ts';
-import { useChatInput } from '@/hooks/useChatInput.ts';
-import { groupMessages } from '@/shared/utils/chatUtils.ts';
+import React, {useEffect, useRef, useState} from 'react';
+import type {ChatMessage, ReplySnapshot} from '@/hooks/useWebSocket.ts';
+import {useCardAutocomplete} from '@/hooks/useCardAutocomplete.ts';
+import {useChatInput} from '@/hooks/useChatInput.ts';
+import {groupMessages} from '@/shared/utils/chatUtils.ts';
 import Panel from '@/shared/components/Panel';
-import { CardSuggestions } from '@/features/chat/CardSuggestions.tsx';
-import { ReplyBanner, TimestampDivider } from './ChatPanelExtras.tsx';
-import { MessageGroupView } from './MessageGroupView';
+import {CardSuggestions} from '@/features/chat/CardSuggestions.tsx';
+import {ReplyBanner, TimestampDivider} from './ChatPanelExtras.tsx';
+import {MessageGroupView} from './MessageGroupView';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 

@@ -4,6 +4,7 @@ import UserMenu from "./UserMenu";
 import {NAV_ITEMS} from "./nav-config.ts";
 import MobileMenu from "./MobileMenu";
 import NavItem from "./NavItem"
+
 export default function AppNavbar() {
     const {user} = useAuthContext()
 

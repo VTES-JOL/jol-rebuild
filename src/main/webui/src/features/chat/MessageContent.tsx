@@ -1,5 +1,5 @@
-import { parseMessageTokens } from '@/shared/utils/parseMessageTokens.ts';
-import { CardToken } from '@/shared/components/CardToken';
+import {parseMessageTokens} from '@/shared/utils/parseMessageTokens.ts';
+import {CardToken} from '@/shared/components/CardToken';
 import GameToken from "@/shared/components/GameToken.tsx";
 
 export function MessageContent({ content, className }: { content: string, className?: string }) {

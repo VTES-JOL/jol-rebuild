@@ -1,5 +1,5 @@
 import type {Meta} from '@storybook/react-vite';
-import {MemoryRouter, Routes, Route} from 'react-router-dom';
+import {MemoryRouter, Route, Routes} from 'react-router-dom';
 
 import {ProtectedRouteView} from '../shared/components/ProtectedRoute.tsx';
 import React, {type JSX} from "react";

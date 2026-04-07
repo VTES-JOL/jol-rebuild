@@ -1,7 +1,7 @@
-import { useActiveRoute } from "../../hooks/useActiveRoute.ts"
-import { NAV_ITEMS } from "./nav-config"
-import { useAuthContext } from "@/hooks/useAuthContext.ts"
-import { Link } from "react-router-dom"
+import {useActiveRoute} from "../../hooks/useActiveRoute.ts"
+import {NAV_ITEMS} from "./nav-config"
+import {useAuthContext} from "@/hooks/useAuthContext.ts"
+import {Link} from "react-router-dom"
 import {useState} from "react";
 
 export default function MobileMenu() {

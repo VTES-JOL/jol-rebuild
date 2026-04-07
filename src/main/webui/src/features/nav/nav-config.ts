@@ -1,4 +1,4 @@
-import {Shield, FileText, type LucideIcon, Files} from "lucide-react"
+import {Files, FileText, type LucideIcon, Shield} from "lucide-react"
 
 export interface NavItem {
     label: string

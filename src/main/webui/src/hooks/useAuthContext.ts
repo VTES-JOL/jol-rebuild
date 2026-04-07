@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { authContextValue } from "@/features/auth/authContextValue.ts";
+import {useContext} from "react";
+import {authContextValue} from "@/features/auth/authContextValue.ts";
 
 export function useAuthContext() {
     const ctx = useContext(authContextValue);

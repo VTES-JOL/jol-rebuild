@@ -1,6 +1,6 @@
-import { Navigate } from "react-router-dom";
+import {Navigate} from "react-router-dom";
 import {useAuthContext} from "@/hooks/useAuthContext.ts";
-import type { JSX } from "react";
+import type {JSX} from "react";
 
 type ProtectedRouteViewProps = {
     children: JSX.Element;

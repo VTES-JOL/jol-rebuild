@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { type ChatMessage, useWebSocket } from './useWebSocket.ts';
+import {useCallback, useState} from 'react';
+import {type ChatMessage, useWebSocket} from './useWebSocket.ts';
 
 interface UseChatOptions {
     url: string;
