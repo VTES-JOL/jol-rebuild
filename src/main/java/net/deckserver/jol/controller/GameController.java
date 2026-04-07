@@ -49,7 +49,11 @@ public class GameController {
     @GET
     @Path("/{id}")
     public GameDto get(@PathParam("id") Long id) {
-        return Game.find("id", id).project(GameDto.class).firstResult();
+        Game game = Game.findById(id);
+        if (game == null) {
+            throw new NotFoundException();
+        }
+        return new GameDto(game.id, game.name, game.status, game.gameFormat, game.owner != null ? game.owner.username : null);
     }
 
     @GET

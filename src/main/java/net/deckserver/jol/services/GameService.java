@@ -17,15 +17,19 @@ public class GameService {
     @Inject
     LobbyChatBroadcaster lobbyChatBroadcaster;
 
+    @Inject
+    NameService nameService;
+
     @Scheduled(every = "1m")
     @Transactional
     public void createGame() {
         for (GameFormat format : GameFormat.values()) {
             List<Game> openGames = Game.findOpenGames(format);
             if (openGames.size() < 5) {
-                String gameName = "Test Game " + format.getLabel();
-                Game.create(null, gameName, Visibility.PUBLIC, format);
-                lobbyChatBroadcaster.announce("A new game \"" + gameName + "\" has been created!");
+                String gameName = nameService.generateName();
+                Game game = Game.create(null, gameName, Visibility.PUBLIC, format);
+                String gameToken = String.format("[game:%d:%s]", game.id, gameName);
+                lobbyChatBroadcaster.announce("A new game " + gameToken + " has been created!");
             }
         }
     }
