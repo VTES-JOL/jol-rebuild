@@ -17,32 +17,40 @@ export function CardToken({ id, label }: { id: number; label: string }) {
     const IMG_H = 500;
     const MARGIN = 8;
 
+    const getTooltipPosition = (
+        rect: DOMRect,
+        viewportWidth: number,
+        viewportHeight: number
+    ): TooltipPos => {
+        const centeredLeft = rect.left + rect.width / 2 - IMG_W / 2;
+        const left = Math.max(
+            MARGIN,
+            Math.min(centeredLeft, viewportWidth - IMG_W - MARGIN)
+        );
+        const minTooltipSpace = IMG_H + MARGIN;
+        const spaceAbove = rect.top;
+        const spaceBelow = viewportHeight - rect.bottom;
+
+        if (spaceAbove >= minTooltipSpace) {
+            return { bottom: viewportHeight - rect.top + MARGIN, left };
+        }
+
+        if (spaceBelow >= minTooltipSpace) {
+            return { top: rect.bottom + MARGIN, left };
+        }
+
+        return { top: Math.max(MARGIN, (viewportHeight - IMG_H) / 2), left };
+    };
+
     useEffect(() => {
         if (!hovered || !spanRef.current) return;
 
         const rect = spanRef.current.getBoundingClientRect();
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
 
-        // Horizontal: centre on token, clamp to viewport
-        let left = rect.left + rect.width / 2 - IMG_W / 2;
-        left = Math.max(MARGIN, Math.min(left, vw - IMG_W - MARGIN));
-
-        // Vertical: prefer above, fall back to below
-        const spaceAbove = rect.top;
-        const spaceBelow = vh - rect.bottom;
-
-        let tooltipPos: TooltipPos;
-        if (spaceAbove >= IMG_H + MARGIN) {
-            tooltipPos = { bottom: vh - rect.top + MARGIN, left };
-        } else if (spaceBelow >= IMG_H + MARGIN) {
-            tooltipPos = { top: rect.bottom + MARGIN, left };
-        } else {
-            // Not enough room either way — centre vertically in viewport
-            tooltipPos = { top: Math.max(MARGIN, (vh - IMG_H) / 2), left };
-        }
-
-        setPos(tooltipPos);
+        const tooltipPosition = getTooltipPosition(rect, viewportWidth, viewportHeight);
+        setPos(tooltipPosition);
     }, [hovered]);
 
     const tooltip = hovered && pos && createPortal(

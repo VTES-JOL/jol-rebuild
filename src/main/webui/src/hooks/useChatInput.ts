@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { encodedToDisplay, mapEncodedToDisplayIndex } from './parseMessageTokens';
+import { encodedToDisplay, mapEncodedToDisplayIndex } from '../shared/utils/parseMessageTokens.ts';
 
 export function useChatInput(initialValue = '') {
     const [draft, setDraft] = useState(initialValue); // The "true" encoded content: [card:123:Name]

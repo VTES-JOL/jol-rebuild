@@ -1,4 +1,4 @@
-import { useActiveRoute } from "./useActiveRoute"
+import { useActiveRoute } from "../../hooks/useActiveRoute.ts"
 import { NAV_ITEMS } from "./nav-config"
 import { useAuth } from "@/features/auth/AuthContext"
 import { Link } from "react-router-dom"

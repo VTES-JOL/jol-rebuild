@@ -1,4 +1,4 @@
-import type {CardSuggestion} from "@/shared/services/useCardAutocomplete.ts";
+ import type {CardSuggestion} from "@/hooks/useCardAutocomplete.ts";
 
 interface CardSuggestionsProps {
     suggestions: CardSuggestion[];

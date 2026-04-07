@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type {ReplySnapshot, ReactionDto} from '@/features/chat/useWebSocket';
+import type {ReplySnapshot, ReactionDto} from '@/hooks/useWebSocket.ts';
 import { nameColorStyle } from '@/shared/utils/avatarUtils';
 import { MessageContent } from './MessageContent';
 

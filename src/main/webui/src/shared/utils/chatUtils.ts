@@ -1,5 +1,5 @@
-import type {ChatMessage} from '@/features/chat/useWebSocket';
-import type {MessageLine} from '@/features/chat/MessageLineView';
+import type {ChatMessage} from '@/hooks/useWebSocket.ts';
+import type {MessageLine} from '@/features/chat/MessageLineView.tsx';
 
 export interface MessageGroup {
     sender: string;

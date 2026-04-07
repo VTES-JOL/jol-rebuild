@@ -1,4 +1,4 @@
-import { parseMessageTokens } from '@/features/chat/parseMessageTokens';
+import { parseMessageTokens } from '@/shared/utils/parseMessageTokens.ts';
 import { CardToken } from '@/shared/components/CardToken';
 
 export function MessageContent({ content }: { content: string }) {

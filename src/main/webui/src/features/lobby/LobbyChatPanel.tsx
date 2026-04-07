@@ -1,4 +1,4 @@
-import { useChat } from '@/features/chat/useChat';
+import { useChat } from '@/hooks/useChat.ts';
 import { ChatPanel } from '@/features/chat/ChatPanel';
 
 interface LobbyChatPanelProps {
