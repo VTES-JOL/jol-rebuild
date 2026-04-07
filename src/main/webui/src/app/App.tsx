@@ -1,5 +1,5 @@
 import AppRouter from "./router";
-import { AuthProvider } from "@/features/auth/AuthContext";
+import {AuthProvider} from "@/features/auth/AuthContext.tsx";
 
 export default function App() {
     return (

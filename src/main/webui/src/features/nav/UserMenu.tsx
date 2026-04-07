@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
-import { useAuth } from "@/features/auth/AuthContext"
+import { useAuthContext } from "@/hooks/useAuthContext.ts"
 
 export default function UserMenu() {
-    const { user, logout } = useAuth()
+    const { user, logout } = useAuthContext()
     const [open, setOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
 
@@ -65,7 +65,7 @@ export default function UserMenu() {
     )
 }
 
-function MenuLink({ to, children }: any) {
+function MenuLink({ to, children }: { to:string, children: React.ReactNode }) {
     return (
         <Link to={to} className="block px-4 py-3 hover:">
             {children}

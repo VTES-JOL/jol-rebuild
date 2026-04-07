@@ -1,12 +1,12 @@
 import AppLayout from "@/shared/layout/AppLayout.tsx";
 import {GameChatPanel} from "@/features/game/GameChatPanel.tsx";
-import {useAuth} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/hooks/useAuthContext.ts";
 import {useParams} from "react-router-dom";
 
 export default function GamePage() {
 
-    const { user, loading } = useAuth();
-    let { gameId } = useParams();
+    const { user, loading } = useAuthContext();
+    const { gameId } = useParams();
     if (!gameId) throw new Error("Missing Game ID");
 
     return (

@@ -1,11 +1,11 @@
 import AppLayout from "@/shared/layout/AppLayout.tsx";
 import ActiveGames from "./ActiveGames.tsx";
 import {LobbyChatPanel} from "@/features/lobby/LobbyChatPanel.tsx";
-import {useAuth} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/hooks/useAuthContext.ts";
 
 export default function LobbyPage() {
 
-    const { user, loading } = useAuth();
+    const { user, loading } = useAuthContext();
 
     return (
         <AppLayout background="/Locations76.jpg">

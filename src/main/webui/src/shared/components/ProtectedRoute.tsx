@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "@/features/auth/AuthContext";
+import {useAuthContext} from "@/hooks/useAuthContext.ts";
 import type { JSX } from "react";
 
 type ProtectedRouteViewProps = {
@@ -19,7 +19,7 @@ export function ProtectedRouteView({ children, loading, user }: ProtectedRouteVi
 }
 
 export default function ProtectedRoute({ children }: { children: JSX.Element }) {
-    const { user, loading } = useAuth();
+    const { user, loading } = useAuthContext();
 
     return <ProtectedRouteView loading={loading} user={user} children={children} />;
 }

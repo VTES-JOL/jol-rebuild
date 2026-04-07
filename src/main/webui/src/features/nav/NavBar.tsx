@@ -1,15 +1,11 @@
 import {Link} from "react-router-dom";
-import {useAuth} from "@/features/auth/AuthContext";
-import type {User} from "@/features/auth/types.ts";
+import {useAuthContext} from "@/hooks/useAuthContext.ts";
 import UserMenu from "./UserMenu";
 import {NAV_ITEMS} from "./nav-config.ts";
 import MobileMenu from "./MobileMenu";
 import NavItem from "./NavItem"
-
-export const hasRole = (user: User | null, role: string) => user?.roles.includes(role) ?? false
-
 export default function AppNavbar() {
-    const {user} = useAuth()
+    const {user} = useAuthContext()
 
     return (
         <div className="border-b border-slate-900 text-slate-200 bg-slate-900/30">

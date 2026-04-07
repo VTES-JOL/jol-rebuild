@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { useActiveRoute } from "../../hooks/useActiveRoute.ts"
+import { useActiveRoute } from "@/hooks/useActiveRoute.ts"
 import type { NavItem as NavItemType } from "./nav-config"
 
 export default function NavItem({ item }: { item: NavItemType }) {

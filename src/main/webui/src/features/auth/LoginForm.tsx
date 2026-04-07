@@ -1,12 +1,12 @@
 import Panel from "@/shared/components/Panel.tsx";
-import {useAuth} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/hooks/useAuthContext.ts";
 import {useNavigate} from "react-router-dom";
 import {type SubmitEvent, useState} from "react";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";
 
 export default function LoginForm() {
 
-    const {login} = useAuth();
+    const {login} = useAuthContext();
     const navigate = useNavigate();
 
     const [username, setUsername] = useState("");

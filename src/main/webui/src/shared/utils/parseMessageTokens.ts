@@ -4,7 +4,7 @@ export type GameSegment   = { type: 'game';  id: number; label: string }; // rea
 
 export type MessageSegment = TextSegment | CardSegment | GameSegment;
 
-const TOKEN_RE = /\[(card|game):(\d+):([^\]]+)\]/g;
+const TOKEN_RE = /\[(card|game):(\d+):([^\]]+)]/g;
 
 export function parseMessageTokens(content: string): MessageSegment[] {
     const segments: MessageSegment[] = [];
@@ -26,7 +26,7 @@ export function parseMessageTokens(content: string): MessageSegment[] {
     return segments;
 }
 export function encodedToDisplay(encoded: string): string {
-    return encoded.replace(/\[card:\d+:([^\]]+)\]/g, '[$1]');
+    return encoded.replace(/\[card:\d+:([^\]]+)]/g, '[$1]');
 }
 
 export function mapEncodedToDisplayIndex(encoded: string, encodedIndex: number): number {

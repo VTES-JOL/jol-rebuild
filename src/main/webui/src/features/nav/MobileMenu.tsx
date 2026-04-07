@@ -1,12 +1,12 @@
 import { useActiveRoute } from "../../hooks/useActiveRoute.ts"
 import { NAV_ITEMS } from "./nav-config"
-import { useAuth } from "@/features/auth/AuthContext"
+import { useAuthContext } from "@/hooks/useAuthContext.ts"
 import { Link } from "react-router-dom"
 import {useState} from "react";
 
 export default function MobileMenu() {
     const [open, setOpen] = useState(false)
-    const { user } = useAuth()
+    const { user } = useAuthContext()
     const { isActive } = useActiveRoute()
 
     return (

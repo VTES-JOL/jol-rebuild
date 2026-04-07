@@ -94,7 +94,8 @@ export function useWebSocket({
         connect();
 
         return () => {
-            epochRef.current++;
+            const currentEpoch = epochRef.current;
+            epochRef.current = currentEpoch + 1;
             clearReconnect();
             wsRef.current?.close();
             wsRef.current = null;

@@ -177,7 +177,7 @@ export function ChatPanelView({
                                 const val = e.target.value;
                                 const selectionStart = e.target.selectionStart ?? 0;
                                 const { newEncoded, encodedCursor } = syncFromDisplay(val, selectionStart);
-                                handleInputChange(newEncoded, encodedCursor);
+                                void handleInputChange(newEncoded, encodedCursor);
                             }}
                             onKeyDown={handleKeyDown}
                             placeholder={replyingTo ? `Reply to ${replyingTo.sender}…` : placeholder}
