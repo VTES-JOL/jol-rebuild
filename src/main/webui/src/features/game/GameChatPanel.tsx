@@ -1,5 +1,5 @@
-import { useChat } from '@/shared/services/useChat';
-import { ChatPanel } from '@/shared/components/ChatPanel';
+import { useChat } from '@/features/chat/useChat';
+import { ChatPanel } from '@/features/chat/ChatPanel';
 
 interface GameChatPanelProps {
     /** The logged-in user's username */

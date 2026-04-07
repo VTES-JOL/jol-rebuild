@@ -1,5 +1,5 @@
-import { parseMessageTokens } from '@/shared/utils/parseMessageTokens';
-import { CardToken } from './CardToken';
+import { parseMessageTokens } from '@/features/chat/parseMessageTokens';
+import { CardToken } from '@/shared/components/CardToken';
 
 export function MessageContent({ content }: { content: string }) {
     const segments = parseMessageTokens(content);

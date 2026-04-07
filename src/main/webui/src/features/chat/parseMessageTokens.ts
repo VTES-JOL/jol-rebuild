@@ -25,3 +25,10 @@ export function parseMessageTokens(content: string): MessageSegment[] {
 
     return segments;
 }
+export function encodedToDisplay(encoded: string): string {
+    return encoded.replace(/\[card:\d+:([^\]]+)\]/g, '[$1]');
+}
+
+export function mapEncodedToDisplayIndex(encoded: string, encodedIndex: number): number {
+    return encodedToDisplay(encoded.slice(0, encodedIndex)).length;
+}

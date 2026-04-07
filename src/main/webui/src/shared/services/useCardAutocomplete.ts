@@ -1,12 +1,12 @@
 import { useState, useCallback, useRef } from 'react';
 
-interface UseCardAutocompleteOptions {
-    onComplete: (newValue: string, newCursorPos: number) => void;
-}
-
 export interface CardSuggestion {
     id: number;
     name: string;
+}
+
+interface UseCardAutocompleteOptions {
+    onComplete: (newValue: string, newCursorPos: number) => void;
 }
 
 export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) {
@@ -106,12 +106,4 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
     }, [isOpen, suggestions, activeIndex, confirmSelection]);
 
     return { suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown, confirmSelection };
-}
-
-export function encodedToDisplay(encoded: string): string {
-    return encoded.replace(/\[card:\d+:([^\]]+)\]/g, '[$1]');
-}
-
-export function mapEncodedToDisplayIndex(encoded: string, encodedIndex: number): number {
-    return encodedToDisplay(encoded.slice(0, encodedIndex)).length;
 }
