@@ -1,5 +1,6 @@
 import type {ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import { nameColorStyle } from '@/shared/utils/avatarUtils';
+import {MessageContent} from "@/features/chat/MessageContent.tsx";
 
 interface ReplyBannerProps {
     replyTo: ReplySnapshot;
@@ -14,7 +15,7 @@ export function ReplyBanner({ replyTo, onCancel }: ReplyBannerProps) {
                 <span className="font-medium" style={nameColorStyle(replyTo.sender)}>
                     {replyTo.sender}{' '}
                 </span>
-                <span className="text-slate-400 truncate">{replyTo.content}</span>
+                <MessageContent className={"text-slate-400 truncate"} content={replyTo.content} />
             </div>
             <button
                 onClick={onCancel}
