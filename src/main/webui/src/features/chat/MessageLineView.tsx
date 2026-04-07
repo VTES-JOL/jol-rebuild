@@ -57,10 +57,10 @@ function ReplyQuote({ replyTo, onJumpTo }: { replyTo: ReplySnapshot; onJumpTo: (
         >
             <div className="w-0.5 rounded-full bg-indigo-400/40 group-hover:bg-indigo-400/70 transition-colors shrink-0" />
             <div className="flex-1 min-w-0 pl-2">
-                <span className="text-[11px] font-medium" style={nameColorStyle(replyTo.sender)}>
+                <span className="text-[11px] font-medium pe-2" style={nameColorStyle(replyTo.sender)}>
                     {replyTo.sender}
                 </span>
-                <p className="text-[11px] text-slate-400 truncate leading-tight">{replyTo.content}</p>
+                <MessageContent className={"text-[11px] text-slate-400 truncate leading-tight"} content={replyTo.content}/>
             </div>
         </button>
     );

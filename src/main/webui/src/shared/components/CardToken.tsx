@@ -55,7 +55,7 @@ export function CardToken({ id, label }: { id: number; label: string }) {
 
     const tooltip = hovered && pos && createPortal(
         <div
-            className="fixed z-[9999] pointer-events-none
+            className="fixed z-9999 pointer-events-none
                        rounded-lg border border-white/10 shadow-2xl overflow-hidden bg-slate-900"
             style={{
                 width: IMG_W,

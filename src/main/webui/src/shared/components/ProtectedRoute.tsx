@@ -1,10 +1,14 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthContext";
-import type {JSX} from "react";
+import type { JSX } from "react";
 
-export default function ProtectedRoute({ children }: { children: JSX.Element }) {
-    const { user, loading } = useAuth();
+type ProtectedRouteViewProps = {
+    children: JSX.Element;
+    loading: boolean;
+    user: unknown | null;
+};
 
+export function ProtectedRouteView({ children, loading, user }: ProtectedRouteViewProps) {
     if (loading) return <div>Loading...</div>;
 
     if (!user) {
@@ -12,4 +16,10 @@ export default function ProtectedRoute({ children }: { children: JSX.Element }) 
     }
 
     return children;
+}
+
+export default function ProtectedRoute({ children }: { children: JSX.Element }) {
+    const { user, loading } = useAuth();
+
+    return <ProtectedRouteView loading={loading} user={user} children={children} />;
 }

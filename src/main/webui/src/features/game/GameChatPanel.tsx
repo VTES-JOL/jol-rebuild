@@ -1,5 +1,4 @@
-import { useChat } from '@/hooks/useChat.ts';
-import { ChatPanel } from '@/features/chat/ChatPanel';
+import { ChatPanel } from '@/features/chat/ChatPanel.tsx';
 
 interface GameChatPanelProps {
     /** The logged-in user's username */
@@ -14,16 +13,11 @@ export function GameChatPanel({ username, gameId }: GameChatPanelProps) {
     const wsBaseUrl = `${protocol}//${window.location.host}`;
     const url = `${wsBaseUrl}/ws/game/${encodeURIComponent(gameId)}`;
 
-    const { messages, status, send, react } = useChat({ url, username });
-
     return (
         <ChatPanel
             title="Game chat"
-            messages={messages}
-            status={status}
+            url={url}
             currentUser={username}
-            onSend={send}
-            onReact={react}
             enableReactions={false}
             enableReply={false}
             placeholder="Chat with your opponents…"

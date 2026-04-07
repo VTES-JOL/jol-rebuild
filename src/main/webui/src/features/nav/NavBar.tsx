@@ -12,7 +12,7 @@ export default function AppNavbar() {
     const {user} = useAuth()
 
     return (
-        <div className="border-b border-slate-800 text-slate-200 bg-slate-800/30">
+        <div className="border-b border-slate-900 text-slate-200 bg-slate-900/30">
             <div className="h-14 px-6 flex items-center gap-8">
 
                 {/* mobile hamburger */}
