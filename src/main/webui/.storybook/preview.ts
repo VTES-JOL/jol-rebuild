@@ -1,10 +1,10 @@
-import { withThemeByDataAttribute } from '@storybook/addon-themes';
+import { withThemeByClassName } from '@storybook/addon-themes';
 import '../src/index.css';
 
 export const decorators = [
-  withThemeByDataAttribute({
+  withThemeByClassName({
     themes: {
-      light: 'light',
+      light: '',
       dark: 'dark',
     },
     defaultTheme: 'light',

@@ -19,9 +19,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         suggestions: [
-            {name: 'Fireball', id: 0},
-            {name: 'Frost Nova', id: 1},
-            {name: 'Ancient Dragon', id: 2},
+            {name: 'Abbot', id: 100006},
+            {name: 'Art Scam', id: 100099},
+            {name: 'Arcanum Chapterhouse, Alexandria', id: 100082},
         ],
         activeIndex: 0,
         onSelect: fn(),
@@ -31,9 +31,9 @@ export const Default: Story = {
 export const ActiveMiddle: Story = {
     args: {
         suggestions: [
-            {name: 'Fireball', id: 0},
-            {name: 'Frost Nova', id: 1},
-            {name: 'Ancient Dragon', id: 2},
+            {name: 'Abbot', id: 100006},
+            {name: 'Art Scam', id: 100099},
+            {name: 'Arcanum Chapterhouse, Alexandria', id: 100082},
         ],
         activeIndex: 1,
         onSelect: fn(),
