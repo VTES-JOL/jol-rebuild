@@ -39,7 +39,7 @@ public class GameControllerTest {
         GameController.GameCreateCommand gameCreateCommand = new GameController.GameCreateCommand("Test Game");
         given().body(gameCreateCommand)
                 .contentType(MediaType.APPLICATION_JSON)
-                .post("/games")
+                .post("/api/games")
                 .then()
                 .statusCode(HttpStatus.SC_CREATED);
     }
@@ -53,7 +53,7 @@ public class GameControllerTest {
         GameController.GameCreateCommand gameCreateCommand = new GameController.GameCreateCommand("Test Game");
         given().body(gameCreateCommand)
                 .contentType(MediaType.APPLICATION_JSON)
-                .post("/games")
+                .post("/api/games")
                 .then()
                 .statusCode(HttpStatus.SC_FORBIDDEN);
     }
