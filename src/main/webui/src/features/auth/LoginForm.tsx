@@ -22,23 +22,23 @@ export default function LoginForm() {
     }
 
     return (
-        <HeroLayout background={"https://static.deckserver.net/assets/images/Locations52.jpg"}>
+        <HeroLayout>
             <Panel title={"Login"} className={"w-1/4"}>
                 <form className="space-y-4 p-4" onSubmit={handleSubmit}>
                     <input
-                        className="w-full px-4 py-2 border border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30"
                         value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username"/>
                     <input
-                        className="w-full px-4 py-2 border border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30"
                         type="password" value={password} onChange={(e) => setPassword(e.target.value)}
                         placeholder="password"/>
 
-                    {error && <p className="text-red-400 text-sm">{error}</p>}
+                    {error && <p className="text-blood text-sm">{error}</p>}
 
-                    <button type={"submit"} className="w-full bg-blue-500 text-white py-2 rounded">Login</button>
+                    <button type={"submit"} className="w-full bg-accent text-surface py-2 rounded hover:bg-accent-dim transition-colors">Login</button>
 
-                    <div className={"text-gray-200 mx-auto text-center w-4/5"}>Need an account? <a
-                        className={"underline hover:text-blue-500"} onClick={() => navigate("/register")}>Register
+                    <div className="text-ink-muted mx-auto text-center w-4/5">Need an account? <a
+                        className="underline hover:text-accent cursor-pointer" onClick={() => navigate("/register")}>Register
                         here</a></div>
 
                 </form>

@@ -13,7 +13,7 @@ export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSugg
         <ul
             role="listbox"
             className="absolute bottom-full mb-1 left-0 right-0 z-50
-                       bg-slate-800 border border-white/10 rounded-lg
+                       bg-panel/90 backdrop-blur-sm border border-line/60 rounded-lg
                        shadow-xl overflow-hidden"
         >
             {suggestions.map((card, i) => (
@@ -28,14 +28,14 @@ export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSugg
                     className={[
                         'px-3 py-2 text-sm cursor-pointer transition-colors duration-75',
                         i === activeIndex
-                            ? 'bg-indigo-500/30 text-indigo-200'
-                            : 'text-gray-300 hover:bg-white/5',
+                            ? 'bg-arcane/20 text-arcane-soft'
+                            : 'text-ink-secondary hover:bg-hover/50',
                     ].join(' ')}
                 >
                     {card.name}
                 </li>
             ))}
-            <li className="px-3 py-1 text-[10px] text-slate-500 border-t border-white/5">
+            <li className="px-3 py-1 text-[10px] text-ink-muted border-t border-line/40">
                 ↑↓ navigate · Tab/Enter select · Esc dismiss
             </li>
         </ul>

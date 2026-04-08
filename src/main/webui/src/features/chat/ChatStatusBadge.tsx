@@ -5,12 +5,12 @@ type Props = {
 export function ChatStatusBadge({ status }: Props) {
     const color =
         status === 'connected'
-            ? 'text-emerald-400'
+            ? 'text-online'
             : status === 'connecting'
-                ? 'text-amber-400'
+                ? 'text-away'
                 : status === 'error'
-                    ? 'text-red-400'
-                    : 'text-slate-400';
+                    ? 'text-blood'
+                    : 'text-offline';
 
     return <span className={`text-xs ${color}`}>{status}</span>;
 }

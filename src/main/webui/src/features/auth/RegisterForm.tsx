@@ -29,34 +29,34 @@ export default function RegisterForm() {
     }
 
     return (
-        <HeroLayout background={"https://static.deckserver.net/assets/images/Locations52.jpg"}>
+        <HeroLayout>
             <Panel title={"Register"} className={"w-1/4"}>
                 <form className="space-y-4 p-4" onSubmit={handleRegister}>
                     <input
-                        className="w-full px-4 py-2 border border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30"
                         value={username} required onChange={(e) => setUsername(e.target.value)} placeholder="Username"/>
-                    {fieldErrors.username && <p className="text-red-400 text-sm">{fieldErrors.username}</p>}
+                    {fieldErrors.username && <p className="text-blood text-sm">{fieldErrors.username}</p>}
 
                     <input
-                        className="w-full px-4 py-2 border border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30"
                         type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"/>
-                    {fieldErrors.password && <p className="text-red-400 text-sm">{fieldErrors.password}</p>}
+                    {fieldErrors.password && <p className="text-blood text-sm">{fieldErrors.password}</p>}
 
                     <input
-                        className="w-full px-4 py-2 border border-slate-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30"
                         type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                         placeholder="Email Address"/>
-                    {fieldErrors.email && <p className="text-red-400 text-sm">{fieldErrors.email}</p>}
+                    {fieldErrors.email && <p className="text-blood text-sm">{fieldErrors.email}</p>}
 
-                    {formError && <p className="text-red-400 text-sm">{formError}</p>}
+                    {formError && <p className="text-blood text-sm">{formError}</p>}
 
                     <button
-                        className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition duration-200">Register
+                        className="w-full bg-accent text-surface py-2 rounded hover:bg-accent-dim transition-colors">Register
                     </button>
 
-                    <div className={"text-gray-200 mx-auto text-center w-4/5"}>Already have an account? <a
-                        className={"underline hover:text-green-500"} onClick={() => navigate("/login")}>Login here</a>
+                    <div className="text-ink-muted mx-auto text-center w-4/5">Already have an account? <a
+                        className="underline hover:text-accent cursor-pointer" onClick={() => navigate("/login")}>Login here</a>
                     </div>
                 </form>
             </Panel>

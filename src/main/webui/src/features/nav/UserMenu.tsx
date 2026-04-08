@@ -40,12 +40,12 @@ export default function UserMenu() {
             </button>
 
             {open && (
-                <div className="absolute right-0 mt-2 w-64 z-20 bg-slate-200 text-black rounded-xl shadow-xl overflow-hidden">
+                <div className="absolute right-0 mt-2 w-64 z-50 bg-surface/95 backdrop-blur-sm border border-line/60 text-ink rounded-xl shadow-lg overflow-hidden">
 
                     {/* header */}
-                    <div className="px-4 py-3 border-b">
-                        <div className="font-semibold">{user.username}</div>
-                        <div className="text-sm text-slate-500">{user.email}</div>
+                    <div className="px-4 py-3 border-b border-line/60">
+                        <div className="font-semibold text-ink">{user.username}</div>
+                        <div className="text-sm text-ink-muted">{user.email}</div>
                     </div>
 
                     {/* links */}
@@ -56,9 +56,9 @@ export default function UserMenu() {
                         <MenuLink to="/admin">Admin Panel</MenuLink>
                     )}
 
-                    <div className="border-t" />
+                    <div className="border-t border-line/60" />
 
-                    <button onClick={logout} className="w-full text-left px-4 py-3 hover:">Logout</button>
+                    <button onClick={logout} className="w-full text-left px-4 py-3 text-blood hover:bg-hover transition-colors">Logout</button>
                 </div>
             )}
         </div>
@@ -67,7 +67,7 @@ export default function UserMenu() {
 
 function MenuLink({ to, children }: { to:string, children: React.ReactNode }) {
     return (
-        <Link to={to} className="block px-4 py-3 hover:">
+        <Link to={to} className="block px-4 py-3 text-ink hover:bg-hover transition-colors">
             {children}
         </Link>
     )
@@ -75,7 +75,7 @@ function MenuLink({ to, children }: { to:string, children: React.ReactNode }) {
 
 function Avatar({ username }: { username: string }) {
     return (
-        <div className="h-8 w-8 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold">
+        <div className="h-8 w-8 rounded-full bg-accent text-surface flex items-center justify-center font-bold">
             {username[0].toUpperCase()}
         </div>
     )

@@ -9,17 +9,17 @@ interface ReplyBannerProps {
 
 export function ReplyBanner({ replyTo, onCancel }: ReplyBannerProps) {
     return (
-        <div className="flex items-center gap-2 px-3 py-1.5 border-t border-white/10 bg-white/5 text-xs text-slate-300">
-            <div className="w-0.5 self-stretch rounded-full bg-indigo-400/60 shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-1.5 border-t border-line/60 bg-hover/30 text-xs text-ink-secondary">
+            <div className="w-0.5 self-stretch rounded-full bg-accent-soft/60 shrink-0" />
             <div className="flex-1 min-w-0">
                 <span className="font-medium" style={nameColorStyle(replyTo.sender)}>
                     {replyTo.sender}{' '}
                 </span>
-                <MessageContent className={"text-slate-400 truncate"} content={replyTo.content} />
+                <MessageContent className={"text-ink-muted truncate"} content={replyTo.content} />
             </div>
             <button
                 onClick={onCancel}
-                className="shrink-0 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer bg-transparent border-none text-sm leading-none"
+                className="shrink-0 text-ink-muted hover:text-ink transition-colors cursor-pointer bg-transparent border-none text-sm leading-none"
                 title="Cancel reply"
                 aria-label="Cancel reply"
             >
@@ -32,9 +32,9 @@ export function ReplyBanner({ replyTo, onCancel }: ReplyBannerProps) {
 export function TimestampDivider({ label }: { label: string }) {
     return (
         <div className="flex items-center gap-2 my-2">
-            <div className="flex-1 h-px bg-slate-200/10" />
-            <span className="text-sm text-slate-300 whitespace-nowrap">{label}</span>
-            <div className="flex-1 h-px bg-slate-200/10" />
+            <div className="flex-1 h-px bg-line/50" />
+            <span className="text-sm text-ink-muted whitespace-nowrap">{label}</span>
+            <div className="flex-1 h-px bg-line/50" />
         </div>
     );
 }

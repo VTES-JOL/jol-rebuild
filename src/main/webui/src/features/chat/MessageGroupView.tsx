@@ -15,7 +15,7 @@ function Avatar({ name, showLine }: { name: string; showLine: boolean }) {
             >
                 {initials(name)}
             </div>
-            {showLine && <div className="w-px flex-1 bg-white/5 mt-1" />}
+            {showLine && <div className="w-px flex-1 bg-line/40 mt-1" />}
         </div>
     );
 }
@@ -52,7 +52,7 @@ export const MessageGroupView = React.memo(function MessageGroupView({
                         {group.sender}
                     </span>
                     {group.shortTime && (
-                        <span className="text-[10px] text-slate-300 cursor-default">{group.shortTime}</span>
+                        <span className="text-[10px] text-ink-muted cursor-default">{group.shortTime}</span>
                     )}
                 </div>
                 {group.lines.map((line, i) => (

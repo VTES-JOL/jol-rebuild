@@ -56,7 +56,7 @@ export function CardToken({ id, label }: { id: number; label: string }) {
     const tooltip = hovered && pos && createPortal(
         <div
             className="fixed z-9999 pointer-events-none
-                       rounded-lg border border-white/10 shadow-2xl overflow-hidden bg-slate-900"
+                       rounded-lg border border-line/60 shadow-2xl overflow-hidden bg-panel/95 backdrop-blur-sm"
             style={{
                 width: IMG_W,
                 top: pos.top,
@@ -83,9 +83,9 @@ export function CardToken({ id, label }: { id: number; label: string }) {
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
                 className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5
-                           rounded bg-indigo-500/20 border border-indigo-400/30
-                           text-indigo-300 text-xs font-medium cursor-default
-                           hover:bg-indigo-500/30 hover:border-indigo-400/50
+                           rounded bg-arcane/20 border border-arcane/30
+                           text-arcane-soft text-xs font-medium cursor-default
+                           hover:bg-arcane/30 hover:border-arcane/50
                            transition-colors"
             >
                 {label}

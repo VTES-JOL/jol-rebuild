@@ -35,8 +35,8 @@ function ReactionPills({ reactions, currentUser, onReact, disabled }: ReactionPi
                         className={[
                             'flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs border transition-colors cursor-pointer',
                             mine
-                                ? 'bg-indigo-500/20 border-indigo-400/40 text-indigo-300'
-                                : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10',
+                                ? 'bg-arcane/20 border-arcane/40 text-arcane-soft'
+                                : 'bg-hover/50 border-line text-ink-secondary hover:bg-hover',
                             disabled ? 'opacity-50 cursor-not-allowed' : '',
                         ].join(' ')}
                     >
@@ -55,12 +55,12 @@ function ReplyQuote({ replyTo, onJumpTo }: { replyTo: ReplySnapshot; onJumpTo: (
             onClick={() => onJumpTo(replyTo.id)}
             className="flex items-stretch gap-0 mb-1.5 w-full text-left cursor-pointer group"
         >
-            <div className="w-0.5 rounded-full bg-indigo-400/40 group-hover:bg-indigo-400/70 transition-colors shrink-0" />
+            <div className="w-0.5 rounded-full bg-accent-soft/40 group-hover:bg-accent-soft/70 transition-colors shrink-0" />
             <div className="flex-1 min-w-0 pl-2">
                 <span className="text-[11px] font-medium pe-2" style={nameColorStyle(replyTo.sender)}>
                     {replyTo.sender}
                 </span>
-                <MessageContent className={"text-[11px] text-slate-400 truncate leading-tight"} content={replyTo.content}/>
+                <MessageContent className={"text-[11px] text-ink-muted truncate leading-tight"} content={replyTo.content}/>
             </div>
         </button>
     );
@@ -95,8 +95,7 @@ export const MessageLineView = React.memo(function MessageLineView({
 
     return (
         <div
-            className="relative group rounded transition-colors duration-100 -mx-1.5 px-1.5"
-            style={{ background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent' }}
+            className={`relative group rounded transition-colors duration-100 -mx-1.5 px-1.5 ${hovered ? 'bg-hover/30' : ''}`}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
@@ -119,7 +118,7 @@ export const MessageLineView = React.memo(function MessageLineView({
 
             {hovered && !disabled && (
                 <div
-                    className="absolute -top-3 right-0 flex items-center bg-slate-800 border border-white/10 rounded-md shadow-lg z-20 divide-x divide-white/10">
+                    className="absolute -top-3 right-0 flex items-center bg-panel/90 backdrop-blur-sm border border-line/60 rounded-md shadow-lg z-20 divide-x divide-line/60">
                     {enableReactions && (
                         <div className="flex items-center gap-0 px-0.5">
                             {EMOJI_PALETTE.map(e => (
@@ -138,7 +137,7 @@ export const MessageLineView = React.memo(function MessageLineView({
                     {enableReply && (
                         <button
                             onClick={() => onReply({ id: line.id, sender, content: line.content })}
-                            className="flex items-center justify-center w-6 h-6 rounded text-slate-400 hover:bg-white/10 hover:text-slate-200 transition-colors cursor-pointer text-sm mx-0.5"
+                            className="flex items-center justify-center w-6 h-6 rounded text-ink-muted hover:bg-hover hover:text-ink transition-colors cursor-pointer text-sm mx-0.5"
                             title="Reply"
                             aria-label="Reply to message"
                         >

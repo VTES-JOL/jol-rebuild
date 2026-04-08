@@ -73,6 +73,11 @@
     --offline: #6a6070;
 }
 
+/* — Global base styles — */
+html, body, #root {
+    height: 100%;
+}
+
 @theme inline {
     --font-titillium: "Titillium Web", sans-serif;
 

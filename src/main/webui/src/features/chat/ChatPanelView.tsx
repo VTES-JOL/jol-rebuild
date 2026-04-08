@@ -107,14 +107,14 @@ export function ChatPanelView({
                         style={{ background: statusInfo.color }}
                         title={statusInfo.label}
                     />
-                    <span className="text-gray-200">{statusInfo.label}</span>
+                    <span className="text-ink-secondary">{statusInfo.label}</span>
                 </div>
             }
         >
             <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex-1 min-h-0 overflow-y-auto py-2 px-3">
                     {messages.length === 0 && (
-                        <div className="mt-4 text-center text-lg text-gray-200">
+                        <div className="mt-4 text-center text-lg text-ink-muted">
                             No messages yet. Say hello!
                         </div>
                     )}
@@ -158,7 +158,7 @@ export function ChatPanelView({
                     />
                 )}
 
-                <div className="flex items-center gap-2 border-t border-white/10">
+                <div className="flex items-center gap-2 border-t border-line/60">
                     <div className="relative min-w-0 flex-1">
                         <CardSuggestions
                             suggestions={isOpen ? suggestions : []}
@@ -171,7 +171,7 @@ export function ChatPanelView({
                         />
                         <input
                             ref={inputRef}
-                            className="w-full rounded-lg border border-white/10 bg-transparent p-2 text-sm text-gray-200 outline-none placeholder:text-gray-500 disabled:opacity-50"
+                            className="w-full rounded-lg border border-line/60 bg-transparent p-2 text-sm text-ink outline-none placeholder:text-ink-muted disabled:opacity-50"
                             value={displayValue}
                             onChange={e => {
                                 const val = e.target.value;
@@ -186,7 +186,7 @@ export function ChatPanelView({
                         />
                     </div>
                     <button
-                        className="cursor-pointer rounded-lg bg-slate-500/50 px-3 py-1.5 text-sm text-white transition-opacity duration-75 hover:bg-slate-700/50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="cursor-pointer rounded-lg bg-accent px-3 py-1.5 text-sm text-surface transition-colors hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
                         onClick={handleSend}
                         disabled={!connected || !draft.trim()}
                     >

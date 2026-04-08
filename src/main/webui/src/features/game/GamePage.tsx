@@ -10,7 +10,7 @@ export default function GamePage() {
     if (!gameId) throw new Error("Missing Game ID");
 
     return (
-        <AppLayout background="/Locations76.jpg">
+        <AppLayout>
             {!loading && user && (<GameChatPanel username={user.username} gameId={gameId} />)}
         </AppLayout>
     )
