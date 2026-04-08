@@ -2,38 +2,106 @@
 @import "tailwindcss";
 
 :root {
-    --background: rgb(244 239 230);
-    --surface: rgb(228 208 196);
-    --surface-header: rgb(214 186 170);
-    --card: rgb(255 255 255);
-    --script: rgb(44 42 38);
-    --muted: rgb(107 100 92);
-    --border: rgb(152 145 129);
-    --accent: rgb(122 31 31);
-    --accent-soft: rgb(239 226 226);
+    /* — Backgrounds — */
+    --base:    #f5f0eb;   /* page canvas — warm parchment           */
+    --panel:   #ede8e2;   /* sidebars, navbars, right panels         */
+    --surface: #faf8f5;   /* cards, inputs, chat bubbles             */
+    --hover:   #e8e1d8;   /* hover states, progress track bg         */
+
+    /* — Text — */
+    --ink:           #1e1410;   /* headings, names, active labels    */
+    --ink-secondary: #5a4838;   /* body copy, chat messages          */
+    --ink-muted:     #9a8878;   /* timestamps, section labels, hints */
+
+    /* — Borders — */
+    --line:        rgba(100, 70, 40, 0.12);   /* default dividers    */
+    --line-accent: rgba(140, 90, 30, 0.28);   /* active / focused    */
+
+    /* — Accent ramps — */
+    --accent:      #7a3e0e;   /* burnt sienna — primary CTA, brand   */
+    --accent-dim:  #a85a1a;   /* hover / pressed states              */
+    --accent-soft: #c8834e;   /* secondary highlights, tints         */
+
+    --gold:        #8a6a00;   /* antique gold — elder / Brujah tone  */
+    --gold-soft:   #b89020;   /* willpower bars, secondary badges    */
+
+    --arcane:      #5a3680;   /* dusty purple — Ventrue / arcane     */
+    --arcane-soft: #7c5aaa;   /* humanity bars, soft highlights      */
+
+    --blood:       #7a2020;   /* blood red — vitae bars, hostiles    */
+    --blood-soft:  #9e3a3a;   /* softer red — hostile tints          */
+
+    /* — Status dots — */
+    --online:  #3d7a52;
+    --away:    #9a7a20;
+    --offline: #8a7870;
 }
 
 .dark {
-    --background: rgb(18 18 18);
-    --surface: rgb(27 27 27);
-    --card: rgb(35 35 35);
-    --script: rgb(230 224 214);
-    --muted: rgb(168 162 154);
-    --border: rgb(51 51 51);
-    --accent: rgb(200 75 75);
-    --accent-soft: rgb(58 31 31);
+    /* — Backgrounds — */
+    --base:    #0d0b0f;
+    --panel:   #13101a;
+    --surface: #1c1726;
+    --hover:   #241f31;
+
+    /* — Text — */
+    --ink:           #e8e0f0;
+    --ink-secondary: #9a8fb0;
+    --ink-muted:     #5e5570;
+
+    /* — Borders — */
+    --line:        rgba(120,  80, 200, 0.18);
+    --line-accent: rgba(160, 100, 255, 0.35);
+
+    /* — Accent ramps — */
+    --accent:      #8b4dcc;   /* arcane violet                       */
+    --accent-dim:  #6b3a9e;
+    --accent-soft: #a86cf0;
+
+    --gold:        #b8860b;
+    --gold-soft:   #d4a017;
+
+    --arcane:      #8b4dcc;   /* reuses accent in dark               */
+    --arcane-soft: #6b3a9e;
+
+    --blood:       #8c2b2b;
+    --blood-soft:  #6b1e1e;
+
+    /* — Status dots — */
+    --online:  #5c9e6e;
+    --away:    #c8960a;
+    --offline: #6a6070;
 }
 
 @theme inline {
     --font-titillium: "Titillium Web", sans-serif;
 
-    --color-background: var(--background);
+    --color-base: var(--base);
+    --color-panel: var(--panel);
     --color-surface: var(--surface);
-    --color-surface-header: var(--surface-header);
-    --color-card: var(--card);
-    --color-script: var(--script);
-    --color-muted: var(--muted);
-    --color-border: var(--border);
+    --color-hover: var(--hover);
+
+    --color-ink: var(--ink);
+    --color-ink-secondary: var(--ink-secondary);
+    --color-ink-muted: var(--ink-muted);
+
+    --color-line: var(--line);
+    --color-line-accent: var(--line-accent);
+
     --color-accent: var(--accent);
+    --color-accent-dim: var(--accent-dim);
     --color-accent-soft: var(--accent-soft);
+
+    --color-gold: var(--gold);
+    --color-gold-soft: var(--gold-soft);
+
+    --color-arcane: var(--arcane);
+    --color-arcane-soft: var(--arcane-soft);
+
+    --color-blood: var(--blood);
+    --color-blood-soft: var(--blood-soft);
+
+    --color-online: var(--online);
+    --color-away: var(--away);
+    --color-offline: var(--offline);
 }
