@@ -1,10 +1,13 @@
 package net.deckserver.jol.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
 
 @Entity
 public class Deck extends PanacheEntity {
@@ -17,6 +20,10 @@ public class Deck extends PanacheEntity {
 
     public String contents;
     public String summary;
+    public String comments;
+
+    @Column(nullable = false)
+    public Instant timestamp;
 
     public static Deck create(User user, String name, String contents, String summary) {
         Deck deck = new Deck();
@@ -24,6 +31,7 @@ public class Deck extends PanacheEntity {
         deck.name = name;
         deck.contents = contents;
         deck.summary = summary;
+        deck.timestamp = Instant.now();
         deck.persist();
         return deck;
     }
