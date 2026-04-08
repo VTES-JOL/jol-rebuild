@@ -28,7 +28,7 @@ export default function LoginForm() {
     };
 
     return (
-        <HeroLayout>
+        <HeroLayout background={"/Locations52.jpg"}>
             <Panel title="Login" className="w-full sm:w-96">
                 <form className="space-y-4 p-4" onSubmit={handleSubmit} noValidate>
 

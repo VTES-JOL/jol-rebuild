@@ -9,9 +9,9 @@ type Props = {
 
 export default function Panel({title, children, right, className}: Props) {
     return (
-        <div className={`relative flex flex-col rounded-lg border border-line/60 bg-surface/85 backdrop-blur-sm shadow-lg ${className}`}>
+        <div className={`relative z-0 flex flex-col rounded-lg border border-line/75 bg-surface/60 backdrop-blur-md shadow-lg ${className}`}>
             {/* Header */}
-            <div className="flex justify-between items-center px-4 py-2 border-b border-line/60 bg-panel/70">
+            <div className="flex justify-between items-center px-4 py-2 border-b border-line/75 bg-panel/45">
                 <h2 className="tracking-wide text-ink">{title}</h2>
                 {right}
             </div>

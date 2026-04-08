@@ -118,7 +118,7 @@ export const MessageLineView = React.memo(function MessageLineView({
 
             {hovered && !disabled && (
                 <div
-                    className="absolute -top-3 right-0 flex items-center bg-panel/90 backdrop-blur-sm border border-line/60 rounded-md shadow-lg z-20 divide-x divide-line/60">
+                    className="absolute -top-3 right-0 flex items-center bg-panel/95 border border-line/60 rounded-md shadow-lg z-20 divide-x divide-line/60">
                     {enableReactions && (
                         <div className="flex items-center gap-0 px-0.5">
                             {EMOJI_PALETTE.map(e => (

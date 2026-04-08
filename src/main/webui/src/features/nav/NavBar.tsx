@@ -10,7 +10,7 @@ export default function AppNavbar() {
 
     return (
         <div className="relative z-50 border-b border-line/60 text-ink bg-panel/70 backdrop-blur-sm">
-            <div className="h-14 px-6 flex items-center gap-8">
+            <div className="h-12 px-6 flex items-center gap-8">
 
                 {/* mobile hamburger */}
                 <MobileMenu />

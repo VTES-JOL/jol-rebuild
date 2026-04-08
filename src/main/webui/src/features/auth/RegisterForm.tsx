@@ -43,7 +43,7 @@ export default function RegisterForm() {
     const inputClass = "w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30";
 
     return (
-        <HeroLayout>
+        <HeroLayout background={"/Locations52.jpg"}>
             <Panel title="Register" className="w-full sm:w-96">
                 <form className="space-y-4 p-4" onSubmit={handleRegister} noValidate>
 
