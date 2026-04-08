@@ -86,7 +86,7 @@ export default function LoginForm() {
                         {loading ? "Signing in…" : "Login"}
                     </button>
 
-                    <p className="text-ink-muted text-center text-sm">
+                    <p className="text-ink-secondary text-center text-sm">
                         Need an account?{" "}
                         <Link to="/register" className="underline hover:text-accent">Register here</Link>
                     </p>

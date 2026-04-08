@@ -14,10 +14,14 @@ export function hueFromName(name: string): number {
 
 export function avatarStyle(name: string): React.CSSProperties {
     const hue = hueFromName(name);
-    return { background: `hsla(${hue},60%,60%,0.18)`, color: `hsl(${hue},70%,72%)` };
+    return {
+        background: `light-dark(hsla(${hue},65%,55%,0.18), hsla(${hue},60%,35%,0.40))`,
+        color:      `light-dark(hsl(${hue},68%,38%),        hsl(${hue},80%,72%))`,
+        boxShadow:  `0 0 0 1.5px light-dark(hsla(${hue},65%,45%,0.35), hsla(${hue},75%,65%,0.55)), 0 0 7px light-dark(transparent, hsla(${hue},80%,60%,0.22))`,
+    };
 }
 
 export function nameColorStyle(name: string): React.CSSProperties {
     const hue = hueFromName(name);
-    return { color: `hsl(${hue},70%,72%)` };
+    return { color: `light-dark(hsl(${hue},68%,38%), hsl(${hue},80%,72%))` };
 }

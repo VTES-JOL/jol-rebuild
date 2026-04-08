@@ -149,7 +149,7 @@ export default function RegisterForm() {
                         {loading ? "Creating account…" : "Register"}
                     </button>
 
-                    <p className="text-ink-muted text-center text-sm">
+                    <p className="text-ink-secondary text-center text-sm">
                         Already have an account?{" "}
                         <Link to="/login" className="underline hover:text-accent">Login here</Link>
                     </p>

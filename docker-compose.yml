@@ -18,7 +18,7 @@ services:
       retries: 5
 
   app:
-    image: quarkus/code-with-quarkus-jvm
+    image: jol-quarkus
     restart: unless-stopped
     ports:
       - "8080:8080"

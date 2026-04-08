@@ -2,6 +2,8 @@
 @import "tailwindcss";
 
 :root {
+    color-scheme: light;
+
     /* — Backgrounds — */
     --base:    #f5f0eb;   /* page canvas — warm parchment           */
     --panel:   #ede8e2;   /* sidebars, navbars, right panels         */
@@ -11,7 +13,7 @@
     /* — Text — */
     --ink:           #1e1410;   /* headings, names, active labels    */
     --ink-secondary: #5a4838;   /* body copy, chat messages          */
-    --ink-muted:     #9a8878;   /* timestamps, section labels, hints */
+    --ink-muted:     #7d6854;   /* timestamps, section labels, hints */
 
     /* — Borders — */
     --line:        rgba(100, 70, 40, 0.12);   /* default dividers    */
@@ -38,6 +40,8 @@
 }
 
 .dark {
+    color-scheme: dark;
+
     /* — Backgrounds — */
     --base:    #0d0b0f;
     --panel:   #13101a;
@@ -47,7 +51,7 @@
     /* — Text — */
     --ink:           #e8e0f0;
     --ink-secondary: #9a8fb0;
-    --ink-muted:     #5e5570;
+    --ink-muted:     #7d7294;
 
     /* — Borders — */
     --line:        rgba(120,  80, 200, 0.18);
