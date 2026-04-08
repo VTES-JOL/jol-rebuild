@@ -138,7 +138,7 @@ export default function DecksPage() {
     };
 
     return (
-        <AppLayout background={"/Locations14.jpg"}>
+        <AppLayout background={"/Locations23.jpg"}>
             <div className="grid grid-cols-[280px_1fr] gap-6 h-[85dvh]">
                 <DeckListPanel
                     decks={decks}

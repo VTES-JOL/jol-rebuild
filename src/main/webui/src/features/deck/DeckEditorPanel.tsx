@@ -218,7 +218,7 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, 
                 <div className="overflow-y-auto flex-1 min-h-0">
                     {groups.map(group => (
                         <div key={group.key}>
-                            <div className="flex items-center gap-2 pl-3 pr-4 py-2 bg-panel border-y border-line/50 sticky top-0 z-1">
+                            <div className="flex items-center gap-2 pl-3 pr-4 py-2 border-y border-line/50 sticky top-0 z-1">
                                 <span className="text-xs font-semibold text-ink">{group.key}</span>
                                 <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-hover border border-line/60 text-[10px] font-semibold tabular-nums text-ink-secondary leading-none">
                                     {group.total}

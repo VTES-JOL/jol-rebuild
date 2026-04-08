@@ -80,13 +80,67 @@ public class CardService {
     }
 
     public List<CardSuggestionDto> autocomplete(String q) {
-        String lower = q.toLowerCase();
-        return lookupMap.keySet().stream()
-                .filter(key -> key.toLowerCase().contains(lower))
-                .sorted(String.CASE_INSENSITIVE_ORDER)
+        String normalizedQuery = StringUtils.stripAccents(q).toLowerCase();
+
+        record Match(String displayName, Card card, int score) {}
+        Map<String, Match> best = new HashMap<>();
+
+        for (Map.Entry<String, Card> entry : lookupMap.entrySet()) {
+            String normalizedKey = StringUtils.stripAccents(entry.getKey()).toLowerCase();
+            int score = matchScore(normalizedQuery, normalizedKey);
+            if (score < 0) continue;
+
+            String displayName = canonicalName(entry.getValue());
+            Match existing = best.get(displayName);
+            if (existing == null || score < existing.score()) {
+                best.put(displayName, new Match(displayName, entry.getValue(), score));
+            }
+        }
+
+        return best.values().stream()
+                .sorted(Comparator.comparingInt(Match::score)
+                        .thenComparingInt(m -> m.displayName().length())
+                        .thenComparing(Match::displayName, String.CASE_INSENSITIVE_ORDER))
                 .limit(5)
-                .map(key -> toSuggestion(key, lookupMap.get(key)))
+                .map(m -> toSuggestion(m.displayName(), m.card()))
                 .toList();
+    }
+
+    /**
+     * Score a query against a normalized key. Lower is better.
+     * 0 = exact, 1 = word-prefix, 2 = key-prefix, 3 = contains, 4 = fuzzy-prefix, -1 = no match.
+     */
+    private int matchScore(String normalizedQuery, String normalizedKey) {
+        if (normalizedKey.equals(normalizedQuery)) return 0;
+        // Word-level prefix: any space/paren-delimited token in the key starts with the query
+        for (String token : normalizedKey.split("[\\s(]")) {
+            if (!token.isEmpty() && token.startsWith(normalizedQuery)) return 1;
+        }
+        if (normalizedKey.startsWith(normalizedQuery)) return 2;
+        if (normalizedKey.contains(normalizedQuery)) return 3;
+        // Fuzzy prefix: shared prefix of length max(query.length - 2, 4) covers accent
+        // transliterations like "sebastian" → "sebastien"
+        int fuzzyLen = Math.max(normalizedQuery.length() - 2, 4);
+        if (normalizedQuery.length() >= fuzzyLen) {
+            String queryPrefix = normalizedQuery.substring(0, fuzzyLen);
+            for (String token : normalizedKey.split("[\\s(]")) {
+                if (token.length() >= fuzzyLen && token.startsWith(queryPrefix)) return 4;
+            }
+        }
+        return -1;
+    }
+
+    private String canonicalName(Card card) {
+        if (card instanceof CryptCard c) {
+            return c.name() + cryptSuffix(c);
+        }
+        return card.name();
+    }
+
+    private String cryptSuffix(CryptCard c) {
+        return "ANY".equals(c.group())
+                ? (c.advanced() ? " (ADV)" : "")
+                : " (G" + c.group() + (c.advanced() ? " ADV" : "") + ")";
     }
 
     private CardSuggestionDto toSuggestion(String displayName, Card card) {
@@ -194,7 +248,7 @@ public class CardService {
                 : " (" + "G" + group + (advanced ? " ADV" : "") + ")";
 
         Stream.concat(
-                Stream.of(card.name()),
+                Stream.of(card.name(), StringUtils.stripAccents(card.name())),
                 card.aka().stream().flatMap(a -> Stream.of(a, StringUtils.stripAccents(a)))
         ).map(String::trim).filter(StringUtils::isNotBlank).distinct().forEach(nameVariant -> {
             lookupMap.put(nameVariant + suffix, card);
@@ -204,7 +258,7 @@ public class CardService {
 
     private void indexLibraryCard(LibraryCard card) {
         Stream.concat(
-                Stream.of(card.name()),
+                Stream.of(card.name(), StringUtils.stripAccents(card.name())),
                 card.aka().stream().flatMap(a -> Stream.of(a, StringUtils.stripAccents(a)))
         ).map(String::trim).filter(StringUtils::isNotBlank).distinct().forEach(nameVariant -> {
             lookupMap.put(nameVariant, card);
