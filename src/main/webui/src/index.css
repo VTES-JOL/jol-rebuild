@@ -1,6 +1,39 @@
 @import url("https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap");
 @import "tailwindcss";
 
-@theme {
+:root {
+    --background: rgb(244 239 230);
+    --surface: rgb(228 208 196);
+    --surface-header: rgb(214 186 170);
+    --card: rgb(255 255 255);
+    --script: rgb(44 42 38);
+    --muted: rgb(107 100 92);
+    --border: rgb(152 145 129);
+    --accent: rgb(122 31 31);
+    --accent-soft: rgb(239 226 226);
+}
+
+.dark {
+    --background: rgb(18 18 18);
+    --surface: rgb(27 27 27);
+    --card: rgb(35 35 35);
+    --script: rgb(230 224 214);
+    --muted: rgb(168 162 154);
+    --border: rgb(51 51 51);
+    --accent: rgb(200 75 75);
+    --accent-soft: rgb(58 31 31);
+}
+
+@theme inline {
     --font-titillium: "Titillium Web", sans-serif;
+
+    --color-background: var(--background);
+    --color-surface: var(--surface);
+    --color-surface-header: var(--surface-header);
+    --color-card: var(--card);
+    --color-script: var(--script);
+    --color-muted: var(--muted);
+    --color-border: var(--border);
+    --color-accent: var(--accent);
+    --color-accent-soft: var(--accent-soft);
 }
