@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, TriangleAlert } from 'lucide-react';
+import { Search, TriangleAlert, Pencil } from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import SummaryStats from '@/shared/components/SummaryStats';
 import DeckCardRow from './DeckCardRow';
@@ -7,11 +7,13 @@ import { groupEntries, computeSummary, getBannedEntries } from './deckUtils';
 import type { CardSearchResult, DeckEntry } from './types';
 
 interface Props {
-    entries: DeckEntry[];
+    title?:    string;
+    onRename?: (name: string) => void;
+    entries:     DeckEntry[];
     onIncrement: (cardId: string) => void;
     onDecrement: (cardId: string) => void;
-    onAddCard:  (result: CardSearchResult) => void;
-    onSearch:   (query: string) => Promise<CardSearchResult[]>;
+    onAddCard:   (result: CardSearchResult) => void;
+    onSearch:    (query: string) => Promise<CardSearchResult[]>;
 }
 
 function cryptHint(r: CardSearchResult): string {
@@ -19,10 +21,34 @@ function cryptHint(r: CardSearchResult): string {
     return `Crypt · G${r.group}`;
 }
 
-export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
+export default function DeckEditorPanel({ title = 'Editor', onRename, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
     const [query,       setQuery]       = useState('');
     const [results,     setResults]     = useState<CardSearchResult[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
+    const [editingName, setEditingName] = useState(false);
+    const [nameValue,   setNameValue]   = useState(title);
+    const nameInputRef = useRef<HTMLInputElement>(null);
+
+    // Keep nameValue in sync when the title prop changes (e.g. deck switched)
+    useEffect(() => { setNameValue(title); setEditingName(false); }, [title]);
+
+    const startEdit = useCallback(() => {
+        if (!onRename) return;
+        setEditingName(true);
+        setTimeout(() => nameInputRef.current?.select(), 0);
+    }, [onRename]);
+
+    const commitName = useCallback(() => {
+        const trimmed = nameValue.trim() || title;
+        setNameValue(trimmed);
+        setEditingName(false);
+        if (trimmed !== title) onRename?.(trimmed);
+    }, [nameValue, title, onRename]);
+
+    const handleNameKey = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter')  { e.preventDefault(); commitName(); }
+        if (e.key === 'Escape') { setNameValue(title); setEditingName(false); }
+    }, [commitName, title]);
 
     const debounceRef  = useRef<ReturnType<typeof setTimeout>>(undefined);
     const onSearchRef  = useRef(onSearch);
@@ -71,7 +97,26 @@ export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onA
     }, [results, activeIndex, selectResult]);
 
     return (
-        <Panel title="Editor">
+        <Panel title={
+            editingName ? (
+                <input
+                    ref={nameInputRef}
+                    value={nameValue}
+                    onChange={e => setNameValue(e.target.value)}
+                    onBlur={commitName}
+                    onKeyDown={handleNameKey}
+                    className="bg-transparent text-ink tracking-wide outline-none border-b border-line-accent w-full max-w-[220px]"
+                />
+            ) : (
+                <span
+                    onClick={startEdit}
+                    className={`tracking-wide text-ink ${onRename ? 'cursor-pointer group flex items-center gap-1.5' : ''}`}
+                >
+                    {nameValue}
+                    {onRename && <Pencil className="w-2.5 h-2.5 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity" />}
+                </span>
+            )
+        }>
             {/* Card search — ref wraps input + dropdown for outside-click detection */}
             <div ref={searchRef} className="relative border-b border-line/50">
                 <div className="flex items-center gap-1.5 px-3 py-1.5">

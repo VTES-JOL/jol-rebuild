@@ -25,5 +25,21 @@ public class DeckTest {
         assertEquals(name, deck.name);
         assertEquals(contents, deck.contents);
         assertEquals(summary, deck.summary);
+        assertNotNull(deck.timestamp);
+    }
+
+    @Test
+    @TestTransaction
+    public void findByUsername() {
+        User user1 = User.create("user1", "pass", "user1@test.com", Role.USER);
+        User user2 = User.create("user2", "pass", "user2@test.com", Role.USER);
+
+        Deck.create(user1, "Deck 1", "{}", "Summary 1");
+        Deck.create(user1, "Deck 2", "{}", "Summary 2");
+        Deck.create(user2, "Deck 3", "{}", "Summary 3");
+
+        assertEquals(2, Deck.findByUsername("user1").size());
+        assertEquals(1, Deck.findByUsername("user2").size());
+        assertEquals(0, Deck.findByUsername("nonexistent").size());
     }
 }

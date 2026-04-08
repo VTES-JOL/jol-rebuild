@@ -1,5 +1,6 @@
 package net.deckserver.jol.dto;
 
+import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 
@@ -10,11 +11,11 @@ public class GameDto {
     public GameFormat format;
     public String owner;
 
-    public GameDto(Long id, String name, Status status, GameFormat format, String owner) {
-        this.id = id;
-        this.name = name;
-        this.status = status;
-        this.format = format;
-        this.owner = owner;
+    public GameDto(Game game) {
+        this.id = game.id;
+        this.name = game.name;
+        this.status = game.status;
+        this.format = game.gameFormat;
+        this.owner = game.owner != null ? game.owner.username : null;
     }
 }

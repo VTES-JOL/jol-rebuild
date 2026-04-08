@@ -17,7 +17,7 @@ import net.deckserver.jol.enums.Visibility;
 import java.net.URI;
 import java.util.List;
 
-@Path("/games")
+@Path("/api/games")
 public class GameController {
 
     @Inject
@@ -53,7 +53,7 @@ public class GameController {
         if (game == null) {
             throw new NotFoundException();
         }
-        return new GameDto(game.id, game.name, game.status, game.gameFormat, game.owner != null ? game.owner.username : null);
+        return new GameDto(game);
     }
 
     @GET

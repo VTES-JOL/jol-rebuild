@@ -1,4 +1,4 @@
-import type { DeckEntry, DeckSummary } from './types';
+import type { DeckEntry, DeckSummary, KrcgContents } from './types';
 
 export interface CardGroup {
     key: string;
@@ -88,4 +88,53 @@ export function formatSummaryCompact(summary: DeckSummary): string {
 
 export function getBannedEntries(entries: DeckEntry[]): DeckEntry[] {
     return entries.filter(e => e.banned);
+}
+
+// ── KRCG serialisation ────────────────────────────────────────────────────────
+
+/** Serialises current entries to KRCG format (with metadata extensions for round-tripping). */
+export function toKrcgContents(entries: DeckEntry[]): KrcgContents {
+    const cryptCards = entries
+        .filter(e => e.isCrypt)
+        .map(e => ({ id: e.cardId, count: e.count, name: e.name, group: e.group, banned: e.banned, types: e.types }));
+
+    const libGroups = groupEntries(entries.filter(e => !e.isCrypt))
+        .map(g => ({
+            type: g.key,
+            count: g.total,
+            cards: g.entries.map(e => ({ id: e.cardId, count: e.count, name: e.name, banned: e.banned, types: e.types })),
+        }));
+
+    return {
+        crypt:   { count: cryptCards.reduce((s, c) => s + c.count, 0), cards: cryptCards },
+        library: { count: libGroups.reduce((s, g) => s + g.count, 0), cards: libGroups },
+    };
+}
+
+/** Deserialises KRCG contents back into DeckEntry[]. */
+export function fromKrcgContents(contents: KrcgContents): DeckEntry[] {
+    const entries: DeckEntry[] = [];
+
+    for (const c of (contents.crypt?.cards ?? [])) {
+        entries.push({
+            cardId: c.id, name: c.name, count: c.count,
+            isCrypt: true,
+            types:  c.types ?? ['Vampire'],
+            group:  c.group,
+            banned: c.banned ?? false,
+        });
+    }
+
+    for (const group of (contents.library?.cards ?? [])) {
+        for (const c of group.cards) {
+            entries.push({
+                cardId: c.id, name: c.name, count: c.count,
+                isCrypt: false,
+                types:  c.types ?? [group.type],
+                banned: c.banned ?? false,
+            });
+        }
+    }
+
+    return entries;
 }

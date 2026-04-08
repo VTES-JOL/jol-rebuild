@@ -8,7 +8,7 @@ export interface GameDto {
 
 const gameApi = {
     async getGame(id: number): Promise<GameDto> {
-        const res = await fetch(`/games/${id}`, {
+        const res = await fetch(`/api/games/${id}`, {
             credentials: "include",
         });
         if (!res.ok) {

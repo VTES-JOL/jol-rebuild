@@ -9,9 +9,10 @@ interface Props {
     selectedId?: number | null;
     onSelect?: (deck: Deck) => void;
     onNew?: () => void;
+    loadError?: string;
 }
 
-export default function DeckListPanel({ decks, selectedId = null, onSelect, onNew }: Props) {
+export default function DeckListPanel({ decks, selectedId = null, onSelect, onNew, loadError }: Props) {
     const [filter, setFilter] = useState('');
 
     const visible = filter.trim()
@@ -41,7 +42,11 @@ export default function DeckListPanel({ decks, selectedId = null, onSelect, onNe
                 />
             </div>
 
-            {decks.length === 0 ? (
+            {loadError ? (
+                <div className="flex-1 flex items-center justify-center p-8 text-center">
+                    <p className="text-sm text-blood-soft">Failed to load decks.</p>
+                </div>
+            ) : decks.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-2 p-8 text-center">
                     <p className="text-sm text-ink-muted">No decks yet.</p>
                     <button

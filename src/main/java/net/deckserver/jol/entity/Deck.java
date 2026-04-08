@@ -8,6 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 public class Deck extends PanacheEntity {
@@ -34,5 +35,9 @@ public class Deck extends PanacheEntity {
         deck.timestamp = Instant.now();
         deck.persist();
         return deck;
+    }
+
+    public static List<Deck> findByUsername(String username) {
+        return find("user.username = ?1", username).list();
     }
 }

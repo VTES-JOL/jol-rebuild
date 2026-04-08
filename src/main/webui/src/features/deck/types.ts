@@ -26,6 +26,29 @@ export interface DeckEntry {
     banned: boolean;
 }
 
+// ── KRCG deck format (with extensions for round-tripping DeckEntry) ──────────
+
+interface KrcgCard {
+    id: string;
+    count: number;
+    name: string;
+    // Extensions: stored alongside KRCG fields so we can restore DeckEntry metadata
+    group?: string;
+    banned?: boolean;
+    types?: string[];
+}
+
+interface KrcgLibraryGroup {
+    type: string;
+    count: number;
+    cards: KrcgCard[];
+}
+
+export interface KrcgContents {
+    crypt:   { count: number; cards: KrcgCard[] };
+    library: { count: number; cards: KrcgLibraryGroup[] };
+}
+
 /** Matches CardSuggestionDto from the backend /cards/autocomplete endpoint. */
 export interface CardSearchResult {
     id: string;
