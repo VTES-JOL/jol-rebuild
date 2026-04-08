@@ -1,9 +1,11 @@
 import React, {useEffect, useRef, useState} from "react"
 import {Link} from "react-router-dom"
 import {useAuthContext} from "@/hooks/useAuthContext.ts"
+import {useDarkMode} from "@/hooks/useDarkMode.ts"
 
 export default function UserMenu() {
     const { user, logout } = useAuthContext()
+    const { dark, toggle } = useDarkMode()
     const [open, setOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
 
@@ -47,6 +49,20 @@ export default function UserMenu() {
                         <div className="font-semibold text-ink">{user.username}</div>
                         <div className="text-sm text-ink-muted">{user.email}</div>
                     </div>
+
+                    {/* dark mode toggle */}
+                    <div className="flex items-center justify-between px-4 py-3">
+                        <span className="text-sm text-ink-muted">Dark mode</span>
+                        <button
+                            onClick={toggle}
+                            aria-label="Toggle dark mode"
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${dark ? "bg-accent" : "bg-hover"}`}
+                        >
+                            <span className={`inline-block h-5 w-5 rounded-full bg-surface shadow transform transition-transform duration-200 ${dark ? "translate-x-5" : "translate-x-0"}`} />
+                        </button>
+                    </div>
+
+                    <div className="border-t border-line/60" />
 
                     {/* links */}
                     <MenuLink to="/profile">Profile</MenuLink>

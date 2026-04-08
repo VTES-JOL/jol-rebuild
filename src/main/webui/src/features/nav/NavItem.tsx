@@ -12,7 +12,7 @@ export default function NavItem({ item }: { item: NavItemType }) {
             to={item.to}
             className={`
         relative flex items-center gap-2 px-1 py-1 text-sm transition-colors
-        ${active ? "text-ink" : "text-ink-muted hover:text-ink"}
+        ${active ? "text-ink" : "text-ink-secondary hover:text-ink"}
       `}
         >
             <Icon size={16} />
