@@ -45,12 +45,24 @@ export function CardToken({ id, label }: { id: number; label: string }) {
     useEffect(() => {
         if (!hovered || !spanRef.current) return;
 
-        const rect = spanRef.current.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
+        const updatePosition = () => {
+            if (!spanRef.current) return;
+            const rect = spanRef.current.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
 
-        const tooltipPosition = getTooltipPosition(rect, viewportWidth, viewportHeight);
-        setPos(tooltipPosition);
+            const tooltipPosition = getTooltipPosition(rect, viewportWidth, viewportHeight);
+            setPos(tooltipPosition);
+        };
+
+        updatePosition();
+        window.addEventListener('resize', updatePosition);
+        window.addEventListener('scroll', updatePosition, true);
+
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition, true);
+        };
     }, [hovered]);
 
     const tooltip = hovered && pos && createPortal(

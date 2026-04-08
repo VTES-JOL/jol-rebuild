@@ -11,7 +11,7 @@ export default function AppRouter() {
             <Routes>
                 <Route path="/login" element={<LoginForm/>}/>
                 <Route path="/register" element={<RegisterForm/>}/>
-                <Route path="/lobby" element={<ProtectedRoute><LobbyPage/></ProtectedRoute>}/>
+                <Route path="/" element={<ProtectedRoute><LobbyPage/></ProtectedRoute>}/>
                 <Route path="/game/:gameId" element={<GamePage/>}/>
                 <Route path="/*" element={<ProtectedRoute><LobbyPage/></ProtectedRoute>}/>
             </Routes>

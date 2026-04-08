@@ -23,7 +23,7 @@ export default function LoginForm() {
         setLoading(true);
         const ok = await login(username, password);
         setLoading(false);
-        if (ok) navigate("/lobby");
+        if (ok) navigate("/");
         else setError("Invalid username or password.");
     };
 
