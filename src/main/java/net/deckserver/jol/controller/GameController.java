@@ -36,14 +36,14 @@ public class GameController {
     @Path("/{id}")
     @Transactional
     @Authenticated
-    public Game update(@PathParam("id") Long id, GameUpdateCommand game) {
+    public GameDto update(@PathParam("id") Long id, GameUpdateCommand game) {
         Game entity = Game.findById(id);
         if (entity == null) {
             throw new NotFoundException();
         }
         entity.visibility = game.visibility;
         entity.name = game.name;
-        return entity;
+        return new GameDto(entity);
     }
 
     @GET
@@ -58,14 +58,21 @@ public class GameController {
 
     @GET
     @Path("/active")
-    public List<Game> activeGames() {
-        return Game.findActiveGames();
+    public List<GameDto> activeGames() {
+        return Game.findActiveGames().stream().map(GameDto::new).toList();
+    }
+
+    @GET
+    @Path("/active/me")
+    public List<GameDto> myGames() {
+        User user = User.findByUsername(identity.getPrincipal().getName());
+        return Game.findActiveGames(user).stream().map(GameDto::new).toList();
     }
 
     @GET
     @Path("/open")
-    public List<Game> openGames() {
-        return Game.findOpenGames();
+    public List<GameDto> openGames() {
+        return Game.findOpenGames().stream().map(GameDto::new).toList();
     }
 
     @POST

@@ -3,7 +3,7 @@ import {useAuthContext} from "@/hooks/useAuthContext.ts";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useState} from "react";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";
-import {Eye, EyeOff} from "lucide-react";
+import {Eye, EyeOff, Loader2} from "lucide-react";
 
 export default function LoginForm() {
     const {login} = useAuthContext();
@@ -81,8 +81,9 @@ export default function LoginForm() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-accent text-surface py-2 rounded hover:bg-accent-dim transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full bg-accent text-surface py-2 rounded hover:bg-accent-dim transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
+                        {loading && <Loader2 size={16} className="animate-spin"/>}
                         {loading ? "Signing in…" : "Login"}
                     </button>
 

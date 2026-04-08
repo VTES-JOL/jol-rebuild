@@ -56,4 +56,8 @@ public class Game extends PanacheEntity {
         return find("visibility = ?1 and status = ?2", Visibility.PUBLIC, Status.ACTIVE).list();
     }
 
+    public static List<Game> findActiveGames(User user) {
+        return find("from Game g left join fetch g.registrations r where g.status =?1 and r.user.id = ?2", Status.ACTIVE, user.id).list();
+    }
+
 }

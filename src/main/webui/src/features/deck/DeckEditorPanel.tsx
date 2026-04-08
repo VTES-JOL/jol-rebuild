@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, TriangleAlert, Pencil } from 'lucide-react';
+import { Search, TriangleAlert, Pencil, Trash2 } from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import SummaryStats from '@/shared/components/SummaryStats';
 import DeckCardRow from './DeckCardRow';
@@ -9,6 +9,7 @@ import type { CardSearchResult, DeckEntry } from './types';
 interface Props {
     title?:    string;
     onRename?: (name: string) => void;
+    onDelete?: () => void;
     entries:     DeckEntry[];
     onIncrement: (cardId: string) => void;
     onDecrement: (cardId: string) => void;
@@ -21,9 +22,10 @@ function cryptHint(r: CardSearchResult): string {
     return `Crypt · G${r.group}`;
 }
 
-export default function DeckEditorPanel({ title = 'Editor', onRename, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
+export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
     const [query,       setQuery]       = useState('');
     const [results,     setResults]     = useState<CardSearchResult[]>([]);
+    const [loading,     setLoading]     = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [editingName, setEditingName] = useState(false);
     const [nameValue,   setNameValue]   = useState(title);
@@ -74,11 +76,16 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, entries, o
         setQuery(value);
         setActiveIndex(0);
         clearTimeout(debounceRef.current);
-        if (!value.trim()) { setResults([]); return; }
+        if (!value.trim()) { setResults([]); setLoading(false); return; }
+        setLoading(true);
         debounceRef.current = setTimeout(async () => {
-            const r = await onSearchRef.current(value);
-            setResults(r);
-            setActiveIndex(0);
+            try {
+                const r = await onSearchRef.current(value);
+                setResults(r);
+                setActiveIndex(0);
+            } finally {
+                setLoading(false);
+            }
         }, 180);
     }, []);
 
@@ -116,11 +123,27 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, entries, o
                     {onRename && <Pencil className="w-2.5 h-2.5 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity" />}
                 </span>
             )
-        }>
+        }
+        right={
+            onDelete && (
+                <button
+                    onClick={(e) => { e.stopPropagation(); if (confirm('Delete this deck?')) onDelete(); }}
+                    title="Delete deck"
+                    className="p-1.5 rounded hover:bg-blood/10 text-ink-muted hover:text-blood transition-colors cursor-pointer"
+                >
+                    <Trash2 className="w-3.5 h-3.5" />
+                </button>
+            )
+        }
+        >
             {/* Card search — ref wraps input + dropdown for outside-click detection */}
             <div ref={searchRef} className="relative border-b border-line/50">
                 <div className="flex items-center gap-1.5 px-3 py-1.5">
-                    <Search className="w-3 h-3 shrink-0 text-ink-muted" />
+                    {loading ? (
+                        <div className="w-3 h-3 border border-accent/30 border-t-accent rounded-full animate-spin shrink-0" />
+                    ) : (
+                        <Search className="w-3 h-3 shrink-0 text-ink-muted" />
+                    )}
                     <input
                         type="text"
                         placeholder="Add card…"
@@ -160,6 +183,11 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, entries, o
                             ↑↓ navigate · Enter select · Esc dismiss
                         </li>
                     </ul>
+                )}
+                {query.trim() && !loading && results.length === 0 && (
+                    <div className="absolute top-full left-0 right-0 z-10 bg-panel/95 backdrop-blur-sm border border-line/60 border-t-0 rounded-b shadow-lg px-3 py-2 text-xs text-ink-muted">
+                        No cards found matching "{query}".
+                    </div>
                 )}
             </div>
 

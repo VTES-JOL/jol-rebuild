@@ -9,7 +9,7 @@ export function ChatStatusBadge({ status }: Props) {
             : status === 'connecting'
                 ? 'text-away'
                 : status === 'error'
-                    ? 'text-blood'
+                    ? 'text-blood-soft'
                     : 'text-offline';
 
     return <span className={`text-xs ${color}`}>{status}</span>;

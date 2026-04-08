@@ -100,6 +100,20 @@ export default function DecksPage() {
         }
     }, [selectedId]);
 
+    const handleDelete = useCallback(async () => {
+        if (selectedId == null) return;
+        try {
+            await deckApi.remove(selectedId);
+            setDecks(ds => ds.filter(d => d.id !== selectedId));
+            setSelectedId(null);
+            setEntries([]);
+            setSaveStatus('idle');
+        } catch (e) {
+            console.error('Failed to delete deck', e);
+            setSaveStatus('error');
+        }
+    }, [selectedId]);
+
     const handleAddCard = useCallback((result: CardSearchResult) => {
         isDirtyRef.current = true;
         setEntries(es => {
@@ -144,6 +158,7 @@ export default function DecksPage() {
                             <DeckEditorPanel
                                 title={selectedDeck?.name ?? 'Editor'}
                                 onRename={handleRename}
+                                onDelete={handleDelete}
                                 entries={entries}
                                 onIncrement={handleIncrement}
                                 onDecrement={handleDecrement}
