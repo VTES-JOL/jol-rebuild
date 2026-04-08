@@ -94,3 +94,55 @@ export const OldDate: Story = {
         selected: false,
     },
 };
+
+export const InvalidCrypt: Story = {
+    args: {
+        deck: {
+            id: 6,
+            name: 'Underbuilt Animalism',
+            summary: 'Crypt: 8  Library: 80  Groups: 4/5',
+            comments: 'Still filling out the crypt — needs 4 more vampires.',
+            timestamp: new Date(Date.now() - 86_400_000).toISOString(),
+        },
+        selected: false,
+    },
+};
+
+export const InvalidLibrary: Story = {
+    args: {
+        deck: {
+            id: 7,
+            name: 'Bloated Ventrue',
+            summary: 'Crypt: 13  Library: 95  Groups: 3/4',
+            comments: 'Too many library cards — needs trimming.',
+            timestamp: new Date(Date.now() - 3 * 86_400_000).toISOString(),
+        },
+        selected: false,
+    },
+};
+
+export const InvalidGroups: Story = {
+    args: {
+        deck: {
+            id: 8,
+            name: 'Mixed Groups',
+            summary: 'Crypt: 12  Library: 78  Groups: 2/4',
+            comments: 'Non-consecutive groups — G2 and G4 are not adjacent.',
+            timestamp: new Date('2025-12-01').toISOString(),
+        },
+        selected: false,
+    },
+};
+
+export const MultipleInvalid: Story = {
+    args: {
+        deck: {
+            id: 9,
+            name: 'Work in Progress',
+            summary: 'Crypt: 7  Library: 45  Groups: 1/3/5',
+            comments: 'Early draft — crypt thin, library short, groups scattered.',
+            timestamp: new Date(Date.now() - 3_600_000).toISOString(),
+        },
+        selected: false,
+    },
+};

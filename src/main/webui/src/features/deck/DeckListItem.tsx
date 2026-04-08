@@ -1,3 +1,4 @@
+import SummaryStats from '@/shared/components/SummaryStats';
 import type { Deck } from './types';
 
 interface Props {
@@ -15,22 +16,6 @@ function formatTimestamp(iso: string): string {
     return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function SummaryStats({ summary }: { summary: string }) {
-    const stats = summary.split(/\s{2,}/).map(seg => {
-        const colon = seg.indexOf(':');
-        return { label: seg.slice(0, colon).trim(), value: seg.slice(colon + 1).trim() };
-    });
-    return (
-        <div className="inline-flex items-center mt-1.5 rounded border border-line/60 bg-hover/60 divide-x divide-line/60 overflow-hidden text-[10px] leading-none tabular-nums">
-            {stats.map((stat, i) => (
-                <span key={i} className="inline-flex items-center gap-1 px-1.5 py-0.5">
-                    <span className="text-ink-muted">{stat.label}</span>
-                    <span className="text-ink-secondary font-semibold">{stat.value}</span>
-                </span>
-            ))}
-        </div>
-    );
-}
 
 export default function DeckListItem({ deck, selected = false, onClick }: Props) {
     return (
@@ -51,7 +36,7 @@ export default function DeckListItem({ deck, selected = false, onClick }: Props)
                     {formatTimestamp(deck.timestamp)}
                 </span>
             </div>
-            {deck.summary && <SummaryStats summary={deck.summary} />}
+            {deck.summary && <SummaryStats summary={deck.summary} validate className="mt-1.5" />}
             {deck.comments && (
                 <p className="text-xs text-ink-muted mt-0.5 line-clamp-1 leading-relaxed">
                     {deck.comments}

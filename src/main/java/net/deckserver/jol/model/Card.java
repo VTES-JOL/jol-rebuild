@@ -16,5 +16,5 @@ public sealed interface Card permits CryptCard, LibraryCard {
     List<String> aka();
     String cardText();
     String artist();
-    String banned();
+    boolean banned();
 }

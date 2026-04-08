@@ -27,7 +27,7 @@ public record LibraryCard(
         List<String> aka,
         String cardText,
         String artist,
-        String banned,
+        boolean banned,
         String flavorText,
         List<String> types,
         List<String> requirementClans,

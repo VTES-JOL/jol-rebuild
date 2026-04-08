@@ -19,7 +19,7 @@ public record CryptCard(
         List<String> aka,
         String cardText,
         String artist,
-        String banned,
+        boolean banned,
         CryptType type,
         String clan,
         String path,

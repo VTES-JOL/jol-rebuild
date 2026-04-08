@@ -10,7 +10,7 @@ export default function DecksPage() {
     const decks: Deck[] = [];
 
     return (
-        <AppLayout>
+        <AppLayout background={"/Locations14.jpg"}>
             <div className="grid grid-cols-[280px_1fr] gap-6 h-[85dvh]">
                 <DeckListPanel
                     decks={decks}
