@@ -14,6 +14,11 @@ interface Props {
     onSearch:   (query: string) => Promise<CardSearchResult[]>;
 }
 
+function cryptHint(r: CardSearchResult): string {
+    if (!r.group || r.group === 'ANY') return 'Crypt';
+    return `Crypt · G${r.group}`;
+}
+
 export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
     const [query,       setQuery]       = useState('');
     const [results,     setResults]     = useState<CardSearchResult[]>([]);
@@ -21,7 +26,19 @@ export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onA
 
     const debounceRef  = useRef<ReturnType<typeof setTimeout>>(undefined);
     const onSearchRef  = useRef(onSearch);
+    const searchRef    = useRef<HTMLDivElement>(null);
     useEffect(() => { onSearchRef.current = onSearch; });
+
+    // Fix 1: close dropdown on outside click
+    useEffect(() => {
+        function onClickOutside(e: MouseEvent) {
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+                setResults([]);
+            }
+        }
+        document.addEventListener('mousedown', onClickOutside);
+        return () => document.removeEventListener('mousedown', onClickOutside);
+    }, []);
 
     const summary = computeSummary(entries);
     const banned  = getBannedEntries(entries);
@@ -55,8 +72,8 @@ export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onA
 
     return (
         <Panel title="Editor">
-            {/* Card search */}
-            <div className="relative border-b border-line/50">
+            {/* Card search — ref wraps input + dropdown for outside-click detection */}
+            <div ref={searchRef} className="relative border-b border-line/50">
                 <div className="flex items-center gap-1.5 px-3 py-1.5">
                     <Search className="w-3 h-3 shrink-0 text-ink-muted" />
                     <input
@@ -75,7 +92,7 @@ export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onA
                     >
                         {results.map((r, i) => (
                             <li
-                                key={r.cardId}
+                                key={r.id}
                                 role="option"
                                 aria-selected={i === activeIndex}
                                 onMouseDown={e => { e.preventDefault(); selectResult(r); }}
@@ -88,8 +105,9 @@ export default function DeckEditorPanel({ entries, onIncrement, onDecrement, onA
                                 ].join(' ')}
                             >
                                 <span className="truncate">{r.name}</span>
+                                {/* Fix 2: ANY-group crypt cards render "Crypt", not "Crypt · GANY" */}
                                 <span className="text-[10px] text-ink-muted shrink-0">
-                                    {r.isCrypt ? `Crypt · G${r.group}` : r.types.join('/')}
+                                    {r.crypt ? cryptHint(r) : r.types.join('/')}
                                 </span>
                             </li>
                         ))}

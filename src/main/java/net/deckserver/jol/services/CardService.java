@@ -85,11 +85,27 @@ public class CardService {
                 .filter(key -> key.toLowerCase().contains(lower))
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .limit(5)
-                .map(key -> {
-                    Card card = lookupMap.get(key);
-                    return new CardSuggestionDto(card.id(), key, card instanceof CryptCard);
-                })
+                .map(key -> toSuggestion(key, lookupMap.get(key)))
                 .toList();
+    }
+
+    private CardSuggestionDto toSuggestion(String displayName, Card card) {
+        if (card instanceof CryptCard c) {
+            return new CardSuggestionDto(
+                    c.id(), displayName, true,
+                    c.group(),
+                    c.type().name().charAt(0) + c.type().name().substring(1).toLowerCase(),
+                    List.of(),
+                    c.banned()
+            );
+        }
+        LibraryCard l = (LibraryCard) card;
+        return new CardSuggestionDto(
+                l.id(), displayName, false,
+                null, null,
+                l.types(),
+                l.banned()
+        );
     }
 
     // ── Parsing ───────────────────────────────────────────────────────────────

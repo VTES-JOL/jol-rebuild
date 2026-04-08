@@ -46,14 +46,15 @@ const withBanned: DeckEntry[] = [
     ...libraryEntries,
 ];
 
-// Stub search pool
+// Stub search pool — field names match CardSuggestionDto from the backend
 const searchPool: CardSearchResult[] = [
-    { cardId: 'c-10', name: 'Lucita',                isCrypt: true,  types: ['Vampire'],         group: '3', banned: false },
-    { cardId: 'c-11', name: 'Lena Ritter',           isCrypt: true,  types: ['Vampire'],         group: '6', banned: false },
-    { cardId: 'c-12', name: 'Lorenzo Detuono',       isCrypt: true,  types: ['Vampire'],         group: '3', banned: false },
-    { cardId: 'l-20', name: 'Legal Manipulations',   isCrypt: false, types: ['Action'],                      banned: false },
-    { cardId: 'l-21', name: 'Liquidation',           isCrypt: false, types: ['Master'],                      banned: false },
-    { cardId: 'l-22', name: 'Lure of the Darkside',  isCrypt: false, types: ['Master'],                      banned: true  },
+    { id: 'c-10', name: 'Lucita',               crypt: true,  group: '3',    cryptType: 'Vampire', types: [],         banned: false },
+    { id: 'c-11', name: 'Lena Ritter',          crypt: true,  group: '6',    cryptType: 'Vampire', types: [],         banned: false },
+    { id: 'c-12', name: 'Lorenzo Detuono',      crypt: true,  group: '3',    cryptType: 'Vampire', types: [],         banned: false },
+    { id: 'c-13', name: 'Anarch Convert',       crypt: true,  group: 'ANY',  cryptType: 'Vampire', types: [],         banned: false },
+    { id: 'l-20', name: 'Legal Manipulations',  crypt: false, group: null,   cryptType: null,       types: ['Action'], banned: false },
+    { id: 'l-21', name: 'Liquidation',          crypt: false, group: null,   cryptType: null,       types: ['Master'], banned: false },
+    { id: 'l-22', name: 'Lure of the Darkside', crypt: false, group: null,   cryptType: null,       types: ['Master'], banned: true  },
 ];
 
 function mockSearch(q: string): Promise<CardSearchResult[]> {
@@ -69,9 +70,18 @@ function useDeckState(initial: DeckEntry[]) {
 
     const onAddCard = (result: CardSearchResult) =>
         setEntries(prev => {
-            const existing = prev.find(e => e.cardId === result.cardId);
-            if (existing) return prev.map(e => e.cardId === result.cardId ? { ...e, count: e.count + 1 } : e);
-            return [...prev, { ...result, count: 1 }];
+            const existing = prev.find(e => e.cardId === result.id);
+            if (existing) return prev.map(e => e.cardId === result.id ? { ...e, count: e.count + 1 } : e);
+            const newEntry: DeckEntry = {
+                cardId:  result.id,
+                name:    result.name,
+                count:   1,
+                isCrypt: result.crypt,
+                types:   result.crypt ? [result.cryptType ?? 'Vampire'] : result.types,
+                group:   result.group ?? undefined,
+                banned:  result.banned,
+            };
+            return [...prev, newEntry];
         });
 
     const onIncrement = (cardId: string) =>

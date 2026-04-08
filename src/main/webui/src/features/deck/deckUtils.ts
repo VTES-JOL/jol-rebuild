@@ -1,4 +1,4 @@
-import type { DeckEntry } from './types';
+import type { DeckEntry, DeckSummary } from './types';
 
 export interface CardGroup {
     key: string;
@@ -37,17 +37,18 @@ export function groupEntries(entries: DeckEntry[]): CardGroup[] {
 }
 
 /**
- * Computes the summary string in the format used by SummaryStats chips.
- * Returns null when the deck is empty.
+ * Computes a live DeckSummary from the current entries.
+ * Returns null only when the deck is completely empty.
+ * Always includes crypt+library counts (even 0) so validation chips remain visible.
  */
-export function computeSummary(entries: DeckEntry[]): string | null {
+export function computeSummary(entries: DeckEntry[]): DeckSummary | null {
     if (entries.length === 0) return null;
 
     const cryptEntries = entries.filter(e => e.isCrypt);
     const libEntries   = entries.filter(e => !e.isCrypt);
 
-    const cryptCount = cryptEntries.reduce((sum, e) => sum + e.count, 0);
-    const libCount   = libEntries.reduce((sum, e) => sum + e.count, 0);
+    const crypt   = cryptEntries.reduce((sum, e) => sum + e.count, 0);
+    const library = libEntries.reduce((sum, e) => sum + e.count, 0);
 
     const groups = [
         ...new Set(
@@ -57,14 +58,32 @@ export function computeSummary(entries: DeckEntry[]): string | null {
         ),
     ]
         .sort((a, b) => parseInt(a) - parseInt(b))
-        .join('/');
+        .join('/') || null;
 
-    const parts: string[] = [];
-    if (cryptCount > 0) parts.push(`Crypt: ${cryptCount}`);
-    if (libCount > 0)   parts.push(`Library: ${libCount}`);
-    if (groups)         parts.push(`Groups: ${groups}`);
+    return { crypt, library, groups };
+}
 
-    return parts.join('  ') || null;
+/**
+ * Parses the compact storage format "{crypt},{library},{groups}" into a DeckSummary.
+ * e.g. "12,80,4/5" → { crypt: 12, library: 80, groups: "4/5" }
+ *      "12,80,"    → { crypt: 12, library: 80, groups: null }
+ */
+export function parseSummary(compact: string | null): DeckSummary | null {
+    if (!compact) return null;
+    const [cryptStr, libraryStr, groupsStr] = compact.split(',');
+    return {
+        crypt:   parseInt(cryptStr,   10),
+        library: parseInt(libraryStr, 10),
+        groups:  groupsStr || null,
+    };
+}
+
+/**
+ * Serialises a DeckSummary to the compact storage format.
+ * e.g. { crypt: 12, library: 80, groups: "4/5" } → "12,80,4/5"
+ */
+export function formatSummaryCompact(summary: DeckSummary): string {
+    return `${summary.crypt},${summary.library},${summary.groups ?? ''}`;
 }
 
 export function getBannedEntries(entries: DeckEntry[]): DeckEntry[] {

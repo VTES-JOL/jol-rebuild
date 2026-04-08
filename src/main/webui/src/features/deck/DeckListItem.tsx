@@ -1,4 +1,5 @@
 import SummaryStats from '@/shared/components/SummaryStats';
+import { parseSummary } from './deckUtils';
 import type { Deck } from './types';
 
 interface Props {
@@ -36,7 +37,7 @@ export default function DeckListItem({ deck, selected = false, onClick }: Props)
                     {formatTimestamp(deck.timestamp)}
                 </span>
             </div>
-            {deck.summary && <SummaryStats summary={deck.summary} validate className="mt-1.5" />}
+            {parseSummary(deck.summary) && <SummaryStats summary={parseSummary(deck.summary)!} validate className="mt-1.5" />}
             {deck.comments && (
                 <p className="text-xs text-ink-muted mt-0.5 line-clamp-1 leading-relaxed">
                     {deck.comments}

@@ -23,28 +23,28 @@ const sampleDecks: Deck[] = [
     {
         id: 1,
         name: 'Weenie Animalism',
-        summary: 'Crypt: 12  Library: 80  Groups: 4/5',
+        summary: '12,80,4/5',
         comments: 'Fast aggravated damage with Gangrel and Nosferatu. Rush early, bleed late.',
         timestamp: new Date(Date.now() - 2 * 86_400_000).toISOString(),
     },
     {
         id: 2,
         name: 'Political Ventrue',
-        summary: 'Crypt: 13  Library: 77  Groups: 3/4',
+        summary: '13,77,3/4',
         comments: 'Vote lock with Ventrue princes and Inner Circle members.',
         timestamp: new Date(Date.now() - 86_400_000).toISOString(),
     },
     {
         id: 3,
         name: 'Ravnos Toolbox',
-        summary: 'Crypt: 12  Library: 78  Groups: 5/6',
+        summary: '12,78,5/6',
         comments: null,
         timestamp: new Date('2025-11-03').toISOString(),
     },
     {
         id: 4,
         name: 'Blood Brothers Wall',
-        summary: 'Crypt: 12  Library: 80  Groups: 3',
+        summary: '12,80,3',
         comments: 'Defensive bloat with intercept and combat ends. Very hard to rush.',
         timestamp: new Date('2025-08-14').toISOString(),
     },
@@ -105,7 +105,7 @@ export const Interactive: Story = {
 const manyDecks: Deck[] = Array.from({ length: 20 }, (_, i) => ({
     id: 100 + i,
     name: `Deck ${i + 1} — ${'ABCDEFGHIJKLMNOPQRST'[i]}`,
-    summary: i % 4 !== 3 ? `Crypt: ${10 + i % 4}  Library: ${76 + i % 6}  Groups: ${(i % 6) + 1}` : null,
+    summary: i % 4 !== 3 ? `${10 + i % 4},${76 + i % 6},${(i % 6) + 1}` : null,
     comments: i % 3 === 0 ? `Notes for deck ${i + 1} with a bit of descriptive text.` : null,
     timestamp: new Date(Date.now() - i * 3 * 86_400_000).toISOString(),
 }));

@@ -1,28 +1,33 @@
+import type { DeckSummary } from '@/features/deck/types';
+
 interface Props {
-    summary: string; // double-space delimited "Label: value  Label: value"
+    summary: DeckSummary;
     validate?: boolean;
     className?: string;
 }
 
-function isValid(label: string, value: string): boolean {
-    if (label === 'Crypt')   return parseInt(value) >= 12;
-    if (label === 'Library') { const n = parseInt(value); return n >= 60 && n <= 90; }
-    if (label === 'Groups')  {
-        const groups = value.split('/').map(Number);
-        if (groups.length > 2) return false;
-        if (groups.length === 1) return true;
-        return groups[1] === groups[0] + 1;
-    }
-    return true;
+function isValidCrypt(n: number):          boolean { return n >= 12; }
+function isValidLibrary(n: number):        boolean { return n >= 60 && n <= 90; }
+function isValidGroups(g: string | null):  boolean {
+    if (!g) return true;
+    const parts = g.split('/').map(Number);
+    if (parts.length > 2) return false;
+    if (parts.length === 1) return true;
+    return parts[1] === parts[0] + 1;
 }
 
 export default function SummaryStats({ summary, validate = false, className = '' }: Props) {
-    const stats = summary.split(/\s{2,}/).map(seg => {
-        const colon = seg.indexOf(':');
-        return { label: seg.slice(0, colon).trim(), value: seg.slice(colon + 1).trim() };
-    });
+    const cryptInvalid   = validate && !isValidCrypt(summary.crypt);
+    const libInvalid     = validate && !isValidLibrary(summary.library);
+    const groupsInvalid  = validate && !isValidGroups(summary.groups);
+    const hasError       = cryptInvalid || libInvalid || groupsInvalid;
 
-    const hasError = validate && stats.some(s => !isValid(s.label, s.value));
+    const chip = (label: string, value: string | number, invalid: boolean) => (
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 ${invalid ? 'bg-blood/10' : ''}`}>
+            <span className={invalid ? 'text-blood-soft' : 'text-ink-muted'}>{label}</span>
+            <span className={`font-semibold ${invalid ? 'text-blood-soft' : 'text-ink-secondary'}`}>{value}</span>
+        </span>
+    );
 
     return (
         <div className={[
@@ -32,15 +37,9 @@ export default function SummaryStats({ summary, validate = false, className = ''
                 : 'border-line/60 bg-hover/60 divide-x divide-line/60',
             className,
         ].join(' ')}>
-            {stats.map((stat, i) => {
-                const invalid = validate && !isValid(stat.label, stat.value);
-                return (
-                    <span key={i} className={`inline-flex items-center gap-1 px-1.5 py-0.5 ${invalid ? 'bg-blood/10' : ''}`}>
-                        <span className={invalid ? 'text-blood-soft' : 'text-ink-muted'}>{stat.label}</span>
-                        <span className={`font-semibold ${invalid ? 'text-blood-soft' : 'text-ink-secondary'}`}>{stat.value}</span>
-                    </span>
-                );
-            })}
+            {chip('Crypt',   summary.crypt,             cryptInvalid)}
+            {chip('Library', summary.library,           libInvalid)}
+            {summary.groups && chip('Groups', summary.groups, groupsInvalid)}
         </div>
     );
 }
