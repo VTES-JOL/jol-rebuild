@@ -52,7 +52,7 @@ export const WithReactions: Story = {
             lines: [
                 {
                     id: 2,
-                    content: 'I think [card:1:Fireball] is the play.',
+                    content: 'I think [card:100266:Bum\'s Rush] is the play.',
                     reactions: [
                         {emoji: '👍', senders: ['Alex', 'Sam']},
                         {emoji: '❤️', senders: ['Jill']},

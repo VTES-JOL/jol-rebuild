@@ -23,9 +23,9 @@ export default function SummaryStats({ summary, validate = false, className = ''
     const hasError       = cryptInvalid || libInvalid || groupsInvalid;
 
     const chip = (label: string, value: string | number, invalid: boolean) => (
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 ${invalid ? 'bg-blood/10' : ''}`}>
-            <span className={invalid ? 'text-blood-soft' : 'text-ink-muted'}>{label}</span>
-            <span className={`font-semibold ${invalid ? 'text-blood-soft' : 'text-ink-secondary'}`}>{value}</span>
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 ${invalid ? 'bg-blood-soft/10' : ''}`}>
+            <span className={invalid ? 'text-blood' : 'text-ink-muted'}>{label}</span>
+            <span className={`font-semibold ${invalid ? 'text-blood' : 'text-ink-secondary'}`}>{value}</span>
         </span>
     );
 

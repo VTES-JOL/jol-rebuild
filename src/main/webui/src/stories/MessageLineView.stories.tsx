@@ -64,7 +64,7 @@ export const WithReactions: Story = {
     args: {
         line: {
             id: 3,
-            content: 'I played [card:1:Fireball] and it worked.',
+            content: 'I played [card:100266:Bum\'s Rush] and it worked.',
             reactions: [
                 { emoji: '👍', senders: ['Alex', 'Jill'] },
                 { emoji: '😂', senders: ['Sam'] },

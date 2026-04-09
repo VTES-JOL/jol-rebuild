@@ -62,7 +62,7 @@ export const WithHistory: Story = {
                 type: 'CHAT',
                 id: 2,
                 sender: 'Sam',
-                content: 'I played [card:1:Fireball] earlier.',
+                content: 'I played [card:100266:Bum\'s Rush] earlier.',
                 timestamp: '2026-04-07T10:03:00Z',
                 reactions: [],
             },

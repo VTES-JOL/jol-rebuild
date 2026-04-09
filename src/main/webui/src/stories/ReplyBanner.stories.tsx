@@ -20,7 +20,7 @@ export const ReplyPreview: Story = {
         replyTo: {
             id: 100294,
             sender: 'Alex',
-            content: 'I think [card:1:Fireball] is the right play here.',
+            content: 'I think [card:100266:Bum\'s Rush] is the right play here.',
         },
         onCancel: () => {
         },

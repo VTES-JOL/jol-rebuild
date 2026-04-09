@@ -23,13 +23,13 @@ export const PlainText: Story = {
 
 export const WithTokens: Story = {
     args: {
-        content: 'I played [card:1:Fireball] and then joined [game:10:Match #10].',
+        content: 'I played [card:100266:Bum\'s Rush] and then joined [game:10:Match #10].',
     },
 };
 
 export const LongMessage: Story = {
     args: {
         content:
-            'This message is longer and includes multiple references like [card:42:Ancient Dragon] plus [game:7:Ranked Duel] to show wrapping behavior.',
+            'This message is longer and includes multiple references like [card:200349:Dmitra Ilyanova] plus [game:7:Ranked Duel] to show wrapping behavior.',
     },
 };
