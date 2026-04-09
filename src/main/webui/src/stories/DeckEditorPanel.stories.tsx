@@ -52,7 +52,7 @@ const withBanned: DeckEntry[] = [
 
 const noIcons = (id: string, crypt: boolean): CardDetailData => ({
     id, name: id, crypt,
-    types: [], group: null, banned: false,
+    types: [], group: null, banned: false, advanced: false,
     clan: null, path: null, capacity: null, disciplines: [],
     andDisciplines: [], orDisciplines: [], requirementClans: [],
     requirementPath: null, poolCost: null, bloodCost: null,
@@ -60,42 +60,42 @@ const noIcons = (id: string, crypt: boolean): CardDetailData => ({
 
 const cryptIconData: CardDetailData[] = [
     // Beckett — Gangrel, G3, cap 9: ANI AUS FOR PRO
-    { id: '200183', name: 'Beckett', crypt: true, types: ['Vampire'], group: '3', banned: false,
+    { id: '200183', name: 'Beckett', crypt: true, types: ['Vampire'], group: '3', banned: false, advanced: false,
       clan: 'Gangrel', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'FOR', 'PRO'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Hektor — Brujah antitribu, G2, cap 11: CEL POT PRE
-    { id: '200584', name: 'Hektor', crypt: true, types: ['Vampire'], group: '2', banned: false,
+    { id: '200584', name: 'Hektor', crypt: true, types: ['Vampire'], group: '2', banned: false, advanced: false,
       clan: 'Brujah antitribu', path: null, capacity: 11,
       disciplines: ['CEL', 'POT', 'PRE'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Malgorzata — Tzimisce, G2, cap 9: ANI AUS VIC
-    { id: '200905', name: 'Malgorzata', crypt: true, types: ['Vampire'], group: '2', banned: false,
+    { id: '200905', name: 'Malgorzata', crypt: true, types: ['Vampire'], group: '2', banned: false, advanced: false,
       clan: 'Tzimisce', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'VIC'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Theo Bell — Brujah antitribu, G2, cap 9: CEL POT PRE
-    { id: '201362', name: 'Theo Bell', crypt: true, types: ['Vampire'], group: '2', banned: false,
+    { id: '201362', name: 'Theo Bell', crypt: true, types: ['Vampire'], group: '2', banned: false, advanced: false,
       clan: 'Brujah antitribu', path: null, capacity: 9,
       disciplines: ['CEL', 'POT', 'PRE'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Anarch Convert — no clan, cap 1, no disciplines
-    { id: '200076', name: 'Anarch Convert', crypt: true, types: ['Vampire'], group: 'ANY', banned: false,
+    { id: '200076', name: 'Anarch Convert', crypt: true, types: ['Vampire'], group: 'ANY', banned: false, advanced: false,
       clan: null, path: null, capacity: 1,
       disciplines: [],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Zoe — Imbued, G4, cap 4: inn jud
-    { id: '201509', name: 'Zoe', crypt: true, types: ['Imbued'], group: '4', banned: false,
+    { id: '201509', name: 'Zoe', crypt: true, types: ['Imbued'], group: '4', banned: false, advanced: false,
       clan: null, path: null, capacity: 4,
       disciplines: ['inn', 'jud'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
@@ -104,73 +104,73 @@ const cryptIconData: CardDetailData[] = [
 
 const libraryIconData: CardDetailData[] = [
     // Govern the Unaligned — Action, 2 pool, DOM
-    { id: '100845', name: 'Govern the Unaligned', crypt: false, types: ['Action'], group: null, banned: false,
+    { id: '100845', name: 'Govern the Unaligned', crypt: false, types: ['Action'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['dom', 'DOM'],
       requirementClans: [], requirementPath: null, poolCost: 2, bloodCost: null },
 
     // Conditioning — Action Modifier, DOM
-    { id: '100401', name: 'Conditioning', crypt: false, types: ['Action Modifier'], group: null, banned: false,
+    { id: '100401', name: 'Conditioning', crypt: false, types: ['Action Modifier'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['DOM'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Deflection — Reaction, DOM
-    { id: '100518', name: 'Deflection', crypt: false, types: ['Reaction'], group: null, banned: false,
+    { id: '100518', name: 'Deflection', crypt: false, types: ['Reaction'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['DOM'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Freak Drive — Action Modifier, CEL
-    { id: '100788', name: 'Freak Drive', crypt: false, types: ['Action Modifier'], group: null, banned: false,
+    { id: '100788', name: 'Freak Drive', crypt: false, types: ['Action Modifier'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['CEL'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Minion Tap — Master, no discipline, 0 pool
-    { id: '101217', name: 'Minion Tap', crypt: false, types: ['Master'], group: null, banned: false,
+    { id: '101217', name: 'Minion Tap', crypt: false, types: ['Master'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Villein — Master, no discipline
-    { id: '102121', name: 'Villein', crypt: false, types: ['Master'], group: null, banned: false,
+    { id: '102121', name: 'Villein', crypt: false, types: ['Master'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Parity Shift — Political Action, 2 pool
-    { id: '101353', name: 'Parity Shift', crypt: false, types: ['Political Action'], group: null, banned: false,
+    { id: '101353', name: 'Parity Shift', crypt: false, types: ['Political Action'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: 2, bloodCost: null },
 
     // Kine Resources Contested — Political Action, 1 pool
-    { id: '101056', name: 'Kine Resources Contested', crypt: false, types: ['Political Action'], group: null, banned: false,
+    { id: '101056', name: 'Kine Resources Contested', crypt: false, types: ['Political Action'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: 1, bloodCost: null },
 
     // Taste of Vitae — Combat, no cost (gives blood)
-    { id: '101945', name: 'Taste of Vitae', crypt: false, types: ['Combat'], group: null, banned: false,
+    { id: '101945', name: 'Taste of Vitae', crypt: false, types: ['Combat'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Immortal Grapple — Combat, POT
-    { id: '100959', name: 'Immortal Grapple', crypt: false, types: ['Combat'], group: null, banned: false,
+    { id: '100959', name: 'Immortal Grapple', crypt: false, types: ['Combat'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['POT'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Punish — Action/Combat, 1 blood
-    { id: '101518', name: 'Punish', crypt: false, types: ['Action', 'Combat'], group: null, banned: false,
+    { id: '101518', name: 'Punish', crypt: false, types: ['Action', 'Combat'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: 1 },
 
     // Mylan Horseed — Ally, 3 pool
-    { id: '101261', name: 'Mylan Horseed', crypt: false, types: ['Ally'], group: null, banned: false,
+    { id: '101261', name: 'Mylan Horseed', crypt: false, types: ['Ally'], group: null, banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: 3, bloodCost: null },
@@ -180,17 +180,17 @@ const bannedLibraryIconData: CardDetailData =
     noIcons('101620', false);
 
 const invalidIconData: CardDetailData[] = [
-    { id: '200183', name: 'Beckett', crypt: true, types: ['Vampire'], group: '3', banned: false,
+    { id: '200183', name: 'Beckett', crypt: true, types: ['Vampire'], group: '3', banned: false, advanced: false,
       clan: 'Gangrel', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'FOR', 'PRO'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200424', name: 'Enkidu, The Noah', crypt: true, types: ['Vampire'], group: '4', banned: false,
+    { id: '200424', name: 'Enkidu, The Noah', crypt: true, types: ['Vampire'], group: '4', banned: false, advanced: false,
       clan: 'Gangrel', path: null, capacity: 11,
       disciplines: ['ANI', 'FOR', 'POT', 'PRO'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200905', name: 'Malgorzata', crypt: true, types: ['Vampire'], group: '2', banned: false,
+    { id: '200905', name: 'Malgorzata', crypt: true, types: ['Vampire'], group: '2', banned: false, advanced: false,
       clan: 'Tzimisce', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'VIC'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
@@ -213,25 +213,25 @@ const invalidDetailMap = new Map(invalidIconData.map(d => [d.id, d]));
 // ── Stub search pool ──────────────────────────────────────────────────────────
 
 const searchPool: CardDetailData[] = [
-    { id: '200874', name: 'Lucita',              crypt: true,  group: '3',   types: ['Vampire'], banned: false,
+    { id: '200874', name: 'Lucita',              crypt: true,  group: '3',   types: ['Vampire'], banned: false, advanced: false,
       clan: 'Lasombra', path: null, capacity: 8, disciplines: ['DOM', 'OBT', 'POT'],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200407', name: 'Elena Gutierrez',     crypt: true,  group: '6',   types: ['Vampire'], banned: false,
+    { id: '200407', name: 'Elena Gutierrez',     crypt: true,  group: '6',   types: ['Vampire'], banned: false, advanced: false,
       clan: 'Tremere', path: null, capacity: 5, disciplines: ['aus', 'tha'],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200858', name: 'Lorenzo Detuono',     crypt: true,  group: '3',   types: ['Vampire'], banned: false,
+    { id: '200858', name: 'Lorenzo Detuono',     crypt: true,  group: '3',   types: ['Vampire'], banned: false, advanced: false,
       clan: 'Giovanni', path: null, capacity: 5, disciplines: ['dom', 'nec'],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200076', name: 'Anarch Convert',      crypt: true,  group: 'ANY', types: ['Vampire'], banned: false,
+    { id: '200076', name: 'Anarch Convert',      crypt: true,  group: 'ANY', types: ['Vampire'], banned: false, advanced: false,
       clan: null, path: null, capacity: 1, disciplines: [],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '101089', name: 'Legal Manipulations', crypt: false, group: null,  types: ['Action'],  banned: false,
+    { id: '101089', name: 'Legal Manipulations', crypt: false, group: null,  types: ['Action'],  banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '101112', name: 'Liquidation',         crypt: false, group: null,  types: ['Master'],  banned: false,
+    { id: '101112', name: 'Liquidation',         crypt: false, group: null,  types: ['Master'],  banned: false, advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '101134', name: 'Lure of the Serpent', crypt: false, group: null,  types: ['Master'],  banned: true,
+    { id: '101134', name: 'Lure of the Serpent', crypt: false, group: null,  types: ['Master'],  banned: true,  advanced: false,
       clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 ];

@@ -8,8 +8,10 @@ interface Props {
 }
 
 function cryptHint(r: CardDetailData): string {
-    if (!r.group || r.group === 'ANY') return 'Crypt';
-    return `Crypt · G${r.group}`;
+    const parts: string[] = [];
+    if (r.group && r.group !== 'ANY') parts.push(`G${r.group}`);
+    if (r.advanced) parts.push('ADV');
+    return parts.length > 0 ? `Crypt · ${parts.join(' ')}` : 'Crypt';
 }
 
 export default function DeckSearchBar({ onSearch, onAddCard }: Props) {

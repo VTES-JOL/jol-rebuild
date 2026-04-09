@@ -24,6 +24,7 @@ export interface DeckEntry {
     /** Crypt only: "1"–"7" | "ANY". */
     group?: string;
     banned: boolean;
+    advanced?: boolean;
 }
 
 // ── KRCG deck format (pure — no extension fields) ────────────────────────────
@@ -58,6 +59,7 @@ export interface CardDetailData {
     types: string[];
     group: string | null;
     banned: boolean;
+    advanced: boolean;
     // Crypt display
     clan: string | null;
     path: string | null;

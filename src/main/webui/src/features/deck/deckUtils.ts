@@ -130,12 +130,13 @@ export function extractKrcgCards(contents: KrcgContents): RawKrcgCard[] {
 /** Builds a DeckEntry by merging a raw KRCG card with its fetched card detail. */
 export function enrichEntry(raw: RawKrcgCard, detail: CardDetailData | undefined): DeckEntry {
     return {
-        cardId:  raw.id,
-        name:    raw.name,
-        count:   raw.count,
-        isCrypt: raw.isCrypt,
-        types:   detail?.types  ?? (raw.isCrypt ? ['Vampire'] : []),
-        group:   detail?.group  ?? undefined,
-        banned:  detail?.banned ?? false,
+        cardId:   raw.id,
+        name:     raw.name,
+        count:    raw.count,
+        isCrypt:  raw.isCrypt,
+        types:    detail?.types    ?? (raw.isCrypt ? ['Vampire'] : []),
+        group:    detail?.group    ?? undefined,
+        banned:   detail?.banned   ?? false,
+        advanced: detail?.advanced ?? false,
     };
 }

@@ -195,13 +195,14 @@ export default function DecksPage() {
             const existing = es.find(e => e.cardId === result.id);
             if (existing) return es.map(e => e.cardId === result.id ? { ...e, count: e.count + 1 } : e);
             return [...es, {
-                cardId:  result.id,
-                name:    result.name,
-                count:   1,
-                isCrypt: result.crypt,
-                types:   result.types,
-                group:   result.group ?? undefined,
-                banned:  result.banned,
+                cardId:   result.id,
+                name:     result.name,
+                count:    1,
+                isCrypt:  result.crypt,
+                types:    result.types,
+                group:    result.group ?? undefined,
+                banned:   result.banned,
+                advanced: result.advanced,
             }];
         });
         if (!detailMapRef.current.has(result.id)) {

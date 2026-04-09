@@ -1,8 +1,11 @@
 import React, {useCallback, useRef, useState} from 'react';
 
 export interface CardSuggestion {
-    id: number;
+    id: string;
     name: string;
+    crypt: boolean;
+    group: string | null;
+    advanced: boolean;
 }
 
 interface UseCardAutocompleteOptions {

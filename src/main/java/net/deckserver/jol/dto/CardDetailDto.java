@@ -20,6 +20,7 @@ public record CardDetailDto(
         List<String> types,
         String group,
         boolean banned,
+        boolean advanced,
         // Crypt display data
         String clan,
         String path,

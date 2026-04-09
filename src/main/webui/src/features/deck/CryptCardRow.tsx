@@ -11,6 +11,13 @@ interface Props {
     onDecrement: () => void;
 }
 
+function cryptGroupHint(entry: DeckEntry): string | null {
+    const parts: string[] = [];
+    if (entry.group && entry.group !== 'ANY') parts.push(`G${entry.group}`);
+    if (entry.advanced) parts.push('ADV');
+    return parts.length > 0 ? parts.join(' ') : null;
+}
+
 export default function CryptCardRow({ entry, iconData, onIncrement, onDecrement }: Props) {
     return (
         <CardRowShell entry={entry} onIncrement={onIncrement} onDecrement={onDecrement}>
@@ -19,11 +26,16 @@ export default function CryptCardRow({ entry, iconData, onIncrement, onDecrement
                 {iconData?.clan && <ClanIcon clan={iconData.clan} size={16} />}
             </span>
 
-            {/* Name + banned marker */}
+            {/* Name + group/ADV hint + banned marker */}
             <div className="flex items-center gap-1 flex-1 min-w-0">
                 <span className={`text-xs truncate ${entry.banned ? 'text-blood-soft' : 'text-ink-secondary'}`}>
                     {entry.name}
                 </span>
+                {cryptGroupHint(entry) && (
+                    <span className="text-[9px] text-ink-muted shrink-0 tabular-nums">
+                        {cryptGroupHint(entry)}
+                    </span>
+                )}
                 {entry.banned && <TriangleAlert className="w-3 h-3 text-blood-soft shrink-0" />}
             </div>
 

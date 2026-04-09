@@ -6,6 +6,14 @@ interface CardSuggestionsProps {
     onSelect: (card: CardSuggestion) => void;
 }
 
+function cryptHint(card: CardSuggestion): string | null {
+    if (!card.crypt) return null;
+    const parts: string[] = [];
+    if (card.group && card.group !== 'ANY') parts.push(`G${card.group}`);
+    if (card.advanced) parts.push('ADV');
+    return parts.length > 0 ? `Crypt · ${parts.join(' ')}` : 'Crypt';
+}
+
 export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSuggestionsProps) {
     if (!suggestions.length) return null;
 
@@ -18,7 +26,7 @@ export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSugg
         >
             {suggestions.map((card, i) => (
                 <li
-                    key={card.name}
+                    key={card.id}
                     role="option"
                     aria-selected={i === activeIndex}
                     onMouseDown={e => {
@@ -26,13 +34,16 @@ export function CardSuggestions({ suggestions, activeIndex, onSelect }: CardSugg
                         onSelect(card);
                     }}
                     className={[
-                        'px-3 py-2 text-sm cursor-pointer transition-colors duration-75',
+                        'flex items-center justify-between gap-2 px-3 py-2 text-sm cursor-pointer transition-colors duration-75',
                         i === activeIndex
                             ? 'bg-arcane/20 text-arcane-soft'
                             : 'text-ink-secondary hover:bg-hover/50',
                     ].join(' ')}
                 >
-                    {card.name}
+                    <span className="truncate">{card.name}</span>
+                    <span className="text-[10px] text-ink-muted shrink-0">
+                        {cryptHint(card) ?? 'Library'}
+                    </span>
                 </li>
             ))}
             <li className="px-3 py-1 text-[10px] text-ink-muted border-t border-line/40">

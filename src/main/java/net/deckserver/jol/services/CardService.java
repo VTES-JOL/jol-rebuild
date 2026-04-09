@@ -272,7 +272,7 @@ public class CardService {
             List<String> types = List.of(c.type() == CryptType.IMBUED ? "Imbued" : "Vampire");
             return new CardDetailDto(
                     c.id(), c.name(), true,
-                    types, c.group(), c.banned(),
+                    types, c.group(), c.banned(), c.advanced(),
                     c.clan(), c.path(), c.capacity(), c.disciplines(),
                     List.of(), List.of(), List.of(), null, null, null
             );
@@ -280,7 +280,7 @@ public class CardService {
         LibraryCard l = (LibraryCard) card;
         return new CardDetailDto(
                 l.id(), l.name(), false,
-                l.types(), null, l.banned(),
+                l.types(), null, l.banned(), false,
                 null, null, null, List.of(),
                 l.andDisciplines(), l.orDisciplines(),
                 l.requirementClans(), l.requirementPath(),
