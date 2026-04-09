@@ -3,6 +3,8 @@ package net.deckserver.jol.controller;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import java.util.Arrays;
+import net.deckserver.jol.dto.CardIconDto;
 import net.deckserver.jol.dto.CardSuggestionDto;
 import net.deckserver.jol.model.Card;
 import net.deckserver.jol.services.CardService;
@@ -25,6 +27,13 @@ public class CardController {
     @Path("/autocomplete")
     public List<CardSuggestionDto> autocomplete(@RestQuery("q") String q) {
         return cardService.autocomplete(q);
+    }
+
+    @GET
+    @Path("/icons")
+    public List<CardIconDto> icons(@RestQuery("ids") String ids) {
+        if (ids == null || ids.isBlank()) return List.of();
+        return cardService.findIconsByIds(Arrays.asList(ids.split(",")));
     }
 
 }

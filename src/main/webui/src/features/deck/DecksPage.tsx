@@ -5,7 +5,7 @@ import DeckEditorPanel from './DeckEditorPanel';
 import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import { computeSummary, formatSummaryCompact, toKrcgContents, fromKrcgContents } from './deckUtils';
 import deckApi from './api';
-import type { Deck, DeckEntry, CardSearchResult } from './types';
+import type { CardIconData, Deck, DeckEntry, CardSearchResult } from './types';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -13,6 +13,7 @@ export default function DecksPage() {
     const [decks,           setDecks]           = useState<Deck[]>([]);
     const [selectedId,      setSelectedId]      = useState<number | null>(null);
     const [entries,         setEntries]         = useState<DeckEntry[]>([]);
+    const [iconMap,         setIconMap]         = useState<Map<string, CardIconData>>(new Map());
     const [saveStatus,      setSaveStatus]      = useState<SaveStatus>('idle');
     const [loadError,       setLoadError]       = useState<string | null>(null);
     const [entriesLoading,  setEntriesLoading]  = useState(false);
@@ -21,6 +22,8 @@ export default function DecksPage() {
     const isDirtyRef  = useRef(false);
     // Mirror of entries state accessible in callbacks without adding entries to their deps.
     const entriesRef  = useRef<DeckEntry[]>([]);
+    // Mirror of iconMap so handleAddCard can check presence without taking it as a dep.
+    const iconMapRef  = useRef<Map<string, CardIconData>>(new Map());
 
     // ── Load deck list on mount ───────────────────────────────────────────────
     useEffect(() => {
@@ -31,22 +34,26 @@ export default function DecksPage() {
 
     // ── Load contents when selection changes ─────────────────────────────────
     useEffect(() => {
-        if (selectedId == null) { setEntries([]); entriesRef.current = []; return; }
+        if (selectedId == null) { setEntries([]); entriesRef.current = []; setIconMap(new Map()); return; }
         setEntries([]);
         entriesRef.current = [];
+        setIconMap(new Map());
         setEntriesLoading(true);
         deckApi.getContents(selectedId)
-            .then(contents => {
+            .then(async contents => {
                 const loaded = fromKrcgContents(contents);
                 setEntries(loaded);
                 entriesRef.current = loaded;
+                const icons = await deckApi.cardIcons(loaded.map(e => e.cardId));
+                setIconMap(new Map(icons.map(i => [i.id, i])));
             })
             .catch(console.error)
             .finally(() => setEntriesLoading(false));
     }, [selectedId]);
 
-    // Keep ref in sync for use in callbacks that can't take entries as a dep.
+    // Keep refs in sync for use in callbacks that can't take state as a dep.
     useEffect(() => { entriesRef.current = entries; }, [entries]);
+    useEffect(() => { iconMapRef.current = iconMap;  }, [iconMap]);
 
     // ── Auto-save on entries change ──────────────────────────────────────────
     useEffect(() => {
@@ -182,6 +189,13 @@ export default function DecksPage() {
                 banned:  result.banned,
             }];
         });
+        if (!iconMapRef.current.has(result.id)) {
+            deckApi.cardIcons([result.id])
+                .then(([icon]) => {
+                    if (icon) setIconMap(m => new Map([...m, [icon.id, icon]]));
+                })
+                .catch(console.error);
+        }
     }, []);
 
     const selectedDeck = decks.find(d => d.id === selectedId);
@@ -209,6 +223,7 @@ export default function DecksPage() {
                         onRetrySave={handleRetrySave}
                         onDelete={handleDelete}
                         entries={entries}
+                        iconMap={iconMap}
                         onIncrement={handleIncrement}
                         onDecrement={handleDecrement}
                         onAddCard={handleAddCard}

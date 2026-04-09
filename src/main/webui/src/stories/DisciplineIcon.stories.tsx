@@ -34,7 +34,7 @@ export const Superior: Story = {
 const allDisciplines = [
   'abo', 'ABO', 'ani', 'ANI', 'aus', 'AUS', 'cel', 'CEL', 'chi', 'CHI',
   'dai', 'DAI', 'def', 'dem', 'DEM', 'dom', 'DOM', 'flight', 'FLIGHT', 'for', 'FOR',
-  'inn', 'jus', 'mal', 'MAL', 'mar', 'mel', 'MEL', 'myt', 'MYT',
+  'inn', 'jud', 'mal', 'MAL', 'mar', 'mel', 'MEL', 'myt', 'MYT',
   'nec', 'NEC', 'obe', 'OBE', 'obf', 'OBF', 'obl', 'OBL', 'obt', 'OBT',
   'pot', 'POT', 'pre', 'PRE', 'pro', 'PRO', 'qui', 'QUI', 'red', 'san', 'SAN',
   'ser', 'SER', 'spi', 'SPI', 'str', 'STR', 'tem', 'TEM', 'tha', 'THA',

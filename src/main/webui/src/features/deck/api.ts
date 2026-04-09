@@ -1,4 +1,4 @@
-import type { CardSearchResult, Deck, KrcgContents } from './types';
+import type { CardIconData, CardSearchResult, Deck, KrcgContents } from './types';
 
 const BASE = '/api/decks';
 const OPTS = { credentials: 'include' as const };
@@ -41,6 +41,11 @@ const deckApi = {
     async autocomplete(q: string): Promise<CardSearchResult[]> {
         if (!q.trim()) return [];
         return json(await fetch(`/cards/autocomplete?q=${encodeURIComponent(q)}`, OPTS));
+    },
+
+    async cardIcons(ids: string[]): Promise<CardIconData[]> {
+        if (!ids.length) return [];
+        return json(await fetch(`/cards/icons?ids=${ids.join(',')}`, OPTS));
     },
 };
 

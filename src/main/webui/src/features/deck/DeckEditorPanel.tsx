@@ -2,9 +2,10 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Search, TriangleAlert, Pencil, Trash2, ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import SummaryStats from '@/shared/components/SummaryStats';
+import { TypeIcon } from '@/shared/components/TypeIcon';
 import DeckCardRow from './DeckCardRow';
 import { groupEntries, computeSummary, getBannedEntries } from './deckUtils';
-import type { CardSearchResult, DeckEntry } from './types';
+import type { CardIconData, CardSearchResult, DeckEntry } from './types';
 
 interface Props {
     title?:            string;
@@ -17,6 +18,7 @@ interface Props {
     onRetrySave?:      () => void;
     onCommentsChange?: (comments: string | null) => void;
     entries:           DeckEntry[];
+    iconMap?:          Map<string, CardIconData>;
     onIncrement:       (cardId: string) => void;
     onDecrement:       (cardId: string) => void;
     onAddCard:         (result: CardSearchResult) => void;
@@ -31,7 +33,7 @@ function cryptHint(r: CardSearchResult): string {
 export default function DeckEditorPanel({
     title = 'Editor', saveLabel, saveError, comments, entriesLoading,
     onRename, onDelete, onRetrySave, onCommentsChange,
-    entries, onIncrement, onDecrement, onAddCard, onSearch,
+    entries, iconMap, onIncrement, onDecrement, onAddCard, onSearch,
 }: Props) {
     const [query,        setQuery]        = useState('');
     const [results,      setResults]      = useState<CardSearchResult[]>([]);
@@ -349,20 +351,22 @@ export default function DeckEditorPanel({
                                         : <ChevronRight className="w-3 h-3 text-ink-muted shrink-0" />
                                     }
                                     <span className="text-xs font-semibold text-ink">{group.key}</span>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-hover border border-line/60 text-[10px] font-semibold tabular-nums text-ink-secondary leading-none">
-                                        {group.total}
-                                    </span>
-                                    {!isOpen && (
-                                        <span className="ml-auto text-[10px] text-ink-muted truncate max-w-[55%]">
-                                            {group.entries.slice(0, 3).map(e => e.name).join(', ')}
-                                            {group.entries.length > 3 ? '…' : ''}
+                                    {group.key !== 'Crypt' && (
+                                        <span className="flex items-center gap-0.5 shrink-0">
+                                            {group.key.split('/').map(t => (
+                                                <TypeIcon key={t} type={t} size={16} />
+                                            ))}
                                         </span>
                                     )}
+                                    <span className="ml-auto inline-flex items-center px-1.5 py-0.5 rounded-full bg-hover border border-line/60 text-[10px] font-semibold tabular-nums text-ink-secondary leading-none">
+                                        {group.total}
+                                    </span>
                                 </button>
                                 {isOpen && group.entries.map(entry => (
                                     <DeckCardRow
                                         key={entry.cardId}
                                         entry={entry}
+                                        iconData={iconMap?.get(entry.cardId)}
                                         onIncrement={() => onIncrement(entry.cardId)}
                                         onDecrement={() => onDecrement(entry.cardId)}
                                     />

@@ -4,7 +4,9 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.deckserver.jol.config.Config;
+import net.deckserver.jol.dto.CardIconDto;
 import net.deckserver.jol.dto.CardSuggestionDto;
+import net.deckserver.jol.enums.Discipline;
 import net.deckserver.jol.model.Card;
 import net.deckserver.jol.model.CryptCard;
 import net.deckserver.jol.model.CryptType;
@@ -26,6 +28,16 @@ import java.util.stream.Stream;
 public class CardService {
 
     private static final Logger LOG = Logger.getLogger(CardService.class);
+
+    /** Maps lowercased full discipline name (e.g. "blood sorcery") → code (e.g. "tha"). */
+    private static final Map<String, String> DISC_NAME_TO_CODE;
+    static {
+        DISC_NAME_TO_CODE = new HashMap<>();
+        for (Discipline d : Discipline.values()) {
+            // enum name "BLOOD_SORCERY" → lookup key "blood sorcery"
+            DISC_NAME_TO_CODE.put(d.name().toLowerCase().replace('_', ' '), d.code);
+        }
+    }
     /**
      * All cards, one entry per CSV row (no duplicates).
      */
@@ -36,6 +48,10 @@ public class CardService {
      * For crypt cards the key includes the "(G# ADV)" qualifier.
      */
     private final Map<String, Card> lookupMap = new HashMap<>();
+    /**
+     * Fast lookup by card ID (one entry per card).
+     */
+    private final Map<String, Card> idMap = new HashMap<>();
     @Inject
     Config config;
 
@@ -77,6 +93,32 @@ public class CardService {
 
     public Optional<Card> findByName(String name) {
         return Optional.ofNullable(lookupMap.get(name));
+    }
+
+    public List<CardIconDto> findIconsByIds(List<String> ids) {
+        return ids.stream()
+                .map(idMap::get)
+                .filter(Objects::nonNull)
+                .map(this::toIconDto)
+                .toList();
+    }
+
+    private CardIconDto toIconDto(Card card) {
+        if (card instanceof CryptCard c) {
+            return new CardIconDto(
+                    c.id(), true,
+                    c.clan(), c.path(), c.capacity(), c.disciplines(),
+                    List.of(), List.of(), List.of(), null, null, null
+            );
+        }
+        LibraryCard l = (LibraryCard) card;
+        return new CardIconDto(
+                l.id(), false,
+                null, null, null, List.of(),
+                l.andDisciplines(), l.orDisciplines(),
+                l.requirementClans(), l.requirementPath(),
+                l.poolCost(), l.bloodCost()
+        );
     }
 
     public List<CardSuggestionDto> autocomplete(String q) {
@@ -188,6 +230,7 @@ public class CardService {
                 );
 
                 allCards.add(card);
+                idMap.put(card.id(), card);
                 indexCryptCard(card, group, advanced);
             }
         } catch (IOException e) {
@@ -203,11 +246,11 @@ public class CardService {
                 List<String> orDisciplines;
 
                 if (rawDisc.contains(" & ")) {
-                    andDisciplines = splitOn(rawDisc, " & ");
+                    andDisciplines = splitOn(rawDisc, " & ").stream().map(this::disciplineToCode).toList();
                     orDisciplines = List.of();
                 } else if (!rawDisc.isEmpty()) {
                     andDisciplines = List.of();
-                    orDisciplines = splitOn(rawDisc, "/");
+                    orDisciplines = splitOn(rawDisc, "/").stream().map(this::disciplineToCode).toList();
                 } else {
                     andDisciplines = List.of();
                     orDisciplines = List.of();
@@ -233,6 +276,7 @@ public class CardService {
                 );
 
                 allCards.add(card);
+                idMap.put(card.id(), card);
                 indexLibraryCard(card);
             }
         } catch (IOException e) {
@@ -303,6 +347,11 @@ public class CardService {
 
     private boolean parseBurnOption(String raw) {
         return "Y".equalsIgnoreCase(raw) || "Yes".equalsIgnoreCase(raw);
+    }
+
+    /** Converts a full discipline name from the CSV to its short code. Falls back to lowercase original if unknown. */
+    private String disciplineToCode(String name) {
+        return DISC_NAME_TO_CODE.getOrDefault(name.trim().toLowerCase(), name.trim().toLowerCase());
     }
 
     private String nullIfBlank(String value) {

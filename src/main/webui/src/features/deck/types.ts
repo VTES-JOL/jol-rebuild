@@ -49,6 +49,24 @@ export interface KrcgContents {
     library: { count: number; cards: KrcgLibraryGroup[] };
 }
 
+/** Matches CardIconDto from the backend /cards/icons endpoint. */
+export interface CardIconData {
+    id: string;
+    crypt: boolean;
+    // Crypt
+    clan: string | null;
+    path: string | null;
+    capacity: number | null;
+    disciplines: string[];
+    // Library
+    andDisciplines: string[];
+    orDisciplines: string[];
+    requirementClans: string[];
+    requirementPath: string | null;
+    poolCost: number | null;
+    bloodCost: number | null;
+}
+
 /** Matches CardSuggestionDto from the backend /cards/autocomplete endpoint. */
 export interface CardSearchResult {
     id: string;
