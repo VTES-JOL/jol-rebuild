@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -100,7 +101,24 @@ public class CardService {
         loadLibrary(libraryPath, libraryFormat);
 
         lookupMap.forEach((k, v) -> lowerLookupMap.put(StringUtils.stripAccents(k).toLowerCase(), v));
-        LOG.infof("Loaded %d cards (%d lookup keys)", allCards.size(), lookupMap.size());
+
+        // For crypt cards whose base name is unique (no other card shares it), also add
+        // a bare-name entry so that JOL imports don't need to include group qualifiers.
+        Map<String, Set<Card>> bareNameToCards = new LinkedHashMap<>();
+        for (Card card : allCards) {
+            if (!(card instanceof CryptCard)) continue;
+            for (String variant : nameVariants(card)) {
+                bareNameToCards.computeIfAbsent(variant, k -> new LinkedHashSet<>()).add(card);
+            }
+        }
+        int bareAdded = 0;
+        for (Map.Entry<String, Set<Card>> entry : bareNameToCards.entrySet()) {
+            if (entry.getValue().size() == 1) {
+                lowerLookupMap.putIfAbsent(entry.getKey(), entry.getValue().iterator().next());
+                bareAdded++;
+            }
+        }
+        LOG.infof("Loaded %d cards (%d lookup keys, %d unambiguous crypt bare names)", allCards.size(), lookupMap.size(), bareAdded);
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -468,6 +486,20 @@ public class CardService {
 
     private String nullIfBlank(String value) {
         return StringUtils.isBlank(value) ? null : value.trim();
+    }
+
+    /**
+     * Returns the stripped-lowercase bare name variants for a card (name + AKAs),
+     * used to build the unambiguous crypt bare-name index.
+     */
+    private Set<String> nameVariants(Card card) {
+        return Stream.concat(
+                Stream.of(card.name()),
+                card.aka().stream()
+        ).flatMap(n -> Stream.of(n, replaceArticle(n)))
+         .map(n -> StringUtils.stripAccents(n).toLowerCase().strip())
+         .filter(StringUtils::isNotBlank)
+         .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
