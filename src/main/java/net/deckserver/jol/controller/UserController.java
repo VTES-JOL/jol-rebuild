@@ -1,5 +1,6 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.vertx.http.runtime.security.FormAuthenticationMechanism;
@@ -74,6 +75,7 @@ public class UserController {
         return Response.ok(dto).build();
     }
 
+    @RegisterForReflection
     public record Register(@NotBlank(message = "{jol.validation.constraints.username.blank}") String username,
                            @NotBlank(message = "{jol.validation.constrains.password.size}") @Size(min = 8, message = "{jol.validation.constrains.password.size}") String password,
                            @NotBlank(message = "{jol.validation.constraints.email.invalid}") @Email(message = "{jol.validation.constraints.email.invalid}") String email) {

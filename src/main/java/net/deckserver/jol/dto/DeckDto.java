@@ -1,7 +1,9 @@
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import net.deckserver.jol.entity.Deck;
 
+@RegisterForReflection
 public class DeckDto {
     public Long id;
     public String name;

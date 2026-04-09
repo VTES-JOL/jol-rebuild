@@ -3,6 +3,7 @@ package net.deckserver.jol.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
@@ -95,7 +96,9 @@ public class DeckController {
         return Response.noContent().build();
     }
 
+    @RegisterForReflection
     public record DeckCreateCommand(String name) {}
 
+    @RegisterForReflection
     public record DeckUpdateCommand(String name, JsonNode contents, String summary, String comments) {}
 }

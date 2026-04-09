@@ -1,5 +1,7 @@
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import java.util.List;
  * Client → Server:  type = CHAT | REACTION
  * Server → Client:  type = CHAT | REACTION | HISTORY | ERROR
  */
+@RegisterForReflection
 public class ChatMessageDto {
 
     public Type type;

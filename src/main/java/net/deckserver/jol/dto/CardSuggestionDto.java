@@ -1,5 +1,7 @@
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.List;
 
 /**
@@ -12,6 +14,7 @@ import java.util.List;
  * types    — library card types (e.g. ["Action", "Combat"]). Empty for crypt cards.
  * banned   — true when the card has a ban date in the data.
  */
+@RegisterForReflection
 public record CardSuggestionDto(
         String id,
         String name,

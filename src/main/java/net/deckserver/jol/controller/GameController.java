@@ -1,5 +1,6 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
@@ -85,12 +86,14 @@ public class GameController {
         return Response.ok().build();
     }
 
+    @RegisterForReflection
     public record GameCreateCommand(String name, Visibility visibility) {
         public GameCreateCommand(String name) {
             this(name, Visibility.PUBLIC);
         }
     }
 
+    @RegisterForReflection
     public record GameUpdateCommand(String name, Visibility visibility) {
         public GameUpdateCommand(String name) {
             this(name, Visibility.PUBLIC);

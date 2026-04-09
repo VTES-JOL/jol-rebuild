@@ -1,9 +1,11 @@
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 
+@RegisterForReflection
 public class GameDto {
     public Long id;
     public String name;

@@ -14,7 +14,6 @@ import java.util.Random;
 public class NameService {
 
     private static final Logger LOG = Logger.getLogger(NameService.class);
-    private static final Random rand = new Random();
 
     private List<String> adjectives;
     private List<String> verbs;
@@ -35,14 +34,14 @@ public class NameService {
     }
 
     public String getAdjective() {
-        return adjectives.get(rand.nextInt(adjectives.size()));
+        return adjectives.get(new Random().nextInt(adjectives.size()));
     }
 
     public String getVerb() {
-        return verbs.get(rand.nextInt(verbs.size()));
+        return verbs.get(new Random().nextInt(verbs.size()));
     }
 
     public String getNoun() {
-        return nouns.get(rand.nextInt(nouns.size()));
+        return nouns.get(new Random().nextInt(nouns.size()));
     }
 }

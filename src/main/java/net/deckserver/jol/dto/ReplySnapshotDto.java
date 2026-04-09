@@ -1,6 +1,9 @@
 // ReplySnapshotDto.java
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class ReplySnapshotDto {
     public Long id;
     public String sender;
