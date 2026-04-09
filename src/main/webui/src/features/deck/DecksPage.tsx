@@ -100,6 +100,16 @@ export default function DecksPage() {
         }
     }, [selectedId]);
 
+    const handleCommentsChange = useCallback(async (comments: string | null) => {
+        if (selectedId == null) return;
+        try {
+            const updated = await deckApi.save(selectedId, { comments });
+            setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
+        } catch (e) {
+            console.error('Failed to save comments', e);
+        }
+    }, [selectedId]);
+
     const handleDelete = useCallback(async () => {
         if (selectedId == null) return;
         try {
@@ -153,7 +163,9 @@ export default function DecksPage() {
                         title={selectedDeck?.name ?? 'Editor'}
                         saveLabel={saveStatus !== 'idle' ? saveLabel[saveStatus] : undefined}
                         saveError={saveStatus === 'error'}
+                        comments={selectedDeck?.comments}
                         onRename={handleRename}
+                        onCommentsChange={handleCommentsChange}
                         onDelete={handleDelete}
                         entries={entries}
                         onIncrement={handleIncrement}

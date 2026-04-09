@@ -7,16 +7,18 @@ import { groupEntries, computeSummary, getBannedEntries } from './deckUtils';
 import type { CardSearchResult, DeckEntry } from './types';
 
 interface Props {
-    title?:      string;
-    saveLabel?:  string;
-    saveError?:  boolean;
-    onRename?:   (name: string) => void;
-    onDelete?:   () => void;
-    entries:     DeckEntry[];
-    onIncrement: (cardId: string) => void;
-    onDecrement: (cardId: string) => void;
-    onAddCard:   (result: CardSearchResult) => void;
-    onSearch:    (query: string) => Promise<CardSearchResult[]>;
+    title?:            string;
+    saveLabel?:        string;
+    saveError?:        boolean;
+    comments?:         string | null;
+    onRename?:         (name: string) => void;
+    onDelete?:         () => void;
+    onCommentsChange?: (comments: string | null) => void;
+    entries:           DeckEntry[];
+    onIncrement:       (cardId: string) => void;
+    onDecrement:       (cardId: string) => void;
+    onAddCard:         (result: CardSearchResult) => void;
+    onSearch:          (query: string) => Promise<CardSearchResult[]>;
 }
 
 function cryptHint(r: CardSearchResult): string {
@@ -24,16 +26,15 @@ function cryptHint(r: CardSearchResult): string {
     return `Crypt · G${r.group}`;
 }
 
-// Groups with this many unique card rows or fewer are open by default.
-const AUTO_OPEN_THRESHOLD = 4;
 
-export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError, onRename, onDelete, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
+export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError, comments, onRename, onDelete, onCommentsChange, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
     const [query,       setQuery]       = useState('');
     const [results,     setResults]     = useState<CardSearchResult[]>([]);
     const [loading,     setLoading]     = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-    const [editingName, setEditingName] = useState(false);
-    const [nameValue,   setNameValue]   = useState(title);
+    const [editingName,   setEditingName]   = useState(false);
+    const [nameValue,     setNameValue]     = useState(title);
+    const [commentValue,  setCommentValue]  = useState(comments ?? '');
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     // Accordion: set of open group keys. Initialised once when entries first load.
@@ -47,11 +48,7 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
     useEffect(() => {
         if (entries.length === 0 || groupsInitialized.current) return;
         groupsInitialized.current = true;
-        const defaults = new Set<string>();
-        groupEntries(entries).forEach(g => {
-            if (g.entries.length <= AUTO_OPEN_THRESHOLD) defaults.add(g.key);
-        });
-        setOpenGroups(defaults);
+        setOpenGroups(new Set(groupEntries(entries).map(g => g.key)));
     }, [entries]);
 
     const toggleGroup = useCallback((key: string) => {
@@ -191,7 +188,7 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
                 {results.length > 0 && (
                     <ul
                         role="listbox"
-                        className="absolute top-full left-0 right-0 z-10 bg-panel/95 backdrop-blur-sm border border-line/60 border-t-0 rounded-b shadow-lg overflow-hidden"
+                        className="absolute top-full left-0 right-0 z-20 bg-panel border border-line/60 border-t-0 rounded-b shadow-lg overflow-hidden"
                     >
                         {results.map((r, i) => (
                             <li
@@ -219,7 +216,7 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
                     </ul>
                 )}
                 {query.trim() && !loading && results.length === 0 && (
-                    <div className="absolute top-full left-0 right-0 z-10 bg-panel/95 backdrop-blur-sm border border-line/60 border-t-0 rounded-b shadow-lg px-3 py-2 text-xs text-ink-muted">
+                    <div className="absolute top-full left-0 right-0 z-20 bg-panel border border-line/60 border-t-0 rounded-b shadow-lg px-3 py-2 text-xs text-ink-muted">
                         No cards found matching "{query}".
                     </div>
                 )}
@@ -239,6 +236,21 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
                         <span>{banned.length} banned</span>
                     </div>
                 )}
+            </div>
+
+            {/* Comments */}
+            <div className="px-3 py-1.5 border-b border-line/50">
+                <textarea
+                    value={commentValue}
+                    onChange={e => setCommentValue(e.target.value)}
+                    onBlur={() => {
+                        const trimmed = commentValue.trim() || null;
+                        if (trimmed !== (comments ?? null)) onCommentsChange?.(trimmed);
+                    }}
+                    placeholder="Add a note…"
+                    rows={2}
+                    className="w-full bg-transparent text-xs text-ink-secondary placeholder:text-ink-muted outline-none resize-none leading-relaxed"
+                />
             </div>
 
             {/* Card list with accordion groups */}
