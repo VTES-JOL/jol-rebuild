@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import { Minus, Plus, TriangleAlert } from 'lucide-react';
 import { useCardPreview } from '@/hooks/useCardPreview.tsx';
 import type { DeckEntry } from './types';
@@ -11,11 +10,11 @@ interface Props {
 
 export default function DeckCardRow({ entry, onIncrement, onDecrement }: Props) {
     const willRemove = entry.count === 1;
-    const { anchorRef, onMouseEnter, onMouseLeave, tooltip } = useCardPreview(entry.cardId);
+    const { anchorRef, onMouseEnter, onMouseLeave, tooltip } = useCardPreview<HTMLDivElement>(entry.cardId);
 
     return (
         <div
-            ref={anchorRef as RefObject<HTMLDivElement>}
+            ref={anchorRef}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             className="flex items-center justify-between px-4 py-1.5 hover:bg-hover/50 transition-colors"

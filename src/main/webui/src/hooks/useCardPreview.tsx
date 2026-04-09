@@ -8,7 +8,6 @@ interface TooltipPos {
     left: number;
 }
 
-// Card aspect ratio: 358×500 — displayed at full resolution in the portal.
 const IMG_W = 358;
 const IMG_H = 500;
 const MARGIN = 8;
@@ -26,22 +25,22 @@ function getTooltipPosition(rect: DOMRect, vw: number, vh: number): TooltipPos {
     return { top: Math.max(MARGIN, (vh - IMG_H) / 2), left };
 }
 
-interface CardPreview {
-    anchorRef: RefObject<HTMLElement | null>;
+interface CardPreview<T extends HTMLElement> {
+    anchorRef: RefObject<T | null>;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
     tooltip: ReactPortal | null;
 }
 
 /**
- * Returns hover handlers, an anchor ref, and a portal tooltip for card image previews.
- * Attach `anchorRef` to the element that triggers the preview, spread the mouse handlers,
- * and render `tooltip` anywhere in the component tree.
+ * Returns hover handlers, a typed anchor ref, and a portal tooltip for card image previews.
+ * Generic T lets callers avoid unsafe ref casts:
+ *   const { anchorRef } = useCardPreview<HTMLDivElement>(id);
  */
-export function useCardPreview(cardId: string | number): CardPreview {
+export function useCardPreview<T extends HTMLElement = HTMLElement>(cardId: string | number): CardPreview<T> {
     const [hovered, setHovered] = useState(false);
     const [pos, setPos]         = useState<TooltipPos | null>(null);
-    const anchorRef             = useRef<HTMLElement | null>(null);
+    const anchorRef             = useRef<T | null>(null);
 
     useEffect(() => {
         if (!hovered || !anchorRef.current) return;

@@ -10,14 +10,17 @@ import type { Deck, DeckEntry, CardSearchResult } from './types';
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function DecksPage() {
-    const [decks,      setDecks]      = useState<Deck[]>([]);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
-    const [entries,    setEntries]    = useState<DeckEntry[]>([]);
-    const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-    const [loadError,  setLoadError]  = useState<string | null>(null);
+    const [decks,           setDecks]           = useState<Deck[]>([]);
+    const [selectedId,      setSelectedId]      = useState<number | null>(null);
+    const [entries,         setEntries]         = useState<DeckEntry[]>([]);
+    const [saveStatus,      setSaveStatus]      = useState<SaveStatus>('idle');
+    const [loadError,       setLoadError]       = useState<string | null>(null);
+    const [entriesLoading,  setEntriesLoading]  = useState(false);
 
-    const saveTimer    = useRef<ReturnType<typeof setTimeout>>(undefined);
-    const isDirtyRef   = useRef(false);
+    const saveTimer   = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const isDirtyRef  = useRef(false);
+    // Mirror of entries state accessible in callbacks without adding entries to their deps.
+    const entriesRef  = useRef<DeckEntry[]>([]);
 
     // ── Load deck list on mount ───────────────────────────────────────────────
     useEffect(() => {
@@ -28,12 +31,22 @@ export default function DecksPage() {
 
     // ── Load contents when selection changes ─────────────────────────────────
     useEffect(() => {
-        if (selectedId == null) { setEntries([]); return; }
+        if (selectedId == null) { setEntries([]); entriesRef.current = []; return; }
         setEntries([]);
+        entriesRef.current = [];
+        setEntriesLoading(true);
         deckApi.getContents(selectedId)
-            .then(contents => setEntries(fromKrcgContents(contents)))
-            .catch(console.error);
+            .then(contents => {
+                const loaded = fromKrcgContents(contents);
+                setEntries(loaded);
+                entriesRef.current = loaded;
+            })
+            .catch(console.error)
+            .finally(() => setEntriesLoading(false));
     }, [selectedId]);
+
+    // Keep ref in sync for use in callbacks that can't take entries as a dep.
+    useEffect(() => { entriesRef.current = entries; }, [entries]);
 
     // ── Auto-save on entries change ──────────────────────────────────────────
     useEffect(() => {
@@ -58,10 +71,22 @@ export default function DecksPage() {
     }, [entries]);
 
     const handleSelect = useCallback((deck: Deck) => {
+        // Flush any pending auto-save for the current deck before switching.
+        if (isDirtyRef.current && selectedId != null) {
+            clearTimeout(saveTimer.current);
+            const snapshot = entriesRef.current;
+            const summary  = computeSummary(snapshot);
+            deckApi.save(selectedId, {
+                contents: toKrcgContents(snapshot),
+                summary:  summary ? formatSummaryCompact(summary) : null,
+            })
+                .then(updated => setDecks(ds => ds.map(d => d.id === updated.id ? updated : d)))
+                .catch(console.error);
+        }
         isDirtyRef.current = false;
         setSelectedId(deck.id);
         setSaveStatus('idle');
-    }, []);
+    }, [selectedId]);
 
     const handleNew = useCallback(async () => {
         try {
@@ -98,6 +123,23 @@ export default function DecksPage() {
             setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
         } catch (e) {
             console.error('Failed to rename deck', e);
+        }
+    }, [selectedId]);
+
+    const handleRetrySave = useCallback(async () => {
+        if (selectedId == null) return;
+        setSaveStatus('saving');
+        try {
+            const snapshot = entriesRef.current;
+            const summary  = computeSummary(snapshot);
+            const updated  = await deckApi.save(selectedId, {
+                contents: toKrcgContents(snapshot),
+                summary:  summary ? formatSummaryCompact(summary) : null,
+            });
+            setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
+            setSaveStatus('saved');
+        } catch {
+            setSaveStatus('error');
         }
     }, [selectedId]);
 
@@ -144,10 +186,6 @@ export default function DecksPage() {
 
     const selectedDeck = decks.find(d => d.id === selectedId);
 
-    const saveLabel: Record<SaveStatus, string> = {
-        idle: '', saving: 'Saving…', saved: 'Saved', error: 'Save failed',
-    };
-
     return (
         <AppLayout background={"/Locations23.jpg"}>
             <div className="grid grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_280px] grid-rows-1 gap-6 h-[85dvh]">
@@ -162,11 +200,13 @@ export default function DecksPage() {
                     <DeckEditorPanel
                         key={selectedId}
                         title={selectedDeck?.name ?? 'Editor'}
-                        saveLabel={saveStatus !== 'idle' ? saveLabel[saveStatus] : undefined}
+                        saveLabel={saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : undefined}
                         saveError={saveStatus === 'error'}
                         comments={selectedDeck?.comments}
+                        entriesLoading={entriesLoading}
                         onRename={handleRename}
                         onCommentsChange={handleCommentsChange}
+                        onRetrySave={handleRetrySave}
                         onDelete={handleDelete}
                         entries={entries}
                         onIncrement={handleIncrement}

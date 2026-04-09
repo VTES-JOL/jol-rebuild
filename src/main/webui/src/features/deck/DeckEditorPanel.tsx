@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, TriangleAlert, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Search, TriangleAlert, Pencil, Trash2, ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import SummaryStats from '@/shared/components/SummaryStats';
 import DeckCardRow from './DeckCardRow';
@@ -11,8 +11,10 @@ interface Props {
     saveLabel?:        string;
     saveError?:        boolean;
     comments?:         string | null;
+    entriesLoading?:   boolean;
     onRename?:         (name: string) => void;
     onDelete?:         () => void;
+    onRetrySave?:      () => void;
     onCommentsChange?: (comments: string | null) => void;
     entries:           DeckEntry[];
     onIncrement:       (cardId: string) => void;
@@ -26,29 +28,53 @@ function cryptHint(r: CardSearchResult): string {
     return `Crypt · G${r.group}`;
 }
 
+export default function DeckEditorPanel({
+    title = 'Editor', saveLabel, saveError, comments, entriesLoading,
+    onRename, onDelete, onRetrySave, onCommentsChange,
+    entries, onIncrement, onDecrement, onAddCard, onSearch,
+}: Props) {
+    const [query,        setQuery]        = useState('');
+    const [results,      setResults]      = useState<CardSearchResult[]>([]);
+    const [loading,      setLoading]      = useState(false);
+    const [activeIndex,  setActiveIndex]  = useState(0);
+    const [editingName,  setEditingName]  = useState(false);
+    const [nameValue,    setNameValue]    = useState(title);
+    const [commentValue, setCommentValue] = useState(comments ?? '');
+    const [confirmDel,   setConfirmDel]   = useState(false);
+    const nameInputRef    = useRef<HTMLInputElement>(null);
+    const commentTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const onCommentsRef   = useRef(onCommentsChange);
+    useEffect(() => { onCommentsRef.current = onCommentsChange; });
 
-export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError, comments, onRename, onDelete, onCommentsChange, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
-    const [query,       setQuery]       = useState('');
-    const [results,     setResults]     = useState<CardSearchResult[]>([]);
-    const [loading,     setLoading]     = useState(false);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [editingName,   setEditingName]   = useState(false);
-    const [nameValue,     setNameValue]     = useState(title);
-    const [commentValue,  setCommentValue]  = useState(comments ?? '');
-    const nameInputRef = useRef<HTMLInputElement>(null);
-
-    // Accordion: set of open group keys. Initialised once when entries first load.
-    const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+    // ── Accordion ─────────────────────────────────────────────────────────────
+    // seenGroupsRef tracks every group key that has ever appeared in this session.
+    // A group missing from seenGroupsRef is brand-new → auto-open it.
+    // Groups the user has manually closed are in seenGroupsRef but not openGroups → stay closed.
+    const [openGroups,     setOpenGroups]     = useState<Set<string>>(new Set());
     const groupsInitialized = useRef(false);
+    const seenGroupsRef     = useRef<Set<string>>(new Set());
 
-    useEffect(() => { setNameValue(title); setEditingName(false); }, [title]);
-
-    // Populate accordion defaults once entries arrive (component is keyed by deck id,
-    // so this ref + state reset automatically on deck switch).
     useEffect(() => {
-        if (entries.length === 0 || groupsInitialized.current) return;
-        groupsInitialized.current = true;
-        setOpenGroups(new Set(groupEntries(entries).map(g => g.key)));
+        if (entries.length === 0) return;
+        const currentKeys = groupEntries(entries).map(g => g.key);
+
+        if (!groupsInitialized.current) {
+            // First load: open everything and record all groups as seen.
+            groupsInitialized.current = true;
+            currentKeys.forEach(k => seenGroupsRef.current.add(k));
+            setOpenGroups(new Set(currentKeys));
+            return;
+        }
+
+        // Subsequent changes: auto-open any brand-new group types.
+        const newKeys = currentKeys.filter(k => !seenGroupsRef.current.has(k));
+        if (newKeys.length === 0) return;
+        newKeys.forEach(k => seenGroupsRef.current.add(k));
+        setOpenGroups(prev => {
+            const next = new Set(prev);
+            newKeys.forEach(k => next.add(k));
+            return next;
+        });
     }, [entries]);
 
     const toggleGroup = useCallback((key: string) => {
@@ -58,6 +84,9 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
             return next;
         });
     }, []);
+
+    // ── Name editing ──────────────────────────────────────────────────────────
+    useEffect(() => { setNameValue(title); setEditingName(false); }, [title]);
 
     const startEdit = useCallback(() => {
         if (!onRename) return;
@@ -77,6 +106,23 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
         if (e.key === 'Escape') { setNameValue(title); setEditingName(false); }
     }, [commitName, title]);
 
+    // ── Comments – debounced auto-save + blur flush ───────────────────────────
+    const handleCommentChange = useCallback((value: string) => {
+        setCommentValue(value);
+        clearTimeout(commentTimerRef.current);
+        commentTimerRef.current = setTimeout(() => {
+            const trimmed = value.trim() || null;
+            onCommentsRef.current?.(trimmed);
+        }, 1500);
+    }, []);
+
+    const flushComment = useCallback(() => {
+        clearTimeout(commentTimerRef.current);
+        const trimmed = commentValue.trim() || null;
+        if (trimmed !== (comments ?? null)) onCommentsRef.current?.(trimmed);
+    }, [commentValue, comments]);
+
+    // ── Card search ───────────────────────────────────────────────────────────
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const onSearchRef = useRef(onSearch);
     const searchRef   = useRef<HTMLDivElement>(null);
@@ -127,6 +173,56 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
         if (e.key === 'Escape')     { setQuery(''); setResults([]); }
     }, [results, activeIndex, selectResult]);
 
+    // ── Header right: save status / delete / confirm ──────────────────────────
+    const headerRight = (
+        <div className="flex items-center gap-2">
+            {saveError ? (
+                <>
+                    <span className="text-[10px] text-blood-soft">Save failed</span>
+                    {onRetrySave && (
+                        <button
+                            onClick={onRetrySave}
+                            title="Retry save"
+                            className="p-1 rounded hover:bg-blood/10 text-blood-soft hover:text-blood transition-colors cursor-pointer"
+                        >
+                            <RotateCcw className="w-3 h-3" />
+                        </button>
+                    )}
+                </>
+            ) : saveLabel ? (
+                <span className="text-[10px] text-ink-muted">{saveLabel}</span>
+            ) : null}
+
+            {onDelete && (
+                confirmDel ? (
+                    <div className="flex items-center gap-1">
+                        <span className="text-[10px] text-blood-soft">Delete?</span>
+                        <button
+                            onClick={() => { setConfirmDel(false); onDelete(); }}
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-blood/15 text-blood-soft hover:bg-blood/25 transition-colors cursor-pointer"
+                        >
+                            Yes
+                        </button>
+                        <button
+                            onClick={() => setConfirmDel(false)}
+                            className="text-[10px] px-1.5 py-0.5 rounded hover:bg-hover text-ink-muted transition-colors cursor-pointer"
+                        >
+                            No
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => setConfirmDel(true)}
+                        title="Delete deck"
+                        className="p-1.5 rounded hover:bg-blood/10 text-ink-muted hover:text-blood transition-colors cursor-pointer"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                )
+            )}
+        </div>
+    );
+
     return (
         <Panel
             title={
@@ -149,24 +245,7 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
                     </span>
                 )
             }
-            right={
-                <div className="flex items-center gap-2">
-                    {saveLabel && (
-                        <span className={`text-[10px] ${saveError ? 'text-blood-soft' : 'text-ink-muted'}`}>
-                            {saveLabel}
-                        </span>
-                    )}
-                    {onDelete && (
-                        <button
-                            onClick={(e) => { e.stopPropagation(); if (confirm('Delete this deck?')) onDelete(); }}
-                            title="Delete deck"
-                            className="p-1.5 rounded hover:bg-blood/10 text-ink-muted hover:text-blood transition-colors cursor-pointer"
-                        >
-                            <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                    )}
-                </div>
-            }
+            right={headerRight}
         >
             {/* Card search */}
             <div ref={searchRef} className="relative border-b border-line/50">
@@ -238,15 +317,12 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
                 )}
             </div>
 
-            {/* Comments */}
+            {/* Comments – auto-saves 1.5 s after last keystroke, also flushes on blur */}
             <div className="px-3 py-1.5 border-b border-line/50">
                 <textarea
                     value={commentValue}
-                    onChange={e => setCommentValue(e.target.value)}
-                    onBlur={() => {
-                        const trimmed = commentValue.trim() || null;
-                        if (trimmed !== (comments ?? null)) onCommentsChange?.(trimmed);
-                    }}
+                    onChange={e => handleCommentChange(e.target.value)}
+                    onBlur={flushComment}
                     placeholder="Add a note…"
                     rows={2}
                     className="w-full bg-transparent text-xs text-ink-secondary placeholder:text-ink-muted outline-none resize-none leading-relaxed"
@@ -256,7 +332,7 @@ export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError
             {/* Card list with accordion groups */}
             {entries.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center p-8 text-sm text-ink-muted">
-                    Search above to add cards.
+                    {entriesLoading ? 'Loading…' : 'Search above to add cards.'}
                 </div>
             ) : (
                 <div className="overflow-y-auto flex-1 min-h-0">
