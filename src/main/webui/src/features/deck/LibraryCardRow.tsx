@@ -3,6 +3,7 @@ import { TriangleAlert } from 'lucide-react';
 import { ClanIcon } from '@/shared/components/ClanIcon';
 import { CostIcon } from '@/shared/components/CostIcon';
 import { DisciplineIcon } from '@/shared/components/DisciplineIcon';
+import { PathIcon } from '@/shared/components/PathIcon';
 import CardRowShell from './CardRowShell';
 import type { CardDetailData, DeckEntry } from './types';
 
@@ -16,10 +17,11 @@ interface Props {
 const SEP = 'text-[9px] text-ink-muted leading-none select-none';
 
 export default function LibraryCardRow({ entry, iconData, onIncrement, onDecrement }: Props) {
-    const orDiscs  = iconData?.orDisciplines   ?? [];
-    const andDiscs = iconData?.andDisciplines  ?? [];
-    const reqClans = iconData?.requirementClans ?? [];
-    const hasRightIcons = reqClans.length > 0 || orDiscs.length > 0 || andDiscs.length > 0;
+    const orDiscs   = iconData?.orDisciplines    ?? [];
+    const andDiscs  = iconData?.andDisciplines   ?? [];
+    const reqClans  = iconData?.requirementClans ?? [];
+    const reqPath   = iconData?.requirementPath  ?? null;
+    const hasRightIcons = reqPath != null || reqClans.length > 0 || orDiscs.length > 0 || andDiscs.length > 0;
 
     return (
         <CardRowShell entry={entry} onIncrement={onIncrement} onDecrement={onDecrement}>
@@ -40,6 +42,8 @@ export default function LibraryCardRow({ entry, iconData, onIncrement, onDecreme
             {/* Requirement clans, or-disciplines, and-disciplines */}
             {hasRightIcons && (
                 <div className="flex items-center gap-0.5 shrink-0 ml-1">
+                    {reqPath && <PathIcon path={reqPath} size={16} />}
+
                     {reqClans.map((c, i) => (
                         <ClanIcon key={i} clan={c} size={16} />
                     ))}

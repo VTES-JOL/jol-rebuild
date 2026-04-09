@@ -31,6 +31,7 @@ export function OpeningHandSection({ entries }: Props) {
     const cryptTotal   = cryptEntries.reduce((s, e) => s + e.count, 0);
 
     if (cryptEntries.length === 0) return null;
+    if (!cryptEntries.some(e => e.count >= 3)) return null;
 
     const rows = cryptEntries
         .map(e => ({ ...e, prob: openingHandProb(cryptTotal, e.count) }))

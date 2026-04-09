@@ -7,7 +7,7 @@ import type { CardDetailData, DeckEntry } from '../features/deck/types';
 const meta = {
     title: 'Deck/DeckEditorPanel',
     component: DeckEditorPanel,
-    parameters: { layout: 'padded' },
+    parameters: { layout: 'fullscreen' },
     tags: ['autodocs'],
 } satisfies Meta<typeof DeckEditorPanel>;
 

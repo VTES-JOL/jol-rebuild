@@ -31,7 +31,7 @@ export function CounterBadge({ type, amount, size = 20, className = '' }: Counte
             role="img"
             aria-label={`${amount} ${LABEL[type]}`}
             title={`${amount} ${LABEL[type]}`}
-            className={`inline-flex items-center justify-center rounded-full text-white font-bold tabular-nums shrink-0 shadow-[0_1px_4px_rgba(0,0,0,0.5)] ring-1 ring-inset ring-white/20 ${BG[type]} ${className}`}
+            className={`inline-flex items-center justify-center rounded-full text-white font-bold tabular-nums shrink-0 ring-1 ring-inset ring-white/20 ${BG[type]} ${className}`}
             style={{ width: size, height: size, fontSize, lineHeight: 1, verticalAlign: 'middle' }}
         >
             <span style={{ transform: 'translateY(-0.05em)', display: 'block' }}>{amount}</span>

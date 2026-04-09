@@ -18,7 +18,7 @@ export default function CardRowShell({ entry, onIncrement, onDecrement, children
             ref={anchorRef}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            className="flex items-center px-4 py-1.5 gap-1.5 hover:bg-hover/50 transition-colors"
+            className="flex items-center px-4 py-1.5 gap-1 hover:bg-hover/50 transition-colors"
         >
             {children}
 
