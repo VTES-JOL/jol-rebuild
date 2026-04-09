@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import DeckEditorPanel from '../features/deck/DeckEditorPanel';
-import type { CardIconData, CardSearchResult, DeckEntry } from '../features/deck/types';
+import type { CardDetailData, CardSearchResult, DeckEntry } from '../features/deck/types';
 
 const meta = {
     title: 'Deck/DeckEditorPanel',
@@ -50,126 +50,148 @@ const withBanned: DeckEntry[] = [
 // Realistic icon data for each card used in the stories.
 // Disciplines: lowercase = inferior, UPPERCASE = superior (matches DisciplineIcon convention).
 
-const noIcons = (id: string, crypt: boolean): CardIconData => ({
-    id, crypt,
+const noIcons = (id: string, crypt: boolean): CardDetailData => ({
+    id, name: id, crypt,
+    types: [], group: null, banned: false,
     clan: null, path: null, capacity: null, disciplines: [],
     andDisciplines: [], orDisciplines: [], requirementClans: [],
     requirementPath: null, poolCost: null, bloodCost: null,
 });
 
-const cryptIconData: CardIconData[] = [
+const cryptIconData: CardDetailData[] = [
     // Beckett — Gangrel, G3, cap 9: ANI AUS FOR PRO
-    { id: '200183', crypt: true, clan: 'Gangrel', path: null, capacity: 9,
+    { id: '200183', name: 'Beckett', crypt: true, types: ['Vampire'], group: '3', banned: false,
+      clan: 'Gangrel', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'FOR', 'PRO'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Hektor — Brujah antitribu, G2, cap 11: CEL POT PRE
-    { id: '200584', crypt: true, clan: 'Brujah antitribu', path: null, capacity: 11,
+    { id: '200584', name: 'Hektor', crypt: true, types: ['Vampire'], group: '2', banned: false,
+      clan: 'Brujah antitribu', path: null, capacity: 11,
       disciplines: ['CEL', 'POT', 'PRE'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Malgorzata — Tzimisce, G2, cap 9: ANI AUS VIC
-    { id: '200905', crypt: true, clan: 'Tzimisce', path: null, capacity: 9,
+    { id: '200905', name: 'Malgorzata', crypt: true, types: ['Vampire'], group: '2', banned: false,
+      clan: 'Tzimisce', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'VIC'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Theo Bell — Brujah antitribu, G2, cap 9: CEL POT PRE
-    { id: '201362', crypt: true, clan: 'Brujah antitribu', path: null, capacity: 9,
+    { id: '201362', name: 'Theo Bell', crypt: true, types: ['Vampire'], group: '2', banned: false,
+      clan: 'Brujah antitribu', path: null, capacity: 9,
       disciplines: ['CEL', 'POT', 'PRE'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Anarch Convert — no clan, cap 1, no disciplines
-    { id: '200076', crypt: true, clan: null, path: null, capacity: 1,
+    { id: '200076', name: 'Anarch Convert', crypt: true, types: ['Vampire'], group: 'ANY', banned: false,
+      clan: null, path: null, capacity: 1,
       disciplines: [],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 
     // Zoe — Imbued, G4, cap 4: inn jud
-    { id: '201509', crypt: true, clan: null, path: null, capacity: 4,
+    { id: '201509', name: 'Zoe', crypt: true, types: ['Imbued'], group: '4', banned: false,
+      clan: null, path: null, capacity: 4,
       disciplines: ['inn', 'jud'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
 ];
 
-const libraryIconData: CardIconData[] = [
+const libraryIconData: CardDetailData[] = [
     // Govern the Unaligned — Action, 2 pool, DOM
-    { id: '100845', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '100845', name: 'Govern the Unaligned', crypt: false, types: ['Action'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['dom', 'DOM'],
       requirementClans: [], requirementPath: null, poolCost: 2, bloodCost: null },
 
     // Conditioning — Action Modifier, DOM
-    { id: '100401', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '100401', name: 'Conditioning', crypt: false, types: ['Action Modifier'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['DOM'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Deflection — Reaction, DOM
-    { id: '100518', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '100518', name: 'Deflection', crypt: false, types: ['Reaction'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['DOM'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Freak Drive — Action Modifier, CEL
-    { id: '100788', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '100788', name: 'Freak Drive', crypt: false, types: ['Action Modifier'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['CEL'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Minion Tap — Master, no discipline, 0 pool
-    { id: '101217', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '101217', name: 'Minion Tap', crypt: false, types: ['Master'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Villein — Master, no discipline
-    { id: '102121', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '102121', name: 'Villein', crypt: false, types: ['Master'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Parity Shift — Political Action, 2 pool
-    { id: '101353', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '101353', name: 'Parity Shift', crypt: false, types: ['Political Action'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: 2, bloodCost: null },
 
     // Kine Resources Contested — Political Action, 1 pool
-    { id: '101056', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '101056', name: 'Kine Resources Contested', crypt: false, types: ['Political Action'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: 1, bloodCost: null },
 
     // Taste of Vitae — Combat, no cost (gives blood)
-    { id: '101945', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '101945', name: 'Taste of Vitae', crypt: false, types: ['Combat'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Immortal Grapple — Combat, POT
-    { id: '100959', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '100959', name: 'Immortal Grapple', crypt: false, types: ['Combat'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: ['POT'],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 
     // Punish — Action/Combat, 1 blood
-    { id: '101518', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '101518', name: 'Punish', crypt: false, types: ['Action', 'Combat'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: null, bloodCost: 1 },
 
     // Mylan Horseed — Ally, 3 pool
-    { id: '101261', crypt: false, clan: null, path: null, capacity: null, disciplines: [],
+    { id: '101261', name: 'Mylan Horseed', crypt: false, types: ['Ally'], group: null, banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
       andDisciplines: [], orDisciplines: [],
       requirementClans: [], requirementPath: null, poolCost: 3, bloodCost: null },
 ];
 
-const bannedLibraryIconData: CardIconData =
+const bannedLibraryIconData: CardDetailData =
     noIcons('101620', false);
 
-const invalidIconData: CardIconData[] = [
-    { id: '200183', crypt: true, clan: 'Gangrel', path: null, capacity: 9,
+const invalidIconData: CardDetailData[] = [
+    { id: '200183', name: 'Beckett', crypt: true, types: ['Vampire'], group: '3', banned: false,
+      clan: 'Gangrel', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'FOR', 'PRO'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200424', crypt: true, clan: 'Gangrel', path: null, capacity: 11,
+    { id: '200424', name: 'Enkidu, The Noah', crypt: true, types: ['Vampire'], group: '4', banned: false,
+      clan: 'Gangrel', path: null, capacity: 11,
       disciplines: ['ANI', 'FOR', 'POT', 'PRO'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
-    { id: '200905', crypt: true, clan: 'Tzimisce', path: null, capacity: 9,
+    { id: '200905', name: 'Malgorzata', crypt: true, types: ['Vampire'], group: '2', banned: false,
+      clan: 'Tzimisce', path: null, capacity: 9,
       disciplines: ['ANI', 'AUS', 'VIC'],
       andDisciplines: [], orDisciplines: [], requirementClans: [],
       requirementPath: null, poolCost: null, bloodCost: null },
@@ -180,13 +202,13 @@ const invalidIconData: CardIconData[] = [
     ].map(id => libraryIconData.find(d => d.id === id) ?? noIcons(id, false)),
 ];
 
-function buildIconMap(...sources: CardIconData[][]): Map<string, CardIconData> {
+function buildDetailMap(...sources: CardDetailData[][]): Map<string, CardDetailData> {
     return new Map(sources.flat().map(d => [d.id, d]));
 }
 
-const fullIconMap      = buildIconMap(cryptIconData, libraryIconData, [bannedLibraryIconData]);
-const cryptIconMap     = buildIconMap(cryptIconData);
-const invalidIconMap   = new Map(invalidIconData.map(d => [d.id, d]));
+const fullDetailMap    = buildDetailMap(cryptIconData, libraryIconData, [bannedLibraryIconData]);
+const cryptDetailMap   = buildDetailMap(cryptIconData);
+const invalidDetailMap = new Map(invalidIconData.map(d => [d.id, d]));
 
 // ── Stub search pool ──────────────────────────────────────────────────────────
 
@@ -261,7 +283,7 @@ export const CryptOnly: Story = {
         const state = useDeckState(cryptEntries);
         return (
             <div style={{ width: 400, height: 600 }}>
-                <DeckEditorPanel {...state} iconMap={cryptIconMap} onSearch={mockSearch} />
+                <DeckEditorPanel {...state} detailMap={cryptDetailMap} onSearch={mockSearch} />
             </div>
         );
     },
@@ -273,7 +295,7 @@ export const FullDeck: Story = {
         const state = useDeckState([...cryptEntries, ...libraryEntries]);
         return (
             <div style={{ width: 400, height: 600 }}>
-                <DeckEditorPanel {...state} iconMap={fullIconMap} onSearch={mockSearch} />
+                <DeckEditorPanel {...state} detailMap={fullDetailMap} onSearch={mockSearch} />
             </div>
         );
     },
@@ -285,7 +307,7 @@ export const WithBannedCard: Story = {
         const state = useDeckState(withBanned);
         return (
             <div style={{ width: 400, height: 600 }}>
-                <DeckEditorPanel {...state} iconMap={fullIconMap} onSearch={mockSearch} />
+                <DeckEditorPanel {...state} detailMap={fullDetailMap} onSearch={mockSearch} />
             </div>
         );
     },
@@ -314,7 +336,7 @@ export const InvalidDeck: Story = {
         const state = useDeckState(invalidEntries);
         return (
             <div style={{ width: 400, height: 600 }}>
-                <DeckEditorPanel {...state} iconMap={invalidIconMap} onSearch={mockSearch} />
+                <DeckEditorPanel {...state} detailMap={invalidDetailMap} onSearch={mockSearch} />
             </div>
         );
     },
@@ -327,7 +349,7 @@ export const Interactive: Story = {
         const state = useDeckState([...cryptEntries, ...libraryEntries]);
         return (
             <div style={{ width: 400, height: 600 }}>
-                <DeckEditorPanel {...state} iconMap={fullIconMap} onSearch={mockSearch} />
+                <DeckEditorPanel {...state} detailMap={fullDetailMap} onSearch={mockSearch} />
             </div>
         );
     },

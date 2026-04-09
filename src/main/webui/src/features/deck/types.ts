@@ -26,16 +26,12 @@ export interface DeckEntry {
     banned: boolean;
 }
 
-// ── KRCG deck format (with extensions for round-tripping DeckEntry) ──────────
+// ── KRCG deck format (pure — no extension fields) ────────────────────────────
 
 interface KrcgCard {
     id: string;
     count: number;
     name: string;
-    // Extensions: stored alongside KRCG fields so we can restore DeckEntry metadata
-    group?: string;
-    banned?: boolean;
-    types?: string[];
 }
 
 interface KrcgLibraryGroup {
@@ -49,16 +45,25 @@ export interface KrcgContents {
     library: { count: number; cards: KrcgLibraryGroup[] };
 }
 
-/** Matches CardIconDto from the backend /cards/icons endpoint. */
-export interface CardIconData {
+/**
+ * Matches CardDetailDto from the backend /cards/details endpoint.
+ * Combines entry metadata (types, group, banned) with icon display data
+ * so a single fetch covers everything the deck editor needs.
+ */
+export interface CardDetailData {
     id: string;
+    name: string;
     crypt: boolean;
-    // Crypt
+    // Entry metadata
+    types: string[];
+    group: string | null;
+    banned: boolean;
+    // Crypt display
     clan: string | null;
     path: string | null;
     capacity: number | null;
     disciplines: string[];
-    // Library
+    // Library display
     andDisciplines: string[];
     orDisciplines: string[];
     requirementClans: string[];
@@ -76,4 +81,12 @@ export interface CardSearchResult {
     cryptType: string | null;  // "Vampire" | "Imbued" for crypt, null for library
     types: string[];           // library types; empty array for crypt
     banned: boolean;
+}
+
+/** Resolved card entry returned by POST /cards/preview. */
+export interface ImportPreview {
+    format:   'krcg' | 'jol';
+    deckName: string | null;
+    resolved: Array<{ count: number; card: CardDetailData }>;
+    errors:   Array<{ line: string; reason: string }>;
 }

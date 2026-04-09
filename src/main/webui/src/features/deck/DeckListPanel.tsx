@@ -9,10 +9,11 @@ interface Props {
     selectedId?: number | null;
     onSelect?: (deck: Deck) => void;
     onNew?: () => void;
+    onImport?: () => void;
     loadError?: string;
 }
 
-export default function DeckListPanel({ decks, selectedId = null, onSelect, onNew, loadError }: Props) {
+export default function DeckListPanel({ decks, selectedId = null, onSelect, onNew, onImport, loadError }: Props) {
     const [filter, setFilter] = useState('');
 
     const visible = filter.trim()
@@ -23,12 +24,20 @@ export default function DeckListPanel({ decks, selectedId = null, onSelect, onNe
         <Panel
             title="My Decks"
             right={
-                <button
-                    onClick={onNew}
-                    className="text-xs px-2 py-1 rounded text-accent-soft hover:text-accent transition-colors cursor-pointer"
-                >
-                    + New
-                </button>
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={onImport}
+                        className="text-xs px-2 py-1 rounded text-ink-muted hover:text-ink transition-colors cursor-pointer"
+                    >
+                        Import
+                    </button>
+                    <button
+                        onClick={onNew}
+                        className="text-xs px-2 py-1 rounded text-accent-soft hover:text-accent transition-colors cursor-pointer"
+                    >
+                        + New
+                    </button>
+                </div>
             }
         >
             <div className="flex items-center gap-1.5 px-3 py-1.5 border-b border-line/50">

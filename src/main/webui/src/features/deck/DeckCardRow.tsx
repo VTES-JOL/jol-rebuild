@@ -1,10 +1,10 @@
 import CryptCardRow from './CryptCardRow';
 import LibraryCardRow from './LibraryCardRow';
-import type { CardIconData, DeckEntry } from './types';
+import type { CardDetailData, DeckEntry } from './types';
 
 interface Props {
     entry: DeckEntry;
-    iconData?: CardIconData;
+    iconData?: CardDetailData;
     onIncrement: () => void;
     onDecrement: () => void;
 }

@@ -3,9 +3,10 @@ import AppLayout from '@/shared/layout/AppLayout';
 import DeckListPanel from './DeckListPanel';
 import DeckEditorPanel from './DeckEditorPanel';
 import DeckAnalyticsPanel from './DeckAnalyticsPanel';
-import { computeSummary, formatSummaryCompact, toKrcgContents, fromKrcgContents } from './deckUtils';
+import DeckImportModal from './DeckImportModal';
+import { computeSummary, formatSummaryCompact, toKrcgContents, extractKrcgCards, enrichEntry } from './deckUtils';
 import deckApi from './api';
-import type { CardIconData, Deck, DeckEntry, CardSearchResult } from './types';
+import type { CardDetailData, Deck, DeckEntry, CardSearchResult } from './types';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -13,17 +14,16 @@ export default function DecksPage() {
     const [decks,           setDecks]           = useState<Deck[]>([]);
     const [selectedId,      setSelectedId]      = useState<number | null>(null);
     const [entries,         setEntries]         = useState<DeckEntry[]>([]);
-    const [iconMap,         setIconMap]         = useState<Map<string, CardIconData>>(new Map());
+    const [detailMap,       setDetailMap]       = useState<Map<string, CardDetailData>>(new Map());
     const [saveStatus,      setSaveStatus]      = useState<SaveStatus>('idle');
     const [loadError,       setLoadError]       = useState<string | null>(null);
     const [entriesLoading,  setEntriesLoading]  = useState(false);
+    const [showImport,      setShowImport]      = useState(false);
 
-    const saveTimer   = useRef<ReturnType<typeof setTimeout>>(undefined);
-    const isDirtyRef  = useRef(false);
-    // Mirror of entries state accessible in callbacks without adding entries to their deps.
-    const entriesRef  = useRef<DeckEntry[]>([]);
-    // Mirror of iconMap so handleAddCard can check presence without taking it as a dep.
-    const iconMapRef  = useRef<Map<string, CardIconData>>(new Map());
+    const saveTimer    = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const isDirtyRef   = useRef(false);
+    const entriesRef   = useRef<DeckEntry[]>([]);
+    const detailMapRef = useRef<Map<string, CardDetailData>>(new Map());
 
     // ── Load deck list on mount ───────────────────────────────────────────────
     useEffect(() => {
@@ -34,37 +34,44 @@ export default function DecksPage() {
 
     // ── Load contents when selection changes ─────────────────────────────────
     useEffect(() => {
-        if (selectedId == null) { setEntries([]); entriesRef.current = []; setIconMap(new Map()); return; }
+        if (selectedId == null) {
+            setEntries([]); entriesRef.current = [];
+            setDetailMap(new Map()); detailMapRef.current = new Map();
+            return;
+        }
         setEntries([]);
         entriesRef.current = [];
-        setIconMap(new Map());
+        setDetailMap(new Map());
         setEntriesLoading(true);
+
         deckApi.getContents(selectedId)
             .then(async contents => {
-                const loaded = fromKrcgContents(contents);
+                const raw     = extractKrcgCards(contents);
+                const details = await deckApi.cardDetails(raw.map(c => c.id));
+                const dmap    = new Map(details.map(d => [d.id, d]));
+                const loaded  = raw.map(c => enrichEntry(c, dmap.get(c.id)));
+                setDetailMap(dmap);
+                detailMapRef.current = dmap;
                 setEntries(loaded);
                 entriesRef.current = loaded;
-                const icons = await deckApi.cardIcons(loaded.map(e => e.cardId));
-                setIconMap(new Map(icons.map(i => [i.id, i])));
             })
             .catch(console.error)
             .finally(() => setEntriesLoading(false));
     }, [selectedId]);
 
-    // Keep refs in sync for use in callbacks that can't take state as a dep.
-    useEffect(() => { entriesRef.current = entries; }, [entries]);
-    useEffect(() => { iconMapRef.current = iconMap;  }, [iconMap]);
+    useEffect(() => { entriesRef.current   = entries;   }, [entries]);
+    useEffect(() => { detailMapRef.current = detailMap; }, [detailMap]);
 
     // ── Auto-save on entries change ──────────────────────────────────────────
     useEffect(() => {
-        clearTimeout(saveTimer.current); // always cancel pending save first
-        if (!isDirtyRef.current) return; // skip the initial load
+        clearTimeout(saveTimer.current);
+        if (!isDirtyRef.current) return;
         setSaveStatus('saving');
         saveTimer.current = setTimeout(async () => {
             if (selectedId == null) return;
             try {
-                const summary  = computeSummary(entries);
-                const updated  = await deckApi.save(selectedId, {
+                const summary = computeSummary(entries);
+                const updated = await deckApi.save(selectedId, {
                     contents: toKrcgContents(entries),
                     summary:  summary ? formatSummaryCompact(summary) : null,
                 });
@@ -78,7 +85,6 @@ export default function DecksPage() {
     }, [entries]);
 
     const handleSelect = useCallback((deck: Deck) => {
-        // Flush any pending auto-save for the current deck before switching.
         if (isDirtyRef.current && selectedId != null) {
             clearTimeout(saveTimer.current);
             const snapshot = entriesRef.current;
@@ -104,6 +110,19 @@ export default function DecksPage() {
             setSaveStatus('idle');
         } catch (e) {
             console.error('Failed to create deck', e);
+        }
+    }, []);
+
+    const handleImport = useCallback(async (name: string, entries: { cardId: string; count: number }[]) => {
+        try {
+            const deck = await deckApi.importDeck(name, entries);
+            setDecks(ds => [deck, ...ds]);
+            isDirtyRef.current = false;
+            setSelectedId(deck.id);
+            setSaveStatus('idle');
+            setShowImport(false);
+        } catch (e) {
+            console.error('Failed to import deck', e);
         }
     }, []);
 
@@ -189,10 +208,10 @@ export default function DecksPage() {
                 banned:  result.banned,
             }];
         });
-        if (!iconMapRef.current.has(result.id)) {
-            deckApi.cardIcon(result.id)
-                .then(icon => {
-                    if (icon) setIconMap(m => new Map([...m, [icon.id, icon]]));
+        if (!detailMapRef.current.has(result.id)) {
+            deckApi.cardDetail(result.id)
+                .then(detail => {
+                    if (detail) setDetailMap(m => new Map([...m, [detail.id, detail]]));
                 })
                 .catch(console.error);
         }
@@ -208,6 +227,7 @@ export default function DecksPage() {
                     selectedId={selectedId}
                     onSelect={handleSelect}
                     onNew={handleNew}
+                    onImport={() => setShowImport(true)}
                     loadError={loadError ?? undefined}
                 />
                 {selectedId != null ? (
@@ -223,7 +243,7 @@ export default function DecksPage() {
                         onRetrySave={handleRetrySave}
                         onDelete={handleDelete}
                         entries={entries}
-                        iconMap={iconMap}
+                        detailMap={detailMap}
                         onIncrement={handleIncrement}
                         onDecrement={handleDecrement}
                         onAddCard={handleAddCard}
@@ -235,9 +255,16 @@ export default function DecksPage() {
                     </div>
                 )}
                 <div className="hidden lg:contents">
-                    <DeckAnalyticsPanel entries={entries} iconMap={iconMap} />
+                    <DeckAnalyticsPanel entries={entries} detailMap={detailMap} />
                 </div>
             </div>
+
+            {showImport && (
+                <DeckImportModal
+                    onImport={handleImport}
+                    onClose={() => setShowImport(false)}
+                />
+            )}
         </AppLayout>
     );
 }

@@ -4,11 +4,11 @@ import { TypeIcon } from '@/shared/components/TypeIcon';
 import DeckCardRow from './DeckCardRow';
 import { groupEntries } from './deckUtils';
 import type { CardGroup } from './deckUtils';
-import type { CardIconData, DeckEntry } from './types';
+import type { CardDetailData, DeckEntry } from './types';
 
 interface Props {
     entries:        DeckEntry[];
-    iconMap?:       Map<string, CardIconData>;
+    detailMap?:     Map<string, CardDetailData>;
     entriesLoading?: boolean;
     onIncrement:    (cardId: string) => void;
     onDecrement:    (cardId: string) => void;
@@ -18,12 +18,12 @@ interface GroupSectionProps {
     group:      CardGroup;
     isOpen:     boolean;
     onToggle:   (key: string) => void;
-    iconMap?:   Map<string, CardIconData>;
+    detailMap?: Map<string, CardDetailData>;
     onIncrement: (cardId: string) => void;
     onDecrement: (cardId: string) => void;
 }
 
-function GroupSection({ group, isOpen, onToggle, iconMap, onIncrement, onDecrement }: GroupSectionProps) {
+function GroupSection({ group, isOpen, onToggle, detailMap, onIncrement, onDecrement }: GroupSectionProps) {
     return (
         <div key={group.key}>
             <button
@@ -50,7 +50,7 @@ function GroupSection({ group, isOpen, onToggle, iconMap, onIncrement, onDecreme
                 <DeckCardRow
                     key={entry.cardId}
                     entry={entry}
-                    iconData={iconMap?.get(entry.cardId)}
+                    iconData={detailMap?.get(entry.cardId)}
                     onIncrement={() => onIncrement(entry.cardId)}
                     onDecrement={() => onDecrement(entry.cardId)}
                 />
@@ -59,7 +59,7 @@ function GroupSection({ group, isOpen, onToggle, iconMap, onIncrement, onDecreme
     );
 }
 
-export default function DeckCardList({ entries, iconMap, entriesLoading, onIncrement, onDecrement }: Props) {
+export default function DeckCardList({ entries, detailMap, entriesLoading, onIncrement, onDecrement }: Props) {
     const [openGroups,      setOpenGroups]      = useState<Set<string>>(new Set());
     const groupsInitialized = useRef(false);
     const seenGroupsRef     = useRef<Set<string>>(new Set());
@@ -105,7 +105,7 @@ export default function DeckCardList({ entries, iconMap, entriesLoading, onIncre
     const cryptGroups = groups.filter(g => g.key === 'Crypt');
     const libGroups   = groups.filter(g => g.key !== 'Crypt');
 
-    const sharedProps = { isOpen: false, onToggle: toggleGroup, iconMap, onIncrement, onDecrement };
+    const sharedProps = { isOpen: false, onToggle: toggleGroup, detailMap, onIncrement, onDecrement };
 
     return (
         // At 2xl: split into two independently-scrolling columns (crypt left, library right).

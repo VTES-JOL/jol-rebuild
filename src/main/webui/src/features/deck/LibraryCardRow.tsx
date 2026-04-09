@@ -4,11 +4,11 @@ import { ClanIcon } from '@/shared/components/ClanIcon';
 import { CostIcon } from '@/shared/components/CostIcon';
 import { DisciplineIcon } from '@/shared/components/DisciplineIcon';
 import CardRowShell from './CardRowShell';
-import type { CardIconData, DeckEntry } from './types';
+import type { CardDetailData, DeckEntry } from './types';
 
 interface Props {
     entry: DeckEntry;
-    iconData?: CardIconData;
+    iconData?: CardDetailData;
     onIncrement: () => void;
     onDecrement: () => void;
 }

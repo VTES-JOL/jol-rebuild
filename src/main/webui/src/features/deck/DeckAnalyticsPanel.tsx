@@ -5,11 +5,11 @@ import { LibraryCostSection }     from './analytics/LibraryCostSection';
 import { CryptCapacityCurve }     from './analytics/CryptCapacityCurve';
 import { ClanDistributionSection } from './analytics/ClanDistributionSection';
 import { DisciplineCoverageSection } from './analytics/DisciplineCoverageSection';
-import type { CardIconData, DeckEntry } from './types';
+import type { CardDetailData, DeckEntry } from './types';
 
 interface Props {
     entries: DeckEntry[];
-    iconMap: Map<string, CardIconData>;
+    detailMap: Map<string, CardDetailData>;
 }
 
 /**
@@ -19,7 +19,7 @@ interface Props {
  *   xl  (280px): + Library Costs + Capacity Curve
  *   2xl (300px): + Clan Distribution + Discipline Coverage
  */
-export default function DeckAnalyticsPanel({ entries, iconMap }: Props) {
+export default function DeckAnalyticsPanel({ entries, detailMap }: Props) {
     const isEmpty = entries.length === 0;
 
     return (
@@ -37,14 +37,14 @@ export default function DeckAnalyticsPanel({ entries, iconMap }: Props) {
 
                     {/* ── xl+ ─────────────────────────────────────────────── */}
                     <div className="hidden xl:block">
-                        <LibraryCostSection  entries={entries} iconMap={iconMap} />
-                        <CryptCapacityCurve  entries={entries} iconMap={iconMap} />
+                        <LibraryCostSection  entries={entries} detailMap={detailMap} />
+                        <CryptCapacityCurve  entries={entries} detailMap={detailMap} />
                     </div>
 
                     {/* ── 2xl+ ────────────────────────────────────────────── */}
                     <div className="hidden 2xl:block">
-                        <ClanDistributionSection   entries={entries} iconMap={iconMap} />
-                        <DisciplineCoverageSection entries={entries} iconMap={iconMap} />
+                        <ClanDistributionSection   entries={entries} detailMap={detailMap} />
+                        <DisciplineCoverageSection entries={entries} detailMap={detailMap} />
                     </div>
 
                 </div>

@@ -1,10 +1,10 @@
 import { BarRow } from './BarRow';
 import { SectionHeader } from './SectionHeader';
-import type { CardIconData, DeckEntry } from '../types';
+import type { CardDetailData, DeckEntry } from '../types';
 
 interface Props {
     entries: DeckEntry[];
-    iconMap: Map<string, CardIconData>;
+    detailMap: Map<string, CardDetailData>;
 }
 
 interface CostRow {
@@ -13,7 +13,7 @@ interface CostRow {
     color: string;
 }
 
-export function LibraryCostSection({ entries, iconMap }: Props) {
+export function LibraryCostSection({ entries, detailMap }: Props) {
     const libEntries = entries.filter(e => !e.isCrypt);
     if (libEntries.length === 0) return null;
 
@@ -22,7 +22,7 @@ export function LibraryCostSection({ entries, iconMap }: Props) {
     const bloodBuckets = new Map<number | 'x', number>();
 
     for (const entry of libEntries) {
-        const icon = iconMap.get(entry.cardId);
+        const icon = detailMap.get(entry.cardId);
         if (!icon) continue;
 
         const hasPool  = icon.poolCost  != null;

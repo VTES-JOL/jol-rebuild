@@ -3,9 +3,14 @@ package net.deckserver.jol.services;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.inject.Inject;
 import net.deckserver.jol.config.Config;
+import net.deckserver.jol.dto.CardDetailDto;
 import net.deckserver.jol.dto.CardIconDto;
 import net.deckserver.jol.dto.CardSuggestionDto;
+import net.deckserver.jol.dto.ImportPreviewDto;
 import net.deckserver.jol.enums.Discipline;
 import net.deckserver.jol.model.Card;
 import net.deckserver.jol.model.CryptCard;
@@ -22,6 +27,8 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -52,8 +59,20 @@ public class CardService {
      * Fast lookup by card ID (one entry per card).
      */
     private final Map<String, Card> idMap = new HashMap<>();
+
+    /**
+     * Case-insensitive, accent-stripped lookup for import name resolution.
+     * Key = lowercase accent-stripped lookup key; value = same card as lookupMap.
+     */
+    private final Map<String, Card> lowerLookupMap = new HashMap<>();
+
+    private static final Pattern JOL_LINE = Pattern.compile("^(\\d+)\\s*[xX]?\\s*(.+)$");
+
     @Inject
     Config config;
+
+    @Inject
+    ObjectMapper mapper;
 
     @PostConstruct
     public void init() {
@@ -80,6 +99,7 @@ public class CardService {
         loadCrypt(cryptPath, cryptFormat);
         loadLibrary(libraryPath, libraryFormat);
 
+        lookupMap.forEach((k, v) -> lowerLookupMap.put(StringUtils.stripAccents(k).toLowerCase(), v));
         LOG.infof("Loaded %d cards (%d lookup keys)", allCards.size(), lookupMap.size());
     }
 
@@ -91,30 +111,121 @@ public class CardService {
                 .toList();
     }
 
-    public List<CardIconDto> findIconsByIds(List<String> ids) {
+    public List<CardDetailDto> findDetailsByIds(List<String> ids) {
         return ids.stream()
                 .map(idMap::get)
                 .filter(Objects::nonNull)
-                .map(this::toIconDto)
+                .map(this::toDetailDto)
                 .toList();
     }
 
-    public CardIconDto findIconById(String id) {
+    public CardDetailDto findDetailById(String id) {
         Card card = idMap.get(id);
-        return card != null ? toIconDto(card) : null;
+        return card != null ? toDetailDto(card) : null;
     }
 
-    private CardIconDto toIconDto(Card card) {
+    /**
+     * Auto-detects format (KRCG JSON vs JOL text) and returns a preview
+     * of what would be imported, including any parse/resolution errors.
+     */
+    public ImportPreviewDto preview(String text) {
+        String trimmed = text == null ? "" : text.strip();
+        if (trimmed.startsWith("{")) {
+            return previewKrcg(trimmed);
+        }
+        return previewJol(trimmed);
+    }
+
+    private ImportPreviewDto previewKrcg(String text) {
+        List<ImportPreviewDto.ResolvedEntry> resolved = new ArrayList<>();
+        List<ImportPreviewDto.ParseError>   errors   = new ArrayList<>();
+        String deckName = null;
+
+        try {
+            JsonNode root = mapper.readTree(text);
+
+            // Extract optional deck name
+            JsonNode meta = root.path("meta");
+            if (!meta.isMissingNode() && meta.has("name")) {
+                deckName = meta.get("name").asText(null);
+            }
+
+            // Crypt cards
+            for (JsonNode card : root.path("crypt").path("cards")) {
+                resolveKrcgCard(card, resolved, errors);
+            }
+            // Library cards (nested under type groups)
+            for (JsonNode group : root.path("library").path("cards")) {
+                for (JsonNode card : group.path("cards")) {
+                    resolveKrcgCard(card, resolved, errors);
+                }
+            }
+        } catch (Exception e) {
+            errors.add(new ImportPreviewDto.ParseError(text.length() > 60 ? text.substring(0, 60) + "…" : text,
+                    "Invalid JSON: " + e.getMessage()));
+        }
+
+        return new ImportPreviewDto("krcg", deckName, resolved, errors);
+    }
+
+    private void resolveKrcgCard(JsonNode card, List<ImportPreviewDto.ResolvedEntry> resolved,
+                                  List<ImportPreviewDto.ParseError> errors) {
+        String id    = card.path("id").asText(null);
+        int    count = card.path("count").asInt(1);
+        if (id == null) {
+            errors.add(new ImportPreviewDto.ParseError(card.toString(), "Missing card id"));
+            return;
+        }
+        Card found = idMap.get(id);
+        if (found == null) {
+            errors.add(new ImportPreviewDto.ParseError(id, "Unknown card id: " + id));
+            return;
+        }
+        resolved.add(new ImportPreviewDto.ResolvedEntry(count, toDetailDto(found)));
+    }
+
+    private ImportPreviewDto previewJol(String text) {
+        List<ImportPreviewDto.ResolvedEntry> resolved = new ArrayList<>();
+        List<ImportPreviewDto.ParseError>   errors   = new ArrayList<>();
+
+        for (String rawLine : text.split("\n")) {
+            String line = rawLine.strip();
+            if (line.isEmpty() || line.startsWith("//") || line.startsWith("#")) continue;
+
+            Matcher m = JOL_LINE.matcher(line);
+            if (!m.matches()) {
+                errors.add(new ImportPreviewDto.ParseError(rawLine, "Expected: {count}[x] {card name}"));
+                continue;
+            }
+
+            int    count = Integer.parseInt(m.group(1));
+            String name  = m.group(2).strip();
+            Card   found = lowerLookupMap.get(StringUtils.stripAccents(name).toLowerCase());
+
+            if (found == null) {
+                errors.add(new ImportPreviewDto.ParseError(rawLine, "Card not found: " + name));
+            } else {
+                resolved.add(new ImportPreviewDto.ResolvedEntry(count, toDetailDto(found)));
+            }
+        }
+
+        return new ImportPreviewDto("jol", null, resolved, errors);
+    }
+
+    private CardDetailDto toDetailDto(Card card) {
         if (card instanceof CryptCard c) {
-            return new CardIconDto(
-                    c.id(), true,
+            List<String> types = List.of(c.type() == CryptType.IMBUED ? "Imbued" : "Vampire");
+            return new CardDetailDto(
+                    c.id(), c.name(), true,
+                    types, c.group(), c.banned(),
                     c.clan(), c.path(), c.capacity(), c.disciplines(),
                     List.of(), List.of(), List.of(), null, null, null
             );
         }
         LibraryCard l = (LibraryCard) card;
-        return new CardIconDto(
-                l.id(), false,
+        return new CardDetailDto(
+                l.id(), l.name(), false,
+                l.types(), null, l.banned(),
                 null, null, null, List.of(),
                 l.andDisciplines(), l.orDisciplines(),
                 l.requirementClans(), l.requirementPath(),

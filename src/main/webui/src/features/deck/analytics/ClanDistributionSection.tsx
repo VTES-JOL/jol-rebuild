@@ -1,20 +1,20 @@
 import { ClanIcon } from '@/shared/components/ClanIcon';
 import { BarRow } from './BarRow';
 import { SectionHeader } from './SectionHeader';
-import type { CardIconData, DeckEntry } from '../types';
+import type { CardDetailData, DeckEntry } from '../types';
 
 interface Props {
     entries: DeckEntry[];
-    iconMap: Map<string, CardIconData>;
+    detailMap: Map<string, CardDetailData>;
 }
 
-export function ClanDistributionSection({ entries, iconMap }: Props) {
+export function ClanDistributionSection({ entries, detailMap }: Props) {
     const cryptEntries = entries.filter(e => e.isCrypt);
     if (cryptEntries.length === 0) return null;
 
     const clanCounts = new Map<string, number>();
     for (const entry of cryptEntries) {
-        const clan = iconMap.get(entry.cardId)?.clan ?? '—';
+        const clan = detailMap.get(entry.cardId)?.clan ?? '—';
         clanCounts.set(clan, (clanCounts.get(clan) ?? 0) + entry.count);
     }
 

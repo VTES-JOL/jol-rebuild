@@ -1,4 +1,4 @@
-import type { DeckEntry, DeckSummary, KrcgContents } from './types';
+import type { CardDetailData, DeckEntry, DeckSummary, KrcgContents } from './types';
 
 export interface CardGroup {
     key: string;
@@ -39,7 +39,6 @@ export function groupEntries(entries: DeckEntry[]): CardGroup[] {
 /**
  * Computes a live DeckSummary from the current entries.
  * Returns null only when the deck is completely empty.
- * Always includes crypt+library counts (even 0) so validation chips remain visible.
  */
 export function computeSummary(entries: DeckEntry[]): DeckSummary | null {
     if (entries.length === 0) return null;
@@ -63,11 +62,6 @@ export function computeSummary(entries: DeckEntry[]): DeckSummary | null {
     return { crypt, library, groups };
 }
 
-/**
- * Parses the compact storage format "{crypt},{library},{groups}" into a DeckSummary.
- * e.g. "12,80,4/5" → { crypt: 12, library: 80, groups: "4/5" }
- *      "12,80,"    → { crypt: 12, library: 80, groups: null }
- */
 export function parseSummary(compact: string | null): DeckSummary | null {
     if (!compact) return null;
     const [cryptStr, libraryStr, groupsStr] = compact.split(',');
@@ -78,10 +72,6 @@ export function parseSummary(compact: string | null): DeckSummary | null {
     };
 }
 
-/**
- * Serialises a DeckSummary to the compact storage format.
- * e.g. { crypt: 12, library: 80, groups: "4/5" } → "12,80,4/5"
- */
 export function formatSummaryCompact(summary: DeckSummary): string {
     return `${summary.crypt},${summary.library},${summary.groups ?? ''}`;
 }
@@ -92,17 +82,17 @@ export function getBannedEntries(entries: DeckEntry[]): DeckEntry[] {
 
 // ── KRCG serialisation ────────────────────────────────────────────────────────
 
-/** Serialises current entries to KRCG format (with metadata extensions for round-tripping). */
+/** Serialises entries to pure KRCG format — no extension fields. */
 export function toKrcgContents(entries: DeckEntry[]): KrcgContents {
     const cryptCards = entries
         .filter(e => e.isCrypt)
-        .map(e => ({ id: e.cardId, count: e.count, name: e.name, group: e.group, banned: e.banned, types: e.types }));
+        .map(e => ({ id: e.cardId, count: e.count, name: e.name }));
 
     const libGroups = groupEntries(entries.filter(e => !e.isCrypt))
         .map(g => ({
-            type: g.key,
+            type:  g.key,
             count: g.total,
-            cards: g.entries.map(e => ({ id: e.cardId, count: e.count, name: e.name, banned: e.banned, types: e.types })),
+            cards: g.entries.map(e => ({ id: e.cardId, count: e.count, name: e.name })),
         }));
 
     return {
@@ -111,30 +101,41 @@ export function toKrcgContents(entries: DeckEntry[]): KrcgContents {
     };
 }
 
-/** Deserialises KRCG contents back into DeckEntry[]. */
-export function fromKrcgContents(contents: KrcgContents): DeckEntry[] {
-    const entries: DeckEntry[] = [];
+export interface RawKrcgCard {
+    id: string;
+    count: number;
+    name: string;
+    isCrypt: boolean;
+}
+
+/**
+ * Extracts minimal {id, count, name, isCrypt} from KRCG contents.
+ * Call cardDetails() to enrich these into full DeckEntry[].
+ */
+export function extractKrcgCards(contents: KrcgContents): RawKrcgCard[] {
+    const cards: RawKrcgCard[] = [];
 
     for (const c of (contents.crypt?.cards ?? [])) {
-        entries.push({
-            cardId: c.id, name: c.name, count: c.count,
-            isCrypt: true,
-            types:  c.types ?? ['Vampire'],
-            group:  c.group,
-            banned: c.banned ?? false,
-        });
+        cards.push({ id: c.id, count: c.count, name: c.name, isCrypt: true });
     }
-
     for (const group of (contents.library?.cards ?? [])) {
         for (const c of group.cards) {
-            entries.push({
-                cardId: c.id, name: c.name, count: c.count,
-                isCrypt: false,
-                types:  c.types ?? [group.type],
-                banned: c.banned ?? false,
-            });
+            cards.push({ id: c.id, count: c.count, name: c.name, isCrypt: false });
         }
     }
 
-    return entries;
+    return cards;
+}
+
+/** Builds a DeckEntry by merging a raw KRCG card with its fetched card detail. */
+export function enrichEntry(raw: RawKrcgCard, detail: CardDetailData | undefined): DeckEntry {
+    return {
+        cardId:  raw.id,
+        name:    raw.name,
+        count:   raw.count,
+        isCrypt: raw.isCrypt,
+        types:   detail?.types  ?? (raw.isCrypt ? ['Vampire'] : []),
+        group:   detail?.group  ?? undefined,
+        banned:  detail?.banned ?? false,
+    };
 }

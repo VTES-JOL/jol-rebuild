@@ -6,7 +6,7 @@ import DeckStatusBar from './DeckStatusBar';
 import DeckComments from './DeckComments';
 import DeckCardList from './DeckCardList';
 import DeckHeaderControls from './DeckHeaderControls';
-import type { CardIconData, CardSearchResult, DeckEntry } from './types';
+import type { CardDetailData, CardSearchResult, DeckEntry } from './types';
 
 interface Props {
     title?:            string;
@@ -19,7 +19,7 @@ interface Props {
     onRetrySave?:      () => void;
     onCommentsChange?: (comments: string | null) => void;
     entries:           DeckEntry[];
-    iconMap?:          Map<string, CardIconData>;
+    detailMap?:        Map<string, CardDetailData>;
     onIncrement:       (cardId: string) => void;
     onDecrement:       (cardId: string) => void;
     onAddCard:         (result: CardSearchResult) => void;
@@ -29,7 +29,7 @@ interface Props {
 export default function DeckEditorPanel({
     title = 'Editor', saveLabel, saveError, comments, entriesLoading,
     onRename, onDelete, onRetrySave, onCommentsChange,
-    entries, iconMap, onIncrement, onDecrement, onAddCard, onSearch,
+    entries, detailMap, onIncrement, onDecrement, onAddCard, onSearch,
 }: Props) {
     const [editingName, setEditingName] = useState(false);
     const [nameValue,   setNameValue]   = useState(title);
@@ -90,7 +90,7 @@ export default function DeckEditorPanel({
             <DeckComments  comments={comments} onCommentsChange={onCommentsChange} />
             <DeckCardList
                 entries={entries}
-                iconMap={iconMap}
+                detailMap={detailMap}
                 entriesLoading={entriesLoading}
                 onIncrement={onIncrement}
                 onDecrement={onDecrement}

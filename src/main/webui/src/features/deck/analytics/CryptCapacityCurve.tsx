@@ -1,14 +1,14 @@
 import { SectionHeader } from './SectionHeader';
-import type { CardIconData, DeckEntry } from '../types';
+import type { CardDetailData, DeckEntry } from '../types';
 
 interface Props {
     entries: DeckEntry[];
-    iconMap: Map<string, CardIconData>;
+    detailMap: Map<string, CardDetailData>;
 }
 
 const MAX_BAR_PX = 44; // container is h-12 (48px); leave a little headroom
 
-export function CryptCapacityCurve({ entries, iconMap }: Props) {
+export function CryptCapacityCurve({ entries, detailMap }: Props) {
     const cryptEntries = entries.filter(e => e.isCrypt);
     if (cryptEntries.length === 0) return null;
 
@@ -17,7 +17,7 @@ export function CryptCapacityCurve({ entries, iconMap }: Props) {
     let totalCards  = 0;
 
     for (const entry of cryptEntries) {
-        const cap = iconMap.get(entry.cardId)?.capacity;
+        const cap = detailMap.get(entry.cardId)?.capacity;
         if (cap == null) continue;
         buckets.set(cap, (buckets.get(cap) ?? 0) + entry.count);
         weightedSum += cap * entry.count;

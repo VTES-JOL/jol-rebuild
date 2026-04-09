@@ -1,11 +1,11 @@
 import { DisciplineIcon } from '@/shared/components/DisciplineIcon';
 import { BarRow } from './BarRow';
 import { SectionHeader } from './SectionHeader';
-import type { CardIconData, DeckEntry } from '../types';
+import type { CardDetailData, DeckEntry } from '../types';
 
 interface Props {
     entries: DeckEntry[];
-    iconMap: Map<string, CardIconData>;
+    detailMap: Map<string, CardDetailData>;
 }
 
 /**
@@ -15,7 +15,7 @@ interface Props {
  * inferior, uppercase for superior — but we group inf+sup together
  * so "dom" and "DOM" both increment the same key.
  */
-export function DisciplineCoverageSection({ entries, iconMap }: Props) {
+export function DisciplineCoverageSection({ entries, detailMap }: Props) {
     const cryptEntries = entries.filter(e => e.isCrypt);
     const libEntries   = entries.filter(e => !e.isCrypt);
 
@@ -24,7 +24,7 @@ export function DisciplineCoverageSection({ entries, iconMap }: Props) {
     // Crypt: how many cards (×count) carry each discipline (case-normalised to uppercase for grouping).
     const cryptDiscs = new Map<string, number>();
     for (const entry of cryptEntries) {
-        const discs = iconMap.get(entry.cardId)?.disciplines ?? [];
+        const discs = detailMap.get(entry.cardId)?.disciplines ?? [];
         for (const d of discs) {
             const key = d.toUpperCase();
             cryptDiscs.set(key, (cryptDiscs.get(key) ?? 0) + entry.count);
@@ -34,7 +34,7 @@ export function DisciplineCoverageSection({ entries, iconMap }: Props) {
     // Library: how many cards require each discipline.
     const libDiscs = new Map<string, number>();
     for (const entry of libEntries) {
-        const icon = iconMap.get(entry.cardId);
+        const icon = detailMap.get(entry.cardId);
         if (!icon) continue;
         for (const d of [...icon.orDisciplines, ...icon.andDisciplines]) {
             const key = d.toUpperCase();
