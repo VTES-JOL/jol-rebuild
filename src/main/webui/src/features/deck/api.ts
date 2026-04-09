@@ -1,4 +1,4 @@
-import type { CardDetailData, CardSearchResult, Deck, ImportPreview, KrcgContents } from './types';
+import type { CardDetailData, Deck, ImportPreview, KrcgContents } from './types';
 
 const BASE  = '/api/decks';
 const CARDS = '/cards';
@@ -43,7 +43,7 @@ const deckApi = {
 
     // ── Card data ─────────────────────────────────────────────────────────────
 
-    async autocomplete(q: string): Promise<CardSearchResult[]> {
+    async autocomplete(q: string): Promise<CardDetailData[]> {
         if (!q.trim()) return [];
         return json(await fetch(`${CARDS}/autocomplete?q=${encodeURIComponent(q)}`, OPTS));
     },

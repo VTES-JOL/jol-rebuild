@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import DeckEditorPanel from '../features/deck/DeckEditorPanel';
-import type { CardDetailData, CardSearchResult, DeckEntry } from '../features/deck/types';
+import type { CardDetailData, DeckEntry } from '../features/deck/types';
 
 const meta = {
     title: 'Deck/DeckEditorPanel',
@@ -212,17 +212,31 @@ const invalidDetailMap = new Map(invalidIconData.map(d => [d.id, d]));
 
 // ── Stub search pool ──────────────────────────────────────────────────────────
 
-const searchPool: CardSearchResult[] = [
-    { id: '200874', name: 'Lucita',              crypt: true,  group: '3',   cryptType: 'Vampire', types: [],         banned: false },
-    { id: '200407', name: 'Elena Gutierrez',     crypt: true,  group: '6',   cryptType: 'Vampire', types: [],         banned: false },
-    { id: '200858', name: 'Lorenzo Detuono',     crypt: true,  group: '3',   cryptType: 'Vampire', types: [],         banned: false },
-    { id: '200076', name: 'Anarch Convert',      crypt: true,  group: 'ANY', cryptType: 'Vampire', types: [],         banned: false },
-    { id: '101089', name: 'Legal Manipulations', crypt: false, group: null,  cryptType: null,       types: ['Action'], banned: false },
-    { id: '101112', name: 'Liquidation',         crypt: false, group: null,  cryptType: null,       types: ['Master'], banned: false },
-    { id: '101134', name: 'Lure of the Serpent', crypt: false, group: null,  cryptType: null,       types: ['Master'], banned: true  },
+const searchPool: CardDetailData[] = [
+    { id: '200874', name: 'Lucita',              crypt: true,  group: '3',   types: ['Vampire'], banned: false,
+      clan: 'Lasombra', path: null, capacity: 8, disciplines: ['DOM', 'OBT', 'POT'],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
+    { id: '200407', name: 'Elena Gutierrez',     crypt: true,  group: '6',   types: ['Vampire'], banned: false,
+      clan: 'Tremere', path: null, capacity: 5, disciplines: ['aus', 'tha'],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
+    { id: '200858', name: 'Lorenzo Detuono',     crypt: true,  group: '3',   types: ['Vampire'], banned: false,
+      clan: 'Giovanni', path: null, capacity: 5, disciplines: ['dom', 'nec'],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
+    { id: '200076', name: 'Anarch Convert',      crypt: true,  group: 'ANY', types: ['Vampire'], banned: false,
+      clan: null, path: null, capacity: 1, disciplines: [],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
+    { id: '101089', name: 'Legal Manipulations', crypt: false, group: null,  types: ['Action'],  banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
+    { id: '101112', name: 'Liquidation',         crypt: false, group: null,  types: ['Master'],  banned: false,
+      clan: null, path: null, capacity: null, disciplines: [],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
+    { id: '101134', name: 'Lure of the Serpent', crypt: false, group: null,  types: ['Master'],  banned: true,
+      clan: null, path: null, capacity: null, disciplines: [],
+      andDisciplines: [], orDisciplines: [], requirementClans: [], requirementPath: null, poolCost: null, bloodCost: null },
 ];
 
-function mockSearch(q: string): Promise<CardSearchResult[]> {
+function mockSearch(q: string): Promise<CardDetailData[]> {
     return Promise.resolve(
         searchPool.filter(r => r.name.toLowerCase().includes(q.toLowerCase()))
     );
@@ -233,7 +247,7 @@ function mockSearch(q: string): Promise<CardSearchResult[]> {
 function useDeckState(initial: DeckEntry[]) {
     const [entries, setEntries] = useState<DeckEntry[]>(initial);
 
-    const onAddCard = (result: CardSearchResult) =>
+    const onAddCard = (result: CardDetailData) =>
         setEntries(prev => {
             const existing = prev.find(e => e.cardId === result.id);
             if (existing) return prev.map(e => e.cardId === result.id ? { ...e, count: e.count + 1 } : e);
@@ -242,7 +256,7 @@ function useDeckState(initial: DeckEntry[]) {
                 name:    result.name,
                 count:   1,
                 isCrypt: result.crypt,
-                types:   result.crypt ? [result.cryptType ?? 'Vampire'] : result.types,
+                types:   result.types,
                 group:   result.group ?? undefined,
                 banned:  result.banned,
             };

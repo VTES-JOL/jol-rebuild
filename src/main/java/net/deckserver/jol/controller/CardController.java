@@ -5,7 +5,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Arrays;
 import net.deckserver.jol.dto.CardDetailDto;
-import net.deckserver.jol.dto.CardSuggestionDto;
 import net.deckserver.jol.dto.ImportPreviewDto;
 import net.deckserver.jol.model.Card;
 import net.deckserver.jol.services.CardService;
@@ -26,7 +25,7 @@ public class CardController {
 
     @GET
     @Path("/autocomplete")
-    public List<CardSuggestionDto> autocomplete(@RestQuery("q") String q) {
+    public List<CardDetailDto> autocomplete(@RestQuery("q") String q) {
         return cardService.autocomplete(q);
     }
 

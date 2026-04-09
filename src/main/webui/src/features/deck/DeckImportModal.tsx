@@ -4,16 +4,18 @@ import deckApi from './api';
 import type { ImportPreview } from './types';
 
 interface Props {
-    onImport: (name: string, entries: { cardId: string; count: number }[]) => void;
+    onImport: (name: string, entries: { cardId: string; count: number }[]) => Promise<void>;
     onClose: () => void;
 }
 
 export default function DeckImportModal({ onImport, onClose }: Props) {
-    const [text,      setText]      = useState('');
-    const [deckName,  setDeckName]  = useState('Imported Deck');
-    const [preview,   setPreview]   = useState<ImportPreview | null>(null);
-    const [loading,   setLoading]   = useState(false);
-    const [error,     setError]     = useState<string | null>(null);
+    const [text,       setText]       = useState('');
+    const [deckName,   setDeckName]   = useState('Imported Deck');
+    const [preview,    setPreview]    = useState<ImportPreview | null>(null);
+    const [loading,    setLoading]    = useState(false);
+    const [creating,   setCreating]   = useState(false);
+    const [error,      setError]      = useState<string | null>(null);
+    const [createError, setCreateError] = useState<string | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -42,12 +44,20 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
                 setLoading(false);
             }
         }, 500);
+        return () => clearTimeout(debounceRef.current);
     }, [text]);
 
-    function handleCreate() {
-        if (!preview || preview.resolved.length === 0) return;
-        const entries = preview.resolved.map(r => ({ cardId: r.card.id, count: r.count }));
-        onImport(deckName.trim() || 'Imported Deck', entries);
+    async function handleCreate() {
+        if (!preview || preview.resolved.length === 0 || creating) return;
+        setCreating(true);
+        setCreateError(null);
+        try {
+            const entries = preview.resolved.map(r => ({ cardId: r.card.id, count: r.count }));
+            await onImport(deckName.trim() || 'Imported Deck', entries);
+        } catch (e) {
+            setCreateError(e instanceof Error ? e.message : 'Import failed');
+            setCreating(false);
+        }
     }
 
     const hasResolved = (preview?.resolved.length ?? 0) > 0;
@@ -149,18 +159,25 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
 
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-line/75">
+                    {createError && (
+                        <p className="mr-auto text-xs text-blood-soft flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            {createError}
+                        </p>
+                    )}
                     <button
                         onClick={onClose}
-                        className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover transition-colors cursor-pointer"
+                        disabled={creating}
+                        className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleCreate}
-                        disabled={!hasResolved}
+                        disabled={!hasResolved || creating}
                         className="text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >
-                        Create Deck
+                        {creating ? 'Creating…' : 'Create Deck'}
                     </button>
                 </div>
             </div>

@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.CardDetailDto;
-import net.deckserver.jol.dto.CardIconDto;
-import net.deckserver.jol.dto.CardSuggestionDto;
 import net.deckserver.jol.dto.ImportPreviewDto;
 import net.deckserver.jol.enums.Discipline;
 import net.deckserver.jol.model.Card;
@@ -127,6 +125,45 @@ public class CardService {
         return allCards.stream()
                 .sorted(Comparator.comparing(Card::name, String.CASE_INSENSITIVE_ORDER))
                 .toList();
+    }
+
+    /**
+     * Builds a KRCG-format contents map from an ordered card-id → count mapping.
+     * Crypt cards are placed in a flat list; library cards are grouped by their type key.
+     */
+    public Map<String, Object> buildKrcgContents(Map<String, Integer> cardCounts) {
+        Map<String, CardDetailDto> detailMap = findDetailsByIds(new ArrayList<>(cardCounts.keySet()))
+                .stream().collect(Collectors.toMap(CardDetailDto::id, d -> d));
+
+        List<Map<String, Object>> cryptCards = new ArrayList<>();
+        Map<String, List<Map<String, Object>>> libGroups = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Integer> entry : cardCounts.entrySet()) {
+            CardDetailDto detail = detailMap.get(entry.getKey());
+            if (detail == null) continue;
+            Map<String, Object> card = Map.of("id", entry.getKey(), "count", entry.getValue(), "name", detail.name());
+            if (detail.crypt()) {
+                cryptCards.add(card);
+            } else {
+                String typeKey = String.join("/", detail.types());
+                libGroups.computeIfAbsent(typeKey, k -> new ArrayList<>()).add(card);
+            }
+        }
+
+        List<Map<String, Object>> libraryGroups = libGroups.entrySet().stream()
+                .map(e -> {
+                    int count = e.getValue().stream().mapToInt(c -> (int) c.get("count")).sum();
+                    return (Map<String, Object>) Map.of("type", e.getKey(), "count", count, "cards", e.getValue());
+                })
+                .toList();
+
+        int cryptCount = cryptCards.stream().mapToInt(c -> (int) c.get("count")).sum();
+        int libCount   = libraryGroups.stream().mapToInt(g -> (int) g.get("count")).sum();
+
+        return Map.of(
+                "crypt",   Map.of("count", cryptCount, "cards", cryptCards),
+                "library", Map.of("count", libCount,   "cards", libraryGroups)
+        );
     }
 
     public List<CardDetailDto> findDetailsByIds(List<String> ids) {
@@ -251,7 +288,7 @@ public class CardService {
         );
     }
 
-    public List<CardSuggestionDto> autocomplete(String q) {
+    public List<CardDetailDto> autocomplete(String q) {
         String normalizedQuery = StringUtils.stripAccents(q).toLowerCase();
 
         record Match(String displayName, Card card, int score) {}
@@ -274,7 +311,7 @@ public class CardService {
                         .thenComparingInt(m -> m.displayName().length())
                         .thenComparing(Match::displayName, String.CASE_INSENSITIVE_ORDER))
                 .limit(5)
-                .map(m -> toSuggestion(m.displayName(), m.card()))
+                .map(m -> toDetailDto(m.card()))
                 .toList();
     }
 
@@ -313,25 +350,6 @@ public class CardService {
         return "ANY".equals(c.group())
                 ? (c.advanced() ? " (ADV)" : "")
                 : " (G" + c.group() + (c.advanced() ? " ADV" : "") + ")";
-    }
-
-    private CardSuggestionDto toSuggestion(String displayName, Card card) {
-        if (card instanceof CryptCard c) {
-            return new CardSuggestionDto(
-                    c.id(), displayName, true,
-                    c.group(),
-                    c.type().name().charAt(0) + c.type().name().substring(1).toLowerCase(),
-                    List.of(),
-                    c.banned()
-            );
-        }
-        LibraryCard l = (LibraryCard) card;
-        return new CardSuggestionDto(
-                l.id(), displayName, false,
-                null, null,
-                l.types(),
-                l.banned()
-        );
     }
 
     // ── Parsing ───────────────────────────────────────────────────────────────

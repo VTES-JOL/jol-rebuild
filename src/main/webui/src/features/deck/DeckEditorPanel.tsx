@@ -6,7 +6,7 @@ import DeckStatusBar from './DeckStatusBar';
 import DeckComments from './DeckComments';
 import DeckCardList from './DeckCardList';
 import DeckHeaderControls from './DeckHeaderControls';
-import type { CardDetailData, CardSearchResult, DeckEntry } from './types';
+import type { CardDetailData, DeckEntry } from './types';
 
 interface Props {
     title?:            string;
@@ -22,8 +22,8 @@ interface Props {
     detailMap?:        Map<string, CardDetailData>;
     onIncrement:       (cardId: string) => void;
     onDecrement:       (cardId: string) => void;
-    onAddCard:         (result: CardSearchResult) => void;
-    onSearch:          (query: string) => Promise<CardSearchResult[]>;
+    onAddCard:         (result: CardDetailData) => void;
+    onSearch:          (query: string) => Promise<CardDetailData[]>;
 }
 
 export default function DeckEditorPanel({

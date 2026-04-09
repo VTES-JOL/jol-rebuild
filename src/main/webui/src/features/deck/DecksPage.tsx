@@ -6,7 +6,7 @@ import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import DeckImportModal from './DeckImportModal';
 import { computeSummary, formatSummaryCompact, toKrcgContents, extractKrcgCards, enrichEntry } from './deckUtils';
 import deckApi from './api';
-import type { CardDetailData, Deck, DeckEntry, CardSearchResult } from './types';
+import type { CardDetailData, Deck, DeckEntry } from './types';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -114,16 +114,12 @@ export default function DecksPage() {
     }, []);
 
     const handleImport = useCallback(async (name: string, entries: { cardId: string; count: number }[]) => {
-        try {
-            const deck = await deckApi.importDeck(name, entries);
-            setDecks(ds => [deck, ...ds]);
-            isDirtyRef.current = false;
-            setSelectedId(deck.id);
-            setSaveStatus('idle');
-            setShowImport(false);
-        } catch (e) {
-            console.error('Failed to import deck', e);
-        }
+        const deck = await deckApi.importDeck(name, entries);
+        setDecks(ds => [deck, ...ds]);
+        isDirtyRef.current = false;
+        setSelectedId(deck.id);
+        setSaveStatus('idle');
+        setShowImport(false);
     }, []);
 
     const handleIncrement = useCallback((cardId: string) => {
@@ -193,7 +189,7 @@ export default function DecksPage() {
         }
     }, [selectedId]);
 
-    const handleAddCard = useCallback((result: CardSearchResult) => {
+    const handleAddCard = useCallback((result: CardDetailData) => {
         isDirtyRef.current = true;
         setEntries(es => {
             const existing = es.find(e => e.cardId === result.id);
@@ -203,17 +199,13 @@ export default function DecksPage() {
                 name:    result.name,
                 count:   1,
                 isCrypt: result.crypt,
-                types:   result.crypt ? (result.cryptType ? [result.cryptType] : ['Vampire']) : result.types,
+                types:   result.types,
                 group:   result.group ?? undefined,
                 banned:  result.banned,
             }];
         });
         if (!detailMapRef.current.has(result.id)) {
-            deckApi.cardDetail(result.id)
-                .then(detail => {
-                    if (detail) setDetailMap(m => new Map([...m, [detail.id, detail]]));
-                })
-                .catch(console.error);
+            setDetailMap(m => new Map([...m, [result.id, result]]));
         }
     }, []);
 

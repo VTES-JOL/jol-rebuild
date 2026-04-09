@@ -1,20 +1,20 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import type { CardSearchResult } from './types';
+import type { CardDetailData } from './types';
 
 interface Props {
-    onSearch:  (query: string) => Promise<CardSearchResult[]>;
-    onAddCard: (result: CardSearchResult) => void;
+    onSearch:  (query: string) => Promise<CardDetailData[]>;
+    onAddCard: (result: CardDetailData) => void;
 }
 
-function cryptHint(r: CardSearchResult): string {
+function cryptHint(r: CardDetailData): string {
     if (!r.group || r.group === 'ANY') return 'Crypt';
     return `Crypt · G${r.group}`;
 }
 
 export default function DeckSearchBar({ onSearch, onAddCard }: Props) {
     const [query,       setQuery]       = useState('');
-    const [results,     setResults]     = useState<CardSearchResult[]>([]);
+    const [results,     setResults]     = useState<CardDetailData[]>([]);
     const [loading,     setLoading]     = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -50,7 +50,7 @@ export default function DeckSearchBar({ onSearch, onAddCard }: Props) {
         }, 180);
     }, []);
 
-    const selectResult = useCallback((result: CardSearchResult) => {
+    const selectResult = useCallback((result: CardDetailData) => {
         onAddCard(result);
         setQuery('');
         setResults([]);

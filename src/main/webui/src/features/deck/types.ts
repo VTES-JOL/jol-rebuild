@@ -72,17 +72,6 @@ export interface CardDetailData {
     bloodCost: number | null;
 }
 
-/** Matches CardSuggestionDto from the backend /cards/autocomplete endpoint. */
-export interface CardSearchResult {
-    id: string;
-    name: string;
-    crypt: boolean;
-    group: string | null;
-    cryptType: string | null;  // "Vampire" | "Imbued" for crypt, null for library
-    types: string[];           // library types; empty array for crypt
-    banned: boolean;
-}
-
 /** Resolved card entry returned by POST /cards/preview. */
 export interface ImportPreview {
     format:   'krcg' | 'jol';

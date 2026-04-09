@@ -5,10 +5,8 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 import java.util.List;
 
 /**
- * Full card data returned by /cards/details.
- * Combines the entry metadata from CardSuggestionDto (types, group, banned)
- * with the display data from CardIconDto (clan, disciplines, costs, etc.)
- * so a single fetch provides everything the deck editor needs.
+ * Full card data — used by /cards/details, /cards/{id}/detail, and /cards/autocomplete.
+ * A single type covers deck enrichment, icon rendering, and search suggestions.
  *
  * For crypt cards: types = ["Vampire"] or ["Imbued"], group = "1"–"7"|"ANY".
  * For library cards: types = card type list, group = null.
