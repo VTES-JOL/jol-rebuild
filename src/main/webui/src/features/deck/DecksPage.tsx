@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import AppLayout from '@/shared/layout/AppLayout';
 import DeckListPanel from './DeckListPanel';
 import DeckEditorPanel from './DeckEditorPanel';
+import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import { computeSummary, formatSummaryCompact, toKrcgContents, fromKrcgContents } from './deckUtils';
 import deckApi from './api';
 import type { Deck, DeckEntry, CardSearchResult } from './types';
@@ -149,7 +150,7 @@ export default function DecksPage() {
 
     return (
         <AppLayout background={"/Locations23.jpg"}>
-            <div className="grid grid-cols-[280px_1fr] grid-rows-1 gap-6 h-[85dvh]">
+            <div className="grid grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_280px] grid-rows-1 gap-6 h-[85dvh]">
                 <DeckListPanel
                     decks={decks}
                     selectedId={selectedId}
@@ -178,6 +179,9 @@ export default function DecksPage() {
                         Select a deck to begin editing.
                     </div>
                 )}
+                <div className="hidden xl:contents">
+                    <DeckAnalyticsPanel entries={entries} />
+                </div>
             </div>
         </AppLayout>
     );
