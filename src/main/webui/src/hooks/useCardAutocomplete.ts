@@ -48,6 +48,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
                 `/cards/autocomplete?q=${encodeURIComponent(query)}`,
                 { signal: abortRef.current.signal }
             );
+            if (!res.ok) return;
             const data: CardSuggestion[] = await res.json();
             const limited = data.slice(0, 5);
             setSuggestions(limited);

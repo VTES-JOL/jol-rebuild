@@ -120,17 +120,16 @@ export function ChatPanelView({
                     )}
 
                     {groups.map((group, i) => (
-                        <React.Fragment key={i}>
+                        <div
+                            key={i}
+                            ref={el => {
+                                for (const line of group.lines) {
+                                    if (el) messageRefs.current.set(line.id, el);
+                                    else messageRefs.current.delete(line.id);
+                                }
+                            }}
+                        >
                             {group.dividerTimestamp && <TimestampDivider label={group.dividerTimestamp} />}
-                            {group.lines.map(line => (
-                                <div
-                                    key={line.id}
-                                    ref={el => {
-                                        if (el) messageRefs.current.set(line.id, el);
-                                        else messageRefs.current.delete(line.id);
-                                    }}
-                                />
-                            ))}
                             <MessageGroupView
                                 group={group}
                                 showLine={i < groups.length - 1 && !groups[i + 1].dividerTimestamp}
@@ -142,7 +141,7 @@ export function ChatPanelView({
                                 enableReactions={enableReactions}
                                 enableReply={enableReply}
                             />
-                        </React.Fragment>
+                        </div>
                     ))}
 
                     <div ref={bottomRef} />

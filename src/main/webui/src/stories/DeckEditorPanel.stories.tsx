@@ -257,8 +257,9 @@ function useDeckState(initial: DeckEntry[]) {
                 count:   1,
                 isCrypt: result.crypt,
                 types:   result.types,
-                group:   result.group ?? undefined,
-                banned:  result.banned,
+                group:    result.group ?? undefined,
+                banned:   result.banned,
+                advanced: result.advanced,
             };
             return [...prev, newEntry];
         });
