@@ -235,7 +235,7 @@ export default function DecksPage() {
                     </div>
                 )}
                 <div className="hidden lg:contents">
-                    <DeckAnalyticsPanel entries={entries} />
+                    <DeckAnalyticsPanel entries={entries} iconMap={iconMap} />
                 </div>
             </div>
         </AppLayout>
