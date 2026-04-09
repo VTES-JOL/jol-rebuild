@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * Returned by /cards/icons — the subset of card data needed to render icons in the deck editor.
- *
  * Crypt-only fields: clan, path, capacity, disciplines.
  * Library-only fields: andDisciplines, orDisciplines, requirementClans, requirementPath, poolCost, bloodCost.
  */

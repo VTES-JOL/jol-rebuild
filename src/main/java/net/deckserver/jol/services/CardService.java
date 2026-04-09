@@ -91,10 +91,6 @@ public class CardService {
                 .toList();
     }
 
-    public Optional<Card> findByName(String name) {
-        return Optional.ofNullable(lookupMap.get(name));
-    }
-
     public List<CardIconDto> findIconsByIds(List<String> ids) {
         return ids.stream()
                 .map(idMap::get)
