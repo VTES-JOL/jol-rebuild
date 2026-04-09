@@ -103,6 +103,11 @@ public class CardService {
                 .toList();
     }
 
+    public CardIconDto findIconById(String id) {
+        Card card = idMap.get(id);
+        return card != null ? toIconDto(card) : null;
+    }
+
     private CardIconDto toIconDto(Card card) {
         if (card instanceof CryptCard c) {
             return new CardIconDto(

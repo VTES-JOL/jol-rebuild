@@ -2,7 +2,9 @@ package net.deckserver.jol.controller;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import java.util.Arrays;
 import net.deckserver.jol.dto.CardIconDto;
 import net.deckserver.jol.dto.CardSuggestionDto;
@@ -34,6 +36,14 @@ public class CardController {
     public List<CardIconDto> icons(@RestQuery("ids") String ids) {
         if (ids == null || ids.isBlank()) return List.of();
         return cardService.findIconsByIds(Arrays.asList(ids.split(",")));
+    }
+
+    @GET
+    @Path("/{id}/icon")
+    public CardIconDto icon(@PathParam("id") String id) {
+        CardIconDto dto = cardService.findIconById(id);
+        if (dto == null) throw new NotFoundException("Card not found: " + id);
+        return dto;
     }
 
 }

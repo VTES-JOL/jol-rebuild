@@ -47,6 +47,12 @@ const deckApi = {
         if (!ids.length) return [];
         return json(await fetch(`/cards/icons?ids=${ids.join(',')}`, OPTS));
     },
+
+    async cardIcon(id: string): Promise<CardIconData | null> {
+        const res = await fetch(`/cards/${encodeURIComponent(id)}/icon`, OPTS);
+        if (res.status === 404) return null;
+        return json(res);
+    },
 };
 
 export default deckApi;

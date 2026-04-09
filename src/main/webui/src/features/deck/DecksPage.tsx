@@ -190,8 +190,8 @@ export default function DecksPage() {
             }];
         });
         if (!iconMapRef.current.has(result.id)) {
-            deckApi.cardIcons([result.id])
-                .then(([icon]) => {
+            deckApi.cardIcon(result.id)
+                .then(icon => {
                     if (icon) setIconMap(m => new Map([...m, [icon.id, icon]]));
                 })
                 .catch(console.error);
@@ -202,7 +202,7 @@ export default function DecksPage() {
 
     return (
         <AppLayout background={"/Locations23.jpg"}>
-            <div className="grid grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_280px] grid-rows-1 gap-6 h-[85dvh]">
+            <div className="grid grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_240px] xl:grid-cols-[280px_1fr_280px] 2xl:grid-cols-[320px_1fr_300px] grid-rows-1 gap-6 h-[85dvh]">
                 <DeckListPanel
                     decks={decks}
                     selectedId={selectedId}
@@ -234,7 +234,7 @@ export default function DecksPage() {
                         Select a deck to begin editing.
                     </div>
                 )}
-                <div className="hidden xl:contents">
+                <div className="hidden lg:contents">
                     <DeckAnalyticsPanel entries={entries} />
                 </div>
             </div>
