@@ -1,4 +1,6 @@
+import type { RefObject } from 'react';
 import { Minus, Plus, TriangleAlert } from 'lucide-react';
+import { useCardPreview } from '@/hooks/useCardPreview.tsx';
 import type { DeckEntry } from './types';
 
 interface Props {
@@ -9,9 +11,15 @@ interface Props {
 
 export default function DeckCardRow({ entry, onIncrement, onDecrement }: Props) {
     const willRemove = entry.count === 1;
+    const { anchorRef, onMouseEnter, onMouseLeave, tooltip } = useCardPreview(entry.cardId);
 
     return (
-        <div className="flex items-center justify-between px-4 py-1.5 hover:bg-hover/50 transition-colors">
+        <div
+            ref={anchorRef as RefObject<HTMLDivElement>}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            className="flex items-center justify-between px-4 py-1.5 hover:bg-hover/50 transition-colors"
+        >
             <div className="flex items-center gap-1.5 min-w-0">
                 <span className={`text-xs truncate ${entry.banned ? 'text-blood-soft' : 'text-ink-secondary'}`}>
                     {entry.name}
@@ -43,6 +51,7 @@ export default function DeckCardRow({ entry, onIncrement, onDecrement }: Props) 
                     <Plus className="w-2.5 h-2.5" />
                 </button>
             </div>
+            {tooltip}
         </div>
     );
 }

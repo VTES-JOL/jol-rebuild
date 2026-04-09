@@ -139,7 +139,7 @@ export default function DecksPage() {
 
     return (
         <AppLayout background={"/Locations23.jpg"}>
-            <div className="grid grid-cols-[280px_1fr] gap-6 h-[85dvh]">
+            <div className="grid grid-cols-[280px_1fr] grid-rows-1 gap-6 h-[85dvh]">
                 <DeckListPanel
                     decks={decks}
                     selectedId={selectedId}
@@ -148,25 +148,19 @@ export default function DecksPage() {
                     loadError={loadError ?? undefined}
                 />
                 {selectedId != null ? (
-                    <div className="flex flex-col gap-1 min-h-0">
-                        {saveStatus !== 'idle' && (
-                            <p className={`text-[10px] text-right pr-1 ${saveStatus === 'error' ? 'text-blood-soft' : 'text-ink-muted'}`}>
-                                {saveLabel[saveStatus]}
-                            </p>
-                        )}
-                        <div className="flex-1 min-h-0">
-                            <DeckEditorPanel
-                                title={selectedDeck?.name ?? 'Editor'}
-                                onRename={handleRename}
-                                onDelete={handleDelete}
-                                entries={entries}
-                                onIncrement={handleIncrement}
-                                onDecrement={handleDecrement}
-                                onAddCard={handleAddCard}
-                                onSearch={deckApi.autocomplete}
-                            />
-                        </div>
-                    </div>
+                    <DeckEditorPanel
+                        key={selectedId}
+                        title={selectedDeck?.name ?? 'Editor'}
+                        saveLabel={saveStatus !== 'idle' ? saveLabel[saveStatus] : undefined}
+                        saveError={saveStatus === 'error'}
+                        onRename={handleRename}
+                        onDelete={handleDelete}
+                        entries={entries}
+                        onIncrement={handleIncrement}
+                        onDecrement={handleDecrement}
+                        onAddCard={handleAddCard}
+                        onSearch={deckApi.autocomplete}
+                    />
                 ) : (
                     <div className="flex items-center justify-center text-ink-muted text-sm">
                         Select a deck to begin editing.

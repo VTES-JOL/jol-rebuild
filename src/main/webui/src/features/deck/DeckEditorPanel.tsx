@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, TriangleAlert, Pencil, Trash2 } from 'lucide-react';
+import { Search, TriangleAlert, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import SummaryStats from '@/shared/components/SummaryStats';
 import DeckCardRow from './DeckCardRow';
@@ -7,9 +7,11 @@ import { groupEntries, computeSummary, getBannedEntries } from './deckUtils';
 import type { CardSearchResult, DeckEntry } from './types';
 
 interface Props {
-    title?:    string;
-    onRename?: (name: string) => void;
-    onDelete?: () => void;
+    title?:      string;
+    saveLabel?:  string;
+    saveError?:  boolean;
+    onRename?:   (name: string) => void;
+    onDelete?:   () => void;
     entries:     DeckEntry[];
     onIncrement: (cardId: string) => void;
     onDecrement: (cardId: string) => void;
@@ -22,7 +24,10 @@ function cryptHint(r: CardSearchResult): string {
     return `Crypt · G${r.group}`;
 }
 
-export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
+// Groups with this many unique card rows or fewer are open by default.
+const AUTO_OPEN_THRESHOLD = 4;
+
+export default function DeckEditorPanel({ title = 'Editor', saveLabel, saveError, onRename, onDelete, entries, onIncrement, onDecrement, onAddCard, onSearch }: Props) {
     const [query,       setQuery]       = useState('');
     const [results,     setResults]     = useState<CardSearchResult[]>([]);
     const [loading,     setLoading]     = useState(false);
@@ -31,8 +36,31 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, 
     const [nameValue,   setNameValue]   = useState(title);
     const nameInputRef = useRef<HTMLInputElement>(null);
 
-    // Keep nameValue in sync when the title prop changes (e.g. deck switched)
+    // Accordion: set of open group keys. Initialised once when entries first load.
+    const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+    const groupsInitialized = useRef(false);
+
     useEffect(() => { setNameValue(title); setEditingName(false); }, [title]);
+
+    // Populate accordion defaults once entries arrive (component is keyed by deck id,
+    // so this ref + state reset automatically on deck switch).
+    useEffect(() => {
+        if (entries.length === 0 || groupsInitialized.current) return;
+        groupsInitialized.current = true;
+        const defaults = new Set<string>();
+        groupEntries(entries).forEach(g => {
+            if (g.entries.length <= AUTO_OPEN_THRESHOLD) defaults.add(g.key);
+        });
+        setOpenGroups(defaults);
+    }, [entries]);
+
+    const toggleGroup = useCallback((key: string) => {
+        setOpenGroups(prev => {
+            const next = new Set(prev);
+            if (next.has(key)) next.delete(key); else next.add(key);
+            return next;
+        });
+    }, []);
 
     const startEdit = useCallback(() => {
         if (!onRename) return;
@@ -52,12 +80,11 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, 
         if (e.key === 'Escape') { setNameValue(title); setEditingName(false); }
     }, [commitName, title]);
 
-    const debounceRef  = useRef<ReturnType<typeof setTimeout>>(undefined);
-    const onSearchRef  = useRef(onSearch);
-    const searchRef    = useRef<HTMLDivElement>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const onSearchRef = useRef(onSearch);
+    const searchRef   = useRef<HTMLDivElement>(null);
     useEffect(() => { onSearchRef.current = onSearch; });
 
-    // Fix 1: close dropdown on outside click
     useEffect(() => {
         function onClickOutside(e: MouseEvent) {
             if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -104,39 +131,47 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, 
     }, [results, activeIndex, selectResult]);
 
     return (
-        <Panel title={
-            editingName ? (
-                <input
-                    ref={nameInputRef}
-                    value={nameValue}
-                    onChange={e => setNameValue(e.target.value)}
-                    onBlur={commitName}
-                    onKeyDown={handleNameKey}
-                    className="bg-transparent text-ink tracking-wide outline-none border-b border-line-accent w-full max-w-[220px]"
-                />
-            ) : (
-                <span
-                    onClick={startEdit}
-                    className={`tracking-wide text-ink ${onRename ? 'cursor-pointer group flex items-center gap-1.5' : ''}`}
-                >
-                    {nameValue}
-                    {onRename && <Pencil className="w-2.5 h-2.5 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity" />}
-                </span>
-            )
-        }
-        right={
-            onDelete && (
-                <button
-                    onClick={(e) => { e.stopPropagation(); if (confirm('Delete this deck?')) onDelete(); }}
-                    title="Delete deck"
-                    className="p-1.5 rounded hover:bg-blood/10 text-ink-muted hover:text-blood transition-colors cursor-pointer"
-                >
-                    <Trash2 className="w-3.5 h-3.5" />
-                </button>
-            )
-        }
+        <Panel
+            title={
+                editingName ? (
+                    <input
+                        ref={nameInputRef}
+                        value={nameValue}
+                        onChange={e => setNameValue(e.target.value)}
+                        onBlur={commitName}
+                        onKeyDown={handleNameKey}
+                        className="bg-transparent text-ink tracking-wide outline-none border-b border-line-accent w-full max-w-[220px]"
+                    />
+                ) : (
+                    <span
+                        onClick={startEdit}
+                        className={`tracking-wide text-ink ${onRename ? 'cursor-pointer group flex items-center gap-1.5' : ''}`}
+                    >
+                        {nameValue}
+                        {onRename && <Pencil className="w-2.5 h-2.5 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity" />}
+                    </span>
+                )
+            }
+            right={
+                <div className="flex items-center gap-2">
+                    {saveLabel && (
+                        <span className={`text-[10px] ${saveError ? 'text-blood-soft' : 'text-ink-muted'}`}>
+                            {saveLabel}
+                        </span>
+                    )}
+                    {onDelete && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); if (confirm('Delete this deck?')) onDelete(); }}
+                            title="Delete deck"
+                            className="p-1.5 rounded hover:bg-blood/10 text-ink-muted hover:text-blood transition-colors cursor-pointer"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                    )}
+                </div>
+            }
         >
-            {/* Card search — ref wraps input + dropdown for outside-click detection */}
+            {/* Card search */}
             <div ref={searchRef} className="relative border-b border-line/50">
                 <div className="flex items-center gap-1.5 px-3 py-1.5">
                     {loading ? (
@@ -173,7 +208,6 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, 
                                 ].join(' ')}
                             >
                                 <span className="truncate">{r.name}</span>
-                                {/* Fix 2: ANY-group crypt cards render "Crypt", not "Crypt · GANY" */}
                                 <span className="text-[10px] text-ink-muted shrink-0">
                                     {r.crypt ? cryptHint(r) : r.types.join('/')}
                                 </span>
@@ -191,49 +225,63 @@ export default function DeckEditorPanel({ title = 'Editor', onRename, onDelete, 
                 )}
             </div>
 
-            {/* Live summary */}
-            <div className="px-3 py-1.5 border-b border-line/50 flex items-center min-h-[28px]">
-                {summary
-                    ? <SummaryStats summary={summary} validate />
-                    : <span className="text-[10px] text-ink-muted">Empty deck</span>
-                }
+            {/* Summary + banned warning */}
+            <div className="px-3 py-1.5 border-b border-line/50 flex items-center justify-between gap-4 min-h-[28px]">
+                <div className="flex items-center min-w-0">
+                    {summary
+                        ? <SummaryStats summary={summary} validate />
+                        : <span className="text-[10px] text-ink-muted">Empty deck</span>
+                    }
+                </div>
+                {banned.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-2 py-1 rounded border border-blood/30 bg-blood/10 text-[10px] text-blood-soft shrink-0">
+                        <TriangleAlert className="w-3 h-3 shrink-0" />
+                        <span>{banned.length} banned</span>
+                    </div>
+                )}
             </div>
 
-            {/* Banned warning */}
-            {banned.length > 0 && (
-                <div className="mx-3 my-2 flex items-center gap-2 px-2.5 py-1.5 rounded border border-blood/30 bg-blood/10 text-xs text-blood-soft">
-                    <TriangleAlert className="w-3.5 h-3.5 shrink-0" />
-                    <span>
-                        {banned.length} banned card{banned.length > 1 ? 's' : ''} in this deck
-                    </span>
-                </div>
-            )}
-
-            {/* Grouped card list */}
+            {/* Card list with accordion groups */}
             {entries.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center p-8 text-sm text-ink-muted">
                     Search above to add cards.
                 </div>
             ) : (
                 <div className="overflow-y-auto flex-1 min-h-0">
-                    {groups.map(group => (
-                        <div key={group.key}>
-                            <div className="flex items-center gap-2 pl-3 pr-4 py-2 border-y border-line/50 sticky top-0 z-1">
-                                <span className="text-xs font-semibold text-ink">{group.key}</span>
-                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-hover border border-line/60 text-[10px] font-semibold tabular-nums text-ink-secondary leading-none">
-                                    {group.total}
-                                </span>
+                    {groups.map(group => {
+                        const isOpen = openGroups.has(group.key);
+                        return (
+                            <div key={group.key}>
+                                <button
+                                    onClick={() => toggleGroup(group.key)}
+                                    className="w-full flex items-center gap-2 pl-3 pr-4 py-2 border-b border-line/50 sticky top-0 z-10 bg-panel/30 hover:bg-hover/40 transition-colors"
+                                >
+                                    {isOpen
+                                        ? <ChevronDown  className="w-3 h-3 text-ink-muted shrink-0" />
+                                        : <ChevronRight className="w-3 h-3 text-ink-muted shrink-0" />
+                                    }
+                                    <span className="text-xs font-semibold text-ink">{group.key}</span>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-hover border border-line/60 text-[10px] font-semibold tabular-nums text-ink-secondary leading-none">
+                                        {group.total}
+                                    </span>
+                                    {!isOpen && (
+                                        <span className="ml-auto text-[10px] text-ink-muted truncate max-w-[55%]">
+                                            {group.entries.slice(0, 3).map(e => e.name).join(', ')}
+                                            {group.entries.length > 3 ? '…' : ''}
+                                        </span>
+                                    )}
+                                </button>
+                                {isOpen && group.entries.map(entry => (
+                                    <DeckCardRow
+                                        key={entry.cardId}
+                                        entry={entry}
+                                        onIncrement={() => onIncrement(entry.cardId)}
+                                        onDecrement={() => onDecrement(entry.cardId)}
+                                    />
+                                ))}
                             </div>
-                            {group.entries.map(entry => (
-                                <DeckCardRow
-                                    key={entry.cardId}
-                                    entry={entry}
-                                    onIncrement={() => onIncrement(entry.cardId)}
-                                    onDecrement={() => onDecrement(entry.cardId)}
-                                />
-                            ))}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </Panel>
