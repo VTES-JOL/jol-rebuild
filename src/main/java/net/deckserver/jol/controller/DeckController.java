@@ -17,7 +17,7 @@ import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.DeckDto;
 import net.deckserver.jol.entity.Deck;
 import net.deckserver.jol.entity.User;
-import net.deckserver.jol.services.CardService;
+import net.deckserver.jol.services.DeckImportService;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -35,7 +35,7 @@ public class DeckController {
     ObjectMapper mapper;
 
     @Inject
-    CardService cardService;
+    DeckImportService deckImportService;
 
     private User currentUser() {
         return User.findByUsername(identity.getPrincipal().getName());
@@ -113,7 +113,7 @@ public class DeckController {
         Map<String, Integer> cardCounts = new LinkedHashMap<>();
         command.entries().forEach(e -> cardCounts.put(e.cardId(), e.count()));
 
-        KrcgDeck contents = cardService.buildKrcgContents(cardCounts);
+        KrcgDeck contents = deckImportService.buildKrcgContents(cardCounts);
         String name = command.name() != null && !command.name().isBlank() ? command.name() : "Imported Deck";
         Deck deck = Deck.create(currentUser(), name, mapper.writeValueAsString(contents), null);
         return new DeckDto(deck);

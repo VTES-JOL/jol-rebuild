@@ -247,9 +247,11 @@ export default function DecksPage() {
                         Select a deck to begin editing.
                     </div>
                 )}
-                <div className="hidden lg:contents">
-                    <DeckAnalyticsPanel entries={entries} detailMap={detailMap} />
-                </div>
+                {selectedId != null && (
+                    <div className="hidden lg:contents">
+                        <DeckAnalyticsPanel entries={entries} detailMap={detailMap} />
+                    </div>
+                )}
             </div>
 
             {showImport && (

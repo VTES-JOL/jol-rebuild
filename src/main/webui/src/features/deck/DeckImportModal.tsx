@@ -10,7 +10,7 @@ interface Props {
 
 export default function DeckImportModal({ onImport, onClose }: Props) {
     const [text,       setText]       = useState('');
-    const [deckName,   setDeckName]   = useState('Imported Deck');
+    const [deckName,   setDeckName]   = useState('');
     const [preview,    setPreview]    = useState<ImportPreview | null>(null);
     const [loading,    setLoading]    = useState(false);
     const [creating,   setCreating]   = useState(false);
@@ -150,6 +150,7 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
                             <input
                                 type="text"
                                 value={deckName}
+                                placeholder="Imported Deck"
                                 onChange={e => setDeckName(e.target.value)}
                                 className="w-full rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink outline-none focus:border-accent/60"
                             />

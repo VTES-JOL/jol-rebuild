@@ -1,9 +1,11 @@
 package net.deckserver.jol.model.krcg;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Root model for a KRCG-format deck document.
@@ -33,6 +35,13 @@ public record KrcgDeck(KrcgMeta meta, KrcgCrypt crypt, KrcgLibrary library) {
         return library.cards().stream()
                 .flatMap(g -> g.cards().stream())
                 .toList();
+    }
+
+    @JsonIgnore
+    public Stream<KrcgCard> cardStream() {
+        Stream<KrcgCard> cryptStream = cryptCards().stream();
+        Stream<KrcgCard> libraryStream = libraryCards().stream();
+        return Stream.concat(cryptStream, libraryStream);
     }
 
     /** Total crypt count as recorded in the document. */

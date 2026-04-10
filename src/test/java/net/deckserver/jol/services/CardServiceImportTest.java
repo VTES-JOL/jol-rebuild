@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests for CardService.preview() covering JOL text import and KRCG JSON import.
+ * Tests for DeckImportService.preview() covering JOL text import and KRCG JSON import.
  *
  * Uses real card data loaded from CSV, so assertions are against actual card names/IDs.
  */
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CardServiceImportTest {
 
     @Inject
-    CardService service;
+    DeckImportService service;
 
     // ── JOL format ────────────────────────────────────────────────────────────
 

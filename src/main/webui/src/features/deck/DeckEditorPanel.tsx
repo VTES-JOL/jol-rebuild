@@ -36,10 +36,16 @@ export default function DeckEditorPanel({
     const nameInputRef = useRef<HTMLInputElement>(null);
     useEffect(() => { setNameValue(title); setEditingName(false); }, [title]);
 
+    useEffect(() => {
+        if (editingName) {
+            nameInputRef.current?.focus();
+            nameInputRef.current?.select();
+        }
+    }, [editingName]);
+
     const startEdit = useCallback(() => {
         if (!onRename) return;
         setEditingName(true);
-        setTimeout(() => nameInputRef.current?.select(), 0);
     }, [onRename]);
 
     const commitName = useCallback(() => {
