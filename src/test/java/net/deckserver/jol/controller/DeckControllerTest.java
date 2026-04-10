@@ -1,27 +1,28 @@
 package net.deckserver.jol.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MediaType;
 import net.deckserver.jol.entity.Deck;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
+import net.deckserver.jol.model.krcg.KrcgCard;
+import net.deckserver.jol.model.krcg.KrcgCrypt;
+import net.deckserver.jol.model.krcg.KrcgDeck;
+import net.deckserver.jol.model.krcg.KrcgLibrary;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
 public class DeckControllerTest {
-
-    @Inject
-    ObjectMapper mapper;
 
     @BeforeEach
     @Transactional
@@ -74,8 +75,13 @@ public class DeckControllerTest {
         User user = User.findByUsername("testuser");
         Deck deck = createDeck(user, "Old Name", "{}", "Old Summary");
 
+        KrcgDeck contents = new KrcgDeck(
+                null,
+                new KrcgCrypt(1, List.of(new KrcgCard("200183", 1, "Beckett"))),
+                new KrcgLibrary(0, List.of())
+        );
         DeckController.DeckUpdateCommand command = new DeckController.DeckUpdateCommand(
-                "New Name", mapper.createObjectNode().put("cards", 1), "New Summary", "New Comment"
+                "New Name", contents, "New Summary", "New Comment"
         );
 
         given()
@@ -91,7 +97,9 @@ public class DeckControllerTest {
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void getContents() {
         User user = User.findByUsername("testuser");
-        Deck deck = createDeck(user, "Deck", "{\"cards\": [1, 2, 3]}", "Summary");
+        Deck deck = createDeck(user, "Deck",
+                "{\"crypt\":{\"count\":0,\"cards\":[]},\"library\":{\"count\":0,\"cards\":[]}}",
+                "Summary");
 
         given()
                 .when().get("/api/decks/" + deck.id + "/contents")

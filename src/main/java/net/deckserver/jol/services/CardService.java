@@ -14,6 +14,11 @@ import net.deckserver.jol.model.Card;
 import net.deckserver.jol.model.CryptCard;
 import net.deckserver.jol.model.CryptType;
 import net.deckserver.jol.model.LibraryCard;
+import net.deckserver.jol.model.krcg.KrcgCard;
+import net.deckserver.jol.model.krcg.KrcgCrypt;
+import net.deckserver.jol.model.krcg.KrcgDeck;
+import net.deckserver.jol.model.krcg.KrcgLibrary;
+import net.deckserver.jol.model.krcg.KrcgLibraryGroup;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -131,17 +136,17 @@ public class CardService {
      * Builds a KRCG-format contents map from an ordered card-id → count mapping.
      * Crypt cards are placed in a flat list; library cards are grouped by their type key.
      */
-    public Map<String, Object> buildKrcgContents(Map<String, Integer> cardCounts) {
+    public KrcgDeck buildKrcgContents(Map<String, Integer> cardCounts) {
         Map<String, CardDetailDto> detailMap = findDetailsByIds(new ArrayList<>(cardCounts.keySet()))
                 .stream().collect(Collectors.toMap(CardDetailDto::id, d -> d));
 
-        List<Map<String, Object>> cryptCards = new ArrayList<>();
-        Map<String, List<Map<String, Object>>> libGroups = new LinkedHashMap<>();
+        List<KrcgCard> cryptCards = new ArrayList<>();
+        Map<String, List<KrcgCard>> libGroups = new LinkedHashMap<>();
 
         for (Map.Entry<String, Integer> entry : cardCounts.entrySet()) {
             CardDetailDto detail = detailMap.get(entry.getKey());
             if (detail == null) continue;
-            Map<String, Object> card = Map.of("id", entry.getKey(), "count", entry.getValue(), "name", detail.name());
+            KrcgCard card = new KrcgCard(entry.getKey(), entry.getValue(), detail.name());
             if (detail.crypt()) {
                 cryptCards.add(card);
             } else {
@@ -150,20 +155,17 @@ public class CardService {
             }
         }
 
-        List<Map<String, Object>> libraryGroups = libGroups.entrySet().stream()
+        List<KrcgLibraryGroup> libraryGroups = libGroups.entrySet().stream()
                 .map(e -> {
-                    int count = e.getValue().stream().mapToInt(c -> (int) c.get("count")).sum();
-                    return (Map<String, Object>) Map.of("type", e.getKey(), "count", count, "cards", e.getValue());
+                    int count = e.getValue().stream().mapToInt(KrcgCard::count).sum();
+                    return new KrcgLibraryGroup(e.getKey(), count, e.getValue());
                 })
                 .toList();
 
-        int cryptCount = cryptCards.stream().mapToInt(c -> (int) c.get("count")).sum();
-        int libCount   = libraryGroups.stream().mapToInt(g -> (int) g.get("count")).sum();
+        int cryptCount = cryptCards.stream().mapToInt(KrcgCard::count).sum();
+        int libCount   = libraryGroups.stream().mapToInt(KrcgLibraryGroup::count).sum();
 
-        return Map.of(
-                "crypt",   Map.of("count", cryptCount, "cards", cryptCards),
-                "library", Map.of("count", libCount,   "cards", libraryGroups)
-        );
+        return new KrcgDeck(null, new KrcgCrypt(cryptCount, cryptCards), new KrcgLibrary(libCount, libraryGroups));
     }
 
     public List<CardDetailDto> findDetailsByIds(List<String> ids) {

@@ -1,8 +1,10 @@
 package net.deckserver.jol.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.deckserver.jol.model.krcg.KrcgCrypt;
+import net.deckserver.jol.model.krcg.KrcgDeck;
+import net.deckserver.jol.model.krcg.KrcgLibrary;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -18,7 +20,9 @@ import net.deckserver.jol.entity.User;
 import net.deckserver.jol.services.CardService;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Path("/api/decks")
 @Authenticated
@@ -57,15 +61,16 @@ public class DeckController {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         String raw = deck.contents != null ? deck.contents : "{}";
-        return Response.ok(mapper.readTree(raw)).build();
+        return Response.ok(mapper.readValue(raw, KrcgDeck.class)).build();
     }
 
     @POST
     @Transactional
     @RolesAllowed("USER")
-    public DeckDto create(DeckCreateCommand command) {
+    public DeckDto create(DeckCreateCommand command) throws JsonProcessingException {
         User owner = currentUser();
-        Deck deck = Deck.create(owner, command.name(), "{}", null);
+        KrcgDeck empty = new KrcgDeck(null, new KrcgCrypt(0, List.of()), new KrcgLibrary(0, List.of()));
+        Deck deck = Deck.create(owner, command.name(), mapper.writeValueAsString(empty), null);
         return new DeckDto(deck);
     }
 
@@ -79,7 +84,7 @@ public class DeckController {
         if (command.name()     != null) deck.name     = command.name();
         if (command.comments() != null) deck.comments = command.comments();
         if (command.contents() != null) {
-            // Summary is always updated alongside contents so it stays in sync (including clearing to null)
+            // Summary is always updated alongside contents so it stays in sync (including clearing to null).
             deck.contents = mapper.writeValueAsString(command.contents());
             deck.summary  = command.summary();
         } else if (command.summary() != null) {
@@ -108,7 +113,7 @@ public class DeckController {
         Map<String, Integer> cardCounts = new LinkedHashMap<>();
         command.entries().forEach(e -> cardCounts.put(e.cardId(), e.count()));
 
-        Map<String, Object> contents = cardService.buildKrcgContents(cardCounts);
+        KrcgDeck contents = cardService.buildKrcgContents(cardCounts);
         String name = command.name() != null && !command.name().isBlank() ? command.name() : "Imported Deck";
         Deck deck = Deck.create(currentUser(), name, mapper.writeValueAsString(contents), null);
         return new DeckDto(deck);
@@ -118,7 +123,7 @@ public class DeckController {
     public record DeckCreateCommand(String name) {}
 
     @RegisterForReflection
-    public record DeckUpdateCommand(String name, JsonNode contents, String summary, String comments) {}
+    public record DeckUpdateCommand(String name, KrcgDeck contents, String summary, String comments) {}
 
     @RegisterForReflection
     public record DeckImportCommand(String name, List<Entry> entries) {

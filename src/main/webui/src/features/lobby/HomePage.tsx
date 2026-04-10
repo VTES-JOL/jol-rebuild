@@ -3,7 +3,7 @@ import ActiveGames from "./ActiveGames.tsx";
 import {LobbyChatPanel} from "@/features/lobby/LobbyChatPanel.tsx";
 import {useAuthContext} from "@/hooks/useAuthContext.ts";
 
-export default function LobbyPage() {
+export default function HomePage() {
 
     const { user, loading } = useAuthContext();
 
