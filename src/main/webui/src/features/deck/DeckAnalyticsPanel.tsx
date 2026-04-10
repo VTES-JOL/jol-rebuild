@@ -1,11 +1,11 @@
 import Panel from '@/shared/components/Panel';
-import { OpeningHandSection }     from './analytics/OpeningHandSection';
-import { LibraryTypeSection }     from './analytics/LibraryTypeSection';
-import { LibraryCostSection }     from './analytics/LibraryCostSection';
-import { CryptCapacityCurve }     from './analytics/CryptCapacityCurve';
-import { ClanDistributionSection } from './analytics/ClanDistributionSection';
-import { DisciplineCoverageSection } from './analytics/DisciplineCoverageSection';
-import type { CardDetailData, DeckEntry } from './types';
+import {OpeningHandSection} from './analytics/OpeningHandSection';
+import {LibraryTypeSection} from './analytics/LibraryTypeSection';
+import {LibraryCostSection} from './analytics/LibraryCostSection';
+import {CryptCapacityCurve} from './analytics/CryptCapacityCurve';
+import {ClanDistributionSection} from './analytics/ClanDistributionSection';
+import {DisciplineCoverageSection} from './analytics/DisciplineCoverageSection';
+import type {CardDetailData, DeckEntry} from './types';
 
 interface Props {
     entries: DeckEntry[];

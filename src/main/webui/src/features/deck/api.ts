@@ -1,4 +1,4 @@
-import type { CardDetailData, Deck, ImportPreview, KrcgContents } from './types';
+import type {CardDetailData, Deck, ImportPreview, KrcgContents} from './types';
 
 const BASE  = '/api/decks';
 const CARDS = '/cards';

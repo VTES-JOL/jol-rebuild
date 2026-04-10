@@ -5,7 +5,8 @@ import io.quarkus.test.junit.QuarkusTest;
 import net.deckserver.jol.enums.Role;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @QuarkusTest
 public class DeckTest {

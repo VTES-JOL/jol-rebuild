@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ClanIcon } from '../shared/components/ClanIcon.tsx';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {ClanIcon} from '../shared/components/ClanIcon.tsx';
 
 const meta = {
   title: 'Shared/ClanIcon',

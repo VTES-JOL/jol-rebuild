@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import gameApi, {type GameDto } from '@/features/game/api';
+import {useEffect, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
+import gameApi, {type GameDto} from '@/features/game/api';
 
 export default function GameToken({ id, label }: { id: number; label: string }) {
     const [isOpen, setIsOpen] = useState(false);

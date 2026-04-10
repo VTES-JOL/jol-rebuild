@@ -1,6 +1,6 @@
 import SummaryStats from '@/shared/components/SummaryStats';
-import { parseSummary } from './deckUtils';
-import type { Deck } from './types';
+import {parseSummary} from './deckUtils';
+import type {Deck} from './types';
 
 interface Props {
     deck: Deck;

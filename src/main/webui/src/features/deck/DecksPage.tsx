@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import AppLayout from '@/shared/layout/AppLayout';
 import DeckListPanel from './DeckListPanel';
 import DeckEditorPanel from './DeckEditorPanel';
 import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import DeckImportModal from './DeckImportModal';
-import { computeSummary, formatSummaryCompact, toKrcgContents, extractKrcgCards, enrichEntry } from './deckUtils';
+import {computeSummary, enrichEntry, extractKrcgCards, formatSummaryCompact, toKrcgContents} from './deckUtils';
 import deckApi from './api';
-import type { CardDetailData, Deck, DeckEntry } from './types';
+import type {CardDetailData, Deck, DeckEntry} from './types';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 

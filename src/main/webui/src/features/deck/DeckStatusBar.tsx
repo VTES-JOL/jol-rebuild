@@ -1,7 +1,7 @@
-import { TriangleAlert } from 'lucide-react';
+import {TriangleAlert} from 'lucide-react';
 import SummaryStats from '@/shared/components/SummaryStats';
-import { computeSummary, getBannedEntries } from './deckUtils';
-import type { DeckEntry } from './types';
+import {computeSummary, getBannedEntries} from './deckUtils';
+import type {DeckEntry} from './types';
 
 interface Props {
     entries: DeckEntry[];

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
+import {useState} from 'react';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {fn} from 'storybook/test';
 import DeckEditorPanel from '../features/deck/DeckEditorPanel';
-import type { CardDetailData, DeckEntry } from '../features/deck/types';
+import type {CardDetailData, DeckEntry} from '../features/deck/types';
 
 const meta = {
     title: 'Deck/DeckEditorPanel',

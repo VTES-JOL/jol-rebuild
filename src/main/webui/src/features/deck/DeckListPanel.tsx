@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Search } from 'lucide-react';
+import {useState} from 'react';
+import {Search} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import DeckListItem from './DeckListItem';
-import type { Deck } from './types';
+import type {Deck} from './types';
 
 interface Props {
     decks: Deck[];

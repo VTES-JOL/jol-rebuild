@@ -1,4 +1,4 @@
-import type { CardDetailData, DeckEntry, DeckSummary, KrcgContents } from './types';
+import type {CardDetailData, DeckEntry, DeckSummary, KrcgContents} from './types';
 
 export interface CardGroup {
     key: string;

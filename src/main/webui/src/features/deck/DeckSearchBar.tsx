@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search } from 'lucide-react';
-import type { CardDetailData } from './types';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {Search} from 'lucide-react';
+import type {CardDetailData} from './types';
 
 interface Props {
     onSearch:  (query: string) => Promise<CardDetailData[]>;

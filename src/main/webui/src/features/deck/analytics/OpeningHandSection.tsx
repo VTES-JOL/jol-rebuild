@@ -1,5 +1,5 @@
-import { SectionHeader } from './SectionHeader';
-import type { DeckEntry } from '../types';
+import {SectionHeader} from './SectionHeader';
+import type {DeckEntry} from '../types';
 
 /** Binomial coefficient C(n, k). */
 function comb(n: number, k: number): number {

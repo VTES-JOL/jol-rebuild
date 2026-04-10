@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, AlertCircle, CheckCircle } from 'lucide-react';
+import {useEffect, useRef, useState} from 'react';
+import {AlertCircle, CheckCircle, X} from 'lucide-react';
 import deckApi from './api';
-import type { ImportPreview } from './types';
+import type {ImportPreview} from './types';
 
 interface Props {
     onImport: (name: string, entries: { cardId: string; count: number }[]) => Promise<void>;

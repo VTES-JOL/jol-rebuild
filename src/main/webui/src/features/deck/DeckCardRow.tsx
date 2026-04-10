@@ -1,6 +1,6 @@
 import CryptCardRow from './CryptCardRow';
 import LibraryCardRow from './LibraryCardRow';
-import type { CardDetailData, DeckEntry } from './types';
+import type {CardDetailData, DeckEntry} from './types';
 
 interface Props {
     entry: DeckEntry;

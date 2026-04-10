@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { CounterBadge } from '../shared/components/CounterBadge.tsx';
-import type { CounterType } from '../shared/components/CounterBadge.tsx';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import type {CounterType} from '../shared/components/CounterBadge.tsx';
+import {CounterBadge} from '../shared/components/CounterBadge.tsx';
 
 const meta = {
     title: 'Shared/CounterBadge',

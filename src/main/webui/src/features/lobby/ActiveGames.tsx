@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import Panel from "@/shared/components/Panel";
-import gameApi, { type GameDto } from "@/features/game/api";
-import { Link } from "react-router-dom";
+import gameApi, {type GameDto} from "@/features/game/api";
+import {Link} from "react-router-dom";
 
 export default function ActiveGames() {
     const [active, setActive] = useState<GameDto[]>([]);

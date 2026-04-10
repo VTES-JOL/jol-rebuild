@@ -1,11 +1,11 @@
-import { Fragment } from 'react';
-import { TriangleAlert } from 'lucide-react';
-import { ClanIcon } from '@/shared/components/ClanIcon';
-import { CostIcon } from '@/shared/components/CostIcon';
-import { DisciplineIcon } from '@/shared/components/DisciplineIcon';
-import { PathIcon } from '@/shared/components/PathIcon';
+import {Fragment} from 'react';
+import {TriangleAlert} from 'lucide-react';
+import {ClanIcon} from '@/shared/components/ClanIcon';
+import {CostIcon} from '@/shared/components/CostIcon';
+import {DisciplineIcon} from '@/shared/components/DisciplineIcon';
+import {PathIcon} from '@/shared/components/PathIcon';
 import CardRowShell from './CardRowShell';
-import type { CardDetailData, DeckEntry } from './types';
+import type {CardDetailData, DeckEntry} from './types';
 
 interface Props {
     entry: DeckEntry;

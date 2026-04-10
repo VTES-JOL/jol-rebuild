@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { CostIcon } from '../shared/components/CostIcon.tsx';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {CostIcon} from '../shared/components/CostIcon.tsx';
 
 const meta = {
   title: 'Shared/CostIcon',

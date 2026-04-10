@@ -1,12 +1,12 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { Pencil } from 'lucide-react';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {Pencil} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import DeckSearchBar from './DeckSearchBar';
 import DeckStatusBar from './DeckStatusBar';
 import DeckComments from './DeckComments';
 import DeckCardList from './DeckCardList';
 import DeckHeaderControls from './DeckHeaderControls';
-import type { CardDetailData, DeckEntry } from './types';
+import type {CardDetailData, DeckEntry} from './types';
 
 interface Props {
     title?:            string;

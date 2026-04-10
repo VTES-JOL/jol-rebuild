@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { TypeIcon } from '../shared/components/TypeIcon.tsx';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {TypeIcon} from '../shared/components/TypeIcon.tsx';
 
 const meta = {
   title: 'Shared/TypeIcon',

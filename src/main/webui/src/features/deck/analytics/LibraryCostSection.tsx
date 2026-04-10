@@ -1,6 +1,6 @@
-import { BarRow } from './BarRow';
-import { SectionHeader } from './SectionHeader';
-import type { CardDetailData, DeckEntry } from '../types';
+import {BarRow} from './BarRow';
+import {SectionHeader} from './SectionHeader';
+import type {CardDetailData, DeckEntry} from '../types';
 
 interface Props {
     entries: DeckEntry[];

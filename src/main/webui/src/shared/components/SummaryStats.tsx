@@ -1,4 +1,4 @@
-import type { DeckSummary } from '@/features/deck/types';
+import type {DeckSummary} from '@/features/deck/types';
 
 interface Props {
     summary: DeckSummary;

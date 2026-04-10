@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { TypeIcon } from '@/shared/components/TypeIcon';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {ChevronDown, ChevronRight} from 'lucide-react';
+import {TypeIcon} from '@/shared/components/TypeIcon';
 import DeckCardRow from './DeckCardRow';
-import { groupEntries } from './deckUtils';
-import type { CardGroup } from './deckUtils';
-import type { CardDetailData, DeckEntry } from './types';
+import type {CardGroup} from './deckUtils';
+import {groupEntries} from './deckUtils';
+import type {CardDetailData, DeckEntry} from './types';
 
 interface Props {
     entries:        DeckEntry[];

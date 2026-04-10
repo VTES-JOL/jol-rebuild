@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { DisciplineIcon } from '../shared/components/DisciplineIcon.tsx';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {DisciplineIcon} from '../shared/components/DisciplineIcon.tsx';
 
 const meta = {
   title: 'Shared/DisciplineIcon',

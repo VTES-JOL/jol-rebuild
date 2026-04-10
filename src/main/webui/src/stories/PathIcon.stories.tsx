@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { PathIcon } from '../shared/components/PathIcon.tsx';
+import type {Meta, StoryObj} from '@storybook/react-vite';
+import {PathIcon} from '../shared/components/PathIcon.tsx';
 
 const meta = {
   title: 'Shared/PathIcon',

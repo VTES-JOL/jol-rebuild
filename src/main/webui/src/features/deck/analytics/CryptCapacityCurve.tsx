@@ -1,5 +1,5 @@
-import { SectionHeader } from './SectionHeader';
-import type { CardDetailData, DeckEntry } from '../types';
+import {SectionHeader} from './SectionHeader';
+import type {CardDetailData, DeckEntry} from '../types';
 
 interface Props {
     entries: DeckEntry[];
