@@ -7,12 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for DeckImportService.preview() covering JOL text import and KRCG JSON import.
- *
  * Uses real card data loaded from CSV, so assertions are against actual card names/IDs.
  */
 @QuarkusTest
@@ -63,7 +61,7 @@ class CardServiceImportTest {
         assertThat(result.errors(), empty());
         assertThat(result.resolved(), hasSize(1));
         assertEquals("Deflection", result.resolved().getFirst().card().name());
-        assertTrue(!result.resolved().getFirst().card().crypt());
+        assertFalse(result.resolved().getFirst().card().crypt());
         assertEquals(6, result.resolved().getFirst().count());
     }
 

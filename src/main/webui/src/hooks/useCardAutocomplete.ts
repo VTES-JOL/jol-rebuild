@@ -45,7 +45,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
 
         try {
             const res = await fetch(
-                `/cards/autocomplete?q=${encodeURIComponent(query)}`,
+                `/api/cards/autocomplete?q=${encodeURIComponent(query)}`,
                 { signal: abortRef.current.signal }
             );
             if (!res.ok) return;

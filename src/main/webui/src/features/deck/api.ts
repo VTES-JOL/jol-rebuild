@@ -1,7 +1,7 @@
 import type {CardDetailData, Deck, ImportPreview, KrcgContents} from './types';
 
 const BASE  = '/api/decks';
-const CARDS = '/cards';
+const CARDS = '/api/cards';
 const OPTS  = { credentials: 'include' as const };
 
 async function json<T>(res: Response): Promise<T> {

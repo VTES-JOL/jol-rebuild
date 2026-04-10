@@ -20,6 +20,7 @@ public record CryptCard(
         String id,
         String name,
         List<String> aka,
+        List<String> sets,
         String cardText,
         String artist,
         boolean banned,

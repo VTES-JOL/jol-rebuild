@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * Full card data — used by /cards/details, /cards/{id}/detail, and /cards/autocomplete.
  * A single type covers deck enrichment, icon rendering, and search suggestions.
- *
  * For crypt cards: types = ["Vampire"] or ["Imbued"], group = "1"–"7"|"ANY".
  * For library cards: types = card type list, group = null.
  */
@@ -21,6 +20,7 @@ public record CardDetailDto(
         String group,
         boolean banned,
         boolean advanced,
+        List<String> sets,
         // Crypt display data
         String clan,
         String path,

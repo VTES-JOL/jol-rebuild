@@ -43,14 +43,4 @@ public record KrcgDeck(KrcgMeta meta, KrcgCrypt crypt, KrcgLibrary library) {
         Stream<KrcgCard> libraryStream = libraryCards().stream();
         return Stream.concat(cryptStream, libraryStream);
     }
-
-    /** Total crypt count as recorded in the document. */
-    public int cryptCount() {
-        return crypt == null ? 0 : crypt.count();
-    }
-
-    /** Total library count as recorded in the document. */
-    public int libraryCount() {
-        return library == null ? 0 : library.count();
-    }
 }

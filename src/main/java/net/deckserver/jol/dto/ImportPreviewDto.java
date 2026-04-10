@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * Response from POST /cards/preview.
- *
  * format   — detected input format: "krcg" or "jol".
  * deckName — deck name extracted from KRCG JSON if present, null for JOL.
  * resolved — successfully matched cards with their counts.

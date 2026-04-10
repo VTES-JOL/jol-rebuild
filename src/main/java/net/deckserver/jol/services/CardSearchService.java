@@ -40,6 +40,11 @@ public class CardSearchService {
         return card != null ? toDetailDto(card) : null;
     }
 
+    public boolean isBanned(String id) {
+        Card card = registry.findById(id);
+        return card != null && card.banned();
+    }
+
     public List<CardDetailDto> autocomplete(String q) {
         String normalizedQuery = StringUtils.stripAccents(q).toLowerCase();
 
@@ -72,7 +77,7 @@ public class CardSearchService {
             List<String> types = List.of(c.type() == CryptType.IMBUED ? "Imbued" : "Vampire");
             return new CardDetailDto(
                     c.id(), c.name(), true,
-                    types, c.group(), c.banned(), c.advanced(),
+                    types, c.group(), c.banned(), c.advanced(), c.sets(),
                     c.clan(), c.path(), c.capacity(), c.disciplines(),
                     List.of(), List.of(), List.of(), null, null, null
             );
@@ -80,7 +85,7 @@ public class CardSearchService {
         LibraryCard l = (LibraryCard) card;
         return new CardDetailDto(
                 l.id(), l.name(), false,
-                l.types(), null, l.banned(), false,
+                l.types(), null, l.banned(), false, l.sets(),
                 null, null, null, List.of(),
                 l.andDisciplines(), l.orDisciplines(),
                 l.requirementClans(), l.requirementPath(),

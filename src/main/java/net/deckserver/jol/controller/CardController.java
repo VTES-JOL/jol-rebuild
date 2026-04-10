@@ -13,7 +13,7 @@ import org.jboss.resteasy.reactive.RestQuery;
 import java.util.Arrays;
 import java.util.List;
 
-@Path("/cards")
+@Path("/api/cards")
 public class CardController {
 
     @Inject

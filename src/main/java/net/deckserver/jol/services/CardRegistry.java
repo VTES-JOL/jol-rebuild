@@ -141,6 +141,7 @@ public class CardRegistry {
                         r.get("Id"),
                         r.get("Name"),
                         splitSemicolon(r.get("Aka")),
+                        parseSetColumn(r.get("Set")),
                         r.get("Card Text"),
                         r.get("Artist"),
                         StringUtils.isNotBlank(r.get("Banned")),
@@ -185,6 +186,7 @@ public class CardRegistry {
                         r.get("Id"),
                         r.get("Name"),
                         splitSemicolon(r.get("Aka")),
+                        parseSetColumn(r.get("Set")),
                         r.get("Card Text"),
                         r.get("Artist"),
                         StringUtils.isNotBlank(r.get("Banned")),
@@ -266,6 +268,18 @@ public class CardRegistry {
         if (StringUtils.isBlank(raw)) return null;
         if ("X".equalsIgnoreCase(raw.trim())) return -1;
         return Integer.parseInt(raw.trim());
+    }
+
+    private List<String> parseSetColumn(String raw) {
+        if (StringUtils.isBlank(raw)) return List.of();
+        return Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .map(s -> s.startsWith("Promo-") ? "Promo:" + s.substring(6) : s)
+                .map(s -> s.split(":")[0])
+                .map(String::toUpperCase)
+                .distinct()
+                .toList();
     }
 
     private boolean parseBurnOption(String raw) {
