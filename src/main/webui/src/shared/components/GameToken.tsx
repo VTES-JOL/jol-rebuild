@@ -1,29 +1,47 @@
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import gameApi, {type GameDto} from '@/features/game/api';
+import {useNavigate} from 'react-router';
+import {Check} from 'lucide-react';
+import gameApi, {type GameDetail} from '@/features/game/api';
+import DeckSelector from '@/features/lobby/DeckSelector';
+import {useAuthContext} from '@/hooks/useAuthContext';
+
+type Phase = 'idle' | 'registering' | 'waiting';
 
 export default function GameToken({ id, label }: { id: number; label: string }) {
+    const {user} = useAuthContext();
+    const currentUsername = user?.username ?? null;
     const [isOpen, setIsOpen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-    const [game, setGame] = useState<GameDto | null>(null);
+    const [game, setGame] = useState<GameDetail | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number } | null>(null);
+    const [phase, setPhase] = useState<Phase>('idle');
+    const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const [actionError, setActionError] = useState<string | null>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const popupRef = useRef<HTMLDivElement>(null);
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const navigate = useNavigate();
 
     const isVisible = isOpen || isHovered;
 
     const POPUP_W = 320; // w-80 = 20rem = 320px
     const MARGIN = 8;
 
+    const loadDetail = () => {
+        setLoading(true);
+        gameApi.getGameDetail(id)
+            .then(setGame)
+            .catch(err => setError(err.message))
+            .finally(() => setLoading(false));
+    };
+
     useEffect(() => {
         if (isVisible && !game && !loading) {
-            setLoading(true);
-            gameApi.getGame(id)
-                .then(setGame)
-                .catch(err => setError(err.message))
-                .finally(() => setLoading(false));
+            loadDetail();
         }
     }, [isVisible, id, game, loading]);
 
@@ -72,6 +90,62 @@ export default function GameToken({ id, label }: { id: number; label: string }) 
         };
     }, [isOpen]);
 
+    // Poll for ACTIVE status after registration
+    useEffect(() => {
+        if (phase !== 'waiting') {
+            if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+            return;
+        }
+        pollRef.current = setInterval(async () => {
+            try {
+                const g = await gameApi.getGame(id);
+                setGame(prev => prev ? {...prev, status: g.status, registrationCount: g.registrationCount} : null);
+                if (g.status === 'ACTIVE') {
+                    clearInterval(pollRef.current!);
+                    pollRef.current = null;
+                    navigate(`/game/${id}`);
+                }
+            } catch { /* ignore poll errors */ }
+        }, 3000);
+        return () => {
+            if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+        };
+    }, [phase, id, navigate]);
+
+    const handleRegister = async () => {
+        if (!selectedDeckId) return;
+        setSubmitting(true);
+        setActionError(null);
+        try {
+            await gameApi.registerForGame(id, selectedDeckId);
+            loadDetail();
+            setPhase('waiting');
+        } catch (e: unknown) {
+            setActionError(e instanceof Error ? e.message : 'Registration failed.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleLeave = async () => {
+        setSubmitting(true);
+        setActionError(null);
+        try {
+            await gameApi.leaveGame(id);
+            loadDetail();
+            setPhase('idle');
+        } catch (e: unknown) {
+            setActionError(e instanceof Error ? e.message : 'Could not leave game.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const isRegistered = !!game?.registrations.find(r => r.username === currentUsername);
+    const isInvited = !!game?.invites.find(r => r.username === currentUsername);
+    const isFull = game ? game.registrationCount >= game.maxPlayers : false;
+    const canRegister = game?.status === 'OPEN' && game?.visibility === 'PUBLIC' && (isInvited || !isFull);
+
     const popup = isVisible && pos && createPortal(
         <div
             ref={popupRef}
@@ -105,26 +179,104 @@ export default function GameToken({ id, label }: { id: number; label: string }) 
                             </div>
                         </div>
                         <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-ink-muted">Players</span>
-                                <span className="text-ink font-medium tabular-nums">
-                                    {game.registrationCount ?? '—'} / {game.maxPlayers ?? '—'}
+                            {/* Player roster */}
+                            <div className="flex items-baseline justify-between mb-1">
+                                <span className="text-xs text-ink-muted">Players</span>
+                                <span className="text-xs text-ink font-medium tabular-nums">
+                                    {game.registrationCount} / {game.maxPlayers}
                                 </span>
                             </div>
+                            <div className="border border-line/50 rounded overflow-hidden">
+                                {game.registrations.map(r => (
+                                    <div key={r.username} className="flex items-center gap-2 px-3 py-1.5 border-b border-line/30 last:border-b-0 text-xs">
+                                        <Check className="w-3 h-3 text-online shrink-0" />
+                                        <span className={`font-medium ${r.username === currentUsername ? 'text-accent-soft' : 'text-ink'}`}>
+                                            {r.username}
+                                        </span>
+                                    </div>
+                                ))}
+                                {game.invites.map(r => (
+                                    <div key={r.username} className="flex items-center gap-2 px-3 py-1.5 border-b border-line/30 last:border-b-0 text-xs opacity-60">
+                                        <span className="w-3 h-3 shrink-0" />
+                                        <span className={`font-medium ${r.username === currentUsername ? 'text-accent-soft' : 'text-ink'}`}>
+                                            {r.username}
+                                        </span>
+                                        <span className="text-ink-muted italic ml-auto">invited</span>
+                                    </div>
+                                ))}
+                                {game.registrations.length === 0 && game.invites.length === 0 && (
+                                    <p className="px-3 py-2 text-xs text-ink-muted italic">No players yet.</p>
+                                )}
+                            </div>
+
                             {game.owner && (
-                                <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center justify-between text-xs mt-0.5">
                                     <span className="text-ink-muted">Host</span>
                                     <span className="text-ink">{game.owner}</span>
                                 </div>
                             )}
-                            {game.status === 'OPEN' && (
-                                <a
-                                    href={`/game/${game.id}`}
-                                    className="mt-1 block text-center text-xs px-3 py-1.5 rounded border border-gold/40 text-gold hover:bg-gold/10 transition-colors"
-                                    onClick={() => setIsOpen(false)}
-                                >
-                                    View Game
-                                </a>
+
+                            {actionError && <p className="text-xs text-blood">{actionError}</p>}
+
+                            {/* Idle: offer registration or leave */}
+                            {phase === 'idle' && (
+                                <div className="flex gap-2 mt-1">
+                                    {isRegistered && (
+                                        <button
+                                            className="flex-1 text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
+                                            disabled={submitting}
+                                            onClick={handleLeave}
+                                        >
+                                            {submitting ? 'Leaving…' : 'Leave'}
+                                        </button>
+                                    )}
+                                    {!isRegistered && canRegister && (
+                                        <button
+                                            className="flex-1 text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent transition-colors cursor-pointer"
+                                            onClick={() => { setIsOpen(true); setPhase('registering'); setActionError(null); }}
+                                        >
+                                            Register
+                                        </button>
+                                    )}
+                                    {!isRegistered && isFull && game.status === 'OPEN' && (
+                                        <span className="text-xs text-ink-muted italic">Game full</span>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Registering: deck selection */}
+                            {phase === 'registering' && (
+                                <div className="flex flex-col gap-2 mt-1">
+                                    <p className="text-xs text-ink-muted">Select a deck to join:</p>
+                                    <DeckSelector
+                                        format={game.format}
+                                        selectedId={selectedDeckId}
+                                        onSelect={setSelectedDeckId}
+                                    />
+                                    <div className="flex gap-2 justify-end">
+                                        <button
+                                            className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover transition-colors cursor-pointer"
+                                            onClick={() => { setPhase('idle'); setSelectedDeckId(null); setActionError(null); }}
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            className="text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent disabled:opacity-50 transition-colors cursor-pointer"
+                                            disabled={!selectedDeckId || submitting}
+                                            onClick={handleRegister}
+                                        >
+                                            {submitting ? 'Joining…' : 'Join Game'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Waiting: poll until ACTIVE */}
+                            {phase === 'waiting' && (
+                                <div className="mt-1 flex flex-col items-center gap-1.5 py-2">
+                                    <span className="text-xs text-ink-muted animate-pulse">Waiting for game to start…</span>
+                                    <span className="text-[10px] text-ink-muted/60">You'll be taken there automatically.</span>
+                                </div>
                             )}
                         </div>
                     </>
