@@ -6,6 +6,7 @@ import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import DeckImportModal from './DeckImportModal';
 import {computeSummary, enrichEntry, extractKrcgCards, formatSummaryCompact, toKrcgContents} from './deckUtils';
 import deckApi from './api';
+import type {DeckFilter} from './DeckFilterModal';
 import type {CardDetailData, Deck, DeckEntry} from './types';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -19,20 +20,21 @@ export default function DecksPage() {
     const [loadError,       setLoadError]       = useState<string | null>(null);
     const [entriesLoading,  setEntriesLoading]  = useState(false);
     const [showImport,      setShowImport]      = useState(false);
+    const [deckFilter,      setDeckFilter]      = useState<DeckFilter>({});
 
     const saveTimer    = useRef<ReturnType<typeof setTimeout>>(undefined);
     const isDirtyRef   = useRef(false);
     const entriesRef   = useRef<DeckEntry[]>([]);
     const detailMapRef = useRef<Map<string, CardDetailData>>(new Map());
 
-    // ── Load deck list on mount ───────────────────────────────────────────────
+    // ── Load deck list on mount and when filter changes ──────────────────────
     useEffect(() => {
-        deckApi.list()
+        deckApi.list(deckFilter.format || deckFilter.cardId ? deckFilter : undefined)
             .then(setDecks)
             .catch(e => setLoadError(String(e)));
-    }, []);
+    }, [deckFilter]);
 
-    // ── Load contents when selection changes ─────────────────────────────────
+    // ── Load contents + validity when selection changes ───────────────────────
     useEffect(() => {
         if (selectedId == null) {
             setEntries([]); entriesRef.current = [];
@@ -44,8 +46,10 @@ export default function DecksPage() {
         setDetailMap(new Map());
         setEntriesLoading(true);
 
-        deckApi.getContents(selectedId)
-            .then(async contents => {
+        Promise.all([
+            deckApi.getContents(selectedId),
+            deckApi.validityAll(selectedId).catch(() => ({})),
+        ]).then(async ([contents, validity]) => {
                 const raw     = extractKrcgCards(contents);
                 const details = await deckApi.cardDetails(raw.map(c => c.id));
                 const dmap    = new Map(details.map(d => [d.id, d]));
@@ -54,6 +58,10 @@ export default function DecksPage() {
                 detailMapRef.current = dmap;
                 setEntries(loaded);
                 entriesRef.current = loaded;
+                // Merge validity into the deck list entry so the editor status bar has it
+                if (Object.keys(validity).length > 0) {
+                    setDecks(ds => ds.map(d => d.id === selectedId ? {...d, formatValidity: validity} : d));
+                }
             })
             .catch(console.error)
             .finally(() => setEntriesLoading(false));
@@ -113,8 +121,8 @@ export default function DecksPage() {
         }
     }, []);
 
-    const handleImport = useCallback(async (name: string, entries: { cardId: string; count: number }[]) => {
-        const deck = await deckApi.importDeck(name, entries);
+    const handleImport = useCallback(async (name: string, entries: { cardId: string; count: number }[], comments?: string | null) => {
+        const deck = await deckApi.importDeck(name, entries, comments);
         setDecks(ds => [deck, ...ds]);
         isDirtyRef.current = false;
         setSelectedId(deck.id);
@@ -221,6 +229,8 @@ export default function DecksPage() {
                     onSelect={handleSelect}
                     onNew={handleNew}
                     onImport={() => setShowImport(true)}
+                    onFilter={setDeckFilter}
+                    activeFilter={deckFilter}
                     loadError={loadError ?? undefined}
                 />
                 {selectedId != null ? (
@@ -230,6 +240,8 @@ export default function DecksPage() {
                         saveLabel={saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : undefined}
                         saveError={saveStatus === 'error'}
                         comments={selectedDeck?.comments}
+                        deckId={selectedDeck?.id}
+                        formatValidity={selectedDeck?.formatValidity}
                         entriesLoading={entriesLoading}
                         onRename={handleRename}
                         onCommentsChange={handleCommentsChange}

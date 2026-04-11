@@ -1,4 +1,4 @@
-import type {CardDetailData, Deck, ImportPreview, KrcgContents} from './types';
+import type {CardDetailData, Deck, FormatValidity, ImportPreview, KrcgContents} from './types';
 
 const BASE  = '/api/decks';
 const CARDS = '/api/cards';
@@ -12,8 +12,12 @@ async function json<T>(res: Response): Promise<T> {
 const deckApi = {
     // ── Deck CRUD ─────────────────────────────────────────────────────────────
 
-    async list(): Promise<Deck[]> {
-        return json(await fetch(BASE, OPTS));
+    async list(filter?: { format?: string; cardId?: string }): Promise<Deck[]> {
+        const params = new URLSearchParams();
+        if (filter?.format) params.set('format', filter.format);
+        if (filter?.cardId) params.set('card', filter.cardId);
+        const qs = params.size ? `?${params}` : '';
+        return json(await fetch(`${BASE}${qs}`, OPTS));
     },
 
     async create(name: string): Promise<Deck> {
@@ -34,6 +38,14 @@ const deckApi = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(patch),
         }));
+    },
+
+    async validityAll(id: number): Promise<Record<string, boolean>> {
+        return json(await fetch(`${BASE}/${id}/validity`, OPTS));
+    },
+
+    async validity(id: number, format: string): Promise<FormatValidity> {
+        return json(await fetch(`${BASE}/${id}/validity/${format}`, OPTS));
     },
 
     async remove(id: number): Promise<void> {
@@ -73,11 +85,11 @@ const deckApi = {
     },
 
     /** Create a new deck from a confirmed import preview. */
-    async importDeck(name: string, entries: { cardId: string; count: number }[]): Promise<Deck> {
+    async importDeck(name: string, entries: { cardId: string; count: number }[], comments?: string | null): Promise<Deck> {
         return json(await fetch(`${BASE}/import`, {
             ...OPTS, method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, entries }),
+            body: JSON.stringify({ name, comments: comments ?? null, entries }),
         }));
     },
 };

@@ -4,17 +4,18 @@ import deckApi from './api';
 import type {ImportPreview} from './types';
 
 interface Props {
-    onImport: (name: string, entries: { cardId: string; count: number }[]) => Promise<void>;
+    onImport: (name: string, entries: { cardId: string; count: number }[], comments?: string | null) => Promise<void>;
     onClose: () => void;
 }
 
 export default function DeckImportModal({ onImport, onClose }: Props) {
-    const [text,       setText]       = useState('');
-    const [deckName,   setDeckName]   = useState('');
-    const [preview,    setPreview]    = useState<ImportPreview | null>(null);
-    const [loading,    setLoading]    = useState(false);
-    const [creating,   setCreating]   = useState(false);
-    const [error,      setError]      = useState<string | null>(null);
+    const [text,        setText]        = useState('');
+    const [deckName,    setDeckName]    = useState('');
+    const [comments,    setComments]    = useState('');
+    const [preview,     setPreview]     = useState<ImportPreview | null>(null);
+    const [loading,     setLoading]     = useState(false);
+    const [creating,    setCreating]    = useState(false);
+    const [error,       setError]       = useState<string | null>(null);
     const [createError, setCreateError] = useState<string | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -36,7 +37,8 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
             try {
                 const result = await deckApi.previewImport(text);
                 setPreview(result);
-                if (result.deckName) setDeckName(result.deckName);
+                if (result.deckName)        setDeckName(result.deckName);
+                if (result.deckDescription) setComments(result.deckDescription);
             } catch (e) {
                 setError(e instanceof Error ? e.message : 'Preview failed');
                 setPreview(null);
@@ -53,7 +55,7 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
         setCreateError(null);
         try {
             const entries = preview.resolved.map(r => ({ cardId: r.card.id, count: r.count }));
-            await onImport(deckName.trim() || 'Imported Deck', entries);
+            await onImport(deckName.trim() || 'Imported Deck', entries, comments.trim() || null);
         } catch (e) {
             setCreateError(e instanceof Error ? e.message : 'Import failed');
             setCreating(false);
@@ -143,18 +145,30 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
                         </div>
                     )}
 
-                    {/* Deck name */}
+                    {/* Deck name + comments */}
                     {hasResolved && (
-                        <div>
-                            <label className="block text-xs text-ink-muted mb-1">Deck name</label>
-                            <input
-                                type="text"
-                                value={deckName}
-                                placeholder="Imported Deck"
-                                onChange={e => setDeckName(e.target.value)}
-                                className="w-full rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink outline-none focus:border-accent/60"
-                            />
-                        </div>
+                        <>
+                            <div>
+                                <label className="block text-xs text-ink-muted mb-1">Deck name</label>
+                                <input
+                                    type="text"
+                                    value={deckName}
+                                    placeholder="Imported Deck"
+                                    onChange={e => setDeckName(e.target.value)}
+                                    className="w-full rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink outline-none focus:border-accent/60"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-ink-muted mb-1">Comments</label>
+                                <textarea
+                                    value={comments}
+                                    placeholder="Optional deck notes…"
+                                    rows={3}
+                                    onChange={e => setComments(e.target.value)}
+                                    className="w-full rounded border border-line/60 bg-panel/30 px-3 py-2 text-xs text-ink placeholder:text-ink-muted outline-none focus:border-accent/60 resize-none"
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
 

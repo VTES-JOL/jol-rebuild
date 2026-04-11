@@ -5,6 +5,15 @@ export interface Deck {
     summary: string | null;
     comments: string | null;
     timestamp: string; // ISO-8601 instant
+    /** Format key → valid. Empty object means never validated. */
+    formatValidity: Record<string, boolean>;
+}
+
+export interface FormatValidity {
+    format: string;
+    valid: boolean;
+    errors: string[];
+    computedAt: string;
 }
 
 export interface DeckSummary {
@@ -76,8 +85,9 @@ export interface CardDetailData {
 
 /** Resolved card entry returned by POST /cards/preview. */
 export interface ImportPreview {
-    format:   'krcg' | 'jol';
-    deckName: string | null;
-    resolved: Array<{ count: number; card: CardDetailData }>;
-    errors:   Array<{ line: string; reason: string }>;
+    format:          'krcg' | 'jol';
+    deckName:        string | null;
+    deckDescription: string | null;
+    resolved:        Array<{ count: number; card: CardDetailData }>;
+    errors:          Array<{ line: string; reason: string }>;
 }

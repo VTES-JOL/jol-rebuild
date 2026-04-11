@@ -43,7 +43,7 @@ class DeckValidatorTest {
         var library = new KrcgLibrary(libCopies,
                 List.of(new KrcgLibraryGroup("Action", libCopies,
                         List.of(new KrcgCard(libId, libCopies, libName)))));
-        return new KrcgDeck(null, crypt, library);
+        return new KrcgDeck(null, null, crypt, library);
     }
 
     /** Multi-crypt-card deck — lets us mix cards in the crypt. */
@@ -53,7 +53,7 @@ class DeckValidatorTest {
         var library = new KrcgLibrary(libCopies,
                 List.of(new KrcgLibraryGroup("Action", libCopies,
                         List.of(new KrcgCard(libId, libCopies, libName)))));
-        return new KrcgDeck(null, crypt, library);
+        return new KrcgDeck(null, null, crypt, library);
     }
 
     // ── StandardDeckValidator ─────────────────────────────────────────────────
@@ -130,7 +130,7 @@ class DeckValidatorTest {
                 new KrcgLibraryGroup("Action", 60, List.of(
                         new KrcgCard("100518", 59, "Deflection"),
                         new KrcgCard("100074", 1, "Anthelios, The Red Star")))));
-        KrcgDeck deck = new KrcgDeck(null, crypt, library);
+        KrcgDeck deck = new KrcgDeck(null, null, crypt, library);
 
         ValidationResult result = standard.validate(deck, GameFormat.STANDARD);
 
@@ -215,7 +215,7 @@ class DeckValidatorTest {
                 new KrcgLibraryGroup("Action", 40, List.of(
                         new KrcgCard("100518", 30, "Deflection"),
                         new KrcgCard("100845", 10, "Govern the Unaligned")))));
-        KrcgDeck deck = new KrcgDeck(null, crypt, library);
+        KrcgDeck deck = new KrcgDeck(null, null, crypt, library);
 
         ValidationResult result = duel.validate(deck, GameFormat.DUEL);
 

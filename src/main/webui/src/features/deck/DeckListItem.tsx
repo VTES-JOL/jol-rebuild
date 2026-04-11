@@ -14,16 +14,18 @@ function formatTimestamp(iso: string): string {
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7)  return `${diffDays}d ago`;
-    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
 }
 
-
-export default function DeckListItem({ deck, selected = false, onClick }: Props) {
+export default function DeckListItem({deck, selected = false, onClick}: Props) {
     return (
-        <button
+        <div
+            role="button"
+            tabIndex={0}
             onClick={onClick}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick?.(); }}
             className={[
-                'w-full text-left px-4 py-3 border-b border-line/50 transition-colors',
+                'w-full text-left px-4 py-3 border-b border-line/50 transition-colors cursor-pointer',
                 selected
                     ? 'bg-accent/10 border-l-2 border-l-accent'
                     : 'hover:bg-hover border-l-2 border-l-transparent',
@@ -37,12 +39,14 @@ export default function DeckListItem({ deck, selected = false, onClick }: Props)
                     {formatTimestamp(deck.timestamp)}
                 </span>
             </div>
-            {parseSummary(deck.summary) && <SummaryStats summary={parseSummary(deck.summary)!} validate className="mt-1.5" />}
+            {parseSummary(deck.summary) && (
+                <SummaryStats summary={parseSummary(deck.summary)!} validate className="mt-1.5" />
+            )}
             {deck.comments && (
                 <p className="text-xs text-ink-muted mt-0.5 line-clamp-1 leading-relaxed">
                     {deck.comments}
                 </p>
             )}
-        </button>
+        </div>
     );
 }

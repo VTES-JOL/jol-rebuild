@@ -26,6 +26,7 @@ const sampleDecks: Deck[] = [
         summary: '12,80,4/5',
         comments: 'Fast aggravated damage with Gangrel and Nosferatu. Rush early, bleed late.',
         timestamp: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+        formatValidity: { STANDARD: true, DUEL: false, V5: false },
     },
     {
         id: 2,
@@ -33,6 +34,7 @@ const sampleDecks: Deck[] = [
         summary: '13,77,3/4',
         comments: 'Vote lock with Ventrue princes and Inner Circle members.',
         timestamp: new Date(Date.now() - 86_400_000).toISOString(),
+        formatValidity: { STANDARD: true, DUEL: true, V5: true },
     },
     {
         id: 3,
@@ -40,6 +42,7 @@ const sampleDecks: Deck[] = [
         summary: '12,78,5/6',
         comments: null,
         timestamp: new Date('2025-11-03').toISOString(),
+        formatValidity: { STANDARD: true, DUEL: false, V5: true },
     },
     {
         id: 4,
@@ -47,6 +50,7 @@ const sampleDecks: Deck[] = [
         summary: '12,80,3',
         comments: 'Defensive bloat with intercept and combat ends. Very hard to rush.',
         timestamp: new Date('2025-08-14').toISOString(),
+        formatValidity: {},
     },
     {
         id: 5,
@@ -54,6 +58,7 @@ const sampleDecks: Deck[] = [
         summary: null,
         comments: null,
         timestamp: new Date(Date.now() - 3_600_000).toISOString(),
+        formatValidity: {},
     },
 ];
 
@@ -108,6 +113,11 @@ const manyDecks: Deck[] = Array.from({ length: 20 }, (_, i) => ({
     summary: i % 4 !== 3 ? `${10 + i % 4},${76 + i % 6},${(i % 6) + 1}` : null,
     comments: i % 3 === 0 ? `Notes for deck ${i + 1} with a bit of descriptive text.` : null,
     timestamp: new Date(Date.now() - i * 3 * 86_400_000).toISOString(),
+    formatValidity: (i % 3 === 0
+        ? { STANDARD: true, DUEL: i % 6 === 0, V5: true }
+        : i % 3 === 1
+            ? { STANDARD: false, DUEL: false, V5: false }
+            : {}) as Record<string, boolean>,
 }));
 
 export const ManyDecks: Story = {

@@ -80,7 +80,7 @@ public class DeckImportService {
         int cryptCount = cryptCards.stream().mapToInt(KrcgCard::count).sum();
         int libCount   = libraryGroups.stream().mapToInt(KrcgLibraryGroup::count).sum();
 
-        return new KrcgDeck(null, new KrcgCrypt(cryptCount, cryptCards), new KrcgLibrary(libCount, libraryGroups));
+        return new KrcgDeck(null, null, new KrcgCrypt(cryptCount, cryptCards), new KrcgLibrary(libCount, libraryGroups));
     }
 
     // ── Format-specific parsers ───────────────────────────────────────────────
@@ -88,14 +88,21 @@ public class DeckImportService {
     private ImportPreviewDto previewKrcg(String text) {
         List<ImportPreviewDto.ResolvedEntry> resolved = new ArrayList<>();
         List<ImportPreviewDto.ParseError>   errors   = new ArrayList<>();
-        String deckName = null;
+        String deckName        = null;
+        String deckDescription = null;
 
         try {
             JsonNode root = mapper.readTree(text);
 
-            JsonNode meta = root.path("meta");
-            if (!meta.isMissingNode() && meta.has("name")) {
-                deckName = meta.get("name").asText(null);
+            // KRCG tournament exports: top-level "name" and "comments" fields.
+            // Internal meta object (our own format): "meta.name" / "meta.description".
+            deckName = root.path("name").asText(null);
+            if (deckName == null) deckName = root.path("meta").path("name").asText(null);
+
+            String rawComments = root.path("comments").asText(null);
+            if (rawComments == null) rawComments = root.path("meta").path("description").asText(null);
+            if (rawComments != null) {
+                deckDescription = rawComments.strip();
             }
 
             for (JsonNode card : root.path("crypt").path("cards")) {
@@ -112,7 +119,7 @@ public class DeckImportService {
                     "Invalid JSON: " + e.getMessage()));
         }
 
-        return new ImportPreviewDto("krcg", deckName, resolved, errors);
+        return new ImportPreviewDto("krcg", deckName, deckDescription, resolved, errors);
     }
 
     private void resolveKrcgCard(JsonNode card, List<ImportPreviewDto.ResolvedEntry> resolved,
@@ -156,6 +163,6 @@ public class DeckImportService {
             }
         }
 
-        return new ImportPreviewDto("jol", null, resolved, errors);
+        return new ImportPreviewDto("jol", null, null, resolved, errors);
     }
 }

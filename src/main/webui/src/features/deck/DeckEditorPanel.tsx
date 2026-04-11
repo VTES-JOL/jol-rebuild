@@ -14,6 +14,8 @@ interface Props {
     saveError?:        boolean;
     comments?:         string | null;
     entriesLoading?:   boolean;
+    deckId?:           number;
+    formatValidity?:   Record<string, boolean>;
     onRename?:         (name: string) => void;
     onDelete?:         () => void;
     onRetrySave?:      () => void;
@@ -28,6 +30,7 @@ interface Props {
 
 export default function DeckEditorPanel({
     title = 'Editor', saveLabel, saveError, comments, entriesLoading,
+    deckId, formatValidity,
     onRename, onDelete, onRetrySave, onCommentsChange,
     entries, detailMap, onIncrement, onDecrement, onAddCard, onSearch,
 }: Props) {
@@ -92,7 +95,7 @@ export default function DeckEditorPanel({
             }
         >
             <DeckSearchBar onSearch={onSearch} onAddCard={onAddCard} />
-            <DeckStatusBar entries={entries} />
+            <DeckStatusBar entries={entries} deckId={deckId} formatValidity={formatValidity} />
             <DeckComments  comments={comments} onCommentsChange={onCommentsChange} />
             <DeckCardList
                 entries={entries}

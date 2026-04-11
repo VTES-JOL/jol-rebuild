@@ -12,17 +12,18 @@ import java.util.stream.Stream;
  *
  * <pre>{@code
  * {
- *   "meta":    { "name": "...", "author": "..." },   // optional
- *   "crypt":   { "count": 12, "cards": [...] },
- *   "library": { "count": 60, "cards": [ { "type": "Action", "count": 8, "cards": [...] } ] }
+ *   "name":     "Bleed com Bleed",           // optional
+ *   "comments": "Description: ...",           // optional
+ *   "crypt":    { "count": 12, "cards": [...] },
+ *   "library":  { "count": 60, "cards": [ { "type": "Action", "count": 8, "cards": [...] } ] }
  * }
  * }</pre>
  *
- * {@code meta} is omitted from serialisation when null.
+ * Optional fields are omitted from serialisation when null.
  */
 @RegisterForReflection
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record KrcgDeck(KrcgMeta meta, KrcgCrypt crypt, KrcgLibrary library) {
+public record KrcgDeck(String name, String comments, KrcgCrypt crypt, KrcgLibrary library) {
 
     /** Convenience: all crypt cards as a flat list. */
     public List<KrcgCard> cryptCards() {
@@ -39,8 +40,6 @@ public record KrcgDeck(KrcgMeta meta, KrcgCrypt crypt, KrcgLibrary library) {
 
     @JsonIgnore
     public Stream<KrcgCard> cardStream() {
-        Stream<KrcgCard> cryptStream = cryptCards().stream();
-        Stream<KrcgCard> libraryStream = libraryCards().stream();
-        return Stream.concat(cryptStream, libraryStream);
+        return Stream.concat(cryptCards().stream(), libraryCards().stream());
     }
 }
