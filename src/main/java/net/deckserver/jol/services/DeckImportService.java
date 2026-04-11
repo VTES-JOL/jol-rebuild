@@ -65,7 +65,7 @@ public class DeckImportService {
             if (detail.crypt()) {
                 cryptCards.add(card);
             } else {
-                String typeKey = String.join("/", detail.types());
+                String typeKey = detail.types().stream().sorted().collect(Collectors.joining("/"));
                 libGroups.computeIfAbsent(typeKey, k -> new ArrayList<>()).add(card);
             }
         }

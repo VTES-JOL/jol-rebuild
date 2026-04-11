@@ -7,7 +7,7 @@ import type {DeckEntry} from './types';
 interface Props {
     entries: DeckEntry[];
     deckId?: number;
-    formatValidity?: Record<string, boolean>;
+    formatValidity?: Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
 }
 
 export default function DeckStatusBar({entries, deckId, formatValidity}: Props) {

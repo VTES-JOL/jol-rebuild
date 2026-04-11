@@ -30,10 +30,12 @@ export function OpeningHandSection({ entries }: Props) {
     const cryptEntries = entries.filter(e => e.isCrypt);
     const cryptTotal   = cryptEntries.reduce((s, e) => s + e.count, 0);
 
-    if (cryptEntries.length === 0) return null;
+    const handEntries = cryptEntries.filter(e => e.count > 1);
+
+    if (handEntries.length === 0) return null;
     if (!cryptEntries.some(e => e.count >= 3)) return null;
 
-    const rows = cryptEntries
+    const rows = handEntries
         .map(e => ({ ...e, prob: openingHandProb(cryptTotal, e.count) }))
         .sort((a, b) => b.prob - a.prob);
 

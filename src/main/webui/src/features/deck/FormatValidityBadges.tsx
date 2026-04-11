@@ -13,7 +13,7 @@ type FormatKey = (typeof FORMATS)[number]['key'];
 
 interface Props {
     deckId: number;
-    formatValidity: Record<string, boolean>;
+    formatValidity: Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
     className?: string;
 }
 
@@ -21,6 +21,7 @@ interface ModalState {
     format: FormatKey;
     label: string;
     errors: string[] | null; // null = loading
+    fetchFailed?: boolean;
 }
 
 export default function FormatValidityBadges({deckId, formatValidity, className = ''}: Props) {
@@ -42,8 +43,7 @@ export default function FormatValidityBadges({deckId, formatValidity, className 
             setCache(prev => ({...prev, [key]: result.errors}));
             setModal({format: key, label, errors: result.errors});
         } catch {
-            setCache(prev => ({...prev, [key]: []}));
-            setModal({format: key, label, errors: []});
+            setModal({format: key, label, errors: [], fetchFailed: true});
         }
     };
 
@@ -63,6 +63,8 @@ export default function FormatValidityBadges({deckId, formatValidity, className 
                             key={key}
                             type="button"
                             onClick={e => handleClick(e, key, label)}
+                            aria-disabled={!isInvalid}
+                            title={isInvalid ? `${label}: invalid — click for details` : undefined}
                             className={[
                                 'flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-colors',
                                 status === true  ? 'bg-online/15 text-online cursor-default' :
@@ -106,8 +108,10 @@ export default function FormatValidityBadges({deckId, formatValidity, className 
                         <div className="px-4 py-3 min-h-[60px]">
                             {modal.errors === null ? (
                                 <p className="text-xs text-ink-muted animate-pulse">Loading…</p>
+                            ) : modal.fetchFailed ? (
+                                <p className="text-xs text-blood-soft">Could not load validation details.</p>
                             ) : modal.errors.length === 0 ? (
-                                <p className="text-xs text-ink-muted">No details available.</p>
+                                <p className="text-xs text-ink-muted">No details recorded.</p>
                             ) : (
                                 <ul className="space-y-1.5">
                                     {modal.errors.map((err, i) => (

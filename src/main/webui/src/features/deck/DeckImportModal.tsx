@@ -17,8 +17,12 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
     const [creating,    setCreating]    = useState(false);
     const [error,       setError]       = useState<string | null>(null);
     const [createError, setCreateError] = useState<string | null>(null);
-    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const debounceRef  = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const textareaRef  = useRef<HTMLTextAreaElement>(null);
+    const deckNameRef  = useRef(deckName);
+    const commentsRef  = useRef(comments);
+    useEffect(() => { deckNameRef.current  = deckName;  }, [deckName]);
+    useEffect(() => { commentsRef.current  = comments;  }, [comments]);
 
     useEffect(() => {
         textareaRef.current?.focus();
@@ -37,8 +41,9 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
             try {
                 const result = await deckApi.previewImport(text);
                 setPreview(result);
-                if (result.deckName)        setDeckName(result.deckName);
-                if (result.deckDescription) setComments(result.deckDescription);
+                // Only autopopulate if the user hasn't typed their own value
+                if (result.deckName        && !deckNameRef.current.trim())  setDeckName(result.deckName);
+                if (result.deckDescription && !commentsRef.current.trim())  setComments(result.deckDescription);
             } catch (e) {
                 setError(e instanceof Error ? e.message : 'Preview failed');
                 setPreview(null);

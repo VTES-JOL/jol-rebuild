@@ -117,7 +117,7 @@ const manyDecks: Deck[] = Array.from({ length: 20 }, (_, i) => ({
         ? { STANDARD: true, DUEL: i % 6 === 0, V5: true }
         : i % 3 === 1
             ? { STANDARD: false, DUEL: false, V5: false }
-            : {}) as Record<string, boolean>,
+            : {}) as Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>,
 }));
 
 export const ManyDecks: Story = {
@@ -130,5 +130,6 @@ export const ManyDecks: Story = {
         decks: manyDecks,
         selectedId: null,
         onSelect: fn(),
+        onFilter: fn(),
     },
 };

@@ -106,8 +106,8 @@ export default function DeckFilterModal({current, onApply, onClose}: Props) {
                 <div className="flex flex-col gap-4 px-4 py-4">
 
                     {/* Format */}
-                    <div>
-                        <p className="text-xs text-ink-muted mb-2">Valid for format</p>
+                    <fieldset>
+                        <legend className="text-xs text-ink-muted mb-2">Valid for format</legend>
                         <div className="flex gap-1.5">
                             {FORMATS.map(f => (
                                 <button
@@ -125,12 +125,13 @@ export default function DeckFilterModal({current, onApply, onClose}: Props) {
                                 </button>
                             ))}
                         </div>
-                    </div>
+                    </fieldset>
 
                     {/* Card */}
                     <div className="relative">
-                        <p className="text-xs text-ink-muted mb-2">Contains card</p>
+                        <label htmlFor="filter-card" className="block text-xs text-ink-muted mb-2">Contains card</label>
                         <input
+                            id="filter-card"
                             ref={inputRef}
                             type="text"
                             value={cardQuery}
@@ -160,7 +161,7 @@ export default function DeckFilterModal({current, onApply, onClose}: Props) {
                                         >
                                             <span className="truncate">{card.name}</span>
                                             <span className="shrink-0 text-[10px] text-ink-muted">
-                                                {card.crypt ? 'crypt' : card.types[0]}
+                                                {card.crypt ? 'crypt' : (card.types[0] ?? '—')}
                                             </span>
                                         </button>
                                     </li>

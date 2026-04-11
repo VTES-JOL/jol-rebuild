@@ -5,8 +5,8 @@ export interface Deck {
     summary: string | null;
     comments: string | null;
     timestamp: string; // ISO-8601 instant
-    /** Format key → valid. Empty object means never validated. */
-    formatValidity: Record<string, boolean>;
+    /** Format key → valid. Missing key means not yet validated for that format. */
+    formatValidity: Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
 }
 
 export interface FormatValidity {
