@@ -25,7 +25,7 @@ public class GameService {
     public void createGame() {
         for (GameFormat format : GameFormat.values()) {
             List<Game> openGames = Game.findOpenGames(format);
-            if (openGames.size() < 3) {
+            if (openGames.isEmpty()) {
                 String gameName = nameService.generateName();
                 Game game = Game.create(null, gameName, Visibility.PUBLIC, format);
                 String gameToken = String.format("[game:%d:%s]", game.id, gameName);

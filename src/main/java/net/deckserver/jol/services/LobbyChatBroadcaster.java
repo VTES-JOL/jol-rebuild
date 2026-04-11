@@ -11,9 +11,9 @@ import net.deckserver.jol.dto.ChatMessageDto;
  * <p>
  * Usage example:
  *
- * @Inject LobbyChatBroadcaster broadcaster;
+ * &#064;Inject LobbyChatBroadcaster broadcaster;
  * <p>
- * broadcaster.announce("Game #42 is starting — join now!");
+ * broadcaster.announce("Game #42 is starting &mdash; join now!");
  * broadcaster.broadcast(ChatMessageDto.chat("System", "Server restarting in 5 minutes", Instant.now()));
  */
 @ApplicationScoped

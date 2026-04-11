@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import {X, Lock, Check} from 'lucide-react';
+import {Check, Lock, X} from 'lucide-react';
 import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from './DeckSelector';
 

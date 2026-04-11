@@ -4,7 +4,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MediaType;
-import net.deckserver.jol.entity.*;
+import net.deckserver.jol.entity.Deck;
+import net.deckserver.jol.entity.Game;
+import net.deckserver.jol.entity.Registration;
+import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Role;
 import net.deckserver.jol.enums.Visibility;
@@ -31,8 +34,6 @@ import static org.hamcrest.Matchers.*;
 @QuarkusTest
 public class GameControllerTest {
 
-    private long otherUserDeckId;
-
     @BeforeEach
     @Transactional
     void setup() {
@@ -50,7 +51,6 @@ public class GameControllerTest {
         deck.contents  = "{}";
         deck.timestamp = java.time.Instant.now();
         deck.persist();
-        otherUserDeckId = deck.id;
     }
 
     @AfterEach

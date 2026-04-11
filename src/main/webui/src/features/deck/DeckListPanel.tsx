@@ -2,8 +2,8 @@ import {useState} from 'react';
 import {Filter, Search, X} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import DeckListItem from './DeckListItem';
-import DeckFilterModal from './DeckFilterModal';
 import type {DeckFilter} from './DeckFilterModal';
+import DeckFilterModal from './DeckFilterModal';
 import type {Deck} from './types';
 
 interface Props {

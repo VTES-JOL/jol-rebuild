@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests for all three DeckValidator implementations.
  * Uses real card data from the CSV registry — all card IDs reference real cards.
- *
  * Card fixtures used:
  *   200076 - Anarch Convert      (non-banned, NOT in duel/V5 whitelists)
  *   201634 - Abraham Mellon      (non-banned, duel whitelist, V5 via FOL set)

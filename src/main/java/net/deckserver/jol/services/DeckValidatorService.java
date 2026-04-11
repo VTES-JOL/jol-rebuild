@@ -22,13 +22,6 @@ public class DeckValidatorService {
     @Inject
     EntityManager em;
 
-    public List<GameFormat> eligibleFormats(KrcgDeck deck) {
-        return validate(deck).stream()
-                .filter(DeckValidator.ValidationResult::valid)
-                .map(DeckValidator.ValidationResult::format)
-                .toList();
-    }
-
     public List<DeckValidator.ValidationResult> validate(KrcgDeck deck) {
         return Arrays.stream(GameFormat.values())
                 .map(format -> factory.createDeckValidator(format).validate(deck, format))

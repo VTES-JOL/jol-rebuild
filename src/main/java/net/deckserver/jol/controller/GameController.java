@@ -7,7 +7,6 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
-import net.deckserver.jol.services.NameService;
 import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.GameDetailDto;
 import net.deckserver.jol.dto.GameDto;
@@ -15,6 +14,7 @@ import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.Visibility;
+import net.deckserver.jol.services.NameService;
 
 import java.net.URI;
 import java.util.ArrayList;

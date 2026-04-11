@@ -21,11 +21,9 @@ import static org.hamcrest.Matchers.*;
 
 /**
  * Integration tests for DeckController.
- *
  * Setup strategy: @BeforeEach/@AfterEach are @Transactional (each commits its own transaction),
  * so data they persist is visible to the server. Test methods use the HTTP API for further
  * setup so every state change goes through a committed server transaction.
- *
  * Card fixtures:
  *   200076 - Anarch Convert  (non-banned; NOT in duel/V5 whitelists)
  *   100518 - Deflection       (non-banned; duel ✓, V5 via V5/NB/V5C sets ✓)

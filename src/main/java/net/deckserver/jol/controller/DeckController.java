@@ -16,9 +16,11 @@ import net.deckserver.jol.entity.Deck;
 import net.deckserver.jol.entity.DeckFormatValidity;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.GameFormat;
+import net.deckserver.jol.model.CryptCard;
 import net.deckserver.jol.model.krcg.KrcgCrypt;
 import net.deckserver.jol.model.krcg.KrcgDeck;
 import net.deckserver.jol.model.krcg.KrcgLibrary;
+import net.deckserver.jol.services.CardRegistry;
 import net.deckserver.jol.services.DeckImportService;
 import net.deckserver.jol.services.DeckValidatorService;
 
@@ -37,6 +39,9 @@ public class DeckController {
 
     @Inject
     ObjectMapper mapper;
+
+    @Inject
+    CardRegistry cardRegistry;
 
     @Inject
     DeckImportService deckImportService;
@@ -155,10 +160,26 @@ public class DeckController {
 
         KrcgDeck contents = deckImportService.buildKrcgContents(cardCounts);
         String name = command.name() != null && !command.name().isBlank() ? command.name() : "Imported Deck";
-        Deck deck = Deck.create(currentUser(), name, mapper.writeValueAsString(contents), null);
+        Deck deck = Deck.create(currentUser(), name, mapper.writeValueAsString(contents), computeSummary(contents));
         if (command.comments() != null && !command.comments().isBlank()) deck.comments = command.comments();
         List<DeckFormatValidity> validity = validatorService.validateAndPersist(deck, contents);
         return new DeckDto(deck, validity);
+    }
+
+    /** Computes "{crypt},{library},{groups}" from built KRCG contents, matching the frontend format. */
+    private String computeSummary(KrcgDeck contents) {
+        int crypt   = contents.crypt().count();
+        int library = contents.library().count();
+        String groups = contents.crypt().cards().stream()
+                .map(c -> cardRegistry.findById(c.id()))
+                .filter(c -> c instanceof CryptCard cc && !"ANY".equals(cc.group()))
+                .map(c -> ((CryptCard) c).group())
+                .flatMap(g -> { try { return java.util.stream.Stream.of(Integer.parseInt(g)); } catch (NumberFormatException e) { return java.util.stream.Stream.empty(); } })
+                .distinct()
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.joining("/"));
+        return crypt + "," + library + "," + groups;
     }
 
     // ── Commands & responses ──────────────────────────────────────────────────
