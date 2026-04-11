@@ -12,9 +12,10 @@ const FORMAT_LABELS: Record<string, string> = {STANDARD: 'Standard', DUEL: 'Duel
 
 interface Props {
     currentUsername: string;
+    onChanged?: () => void;
 }
 
-export default function OpenGamesPanel({currentUsername}: Props) {
+export default function OpenGamesPanel({currentUsername, onChanged}: Props) {
     const [games, setGames] = useState<GameDto[]>([]);
     const [tab, setTab] = useState<Tab>('All');
     const [showCreate, setShowCreate] = useState(false);
@@ -86,7 +87,7 @@ export default function OpenGamesPanel({currentUsername}: Props) {
                     gameId={selectedGameId}
                     currentUsername={currentUsername}
                     onClose={() => setSelectedGameId(null)}
-                    onChanged={refresh}
+                    onChanged={() => { refresh(); onChanged?.(); }}
                 />
             )}
         </>

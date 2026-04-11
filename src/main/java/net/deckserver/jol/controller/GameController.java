@@ -125,6 +125,23 @@ public class GameController {
     }
 
     @GET
+    @Path("/registered/me")
+    @RolesAllowed("USER")
+    public List<GameDto> myRegisteredGames() {
+        User user = User.findByUsername(identity.getPrincipal().getName());
+        return Game.findRegisteredGames(user).stream().map(GameDto::new).toList();
+    }
+
+    @GET
+    @Path("/owned/me")
+    @RolesAllowed("USER")
+    public List<GameDto> myOwnedGames() {
+        User user = User.findByUsername(identity.getPrincipal().getName());
+        return Game.<Game>find("owner.id = ?1 and status = ?2", user.id, Status.OPEN)
+            .stream().map(GameDto::new).toList();
+    }
+
+    @GET
     @Path("/{id}/registrations")
     @RolesAllowed("USER")
     public Response getRegistrations(@PathParam("id") Long id) {

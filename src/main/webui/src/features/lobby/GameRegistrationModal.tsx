@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 import {X, Lock, Check} from 'lucide-react';
 import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from './DeckSelector';
@@ -20,9 +21,11 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
     const [inviteQuery, setInviteQuery] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [showSuggest, setShowSuggest] = useState(false);
+    const [suggestPos, setSuggestPos] = useState<{top: number; left: number; width: number} | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [actionError, setActionError] = useState<string | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const inviteInputRef = useRef<HTMLInputElement>(null);
 
     const load = () => {
         setLoading(true);
@@ -47,7 +50,13 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
             if (res.ok) {
                 const names: string[] = await res.json();
                 setSuggestions(names);
-                setShowSuggest(names.length > 0);
+                if (names.length > 0 && inviteInputRef.current) {
+                    const rect = inviteInputRef.current.getBoundingClientRect();
+                    setSuggestPos({top: rect.bottom + 4, left: rect.left, width: rect.width});
+                    setShowSuggest(true);
+                } else {
+                    setShowSuggest(false);
+                }
             }
         }, 250);
         return () => clearTimeout(debounceRef.current);
@@ -234,41 +243,44 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
                         {isOwner && (
                             <div>
                                 <label className="block text-xs text-ink-muted mb-2">Invite player</label>
-                                <div className="relative">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={inviteQuery}
-                                            onChange={e => { setInviteQuery(e.target.value); setShowSuggest(true); }}
-                                            onKeyDown={e => { if (e.key === 'Enter') handleInvite(inviteQuery); }}
-                                            onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
-                                            placeholder="Username…"
-                                            className="flex-1 rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink placeholder:text-ink-muted outline-none focus:border-accent/60"
-                                        />
-                                        <button
-                                            onClick={() => handleInvite(inviteQuery)}
-                                            disabled={submitting || !inviteQuery.trim()}
-                                            className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
-                                        >
-                                            Invite
-                                        </button>
-                                    </div>
-                                    {showSuggest && suggestions.length > 0 && (
-                                        <ul className="absolute z-10 left-0 right-10 top-full mt-1 rounded border border-line/60 bg-surface shadow-lg overflow-hidden">
-                                            {suggestions.map(name => (
-                                                <li key={name}>
-                                                    <button
-                                                        type="button"
-                                                        onMouseDown={() => handleInvite(name)}
-                                                        className="w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-hover transition-colors cursor-pointer"
-                                                    >
-                                                        {name}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
+                                <div className="flex gap-2">
+                                    <input
+                                        ref={inviteInputRef}
+                                        type="text"
+                                        value={inviteQuery}
+                                        onChange={e => setInviteQuery(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter') handleInvite(inviteQuery); if (e.key === 'Escape') setShowSuggest(false); }}
+                                        onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                                        placeholder="Username…"
+                                        className="flex-1 rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink placeholder:text-ink-muted outline-none focus:border-accent/60"
+                                    />
+                                    <button
+                                        onClick={() => handleInvite(inviteQuery)}
+                                        disabled={submitting || !inviteQuery.trim()}
+                                        className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
+                                    >
+                                        Invite
+                                    </button>
                                 </div>
+                                {showSuggest && suggestPos && suggestions.length > 0 && createPortal(
+                                    <ul
+                                        className="fixed z-[9999] rounded border border-line/60 bg-surface shadow-lg overflow-hidden"
+                                        style={{top: suggestPos.top, left: suggestPos.left, width: suggestPos.width}}
+                                    >
+                                        {suggestions.map(name => (
+                                            <li key={name}>
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={() => handleInvite(name)}
+                                                    className="w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-hover transition-colors cursor-pointer"
+                                                >
+                                                    {name}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>,
+                                    document.body
+                                )}
                             </div>
                         )}
 

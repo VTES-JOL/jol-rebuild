@@ -47,6 +47,14 @@ const gameApi = {
         return json(await fetch('/api/games/invited/me', OPTS));
     },
 
+    async listMyRegistered(): Promise<GameDto[]> {
+        return json(await fetch('/api/games/registered/me', OPTS));
+    },
+
+    async listMyOwned(): Promise<GameDto[]> {
+        return json(await fetch('/api/games/owned/me', OPTS));
+    },
+
     async getGameDetail(id: number): Promise<GameDetail> {
         return json(await fetch(`/api/games/${id}/registrations`, OPTS));
     },
