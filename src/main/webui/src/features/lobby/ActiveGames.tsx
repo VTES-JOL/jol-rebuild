@@ -30,9 +30,9 @@ export default function ActiveGames() {
                 {!error && active.length === 0 && (
                     <div className="p-8 text-center">
                         <p className="text-sm text-ink-muted">No active games.</p>
-                        <button className="mt-2 text-xs text-accent-soft hover:text-accent transition-colors">
-                            Start a new one →
-                        </button>
+                        <Link to="/lobby" className="mt-2 text-xs text-accent-soft hover:text-accent transition-colors">
+                            Find a game →
+                        </Link>
                     </div>
                 )}
             </div>

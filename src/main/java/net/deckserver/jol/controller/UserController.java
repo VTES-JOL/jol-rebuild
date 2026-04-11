@@ -10,16 +10,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.UserProfileDto;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 @Path("/user")
@@ -73,6 +72,20 @@ public class UserController {
                 .orElseThrow(() -> new WebApplicationException("Not Authenticated", Response.Status.UNAUTHORIZED));
         dto.roles = roles;
         return Response.ok(dto).build();
+    }
+
+    @GET
+    @Path("/search")
+    @RolesAllowed("USER")
+    public List<String> search(@QueryParam("q") String q) {
+        if (q == null || q.isBlank() || q.length() < 2) return List.of();
+        String caller = identity.getPrincipal().getName();
+        return User.<User>find("lower(username) like ?1 and username != ?2",
+                "%" + q.toLowerCase() + "%", caller)
+            .page(0, 10)
+            .stream()
+            .map(u -> u.username)
+            .toList();
     }
 
     @RegisterForReflection

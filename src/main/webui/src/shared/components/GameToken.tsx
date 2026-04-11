@@ -104,8 +104,28 @@ export default function GameToken({ id, label }: { id: number; label: string }) 
                                 </span>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-1.5 min-h-6">
-                            {/* Additional game info or user buttons will go here */}
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-ink-muted">Players</span>
+                                <span className="text-ink font-medium tabular-nums">
+                                    {game.registrationCount ?? '—'} / {game.maxPlayers ?? '—'}
+                                </span>
+                            </div>
+                            {game.owner && (
+                                <div className="flex items-center justify-between text-xs">
+                                    <span className="text-ink-muted">Host</span>
+                                    <span className="text-ink">{game.owner}</span>
+                                </div>
+                            )}
+                            {game.status === 'OPEN' && (
+                                <a
+                                    href={`/game/${game.id}`}
+                                    className="mt-1 block text-center text-xs px-3 py-1.5 rounded border border-gold/40 text-gold hover:bg-gold/10 transition-colors"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    View Game
+                                </a>
+                            )}
                         </div>
                     </>
                 )}

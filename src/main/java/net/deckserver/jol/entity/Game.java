@@ -60,4 +60,12 @@ public class Game extends PanacheEntity {
         return find("from Game g left join fetch g.registrations r where g.status =?1 and r.user.id = ?2", Status.ACTIVE, user.id).list();
     }
 
+    public static List<Game> findInvitedGames(User user) {
+        return find(
+            "select g from Game g join g.registrations r " +
+            "where g.status = ?1 and r.user.id = ?2 and r.deck is null",
+            Status.OPEN, user.id
+        ).list();
+    }
+
 }

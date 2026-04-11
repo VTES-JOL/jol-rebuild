@@ -1,11 +1,10 @@
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 
-interface LobbyChatPanelProps {
-    /** The logged-in user's username */
+interface Props {
     username: string;
 }
 
-export function LobbyChatPanel({ username }: LobbyChatPanelProps) {
+export function GlobalChatPanel({username}: Props) {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const url = `${protocol}//${window.location.host}/ws/lobby`;
 

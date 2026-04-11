@@ -74,6 +74,10 @@ public class Registration extends PanacheEntity {
         return find("game.id = ?1 and deck is null", game.id).list();
     }
 
+    public static long countForGame(Long gameId) {
+        return count("game.id = ?1 and deck is not null", gameId);
+    }
+
     public static void delete(Game game, User user) {
         if (game.status == Status.ACTIVE) {
             throw new IllegalStateException("Game in progress.  Can't delete.");
