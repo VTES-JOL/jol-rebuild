@@ -29,6 +29,9 @@ public class GameController {
     @Inject
     NameService nameService;
 
+    @Inject
+    net.deckserver.jol.services.LobbyChatBroadcaster lobbyChatBroadcaster;
+
     @POST
     @Transactional
     @RolesAllowed("USER")
@@ -202,6 +205,7 @@ public class GameController {
         }
 
         Registration.register(game, user, deck);
+        lobbyChatBroadcaster.broadcastLobbyUpdate(id);
         return Response.ok().build();
     }
 
@@ -220,6 +224,7 @@ public class GameController {
         }
 
         Registration.delete(game, user);
+        lobbyChatBroadcaster.broadcastLobbyUpdate(id);
         return Response.noContent().build();
     }
 

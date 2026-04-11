@@ -25,6 +25,7 @@ public class ChatMessageDto {
     public String error;
     public Long replyToId;   // client sends this when replying
     public String emoji;     // client sends this for REACTION messages
+    public Long gameId;      // populated on LOBBY_UPDATE events
 
     public static ChatMessageDto chat(Long id, String sender, String content,
                                       Instant timestamp, ReplySnapshotDto replyTo,
@@ -65,5 +66,12 @@ public class ChatMessageDto {
         return dto;
     }
 
-    public enum Type {CHAT, HISTORY, ERROR, REACTION}
+    public static ChatMessageDto lobbyUpdate(Long gameId) {
+        ChatMessageDto dto = new ChatMessageDto();
+        dto.type = Type.LOBBY_UPDATE;
+        dto.gameId = gameId;
+        return dto;
+    }
+
+    public enum Type {CHAT, HISTORY, ERROR, REACTION, LOBBY_UPDATE}
 }

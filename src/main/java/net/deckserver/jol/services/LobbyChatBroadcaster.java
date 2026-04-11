@@ -44,4 +44,12 @@ public class LobbyChatBroadcaster {
         ChatMessageDto dto = chatService.save(null, "SYSTEM", text, null);
         broadcast(dto);
     }
+
+    /**
+     * Broadcasts a LOBBY_UPDATE event to all lobby sessions, indicating that
+     * the registration state of the given game has changed.
+     */
+    public void broadcastLobbyUpdate(Long gameId) {
+        broadcast(ChatMessageDto.lobbyUpdate(gameId));
+    }
 }

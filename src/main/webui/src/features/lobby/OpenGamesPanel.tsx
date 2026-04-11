@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Lock} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import gameApi, {type GameDto} from '@/features/game/api';
@@ -13,17 +13,27 @@ const FORMAT_LABELS: Record<string, string> = {STANDARD: 'Standard', DUEL: 'Duel
 interface Props {
     currentUsername: string;
     onChanged?: () => void;
+    /** Parent passes a ref container so it can trigger refresh externally (e.g. on LOBBY_UPDATE). */
+    onRefreshRef?: React.MutableRefObject<(() => void) | null>;
 }
 
-export default function OpenGamesPanel({currentUsername, onChanged}: Props) {
+export default function OpenGamesPanel({currentUsername, onChanged, onRefreshRef}: Props) {
     const [games, setGames] = useState<GameDto[]>([]);
     const [tab, setTab] = useState<Tab>('All');
     const [showCreate, setShowCreate] = useState(false);
     const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+    const refreshRef = useRef<() => void>(() => {});
 
     const refresh = () => {
         gameApi.listOpen().then(setGames).catch(() => {});
     };
+
+    // Keep refreshRef and onRefreshRef in sync so the parent can call it
+    useEffect(() => { refreshRef.current = refresh; });
+    useEffect(() => {
+        if (onRefreshRef) onRefreshRef.current = () => refreshRef.current();
+        return () => { if (onRefreshRef) onRefreshRef.current = null; };
+    }, [onRefreshRef]);
 
     useEffect(() => { refresh(); }, []);
 

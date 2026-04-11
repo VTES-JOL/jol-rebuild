@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 
-export type MessageType = 'CHAT' | 'HISTORY' | 'ERROR' | 'REACTION';
+export type MessageType = 'CHAT' | 'HISTORY' | 'ERROR' | 'REACTION' | 'LOBBY_UPDATE';
 
 export interface ReactionDto   { emoji: string; senders: string[] }
 export interface ReplySnapshot { id: number; sender: string; content: string }
@@ -15,6 +15,7 @@ export interface ChatMessage {
     reactions?: ReactionDto[];
     history?: ChatMessage[];
     error?: string;
+    gameId?: number;        // present on LOBBY_UPDATE
     // outbound-only fields (never in server responses)
     replyToId?: number;
     emoji?: string;

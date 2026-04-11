@@ -1,10 +1,11 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useNavigate} from 'react-router';
 import {Check} from 'lucide-react';
 import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from '@/features/lobby/DeckSelector';
 import {useAuthContext} from '@/hooks/useAuthContext';
+import {useLobbySocket} from '@/features/lobby/LobbySocketContext';
 
 type Phase = 'idle' | 'registering' | 'waiting';
 
@@ -25,25 +26,40 @@ export default function GameToken({ id, label }: { id: number; label: string }) 
     const popupRef = useRef<HTMLDivElement>(null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const navigate = useNavigate();
+    const {subscribeToGame} = useLobbySocket();
 
     const isVisible = isOpen || isHovered;
 
     const POPUP_W = 320; // w-80 = 20rem = 320px
     const MARGIN = 8;
 
-    const loadDetail = () => {
+    const gameLoadedRef = useRef(false);
+    const loadDetailRef = useRef<() => void>(() => {});
+
+    const loadDetail = useCallback(() => {
         setLoading(true);
         gameApi.getGameDetail(id)
-            .then(setGame)
+            .then(data => { gameLoadedRef.current = true; setGame(data); })
             .catch(err => setError(err.message))
             .finally(() => setLoading(false));
-    };
+    }, [id]);
+
+    useEffect(() => { loadDetailRef.current = loadDetail; }, [loadDetail]);
+
+    // Refresh detail when this game's registration changes in the lobby —
+    // only if the popup has already loaded data (i.e. it's been opened).
+    useEffect(() => {
+        gameLoadedRef.current = false;
+        return subscribeToGame(id, () => {
+            if (gameLoadedRef.current) loadDetailRef.current();
+        });
+    }, [id, subscribeToGame]);
 
     useEffect(() => {
         if (isVisible && !game && !loading) {
             loadDetail();
         }
-    }, [isVisible, id, game, loading]);
+    }, [isVisible, id, game, loading, loadDetail]);
 
     useEffect(() => {
         if (!isVisible || !buttonRef.current) return;
@@ -276,6 +292,13 @@ export default function GameToken({ id, label }: { id: number; label: string }) 
                                 <div className="mt-1 flex flex-col items-center gap-1.5 py-2">
                                     <span className="text-xs text-ink-muted animate-pulse">Waiting for game to start…</span>
                                     <span className="text-[10px] text-ink-muted/60">You'll be taken there automatically.</span>
+                                    <button
+                                        className="mt-1 text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
+                                        disabled={submitting}
+                                        onClick={handleLeave}
+                                    >
+                                        {submitting ? 'Leaving…' : 'Leave'}
+                                    </button>
                                 </div>
                             )}
                         </div>
