@@ -1,6 +1,9 @@
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Check, Lock, X} from 'lucide-react';
+import Button from '@/shared/components/Button';
+import Badge from '@/shared/components/Badge';
+import Input from '@/shared/components/Input';
 import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from './DeckSelector';
 
@@ -149,9 +152,7 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
                             <Lock className="w-3 h-3 text-ink-muted shrink-0" />
                         )}
                         <h2 className="text-sm font-medium text-ink truncate">{detail.name}</h2>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-arcane/10 border border-arcane/20 text-arcane-soft uppercase tracking-tight shrink-0">
-                            {FORMAT_LABELS[detail.format]}
-                        </span>
+                        <Badge variant="format" className="shrink-0">{FORMAT_LABELS[detail.format]}</Badge>
                     </div>
                     <button onClick={onClose} className="p-1 rounded hover:bg-hover transition-colors cursor-pointer shrink-0 ml-2">
                         <X className="w-4 h-4 text-ink-muted" />
@@ -244,23 +245,25 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
                             <div>
                                 <label className="block text-xs text-ink-muted mb-2">Invite player</label>
                                 <div className="flex gap-2">
-                                    <input
+                                    <Input
                                         ref={inviteInputRef}
-                                        type="text"
+                                        size="sm"
+                                        srLabel="Username to invite"
                                         value={inviteQuery}
                                         onChange={e => setInviteQuery(e.target.value)}
                                         onKeyDown={e => { if (e.key === 'Enter') handleInvite(inviteQuery); if (e.key === 'Escape') setShowSuggest(false); }}
                                         onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
                                         placeholder="Username…"
-                                        className="flex-1 rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink placeholder:text-ink-muted outline-none focus:border-accent/60"
+                                        className="flex-1"
                                     />
-                                    <button
+                                    <Button
+                                        variant="secondary"
+                                        size="sm"
                                         onClick={() => handleInvite(inviteQuery)}
                                         disabled={submitting || !inviteQuery.trim()}
-                                        className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
                                     >
                                         Invite
-                                    </button>
+                                    </Button>
                                 </div>
                                 {showSuggest && suggestPos && suggestions.length > 0 && createPortal(
                                     <ul
@@ -292,39 +295,28 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
                 <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-line/75 shrink-0">
                     <div className="flex gap-2">
                         {isOwner && detail.status === 'OPEN' && (
-                            <button
-                                onClick={handleDelete}
-                                disabled={submitting}
-                                className="text-xs px-3 py-1.5 rounded border border-blood/40 text-blood hover:bg-blood/10 disabled:opacity-40 transition-colors cursor-pointer"
-                            >
+                            <Button variant="danger" size="sm" onClick={handleDelete} disabled={submitting}>
                                 Delete Game
-                            </button>
+                            </Button>
                         )}
                         {(isRegistered || isInvited) && (
-                            <button
-                                onClick={handleLeave}
-                                disabled={submitting}
-                                className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
-                            >
+                            <Button variant="secondary" size="sm" onClick={handleLeave} disabled={submitting}>
                                 Leave
-                            </button>
+                            </Button>
                         )}
                     </div>
                     <div className="flex gap-2">
-                        <button
-                            onClick={onClose}
-                            className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover transition-colors cursor-pointer"
-                        >
-                            Close
-                        </button>
+                        <Button variant="secondary" size="sm" onClick={onClose}>Close</Button>
                         {showJoinPanel && !isFull && (
-                            <button
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                loading={submitting}
+                                disabled={!selectedDeckId}
                                 onClick={handleRegister}
-                                disabled={submitting || !selectedDeckId}
-                                className="text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent disabled:opacity-50 transition-colors cursor-pointer"
                             >
                                 {submitting ? 'Joining…' : isInvited ? 'Register' : 'Join Game'}
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>

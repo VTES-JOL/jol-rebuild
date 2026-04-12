@@ -1,6 +1,7 @@
 import {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
 import {Check, Crown} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
+import EmptyState from '@/shared/components/EmptyState';
 import gameApi, {type GameDto} from '@/features/game/api';
 import GameRegistrationModal from './GameRegistrationModal';
 
@@ -53,7 +54,7 @@ const MyLobbyPanel = forwardRef<MyLobbyPanelHandle, Props>(function MyLobbyPanel
             >
                 <div className="flex-1 overflow-y-auto min-h-0">
                     {total === 0 && (
-                        <p className="text-xs text-ink-muted text-center p-4">No pending games.</p>
+                        <EmptyState title="No pending games." />
                     )}
 
                     {ownedOnly.length > 0 && (

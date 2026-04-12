@@ -1,5 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {X} from 'lucide-react';
+import Button from '@/shared/components/Button';
+import Input from '@/shared/components/Input';
 import deckApi from './api';
 import type {CardDetailData} from './types';
 
@@ -129,27 +131,26 @@ export default function DeckFilterModal({current, onApply, onClose}: Props) {
 
                     {/* Card */}
                     <div className="relative">
-                        <label htmlFor="filter-card" className="block text-xs text-ink-muted mb-2">Contains card</label>
-                        <input
+                        <Input
                             id="filter-card"
                             ref={inputRef}
-                            type="text"
+                            size="sm"
+                            label="Contains card"
                             value={cardQuery}
                             onChange={e => { setCardQuery(e.target.value); setShowSuggest(true); }}
                             onFocus={() => { if (suggestions.length) setShowSuggest(true); }}
                             onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
                             placeholder="Search card name…"
-                            className="w-full rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink placeholder:text-ink-muted outline-none focus:border-accent/60"
+                            right={cardId ? (
+                                <button
+                                    type="button"
+                                    onClick={() => { setCardQuery(''); setCardId(undefined); }}
+                                    className="p-0.5 rounded hover:bg-hover cursor-pointer"
+                                >
+                                    <X className="w-3 h-3 text-ink-muted" />
+                                </button>
+                            ) : undefined}
                         />
-                        {cardId && (
-                            <button
-                                type="button"
-                                onClick={() => { setCardQuery(''); setCardId(undefined); }}
-                                className="absolute right-2 top-[calc(50%+6px)] -translate-y-1/2 p-0.5 rounded hover:bg-hover cursor-pointer"
-                            >
-                                <X className="w-3 h-3 text-ink-muted" />
-                            </button>
-                        )}
                         {showSuggest && suggestions.length > 0 && (
                             <ul className="absolute z-10 left-0 right-0 top-full mt-1 rounded border border-line/60 bg-surface shadow-lg overflow-y-auto max-h-48">
                                 {suggestions.map(card => (
@@ -169,30 +170,15 @@ export default function DeckFilterModal({current, onApply, onClose}: Props) {
                             </ul>
                         )}
                     </div>
+
                 </div>
 
                 {/* Footer */}
                 <div className="flex items-center justify-between gap-2 px-4 py-3 border-t border-line/75">
-                    <button
-                        onClick={handleClear}
-                        disabled={isEmpty}
-                        className="text-xs px-3 py-1.5 rounded text-ink-muted hover:text-ink disabled:opacity-30 transition-colors cursor-pointer"
-                    >
-                        Clear
-                    </button>
+                    <Button variant="ghost" size="sm" onClick={handleClear} disabled={isEmpty}>Clear</Button>
                     <div className="flex gap-2">
-                        <button
-                            onClick={onClose}
-                            className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover transition-colors cursor-pointer"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleApply}
-                            className="text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent transition-colors cursor-pointer"
-                        >
-                            Apply
-                        </button>
+                        <Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
+                        <Button variant="primary" size="sm" onClick={handleApply}>Apply</Button>
                     </div>
                 </div>
             </div>

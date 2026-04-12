@@ -1,5 +1,7 @@
 import {useEffect, useState} from "react";
+import {Swords} from "lucide-react";
 import Panel from "@/shared/components/Panel";
+import EmptyState from "@/shared/components/EmptyState";
 import gameApi, {type GameDto} from "@/features/game/api";
 import {Link} from "react-router-dom";
 
@@ -16,8 +18,8 @@ export default function ActiveGames() {
     return (
         <Panel title="Active Games" right={<span className="text-[10px] tabular-nums text-ink-muted">{active.length} Total</span>}>
             <div className="flex-1 overflow-y-auto min-h-0">
-                {error && <p className="p-4 text-xs text-blood-soft text-center">Failed to load games.</p>}
-                
+                {error && <EmptyState title="Failed to load games." className="text-blood-soft" />}
+
                 {active.length > 0 && (
                     <div>
                         <div className="px-3 py-1 bg-panel border-y border-line/50 text-[10px] font-semibold text-ink uppercase tracking-wider">
@@ -28,12 +30,15 @@ export default function ActiveGames() {
                 )}
 
                 {!error && active.length === 0 && (
-                    <div className="p-8 text-center">
-                        <p className="text-sm text-ink-muted">No active games.</p>
-                        <Link to="/lobby" className="mt-2 text-xs text-accent-soft hover:text-accent transition-colors">
-                            Find a game →
-                        </Link>
-                    </div>
+                    <EmptyState
+                        icon={Swords}
+                        title="No active games."
+                        action={
+                            <Link to="/lobby" className="text-xs text-accent-soft hover:text-accent transition-colors">
+                                Find a game →
+                            </Link>
+                        }
+                    />
                 )}
             </div>
         </Panel>

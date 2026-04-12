@@ -1,6 +1,8 @@
 import {useState} from 'react';
-import {Filter, Search, X} from 'lucide-react';
+import {Filter, Layers, Search, X} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
+import Button from '@/shared/components/Button';
+import EmptyState from '@/shared/components/EmptyState';
 import DeckListItem from './DeckListItem';
 import type {DeckFilter} from './DeckFilterModal';
 import DeckFilterModal from './DeckFilterModal';
@@ -45,18 +47,8 @@ export default function DeckListPanel({
                 title="My Decks"
                 right={
                     <div className="flex items-center gap-1">
-                        <button
-                            onClick={onImport}
-                            className="text-xs px-2 py-1 rounded text-ink-muted hover:text-ink transition-colors cursor-pointer"
-                        >
-                            Import
-                        </button>
-                        <button
-                            onClick={onNew}
-                            className="text-xs px-2 py-1 rounded text-accent-soft hover:text-accent transition-colors cursor-pointer"
-                        >
-                            + New
-                        </button>
+                        <Button variant="ghost" size="sm" onClick={onImport}>Import</Button>
+                        <Button variant="accent-ghost" size="sm" onClick={onNew}>+ New</Button>
                     </div>
                 }
             >
@@ -112,27 +104,24 @@ export default function DeckListPanel({
                 )}
 
                 {loadError ? (
-                    <div className="flex-1 flex items-center justify-center p-8 text-center">
-                        <p className="text-sm text-blood-soft">Failed to load decks.</p>
-                    </div>
+                    <EmptyState
+                        title="Failed to load decks."
+                        className="text-blood-soft"
+                    />
                 ) : decks.length === 0 && !hasActiveFilter ? (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-2 p-8 text-center">
-                        <p className="text-sm text-ink-muted">No decks yet.</p>
-                        <button
-                            onClick={onNew}
-                            className="text-xs text-accent-soft hover:text-accent transition-colors"
-                        >
-                            Create your first deck →
-                        </button>
-                    </div>
+                    <EmptyState
+                        icon={Layers}
+                        title="No decks yet."
+                        action={
+                            <Button variant="accent-ghost" size="sm" onClick={onNew}>
+                                Create your first deck →
+                            </Button>
+                        }
+                    />
                 ) : decks.length === 0 && hasActiveFilter ? (
-                    <div className="flex-1 flex items-center justify-center p-8 text-center">
-                        <p className="text-sm text-ink-muted">No decks match the current filter.</p>
-                    </div>
+                    <EmptyState title="No decks match the current filter." />
                 ) : visible.length === 0 ? (
-                    <div className="flex-1 flex items-center justify-center p-8">
-                        <p className="text-sm text-ink-muted">No decks match "{nameFilter}".</p>
-                    </div>
+                    <EmptyState title={`No decks match "${nameFilter}".`} />
                 ) : (
                     <div className="overflow-y-auto flex-1 min-h-0">
                         {visible.map(deck => (

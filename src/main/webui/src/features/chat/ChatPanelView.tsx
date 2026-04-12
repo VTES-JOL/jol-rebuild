@@ -4,6 +4,7 @@ import {useCardAutocomplete} from '@/hooks/useCardAutocomplete.ts';
 import {useChatInput} from '@/hooks/useChatInput.ts';
 import {groupMessages} from '@/shared/utils/chatUtils.ts';
 import Panel from '@/shared/components/Panel';
+import Button from '@/shared/components/Button';
 import {CardSuggestions} from '@/features/chat/CardSuggestions.tsx';
 import {ReplyBanner, TimestampDivider} from './ChatPanelExtras.tsx';
 import {MessageGroupView} from './MessageGroupView';
@@ -184,13 +185,15 @@ export function ChatPanelView({
                             maxLength={1000}
                         />
                     </div>
-                    <button
-                        className="cursor-pointer rounded-lg bg-accent px-3 py-1.5 text-sm text-surface transition-colors hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
+                    <Button
+                        variant="primary"
+                        size="md"
                         onClick={handleSend}
                         disabled={!connected || !draft.trim()}
+                        className="rounded-lg shrink-0"
                     >
                         Send
-                    </button>
+                    </Button>
                 </div>
             </div>
         </Panel>

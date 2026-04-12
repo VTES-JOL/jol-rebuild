@@ -1,4 +1,6 @@
 import Panel from "@/shared/components/Panel.tsx";
+import Button from "@/shared/components/Button.tsx";
+import Input from "@/shared/components/Input.tsx";
 import {useState} from "react";
 import API from "@/features/auth/api.ts";
 import {Link, useNavigate} from "react-router-dom";
@@ -40,114 +42,94 @@ export default function RegisterForm() {
         }
     };
 
-    const inputClass = "w-full px-4 py-2 rounded bg-surface/70 border border-line text-ink placeholder:text-ink-muted focus:outline-none focus:border-line-accent focus:ring-1 focus:ring-accent/30";
-
     return (
         <HeroLayout background={"/Locations52.jpg"}>
             <Panel title="Register" className="w-full sm:w-96">
                 <form className="space-y-4 p-4" onSubmit={handleRegister} noValidate>
 
-                    <div>
-                        <label htmlFor="username" className="sr-only">Username</label>
-                        <input
-                            id="username"
-                            name="username"
-                            autoFocus
-                            autoComplete="username"
-                            required
-                            className={inputClass}
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Username"
-                        />
-                        {fieldErrors.username && (
-                            <p className="text-blood text-sm mt-1" role="alert">{fieldErrors.username}</p>
-                        )}
-                    </div>
+                    <Input
+                        id="username"
+                        name="username"
+                        srLabel="Username"
+                        autoFocus
+                        autoComplete="username"
+                        required
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Username"
+                        error={fieldErrors.username}
+                    />
 
-                    <div>
-                        <label htmlFor="email" className="sr-only">Email address</label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            className={inputClass}
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email address"
-                        />
-                        {fieldErrors.email && (
-                            <p className="text-blood text-sm mt-1" role="alert">{fieldErrors.email}</p>
-                        )}
-                    </div>
+                    <Input
+                        id="email"
+                        name="email"
+                        srLabel="Email address"
+                        type="email"
+                        autoComplete="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email address"
+                        error={fieldErrors.email}
+                    />
 
-                    <div>
-                        <div className="relative">
-                            <label htmlFor="password" className="sr-only">Password</label>
-                            <input
-                                id="password"
-                                name="password"
-                                type={showPassword ? "text" : "password"}
-                                autoComplete="new-password"
-                                required
-                                className={`${inputClass} pr-10`}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Password"
-                            />
+                    <Input
+                        id="password"
+                        name="password"
+                        srLabel="Password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        error={fieldErrors.password}
+                        right={
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(v => !v)}
                                 aria-label={showPassword ? "Hide password" : "Show password"}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
+                                className="text-ink-muted hover:text-ink"
                             >
                                 {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
                             </button>
-                        </div>
-                        {fieldErrors.password && (
-                            <p className="text-blood text-sm mt-1" role="alert">{fieldErrors.password}</p>
-                        )}
-                    </div>
+                        }
+                    />
 
-                    <div>
-                        <div className="relative">
-                            <label htmlFor="confirmPassword" className="sr-only">Confirm password</label>
-                            <input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type={showConfirm ? "text" : "password"}
-                                autoComplete="new-password"
-                                required
-                                className={`${inputClass} pr-10`}
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Confirm password"
-                            />
+                    <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        srLabel="Confirm password"
+                        type={showConfirm ? "text" : "password"}
+                        autoComplete="new-password"
+                        required
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm password"
+                        error={fieldErrors.confirmPassword}
+                        right={
                             <button
                                 type="button"
                                 onClick={() => setShowConfirm(v => !v)}
                                 aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink"
+                                className="text-ink-muted hover:text-ink"
                             >
                                 {showConfirm ? <EyeOff size={16}/> : <Eye size={16}/>}
                             </button>
-                        </div>
-                        {fieldErrors.confirmPassword && (
-                            <p className="text-blood text-sm mt-1" role="alert">{fieldErrors.confirmPassword}</p>
-                        )}
-                    </div>
+                        }
+                    />
 
                     {formError && <p className="text-blood text-sm" role="alert">{formError}</p>}
 
-                    <button
+                    <Button
                         type="submit"
-                        disabled={loading}
-                        className="w-full bg-accent text-surface py-2 rounded hover:bg-accent-dim transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        variant="primary"
+                        size="lg"
+                        loading={loading}
+                        className="w-full justify-center"
                     >
                         {loading ? "Creating account…" : "Register"}
-                    </button>
+                    </Button>
 
                     <p className="text-ink-secondary text-center text-sm">
                         Already have an account?{" "}

@@ -1,6 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
 import {Lock} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
+import Button from '@/shared/components/Button';
+import Badge from '@/shared/components/Badge';
+import EmptyState from '@/shared/components/EmptyState';
+import {TabStrip} from '@/shared/components/Tabs';
 import gameApi, {type GameDto} from '@/features/game/api';
 import CreateGameModal from './CreateGameModal';
 import GameRegistrationModal from './GameRegistrationModal';
@@ -44,45 +48,34 @@ export default function OpenGamesPanel({currentUsername, onChanged, onRefreshRef
             <Panel
                 title={<span className="text-sm font-medium">Open Games</span>}
                 right={
-                    <button
-                        onClick={() => setShowCreate(true)}
-                        className="text-xs px-2 py-1 rounded text-accent-soft hover:text-accent hover:bg-accent/10 transition-colors cursor-pointer"
-                    >
+                    <Button variant="accent-ghost" size="sm" onClick={() => setShowCreate(true)}>
                         + Create
-                    </button>
+                    </Button>
                 }
             >
                 {/* Tab strip */}
-                <div className="flex gap-1 px-3 py-2 border-b border-line/50 shrink-0">
-                    {TABS.map(t => (
-                        <button
-                            key={t}
-                            onClick={() => setTab(t)}
-                            className={[
-                                'text-[10px] px-2 py-0.5 rounded transition-colors cursor-pointer',
-                                tab === t
-                                    ? 'bg-accent/20 text-accent-soft'
-                                    : 'text-ink-muted hover:text-ink',
-                            ].join(' ')}
-                        >
-                            {t === 'All' ? 'All' : FORMAT_LABELS[t]}
-                        </button>
-                    ))}
+                <div className="px-3 py-2 border-b border-line/50 shrink-0">
+                    <TabStrip
+                        tabs={TABS.map(t => ({key: t, label: t === 'All' ? 'All' : FORMAT_LABELS[t]}))}
+                        active={tab}
+                        onChange={key => setTab(key as Tab)}
+                    />
                 </div>
 
                 {/* Game list */}
                 <div className="flex-1 overflow-y-auto min-h-0">
-                    {visible.length === 0 && (
-                        <p className="text-xs text-ink-muted text-center p-6">No open games.</p>
+                    {visible.length === 0 ? (
+                        <EmptyState title="No open games." />
+                    ) : (
+                        visible.map(g => (
+                            <GameRow
+                                key={g.id}
+                                game={g}
+                                currentUsername={currentUsername}
+                                onSelect={() => setSelectedGameId(g.id)}
+                            />
+                        ))
                     )}
-                    {visible.map(g => (
-                        <GameRow
-                            key={g.id}
-                            game={g}
-                            currentUsername={currentUsername}
-                            onSelect={() => setSelectedGameId(g.id)}
-                        />
-                    ))}
                 </div>
             </Panel>
 
@@ -132,9 +125,7 @@ function GameRow({game, currentUsername, onSelect}: {game: GameDto; currentUsern
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-arcane/10 border border-arcane/20 text-arcane-soft uppercase tracking-tight">
-                    {FORMAT_LABELS[game.format]}
-                </span>
+                <Badge variant="format">{FORMAT_LABELS[game.format]}</Badge>
                 <span className={`text-xs tabular-nums font-medium ${isFull ? 'text-ink-muted' : 'text-ink'}`}>
                     {game.registrationCount}/{game.maxPlayers}
                 </span>

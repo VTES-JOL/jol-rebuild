@@ -84,6 +84,11 @@ html, body, #root {
     height: 100%;
 }
 
+/* iOS safe area for bottom nav */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 @theme inline {
     --font-titillium: "Titillium Web", sans-serif;
 

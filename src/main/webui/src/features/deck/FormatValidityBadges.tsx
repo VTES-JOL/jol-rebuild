@@ -1,6 +1,8 @@
 import {useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Check, Minus, X} from 'lucide-react';
+import Button from '@/shared/components/Button';
+import Badge from '@/shared/components/Badge';
 import deckApi from './api';
 
 const FORMATS = [
@@ -94,10 +96,7 @@ export default function FormatValidityBadges({deckId, formatValidity, className 
                         <div className="flex items-center justify-between px-4 py-3 border-b border-line/75 bg-panel/45">
                             <div className="flex items-center gap-2">
                                 <h2 className="text-sm font-medium text-ink tracking-wide">{modal.label}</h2>
-                                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-blood/15 text-blood-soft text-[10px] font-medium">
-                                    <X className="w-2.5 h-2.5" />
-                                    Invalid
-                                </span>
+                                <Badge variant="blood"><X className="w-2.5 h-2.5 inline mr-0.5" />Invalid</Badge>
                             </div>
                             <button onClick={closeModal} className="p-1 rounded hover:bg-hover transition-colors cursor-pointer">
                                 <X className="w-4 h-4 text-ink-muted" />
@@ -126,12 +125,7 @@ export default function FormatValidityBadges({deckId, formatValidity, className 
 
                         {/* Footer */}
                         <div className="flex justify-end px-4 py-3 border-t border-line/75">
-                            <button
-                                onClick={closeModal}
-                                className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover transition-colors cursor-pointer"
-                            >
-                                Close
-                            </button>
+                            <Button variant="secondary" size="sm" onClick={closeModal}>Close</Button>
                         </div>
                     </div>
                 </div>,

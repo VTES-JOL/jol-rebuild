@@ -1,9 +1,11 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {FolderOpen} from 'lucide-react';
 import AppLayout from '@/shared/layout/AppLayout';
 import DeckListPanel from './DeckListPanel';
 import DeckEditorPanel from './DeckEditorPanel';
 import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import DeckImportModal from './DeckImportModal';
+import EmptyState from '@/shared/components/EmptyState';
 import {computeSummary, enrichEntry, extractKrcgCards, formatSummaryCompact, toKrcgContents} from './deckUtils';
 import deckApi from './api';
 import type {DeckFilter} from './DeckFilterModal';
@@ -222,7 +224,7 @@ export default function DecksPage() {
 
     return (
         <AppLayout background={"/Locations23.jpg"}>
-            <div className="grid grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_240px] xl:grid-cols-[280px_1fr_280px] 2xl:grid-cols-[320px_1fr_300px] grid-rows-1 gap-6 h-[85dvh]">
+            <div className="grid grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_240px] xl:grid-cols-[280px_1fr_280px] 2xl:grid-cols-[320px_1fr_300px] grid-rows-1 gap-6 flex-1 min-h-0">
                 <DeckListPanel
                     decks={decks}
                     selectedId={selectedId}
@@ -255,9 +257,11 @@ export default function DecksPage() {
                         onSearch={deckApi.autocomplete}
                     />
                 ) : (
-                    <div className="flex items-center justify-center text-ink-muted text-sm">
-                        Select a deck to begin editing.
-                    </div>
+                    <EmptyState
+                        icon={FolderOpen}
+                        title="No deck selected"
+                        description="Choose a deck from the list to start editing."
+                    />
                 )}
                 {selectedId != null && (
                     <div className="hidden lg:contents">
