@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {Filter, Gamepad2, Search, X} from 'lucide-react';
+import {Gamepad2, Search} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import EmptyState from '@/shared/components/EmptyState';
@@ -12,6 +12,10 @@ const TABS: GameFilterTab[] = ['All', 'Invited', 'Registered', 'Active', 'Open',
 
 interface Props {
     games: GameDto[];
+    invitedIds?: Set<number>;
+    registeredIds?: Set<number>;
+    ownedIds?: Set<number>;
+    activeIds?: Set<number>;
     selectedId?: number | null;
     currentUsername?: string;
     onSelect?: (game: GameDto) => void;
@@ -21,7 +25,7 @@ interface Props {
 }
 
 export default function GameListPanel({
-    games, selectedId = null, currentUsername, onSelect, onCreate, loading, loadError,
+    games, invitedIds, registeredIds, ownedIds, activeIds, selectedId = null, currentUsername, onSelect, onCreate, loading, loadError,
 }: Props) {
     const [nameFilter, setNameFilter] = useState('');
     const [tab, setTab] = useState<GameFilterTab>('All');
@@ -31,20 +35,15 @@ export default function GameListPanel({
         
         // Tab filtering
         if (tab === 'Invited') {
-            filtered = filtered.filter(g => g.status === 'OPEN' && games.some(original => original.id === g.id && original.owner !== currentUsername)); 
-            // In a real scenario, we'd need a way to know if invited. 
-            // Since we merged all, we might want to check if the user is in the invites list from GameDetail, 
-            // but we only have GameDto here.
+            filtered = filtered.filter(g => invitedIds?.has(g.id));
         } else if (tab === 'Active') {
-            filtered = filtered.filter(g => g.status === 'ACTIVE');
+            filtered = filtered.filter(g => activeIds?.has(g.id) || g.status === 'ACTIVE');
         } else if (tab === 'Open') {
             filtered = filtered.filter(g => g.status === 'OPEN');
         } else if (tab === 'My Games') {
-            filtered = filtered.filter(g => g.owner === currentUsername);
+            filtered = filtered.filter(g => ownedIds?.has(g.id) || g.owner === currentUsername);
         } else if (tab === 'Registered') {
-            // Simplified: if open and not owner, it might be one we registered for.
-            // Ideally we'd pass this state from LobbyPage.
-            filtered = filtered.filter(g => g.status === 'OPEN' && g.owner !== currentUsername);
+            filtered = filtered.filter(g => registeredIds?.has(g.id));
         }
 
         if (nameFilter.trim()) {

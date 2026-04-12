@@ -1,4 +1,4 @@
-import {Lock, Check, Crown} from 'lucide-react';
+import {Lock, Crown} from 'lucide-react';
 import Badge from '@/shared/components/Badge';
 import type {GameDto} from '@/features/game/api';
 import {useAuthContext} from "@/hooks/useAuthContext.ts";

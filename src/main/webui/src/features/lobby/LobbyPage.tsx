@@ -14,6 +14,10 @@ export default function LobbyPage() {
     const {subscribeToLobby} = useLobbySocket();
     
     const [games, setGames] = useState<GameDto[]>([]);
+    const [invitedIds, setInvitedIds] = useState<Set<number>>(new Set());
+    const [registeredIds, setRegisteredIds] = useState<Set<number>>(new Set());
+    const [ownedIds, setOwnedIds] = useState<Set<number>>(new Set());
+    const [activeIds, setActiveIds] = useState<Set<number>>(new Set());
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -29,6 +33,11 @@ export default function LobbyPage() {
             gameApi.listMyInvited(),
             gameApi.listMyOwned()
         ]).then(([open, active, registered, invited, owned]) => {
+            setInvitedIds(new Set(invited.map(g => g.id)));
+            setRegisteredIds(new Set(registered.map(g => g.id)));
+            setOwnedIds(new Set(owned.map(g => g.id)));
+            setActiveIds(new Set(active.map(g => g.id)));
+
             const all = [...open, ...active, ...registered, ...invited, ...owned];
             const seen = new Set<number>();
             const unique = all.filter(g => {
@@ -83,6 +92,10 @@ export default function LobbyPage() {
                             <div className="mt-2 bg-panel border border-line rounded-lg shadow-xl overflow-hidden z-10 relative max-h-[60vh] flex flex-col">
                                 <GameListPanel
                                     games={games}
+                                    invitedIds={invitedIds}
+                                    registeredIds={registeredIds}
+                                    ownedIds={ownedIds}
+                                    activeIds={activeIds}
                                     selectedId={selectedId}
                                     currentUsername={user.username}
                                     onSelect={handleSelect}
@@ -98,6 +111,10 @@ export default function LobbyPage() {
                         <div className="hidden md:block">
                             <GameListPanel
                                 games={games}
+                                invitedIds={invitedIds}
+                                registeredIds={registeredIds}
+                                ownedIds={ownedIds}
+                                activeIds={activeIds}
                                 selectedId={selectedId}
                                 currentUsername={user.username}
                                 onSelect={handleSelect}
