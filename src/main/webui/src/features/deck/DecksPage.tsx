@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {FolderOpen} from 'lucide-react';
+import {ChevronDown, FolderOpen} from 'lucide-react';
 import AppLayout from '@/shared/layout/AppLayout';
 import DeckListPanel from './DeckListPanel';
 import DeckEditorPanel from './DeckEditorPanel';
@@ -23,6 +23,7 @@ export default function DecksPage() {
     const [entriesLoading,  setEntriesLoading]  = useState(false);
     const [showImport,      setShowImport]      = useState(false);
     const [deckFilter,      setDeckFilter]      = useState<DeckFilter>({});
+    const [mobileNavOpen,   setMobileNavOpen]   = useState(false);
 
     const saveTimer    = useRef<ReturnType<typeof setTimeout>>(undefined);
     const isDirtyRef   = useRef(false);
@@ -109,6 +110,7 @@ export default function DecksPage() {
         isDirtyRef.current = false;
         setSelectedId(deck.id);
         setSaveStatus('idle');
+        setMobileNavOpen(false);
     }, [selectedId]);
 
     const handleNew = useCallback(async () => {
@@ -224,17 +226,47 @@ export default function DecksPage() {
 
     return (
         <AppLayout background={"/Locations23.jpg"}>
-            <div className="grid grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_240px] xl:grid-cols-[280px_1fr_280px] 2xl:grid-cols-[320px_1fr_300px] grid-rows-1 gap-6 flex-1 min-h-0">
-                <DeckListPanel
-                    decks={decks}
-                    selectedId={selectedId}
-                    onSelect={handleSelect}
-                    onNew={handleNew}
-                    onImport={() => setShowImport(true)}
-                    onFilter={setDeckFilter}
-                    activeFilter={deckFilter}
-                    loadError={loadError ?? undefined}
-                />
+            {/* Mobile Dropdown Selector */}
+            <div className="lg:hidden mb-4">
+                <button
+                    onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-panel border border-line rounded-lg text-sm font-semibold text-ink shadow-sm"
+                >
+                    <span className="truncate">
+                        {selectedDeck ? selectedDeck.name : 'Select a deck…'}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${mobileNavOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {mobileNavOpen && (
+                    <div className="mt-2 bg-panel border border-line rounded-lg shadow-xl overflow-hidden z-10 relative">
+                        <DeckListPanel
+                            decks={decks}
+                            selectedId={selectedId}
+                            onSelect={handleSelect}
+                            onNew={handleNew}
+                            onImport={() => { setShowImport(true); setMobileNavOpen(false); }}
+                            onFilter={setDeckFilter}
+                            activeFilter={deckFilter}
+                            loadError={loadError ?? undefined}
+                        />
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_240px] xl:grid-cols-[280px_1fr_280px] 2xl:grid-cols-[320px_1fr_300px] grid-rows-1 gap-6 flex-1 min-h-0">
+                <div className="hidden lg:block">
+                    <DeckListPanel
+                        decks={decks}
+                        selectedId={selectedId}
+                        onSelect={handleSelect}
+                        onNew={handleNew}
+                        onImport={() => setShowImport(true)}
+                        onFilter={setDeckFilter}
+                        activeFilter={deckFilter}
+                        loadError={loadError ?? undefined}
+                    />
+                </div>
                 {selectedId != null ? (
                     <DeckEditorPanel
                         key={selectedId}

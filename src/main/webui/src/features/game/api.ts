@@ -87,6 +87,14 @@ const gameApi = {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
+    async updateGame(id: number, payload: { name?: string; visibility?: 'PUBLIC' | 'PRIVATE'; format?: 'STANDARD' | 'DUEL' | 'V5' }): Promise<GameDto> {
+        return json(await fetch(`/api/games/${id}`, {
+            ...OPTS, method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        }));
+    },
+
     async updateGameFormat(id: number, format: 'STANDARD' | 'DUEL' | 'V5'): Promise<GameDto> {
         return json(await fetch(`/api/games/${id}/format`, {
             ...OPTS, method: 'PUT',
