@@ -102,24 +102,22 @@ export default function LobbyPage() {
                             key: 'details',
                             label: selectedGame ? `Game: ${selectedGame.name}` : 'Game Details',
                             content: (
-                                <div className="flex-1 min-h-0">
-                                    {selectedId !== null && selectedGame ? (
-                                        <GameDetailsPanel
-                                            key={selectedId}
-                                            game={selectedGame}
-                                            currentUsername={user.username}
-                                            onChanged={refresh}
+                                selectedId !== null && selectedGame ? (
+                                    <GameDetailsPanel
+                                        key={selectedId}
+                                        game={selectedGame}
+                                        currentUsername={user.username}
+                                        onChanged={refresh}
+                                    />
+                                ) : (
+                                    <div className="h-full bg-surface/70 backdrop-blur-md border border-line/75 rounded-lg flex items-center justify-center shadow-lg">
+                                        <EmptyState
+                                            icon={Gamepad2}
+                                            title="No game selected"
+                                            description="Choose a game from the list to see details and join the action."
                                         />
-                                    ) : (
-                                        <div className="h-full bg-panel/40 backdrop-blur-sm border border-line/50 rounded-lg flex items-center justify-center">
-                                            <EmptyState
-                                                icon={Gamepad2}
-                                                title="No game selected"
-                                                description="Choose a game from the list to see details and join the action."
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                                    </div>
+                                )
                             )
                         }
                     ]}

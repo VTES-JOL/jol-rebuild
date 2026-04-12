@@ -100,7 +100,6 @@ export function ChatPanelView({
     return (
         <Panel
             title={title}
-            className="w-full"
             right={
                 <div className="flex items-center gap-2">
                     <span

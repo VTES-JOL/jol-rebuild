@@ -14,7 +14,7 @@ type Props = {
 export default function Panel({title, children, right, footer, size = 'default', className}: Props) {
     const headerPy = size === 'compact' ? 'py-1.5' : 'py-2';
     return (
-        <div className={`relative z-0 flex flex-col h-full min-h-0 overflow-hidden rounded-lg border border-line/75 bg-surface/70 backdrop-blur-md shadow-lg ${className ?? ''}`}>
+        <div className={`relative flex flex-col h-full min-h-0 overflow-hidden rounded-lg border border-line/75 bg-surface/70 backdrop-blur-md shadow-lg ${className ?? ''}`}>
             {/* Header */}
             <div className={`flex justify-between items-center px-4 ${headerPy} border-b border-line/75 bg-panel/45 shrink-0`}>
                 <h2 className="tracking-wide text-ink">{title}</h2>

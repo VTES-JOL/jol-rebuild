@@ -178,9 +178,9 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-panel-darker/30 rounded-lg p-4 border border-line/30">
                         <div className="text-[10px] text-ink-muted uppercase tracking-wider font-semibold mb-1">Status</div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-ink">
                             <div className={`w-2 h-2 rounded-full ${game.status === 'OPEN' ? 'bg-online' : 'bg-accent'}`} />
-                            <span className="text-sm font-medium text-ink">{game.status}</span>
+                            {game.status}
                         </div>
                     </div>
                     <div className="bg-panel-darker/30 rounded-lg p-4 border border-line/30">
@@ -203,11 +203,9 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                             <Badge variant="format">{FORMAT_LABELS[game.format]}</Badge>
                         )}
                     </div>
-                    <div className="bg-panel-darker/30 rounded-lg p-4 border border-line/30">
+                    <div className="bg-panel-darker/30 rounded-lg p-4 border border-line/30 text-sm font-medium text-ink">
                         <div className="text-[10px] text-ink-muted uppercase tracking-wider font-semibold mb-1">Players</div>
-                        <div className="text-sm font-medium text-ink">
-                            {game.registrationCount} / {game.maxPlayers}
-                        </div>
+                        {game.registrationCount} / {game.maxPlayers}
                     </div>
                 </div>
 

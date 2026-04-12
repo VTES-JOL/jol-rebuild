@@ -272,7 +272,7 @@ export default function DecksPage() {
                                     onSearch={deckApi.autocomplete}
                                 />
                             ) : (
-                                <div className="h-full bg-panel/40 backdrop-blur-sm border border-line/50 rounded-lg flex items-center justify-center">
+                                <div className="h-full bg-surface/70 backdrop-blur-md border border-line/75 rounded-lg flex items-center justify-center shadow-lg">
                                     <EmptyState
                                         icon={FolderOpen}
                                         title="No deck selected"
@@ -289,7 +289,7 @@ export default function DecksPage() {
                             selectedId != null ? (
                                 <DeckAnalyticsPanel entries={entries} detailMap={detailMap} />
                             ) : (
-                                <div className="h-full bg-panel/40 backdrop-blur-sm border border-line/50 rounded-lg flex items-center justify-center">
+                                <div className="h-full bg-surface/70 backdrop-blur-md border border-line/75 rounded-lg flex items-center justify-center shadow-lg">
                                     <EmptyState
                                         icon={FolderOpen}
                                         title="No analytics"

@@ -42,29 +42,9 @@ export default function MasterDetailView({
         setMobileNavOpen(false);
     };
 
-    const breakpointClass = {
-        md: 'md',
-        lg: 'lg',
-        xl: 'xl'
-    }[breakpoint];
-
-    const mobileNavHiddenClass = {
-        md: 'md:hidden',
-        lg: 'lg:hidden',
-        xl: 'xl:hidden'
-    }[breakpoint];
-
-    const gridColsClass = {
-        md: 'md:grid',
-        lg: 'lg:grid',
-        xl: 'xl:grid'
-    }[breakpoint];
-
-    const panelResponsiveClass = {
-        md: 'md:flex md:flex-col md:h-full md:min-h-0 md:w-full',
-        lg: 'lg:flex lg:flex-col lg:h-full lg:min-h-0 lg:w-full',
-        xl: 'xl:flex xl:flex-col xl:h-full xl:min-h-0 xl:w-full'
-    }[breakpoint];
+    const mobileNavHiddenClass = `${breakpoint}:hidden`;
+    const gridColsClass = `${breakpoint}:grid`;
+    const panelResponsiveClass = `${breakpoint}:flex ${breakpoint}:flex-col ${breakpoint}:h-full ${breakpoint}:min-h-0 ${breakpoint}:w-full`;
 
     return (
         <div className="flex flex-col flex-1 min-h-0">
