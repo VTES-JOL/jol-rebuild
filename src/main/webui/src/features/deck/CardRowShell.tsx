@@ -11,18 +11,19 @@ interface Props {
 
 export default function CardRowShell({ entry, onIncrement, onDecrement, children }: Props) {
     const willRemove = entry.count === 1;
-    const { anchorRef, onMouseEnter, onMouseLeave, tooltip } = useCardPreview<HTMLDivElement>(entry.cardId);
+    const { anchorRef, onMouseEnter, onMouseLeave, onClick, tooltip } = useCardPreview<HTMLDivElement>(entry.cardId);
 
     return (
         <div
             ref={anchorRef}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-            className="flex items-center px-4 py-1.5 gap-1 hover:bg-hover/50 transition-colors"
+            onClick={onClick}
+            className="flex items-center px-4 py-1.5 gap-1 hover:bg-hover/50 transition-colors cursor-pointer"
         >
             {children}
 
-            <div className="flex items-center gap-0.5 shrink-0">
+            <div className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
                 <button
                     onClick={onDecrement}
                     title={willRemove ? 'Remove card' : 'Decrease count'}

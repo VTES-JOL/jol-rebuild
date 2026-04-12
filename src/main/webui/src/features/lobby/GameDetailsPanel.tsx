@@ -248,7 +248,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                                         ))}
                                     </select>
                                     <Button
-                                        variant="accent"
+                                        variant="secondary"
                                         disabled={!selectedDeckId || isFull}
                                         onClick={handleRegister}
                                     >
