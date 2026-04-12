@@ -14,7 +14,7 @@ export default function HomePage() {
                     {key: 'active', label: 'Active Games', content: <ActiveGames />},
                     {key: 'chat',   label: 'Global Chat',  content: !loading && user ? <GlobalChatPanel username={user.username}/> : <div/>},
                 ]}
-                columns="280px 1fr"
+                columns="320px 1fr"
             />
         </AppLayout>
     );

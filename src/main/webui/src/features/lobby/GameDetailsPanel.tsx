@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Users, Shield, Info, ExternalLink, Pencil, Lock, Globe} from 'lucide-react';
+import {ExternalLink, Globe, Info, Lock, Pencil, Shield, Users} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import Badge from '@/shared/components/Badge';

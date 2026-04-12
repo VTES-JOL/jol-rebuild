@@ -76,7 +76,8 @@ export default function LobbyPage() {
         <AppLayout background={"/Locations76.jpg"}>
             {!authLoading && user && (
                 <MasterDetailView
-                    columns="280px 1fr"
+                    columns="320px 1fr"
+                    activeKey={selectedId != null ? 'details' : 'list'}
                     panels={[
                         {
                             key: 'list',

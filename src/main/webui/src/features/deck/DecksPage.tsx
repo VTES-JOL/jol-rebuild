@@ -227,7 +227,8 @@ export default function DecksPage() {
         <AppLayout background={"/Locations23.jpg"}>
             <MasterDetailView
                 breakpoint="lg"
-                columns="280px 1fr 240px"
+                columns="320px 1fr 320px"
+                activeKey={selectedId != null ? 'editor' : 'list'}
                 panels={[
                     {
                         key: 'list',

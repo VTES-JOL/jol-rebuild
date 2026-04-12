@@ -1,4 +1,4 @@
-import {useState, type ReactNode} from 'react';
+import {useState, useEffect, type ReactNode} from 'react';
 import {ChevronDown} from 'lucide-react';
 
 interface PanelConfig {
@@ -11,6 +11,7 @@ interface MasterDetailViewProps {
     panels:   [PanelConfig, PanelConfig, ...PanelConfig[]]; // At least two panels
     columns?: string; // e.g. "300px 1fr" or "280px 1fr 280px"
     breakpoint?: 'md' | 'lg' | 'xl';
+    activeKey?: string;
 }
 
 /**
@@ -21,10 +22,18 @@ interface MasterDetailViewProps {
 export default function MasterDetailView({
     panels,
     columns = '1fr 3fr',
-    breakpoint = 'md'
+    breakpoint = 'md',
+    activeKey
 }: MasterDetailViewProps) {
     const [selectedKey, setSelectedKey] = useState(panels[0].key);
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+    // Sync with external activeKey if provided
+    useEffect(() => {
+        if (activeKey && activeKey !== selectedKey) {
+            setSelectedKey(activeKey);
+        }
+    }, [activeKey]);
 
     const selectedPanel = panels.find(p => p.key === selectedKey) || panels[0];
 
@@ -39,16 +48,28 @@ export default function MasterDetailView({
         xl: 'xl'
     }[breakpoint];
 
+    const mobileNavHiddenClass = {
+        md: 'md:hidden',
+        lg: 'lg:hidden',
+        xl: 'xl:hidden'
+    }[breakpoint];
+
     const gridColsClass = {
         md: 'md:grid',
         lg: 'lg:grid',
         xl: 'xl:grid'
     }[breakpoint];
 
+    const panelResponsiveClass = {
+        md: 'md:flex md:flex-col md:h-full md:min-h-0 md:w-full',
+        lg: 'lg:flex lg:flex-col lg:h-full lg:min-h-0 lg:w-full',
+        xl: 'xl:flex xl:flex-col xl:h-full xl:min-h-0 xl:w-full'
+    }[breakpoint];
+
     return (
         <div className="flex flex-col flex-1 min-h-0">
             {/* Mobile Dropdown Selector */}
-            <div className={`${breakpointClass}:hidden mb-4 shrink-0 relative z-20`}>
+            <div className={`${mobileNavHiddenClass} mb-4 shrink-0 relative z-20`}>
                 <button
                     onClick={() => setMobileNavOpen(!mobileNavOpen)}
                     className="w-full flex items-center justify-between px-4 py-3 bg-panel border border-line rounded-lg text-sm font-semibold text-ink shadow-sm"
@@ -78,7 +99,7 @@ export default function MasterDetailView({
 
             {/* Content Area */}
             <div
-                className={`flex-1 min-h-0 ${gridColsClass} gap-6`}
+                className={`flex-1 min-h-0 w-full ${gridColsClass} gap-6`}
                 style={{gridTemplateColumns: columns}}
             >
                 {panels.map(p => (
@@ -86,8 +107,8 @@ export default function MasterDetailView({
                         key={p.key}
                         className={
                             p.key === selectedKey
-                                ? 'flex flex-col h-full min-h-0'
-                                : `hidden ${breakpointClass}:flex ${breakpointClass}:flex-col ${breakpointClass}:h-full ${breakpointClass}:min-h-0`
+                                ? 'flex flex-col h-full min-h-0 w-full'
+                                : `hidden ${panelResponsiveClass}`
                         }
                     >
                         {p.content}

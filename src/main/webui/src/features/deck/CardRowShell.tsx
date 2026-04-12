@@ -1,6 +1,7 @@
 import {Minus, Plus} from 'lucide-react';
 import {useCardPreview} from '@/hooks/useCardPreview.tsx';
 import type {DeckEntry} from './types';
+import React from "react";
 
 interface Props {
     entry: DeckEntry;
