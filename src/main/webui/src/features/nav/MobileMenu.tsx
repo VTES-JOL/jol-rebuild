@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react"
 import {createPortal} from "react-dom"
-import {useActiveRoute} from "../../hooks/useActiveRoute.ts"
+import {useActiveRoute} from "@/hooks/useActiveRoute.ts"
 import {NAV_ITEMS} from "./nav-config"
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {Link} from "react-router-dom"
