@@ -9,7 +9,7 @@ import java.util.List;
 @RegisterForReflection
 public class GameDetailDto extends GameDto {
     public List<RegistrationInfoDto> registrations;
-    public List<RegistrationInfoDto> invites;
+    public List<InviteInfoDto> invites;
 
     @RegisterForReflection
     public static class RegistrationInfoDto {
@@ -22,9 +22,18 @@ public class GameDetailDto extends GameDto {
         }
     }
 
+    @RegisterForReflection
+    public static class InviteInfoDto {
+        public String username;
+
+        public InviteInfoDto(Registration r) {
+            this.username = r.user.username;
+        }
+    }
+
     public GameDetailDto(Game game, List<Registration> registrations, List<Registration> invites) {
         super(game, registrations.size());
         this.registrations = registrations.stream().map(RegistrationInfoDto::new).toList();
-        this.invites = invites.stream().map(RegistrationInfoDto::new).toList();
+        this.invites = invites.stream().map(InviteInfoDto::new).toList();
     }
 }

@@ -14,9 +14,13 @@ export interface RegistrationInfo {
     deckName: string | null;
 }
 
+export interface InviteInfo {
+    username: string;
+}
+
 export interface GameDetail extends GameDto {
     registrations: RegistrationInfo[];
-    invites: RegistrationInfo[];
+    invites: InviteInfo[];
 }
 
 const OPTS = { credentials: 'include' as const };

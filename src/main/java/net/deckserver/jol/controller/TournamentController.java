@@ -60,7 +60,7 @@ public class TournamentController {
             throw new NotFoundException();
         }
 
-        if (entity.status == TournamentStatus.Starting) {
+        if (entity.status != TournamentStatus.Starting) {
             throw new ForbiddenException("Only TOURNAMENT_ADMIN can edit tournaments in Starting status");
         }
 
