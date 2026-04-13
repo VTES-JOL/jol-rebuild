@@ -93,7 +93,7 @@ export default function MasterDetailView({
 
             {/* Content Area */}
             <div
-                className={`flex-1 min-h-0 w-full ${gridColsClass} gap-6`}
+                className={`flex-1 min-h-0 w-full flex flex-col ${gridColsClass} gap-6`}
                 style={{gridTemplateColumns: columns}}
             >
                 {panels.map(p => (
