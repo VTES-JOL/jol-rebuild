@@ -1,6 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {fn} from 'storybook/test';
+import {MemoryRouter} from 'react-router';
 
 import GameToken from '../shared/components/GameToken.tsx';
+import {authContextValue} from '@/features/auth/authContextValue';
+import {LobbySocketProvider} from '@/features/lobby/LobbySocketContext';
 
 const meta = {
     title: 'Shared/GameToken',
@@ -9,6 +13,25 @@ const meta = {
         layout: 'centered',
     },
     tags: ['autodocs'],
+    decorators: [
+        (Story) => (
+            <MemoryRouter>
+                <authContextValue.Provider value={{
+                    user: { username: 'TestUser' } as any,
+                    loading: false,
+                    login: fn(),
+                    logout: fn(),
+                    refresh: fn(),
+                }}>
+                    <LobbySocketProvider>
+                        <div className="flex items-center justify-center p-8 bg-panel rounded-lg">
+                            <Story />
+                        </div>
+                    </LobbySocketProvider>
+                </authContextValue.Provider>
+            </MemoryRouter>
+        ),
+    ],
 } satisfies Meta<typeof GameToken>;
 
 export default meta;

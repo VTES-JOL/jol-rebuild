@@ -1,6 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {MemoryRouter} from 'react-router';
+import {fn} from 'storybook/test';
 
 import {ChatPanelView, type ChatPanelViewProps} from '../features/chat/ChatPanelView.tsx';
+import {authContextValue} from '@/features/auth/authContextValue';
+import {LobbySocketProvider} from '@/features/lobby/LobbySocketContext';
 
 const meta = {
     title: 'Chat/ChatPanelView',
@@ -9,6 +13,23 @@ const meta = {
         layout: 'fullscreen',
     },
     tags: ['autodocs'],
+    decorators: [
+        (Story) => (
+            <MemoryRouter>
+                <authContextValue.Provider value={{
+                    user: { username: 'Alex' } as any,
+                    loading: false,
+                    login: fn(),
+                    logout: fn(),
+                    refresh: fn(),
+                }}>
+                    <LobbySocketProvider>
+                        <Story />
+                    </LobbySocketProvider>
+                </authContextValue.Provider>
+            </MemoryRouter>
+        ),
+    ],
 } satisfies Meta<ChatPanelViewProps>;
 
 export default meta;

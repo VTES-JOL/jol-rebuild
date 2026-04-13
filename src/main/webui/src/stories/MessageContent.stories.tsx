@@ -1,6 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {fn} from 'storybook/test';
+import {MemoryRouter} from 'react-router';
 
 import {MessageContent} from '../features/chat/MessageContent.tsx';
+import {authContextValue} from '@/features/auth/authContextValue';
+import {LobbySocketProvider} from '@/features/lobby/LobbySocketContext';
 
 const meta = {
     title: 'Chat/MessageContent',
@@ -9,6 +13,25 @@ const meta = {
         layout: 'padded',
     },
     tags: ['autodocs'],
+    decorators: [
+        (Story) => (
+            <MemoryRouter>
+                <authContextValue.Provider value={{
+                    user: { username: 'TestUser' } as any,
+                    loading: false,
+                    login: fn(),
+                    logout: fn(),
+                    refresh: fn(),
+                }}>
+                    <LobbySocketProvider>
+                        <div className="max-w-md bg-panel p-4 rounded-lg">
+                            <Story />
+                        </div>
+                    </LobbySocketProvider>
+                </authContextValue.Provider>
+            </MemoryRouter>
+        ),
+    ],
 } satisfies Meta<typeof MessageContent>;
 
 export default meta;
