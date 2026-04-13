@@ -1,7 +1,7 @@
 import AppLayout from "@/shared/layout/AppLayout.tsx";
 import ActiveGames from "@/features/home/ActiveGames.tsx";
 import {GlobalChatPanel} from "@/features/home/GlobalChatPanel.tsx";
-import {useAuthContext} from "@/hooks/useAuthContext.ts";
+import {useAuthContext} from "@/features/auth/AuthContext.tsx";
 import MasterDetailView from "@/shared/layout/MasterDetailView.tsx";
 
 export default function HomePage() {

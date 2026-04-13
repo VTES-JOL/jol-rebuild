@@ -1,6 +1,6 @@
 import React, {createContext, useCallback, useContext, useRef, useState} from 'react';
 import {type ChatMessage, useWebSocket} from '@/hooks/useWebSocket';
-import {useAuthContext} from '@/hooks/useAuthContext';
+import {useAuthContext} from "@/features/auth/AuthContext.tsx";
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 

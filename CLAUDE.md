@@ -77,7 +77,7 @@ shared/     components/  Panel, ProtectedRoute, CardToken, GameToken, ClanIcon, 
                            CostIcon, TypeIcon, PathIcon, CounterBadge, SummaryStats
             layout/      AppLayout, HeroLayout
             utils/       chatUtils, avatarUtils, parseMessageTokens
-hooks/      useAuthContext, useChat, useChatInput, useWebSocket, useCardAutocomplete,
+hooks/      useChat, useChatInput, useWebSocket, useCardAutocomplete,
               useCardPreview, useDarkMode, useActiveRoute
 stories/    Storybook stories doubling as vitest component tests
 ```

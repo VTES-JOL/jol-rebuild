@@ -3,7 +3,7 @@ import {MemoryRouter} from 'react-router';
 import {fn} from 'storybook/test';
 
 import {ChatPanelView, type ChatPanelViewProps} from '../features/chat/ChatPanelView.tsx';
-import {authContextValue} from '@/features/auth/authContextValue';
+import {AuthContext} from '@/features/auth/AuthContext';
 import {LobbySocketProvider} from '@/features/lobby/LobbySocketContext';
 
 const meta = {
@@ -16,7 +16,7 @@ const meta = {
     decorators: [
         (Story) => (
             <MemoryRouter>
-                <authContextValue.Provider value={{
+                <AuthContext.Provider value={{
                     user: { username: 'Alex' } as any,
                     loading: false,
                     login: fn(),
@@ -26,7 +26,7 @@ const meta = {
                     <LobbySocketProvider>
                         <Story />
                     </LobbySocketProvider>
-                </authContextValue.Provider>
+                </AuthContext.Provider>
             </MemoryRouter>
         ),
     ],

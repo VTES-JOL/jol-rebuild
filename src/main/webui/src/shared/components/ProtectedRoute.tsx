@@ -1,5 +1,5 @@
 import {Navigate} from "react-router-dom";
-import {useAuthContext} from "@/hooks/useAuthContext.ts";
+import {useAuthContext} from "@/features/auth/AuthContext.tsx";
 import type {JSX} from "react";
 
 type ProtectedRouteViewProps = {

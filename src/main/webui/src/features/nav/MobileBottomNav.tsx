@@ -1,5 +1,5 @@
 import {Link} from 'react-router-dom';
-import {useAuthContext} from '@/hooks/useAuthContext.ts';
+import {useAuthContext} from "@/features/auth/AuthContext.tsx";
 import {useActiveRoute} from '@/hooks/useActiveRoute.ts';
 import {getVisibleNavItems} from './nav-config';
 

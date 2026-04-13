@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import MasterDetailView from '@/shared/layout/MasterDetailView';
-import {useAuth} from '@/features/auth/useAuth';
+import {useAuthContext} from "@/features/auth/AuthContext.tsx";
 import tournamentApi from './api';
 import type {Tournament} from './types';
 import TournamentListPanel from './TournamentListPanel';
@@ -10,7 +10,7 @@ import {Trophy} from 'lucide-react';
 import AppLayout from "@/shared/layout/AppLayout.tsx";
 
 export default function TournamentsPage() {
-    const {user} = useAuth();
+    const {user} = useAuthContext();
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
     const [isNewlyCreated, setIsNewlyCreated] = useState(false);

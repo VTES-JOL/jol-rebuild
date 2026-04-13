@@ -3,7 +3,7 @@ import {fn} from 'storybook/test';
 import {MemoryRouter} from 'react-router';
 
 import {MessageContent} from '../features/chat/MessageContent.tsx';
-import {authContextValue} from '@/features/auth/authContextValue';
+import {AuthContext} from '@/features/auth/AuthContext';
 import {LobbySocketProvider} from '@/features/lobby/LobbySocketContext';
 
 const meta = {
@@ -16,7 +16,7 @@ const meta = {
     decorators: [
         (Story) => (
             <MemoryRouter>
-                <authContextValue.Provider value={{
+                <AuthContext.Provider value={{
                     user: { username: 'TestUser' } as any,
                     loading: false,
                     login: fn(),
@@ -28,7 +28,7 @@ const meta = {
                             <Story />
                         </div>
                     </LobbySocketProvider>
-                </authContextValue.Provider>
+                </AuthContext.Provider>
             </MemoryRouter>
         ),
     ],
