@@ -52,8 +52,12 @@ public class GameController {
     public GameDto update(@PathParam("id") Long id, GameUpdateCommand command) {
         Game entity = Game.findById(id);
         if (entity == null) throw new NotFoundException();
-        entity.visibility = command.visibility();
-        entity.name = command.name();
+        if (command.visibility() != null) {
+            entity.visibility = command.visibility();
+        }
+        if (command.name() != null) {
+            entity.name = command.name();
+        }
         return new GameDto(entity);
     }
 

@@ -111,7 +111,7 @@ export default function TournamentsPage() {
     ];
 
     return (
-        <AppLayout background={"/Locations23.jpg"}>
+        <AppLayout background={"/Locations52.jpg"}>
             <MasterDetailView
                 panels={panels as any}
                 columns="320px 1fr"

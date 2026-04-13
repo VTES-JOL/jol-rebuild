@@ -1,8 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
-import {ExternalLink, Globe, Info, Lock, Pencil, Shield, Users} from 'lucide-react';
+import {createPortal} from 'react-dom';
+import {Check, ExternalLink, Globe, Info, Lock, Pencil, Shield, Users} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import Badge from '@/shared/components/Badge';
+import Input from '@/shared/components/Input';
 import gameApi, {type GameDetail, type GameDto} from '@/features/game/api';
 import deckApi from '@/features/deck/api';
 import type {Deck} from '@/features/deck/types';
@@ -23,6 +25,38 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
     const [editingName, setEditingName] = useState(false);
     const [nameValue, setNameValue] = useState(game.name);
     const nameInputRef = useRef<HTMLInputElement>(null);
+
+    const [inviteQuery, setInviteQuery] = useState('');
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showSuggest, setShowSuggest] = useState(false);
+    const [suggestPos, setSuggestPos] = useState<{top: number; left: number; width: number} | null>(null);
+    const [submittingInvite, setSubmittingInvite] = useState(false);
+    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const inviteInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        clearTimeout(debounceRef.current);
+        if (inviteQuery.trim().length < 2) {
+            setSuggestions([]);
+            setShowSuggest(false);
+            return;
+        }
+        debounceRef.current = setTimeout(async () => {
+            const res = await fetch(`/user/search?q=${encodeURIComponent(inviteQuery)}`, {credentials: 'include'});
+            if (res.ok) {
+                const names: string[] = await res.json();
+                setSuggestions(names);
+                if (names.length > 0 && inviteInputRef.current) {
+                    const rect = inviteInputRef.current.getBoundingClientRect();
+                    setSuggestPos({top: rect.bottom + 4, left: rect.left, width: rect.width});
+                    setShowSuggest(true);
+                } else {
+                    setShowSuggest(false);
+                }
+            }
+        }, 250);
+        return () => clearTimeout(debounceRef.current);
+    }, [inviteQuery]);
 
     useEffect(() => {
         setLoading(true);
@@ -101,6 +135,25 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
         if (e.key === 'Escape') { setNameValue(game.name); setEditingName(false); }
     };
 
+    const handleInvite = async (username: string) => {
+        const name = username.trim();
+        if (!name) return;
+        setSubmittingInvite(true);
+        try {
+            await gameApi.invitePlayer(game.id, name);
+            setInviteQuery('');
+            setSuggestions([]);
+            setShowSuggest(false);
+            const updated = await gameApi.getGameDetail(game.id);
+            setDetail(updated);
+            onChanged?.();
+        } catch (e) {
+            console.error('Failed to invite player', e);
+        } finally {
+            setSubmittingInvite(false);
+        }
+    };
+
     const titleSlot = editingName ? (
         <input
             ref={nameInputRef}
@@ -131,20 +184,6 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
         }
     };
 
-    const handleInvite = () => {
-        const username = prompt('Enter username to invite:');
-        if (!username) return;
-        gameApi.invitePlayer(game.id, username)
-            .then(() => {
-                alert(`Invited ${username}`);
-                onChanged?.();
-            })
-            .catch(e => {
-                console.error('Failed to invite player', e);
-                alert(`Failed to invite player: ${e.message}`);
-            });
-    };
-
     return (
         <Panel
             title={titleSlot}
@@ -152,9 +191,6 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                 <div className="flex items-center gap-2">
                     {isOwner && game.status === 'OPEN' && (
                         <div className="flex items-center gap-1 mr-2">
-                            <Button variant="ghost" size="sm" onClick={handleInvite} title="Invite Player">
-                                Invite
-                            </Button>
                             <Button variant="ghost" size="sm" onClick={toggleVisibility} title="Change Visibility">
                                 {game.visibility === 'PUBLIC' ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
                             </Button>
@@ -276,6 +312,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                             detail?.registrations.map(r => (
                                 <div key={r.username} className="flex items-center justify-between p-3">
                                     <div className="flex items-center gap-2">
+                                        <Check className="w-3.5 h-3.5 text-online shrink-0" />
                                         <span className={`text-sm ${r.username === currentUsername ? 'font-bold text-accent-soft' : 'text-ink'}`}>
                                             {r.username}
                                             {r.username === game.owner && <span className="ml-1.5 text-[10px] text-gold font-normal">(host)</span>}
@@ -286,6 +323,82 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                         )}
                     </div>
                 </div>
+
+                {/* Invited Players */}
+                {detail?.invites && detail.invites.length > 0 && (
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-ink flex items-center gap-2 px-1">
+                            <Users className="w-4 h-4 text-ink-muted" />
+                            Invited Players
+                        </h3>
+                        <div className="border border-line/40 rounded-lg divide-y divide-line/40 opacity-70">
+                            {detail.invites.map(r => (
+                                <div key={r.username} className="flex items-center justify-between p-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="w-3.5 h-3.5 shrink-0" />
+                                        <span className={`text-sm ${r.username === currentUsername ? 'font-bold text-accent-soft' : 'text-ink'}`}>
+                                            {r.username}
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] text-ink-muted italic">invited</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Owner: Invite Player */}
+                {isOwner && game.status === 'OPEN' && (
+                    <div className="space-y-4 pt-2">
+                        <h3 className="text-sm font-semibold text-ink flex items-center gap-2 px-1">
+                            <Users className="w-4 h-4 text-ink-muted" />
+                            Invite Player
+                        </h3>
+                        <div className="flex gap-2">
+                            <Input
+                                ref={inviteInputRef}
+                                size="sm"
+                                srLabel="Username to invite"
+                                value={inviteQuery}
+                                onChange={e => setInviteQuery(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') handleInvite(inviteQuery);
+                                    if (e.key === 'Escape') setShowSuggest(false);
+                                }}
+                                onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
+                                placeholder="Username…"
+                                className="flex-1"
+                            />
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={() => handleInvite(inviteQuery)}
+                                disabled={submittingInvite || !inviteQuery.trim()}
+                            >
+                                Invite
+                            </Button>
+                        </div>
+                        {showSuggest && suggestPos && suggestions.length > 0 && createPortal(
+                            <ul
+                                className="fixed z-[9999] rounded border border-line/60 bg-surface shadow-lg overflow-hidden"
+                                style={{top: suggestPos.top, left: suggestPos.left, width: suggestPos.width}}
+                            >
+                                {suggestions.map(name => (
+                                    <li key={name}>
+                                        <button
+                                            type="button"
+                                            onMouseDown={() => handleInvite(name)}
+                                            className="w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-hover transition-colors cursor-pointer"
+                                        >
+                                            {name}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>,
+                            document.body
+                        )}
+                    </div>
+                )}
                 
                 {/* Active Game Preview placeholder */}
                 {game.status === 'ACTIVE' && (
