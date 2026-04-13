@@ -1,0 +1,104 @@
+import {useEffect, useState} from 'react';
+import MasterDetailView from '@/shared/layout/MasterDetailView';
+import {useAuth} from '@/features/auth/useAuth';
+import tournamentApi from './api';
+import type {Tournament} from './types';
+import TournamentListPanel from './TournamentListPanel';
+import TournamentDetailPanel from './TournamentDetailPanel';
+import EmptyState from '@/shared/components/EmptyState';
+import {Trophy} from 'lucide-react';
+import AppLayout from "@/shared/layout/AppLayout.tsx";
+
+export default function TournamentsPage() {
+    const {user} = useAuth();
+    const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const isTournamentAdmin = user?.roles.includes('TOURNAMENT_ADMIN') ?? false;
+
+    const loadTournaments = async () => {
+        setLoading(true);
+        try {
+            const data = await tournamentApi.list();
+            setTournaments(data);
+            if (selectedTournament) {
+                const updated = data.find(t => t.id === selectedTournament.id);
+                if (updated) setSelectedTournament(updated);
+            }
+        } catch (e) {
+            console.error('Failed to load tournaments', e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadTournaments();
+    }, []);
+
+    const handleCreate = async () => {
+        const name = prompt('Tournament Name:');
+        if (!name) return;
+        try {
+            const newT = await tournamentApi.create({
+                name,
+                format: 'SINGLE_DECK',
+                gameFormat: 'STANDARD',
+                numberOfRounds: 2,
+                status: 'Starting',
+                rules: []
+            });
+            await loadTournaments();
+            setSelectedTournament(newT);
+        } catch (e) {
+            console.error('Failed to create tournament', e);
+        }
+    };
+
+    const panels = [
+        {
+            key: 'list',
+            label: 'All Tournaments',
+            content: (
+                <TournamentListPanel
+                    tournaments={tournaments}
+                    selectedId={selectedTournament?.id}
+                    onSelect={setSelectedTournament}
+                    onCreate={handleCreate}
+                    loading={loading}
+                    isTournamentAdmin={isTournamentAdmin}
+                />
+            )
+        },
+        {
+            key: 'detail',
+            label: 'Tournament Details',
+            content: selectedTournament ? (
+                <TournamentDetailPanel
+                    tournament={selectedTournament}
+                    isTournamentAdmin={isTournamentAdmin}
+                    onChanged={loadTournaments}
+                />
+            ) : (
+                <div className="flex-1 flex items-center justify-center bg-panel border border-line rounded-xl">
+                    <EmptyState
+                        icon={Trophy}
+                        title="No tournament selected"
+                        description="Select a tournament from the list to view its details."
+                    />
+                </div>
+            )
+        }
+    ];
+
+    return (
+        <AppLayout background={"/Locations23.jpg"}>
+            <MasterDetailView
+                panels={panels as any}
+                columns="320px 1fr"
+                activeKey={selectedTournament ? 'detail' : 'list'}
+            />
+        </AppLayout>
+    );
+}
