@@ -44,7 +44,7 @@ public class TournamentController {
     public Tournament create(Tournament tournament) {
         tournament.id = null;
         if (tournament.status == null) {
-            tournament.status = TournamentStatus.Starting;
+            tournament.status = TournamentStatus.STARTING;
         }
         tournament.persist();
         return tournament;
@@ -60,7 +60,7 @@ public class TournamentController {
             throw new NotFoundException();
         }
 
-        if (entity.status != TournamentStatus.Starting) {
+        if (entity.status != TournamentStatus.STARTING) {
             throw new ForbiddenException("Only TOURNAMENT_ADMIN can edit tournaments in Starting status");
         }
 

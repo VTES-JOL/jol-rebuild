@@ -20,7 +20,7 @@ public class TournamentControllerTest {
     public void testCreateAndGetTournament() {
         Tournament tournament = new Tournament();
         tournament.name = "Test Tournament";
-        tournament.status = TournamentStatus.Starting;
+        tournament.status = TournamentStatus.STARTING;
 
         long id = ((Number) given()
                 .contentType(ContentType.JSON)
@@ -44,7 +44,7 @@ public class TournamentControllerTest {
     public void testUpdateTournamentAsAdmin() {
         Tournament tournament = new Tournament();
         tournament.name = "Initial Name";
-        tournament.status = TournamentStatus.Starting;
+        tournament.status = TournamentStatus.STARTING;
 
         long id = ((Number) given()
                 .contentType(ContentType.JSON)
@@ -69,7 +69,7 @@ public class TournamentControllerTest {
     public void testUpdateTournamentAsUserForbidden() {
         Tournament tournament = new Tournament();
         tournament.name = "User Update Test";
-        tournament.status = TournamentStatus.Starting;
+        tournament.status = TournamentStatus.STARTING;
 
         // Create as admin first
         // We can't easily switch users in a single test method with @TestSecurity, 
@@ -98,7 +98,7 @@ public class TournamentControllerTest {
     public void testDeleteTournamentAsAdmin() {
         Tournament tournament = new Tournament();
         tournament.name = "Delete Me";
-        tournament.status = TournamentStatus.Starting;
+        tournament.status = TournamentStatus.STARTING;
 
         long id = ((Number) given()
                 .contentType(ContentType.JSON)
