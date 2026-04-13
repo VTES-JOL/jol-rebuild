@@ -37,7 +37,7 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
         }
     }, [isEditingName]);
 
-    const canEdit = isTournamentAdmin && tournament.status === 'Starting';
+    const canEdit = isTournamentAdmin && tournament.status === 'STARTING';
 
     const handleSave = async () => {
         try {
@@ -128,7 +128,7 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
                     <div className="bg-hover/30 rounded-lg p-4 space-y-3">
                         <div className="flex justify-between items-center">
                             <span className="text-sm text-ink-muted">Status</span>
-                            <Badge variant={tournament.status === 'Active' ? 'online' : 'accent'}>
+                            <Badge variant={tournament.status === 'ACTIVE' ? 'online' : 'accent'}>
                                 {tournament.status}
                             </Badge>
                         </div>

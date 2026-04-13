@@ -7,7 +7,7 @@ import {TabStrip} from '@/shared/components/Tabs';
 import type {Tournament, TournamentStatus} from './types';
 
 export type TournamentFilterTab = 'All' | TournamentStatus;
-const TABS: TournamentFilterTab[] = ['All', 'Starting', 'Active', 'Seeding', 'Finals', 'Completed'];
+const TABS: TournamentFilterTab[] = ['All', 'STARTING', 'ACTIVE', 'SEEDING', 'FINALS', 'COMPLETED'];
 
 interface Props {
     tournaments: Tournament[];

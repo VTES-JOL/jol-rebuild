@@ -1,4 +1,4 @@
-export type TournamentStatus = 'Starting' | 'Active' | 'Seeding' | 'Finals' | 'Completed';
+export type TournamentStatus = 'STARTING' | 'ACTIVE' | 'SEEDING' | 'FINALS' | 'COMPLETED';
 export type TournamentFormat = 'SINGLE_DECK' | 'MULTI_DECK';
 
 export interface Rule {
