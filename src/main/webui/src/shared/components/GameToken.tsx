@@ -4,8 +4,8 @@ import {useNavigate} from 'react-router';
 import {Check} from 'lucide-react';
 import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from '@/features/lobby/DeckSelector';
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
-import {useLobbySocket} from '@/features/lobby/LobbySocketContext';
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
+import {useLobbySocket} from '@/contexts/LobbySocketContext';
 
 type Phase = 'idle' | 'registering' | 'waiting';
 

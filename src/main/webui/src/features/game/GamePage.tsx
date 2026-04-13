@@ -1,6 +1,6 @@
 import AppLayout from "@/shared/layout/AppLayout.tsx";
 import {GameChatPanel} from "@/features/game/GameChatPanel.tsx";
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {useParams} from "react-router-dom";
 
 export default function GamePage() {

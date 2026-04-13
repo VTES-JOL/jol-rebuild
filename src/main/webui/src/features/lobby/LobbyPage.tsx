@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import {Gamepad2} from 'lucide-react';
 import AppLayout from "@/shared/layout/AppLayout.tsx";
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
-import {useLobbySocket} from "./LobbySocketContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
+import {useLobbySocket} from "@/contexts/LobbySocketContext.tsx";
 import gameApi, {type GameDto} from '@/features/game/api';
 import GameListPanel from './GameListPanel';
 import GameDetailsPanel from './GameDetailsPanel';

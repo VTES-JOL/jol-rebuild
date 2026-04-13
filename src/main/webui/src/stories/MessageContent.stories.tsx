@@ -3,8 +3,8 @@ import {fn} from 'storybook/test';
 import {MemoryRouter} from 'react-router';
 
 import {MessageContent} from '../features/chat/MessageContent.tsx';
-import {AuthContext} from '@/features/auth/AuthContext';
-import {LobbySocketProvider} from '@/features/lobby/LobbySocketContext';
+import {AuthContext} from '@/contexts/AuthContext';
+import {LobbySocketProvider} from '@/contexts/LobbySocketContext';
 
 const meta = {
     title: 'Chat/MessageContent',

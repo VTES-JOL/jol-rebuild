@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useEffect, useState} from "react";
-import type {User} from "./types";
-import API from "./api";
+import type {User} from "@/features/auth/types";
+import API from "@/features/auth/api";
 import {setUnauthorizedHandler} from "@/shared/api/client.ts";
 
 export interface AuthContextType {

@@ -1,7 +1,7 @@
 import Panel from "@/shared/components/Panel.tsx";
 import Button from "@/shared/components/Button.tsx";
 import Input from "@/shared/components/Input.tsx";
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useState} from "react";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";

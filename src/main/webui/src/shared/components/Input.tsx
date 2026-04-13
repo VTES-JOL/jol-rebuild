@@ -1,5 +1,5 @@
-import {forwardRef} from 'react';
 import type {InputHTMLAttributes, ReactNode} from 'react';
+import {forwardRef} from 'react';
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
     label?:   ReactNode;

@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import MasterDetailView from '@/shared/layout/MasterDetailView';
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import tournamentApi from './api';
 import type {Tournament} from './types';
 import TournamentListPanel from './TournamentListPanel';

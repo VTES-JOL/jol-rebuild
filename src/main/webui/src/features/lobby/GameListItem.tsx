@@ -1,7 +1,7 @@
 import {Crown, Lock} from 'lucide-react';
 import Badge from '@/shared/components/Badge';
 import type {GameDto} from '@/features/game/api';
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 
 const FORMAT_LABELS: Record<string, string> = {STANDARD: 'Standard', DUEL: 'Duel', V5: 'V5'};
 

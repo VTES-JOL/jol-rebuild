@@ -1,5 +1,5 @@
 import {Link} from "react-router-dom";
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import UserMenu from "./UserMenu";
 import {getVisibleNavItems} from "./nav-config.ts";
 import NavItem from "./NavItem"

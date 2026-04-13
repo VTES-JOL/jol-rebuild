@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react"
 import {createPortal} from "react-dom"
 import {Link} from "react-router-dom"
-import {useAuthContext} from "@/features/auth/AuthContext.tsx";
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {useDarkMode} from "@/hooks/useDarkMode.ts"
 
 export default function UserMenu() {

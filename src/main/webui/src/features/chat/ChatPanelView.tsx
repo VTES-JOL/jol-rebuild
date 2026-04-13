@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import type {ChatMessage, ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {useCardAutocomplete} from '@/hooks/useCardAutocomplete.ts';
 import {useChatInput} from '@/hooks/useChatInput.ts';
-import {groupMessages} from '@/shared/utils/chatUtils.ts';
+import {groupMessages} from './chatUtils.ts';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import {CardSuggestions} from '@/features/chat/CardSuggestions.tsx';

@@ -1,4 +1,4 @@
-import type { Tournament, TournamentStatus } from './types';
+import type {Tournament, TournamentStatus} from './types';
 import {baseFetch, json} from "@/shared/api/client.ts";
 
 const OPTS = { credentials: 'include' as const };
