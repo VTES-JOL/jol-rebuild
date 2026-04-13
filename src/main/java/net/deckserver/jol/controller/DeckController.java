@@ -49,21 +49,10 @@ public class DeckController {
     @Inject
     DeckValidatorService validatorService;
 
-    private User currentUser() {
-        return User.findByUsername(identity.getPrincipal().getName());
-    }
-
-    /** Returns the deck only if it exists and belongs to the current user. */
-    private Deck ownedDeck(long id) {
-        Deck deck = Deck.findById(id);
-        if (deck == null || !deck.user.username.equals(identity.getPrincipal().getName())) return null;
-        return deck;
-    }
-
     @GET
     public List<DeckDto> decks(
             @QueryParam("format") GameFormat format,
-            @QueryParam("card")   String cardId) {
+            @QueryParam("card") String cardId) {
         String username = identity.getPrincipal().getName();
         List<Deck> decks;
         if (format != null && cardId != null) {
@@ -113,7 +102,7 @@ public class DeckController {
     @RolesAllowed("USER")
     public DeckDto create(DeckCreateCommand command) throws JsonProcessingException {
         User owner = currentUser();
-        KrcgDeck empty = new KrcgDeck(null, null, new KrcgCrypt(0, List.of()), new KrcgLibrary(0, List.of()));
+        KrcgDeck empty = new KrcgDeck(command.name, null, new KrcgCrypt(0, List.of()), new KrcgLibrary(0, List.of()));
         Deck deck = Deck.create(owner, command.name(), mapper.writeValueAsString(empty), null);
         return new DeckDto(deck);
     }
@@ -125,12 +114,12 @@ public class DeckController {
     public Response update(@PathParam("id") long id, DeckUpdateCommand command) throws JsonProcessingException {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
-        if (command.name()     != null) deck.name     = command.name();
+        if (command.name() != null) deck.name = command.name();
         if (command.comments() != null) deck.comments = command.comments();
         List<DeckFormatValidity> freshValidity = null;
         if (command.contents() != null) {
             deck.contents = mapper.writeValueAsString(command.contents());
-            deck.summary  = command.summary();
+            deck.summary = command.summary();
             freshValidity = validatorService.validateAndPersist(deck, command.contents());
         } else if (command.summary() != null) {
             deck.summary = command.summary();
@@ -166,15 +155,36 @@ public class DeckController {
         return new DeckDto(deck, validity);
     }
 
-    /** Computes "{crypt},{library},{groups}" from built KRCG contents, matching the frontend format. */
+    private User currentUser() {
+        return User.findByUsername(identity.getPrincipal().getName());
+    }
+
+    /**
+     * Returns the deck only if it exists and belongs to the current user.
+     */
+    private Deck ownedDeck(long id) {
+        Deck deck = Deck.findById(id);
+        if (deck == null || !deck.user.username.equals(identity.getPrincipal().getName())) return null;
+        return deck;
+    }
+
+    /**
+     * Computes "{crypt},{library},{groups}" from built KRCG contents, matching the frontend format.
+     */
     private String computeSummary(KrcgDeck contents) {
-        int crypt   = contents.crypt().count();
+        int crypt = contents.crypt().count();
         int library = contents.library().count();
         String groups = contents.crypt().cards().stream()
                 .map(c -> cardRegistry.findById(c.id()))
                 .filter(c -> c instanceof CryptCard cc && !"ANY".equals(cc.group()))
                 .map(c -> ((CryptCard) c).group())
-                .flatMap(g -> { try { return java.util.stream.Stream.of(Integer.parseInt(g)); } catch (NumberFormatException e) { return java.util.stream.Stream.empty(); } })
+                .flatMap(g -> {
+                    try {
+                        return java.util.stream.Stream.of(Integer.parseInt(g));
+                    } catch (NumberFormatException e) {
+                        return java.util.stream.Stream.empty();
+                    }
+                })
                 .distinct()
                 .sorted()
                 .map(String::valueOf)
@@ -185,15 +195,18 @@ public class DeckController {
     // ── Commands & responses ──────────────────────────────────────────────────
 
     @RegisterForReflection
-    public record DeckCreateCommand(String name) {}
+    public record DeckCreateCommand(String name) {
+    }
 
     @RegisterForReflection
-    public record DeckUpdateCommand(String name, KrcgDeck contents, String summary, String comments) {}
+    public record DeckUpdateCommand(String name, KrcgDeck contents, String summary, String comments) {
+    }
 
     @RegisterForReflection
     public record DeckImportCommand(String name, String comments, List<Entry> entries) {
         @RegisterForReflection
-        public record Entry(String cardId, int count) {}
+        public record Entry(String cardId, int count) {
+        }
     }
 
     @RegisterForReflection

@@ -1,5 +1,6 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -52,26 +53,15 @@ public class TournamentController {
     @PUT
     @Path("/{id}")
     @Transactional
+    @RolesAllowed("TOURNAMENT_ADMIN")
     public Tournament update(@PathParam("id") Long id, Tournament updated) {
         Tournament entity = Tournament.findById(id);
         if (entity == null) {
             throw new NotFoundException();
         }
 
-        boolean isTournamentAdmin = identity.hasRole("TOURNAMENT_ADMIN");
-        
         if (entity.status == TournamentStatus.Starting) {
-            if (!isTournamentAdmin) {
-                throw new ForbiddenException("Only TOURNAMENT_ADMIN can edit tournaments in Starting status");
-            }
-        } else {
-            // If it's not in Starting status, can we edit it? 
-            // The requirement says: "A user with the role 'TOURNAMENT_ADMIN' will be able to edit tournament details in the 'Starting' status."
-            // It doesn't explicitly forbid editing in other statuses, but usually, once Active/Completed, editing is restricted.
-            // For now, I'll follow the explicit permission.
-            if (!isTournamentAdmin) {
-                 throw new ForbiddenException("Only TOURNAMENT_ADMIN can edit tournament details");
-            }
+            throw new ForbiddenException("Only TOURNAMENT_ADMIN can edit tournaments in Starting status");
         }
 
         entity.name = updated.name;
@@ -102,4 +92,7 @@ public class TournamentController {
         }
         entity.delete();
     }
+
+    @RegisterForReflection
+    public record CreateTournamentCommand(String name) {}
 }
