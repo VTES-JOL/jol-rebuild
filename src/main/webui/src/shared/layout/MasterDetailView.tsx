@@ -42,14 +42,28 @@ export default function MasterDetailView({
         setMobileNavOpen(false);
     };
 
-    const mobileNavHiddenClass = `${breakpoint}:hidden`;
-    const gridColsClass = `${breakpoint}:grid`;
-    const panelResponsiveClass = `${breakpoint}:flex ${breakpoint}:flex-col ${breakpoint}:h-full ${breakpoint}:min-h-0 ${breakpoint}:w-full`;
+    const mobileNavHidden = {
+        md: 'md:hidden',
+        lg: 'lg:hidden',
+        xl: 'xl:hidden',
+    }[breakpoint];
+
+    const gridColsClass = {
+        md: 'md:grid',
+        lg: 'lg:grid',
+        xl: 'xl:grid',
+    }[breakpoint];
+
+    const panelResponsiveClass = {
+        md: 'md:flex md:flex-col md:h-full md:min-h-0 md:w-full',
+        lg: 'lg:flex lg:flex-col lg:h-full lg:min-h-0 lg:w-full',
+        xl: 'xl:flex xl:flex-col xl:h-full xl:min-h-0 xl:w-full',
+    }[breakpoint];
 
     return (
         <div className="flex flex-col flex-1 min-h-0">
             {/* Mobile Dropdown Selector */}
-            <div className={`${mobileNavHiddenClass} mb-4 shrink-0 relative z-20`}>
+            <div className={`${mobileNavHidden} mb-4 shrink-0 relative z-20`}>
                 <button
                     onClick={() => setMobileNavOpen(!mobileNavOpen)}
                     className="w-full flex items-center justify-between px-4 py-3 bg-panel border border-line rounded-lg text-sm font-semibold text-ink shadow-sm"
