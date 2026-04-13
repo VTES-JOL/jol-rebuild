@@ -86,6 +86,7 @@ public class TournamentController {
         entity.finalRound = updated.finalRound;
         entity.requiresId = updated.requiresId;
         entity.rules = updated.rules;
+        entity.conditions = updated.conditions;
         entity.status = updated.status;
 
         return entity;

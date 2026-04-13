@@ -35,7 +35,7 @@ const tournamentApi = {
         return json(res);
     },
 
-    async delete(id: number): Promise<void> {
+    async remove(id: number): Promise<void> {
         const res = await fetch(`/api/tournaments/${id}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },

@@ -281,7 +281,6 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                                             {r.username === game.owner && <span className="ml-1.5 text-[10px] text-gold font-normal">(host)</span>}
                                         </span>
                                     </div>
-                                    <span className="text-xs text-ink-muted italic">{r.deckName || '---'}</span>
                                 </div>
                             ))
                         )}

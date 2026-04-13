@@ -92,4 +92,43 @@ public class TournamentControllerTest {
                 .statusCode(200)
                 .body("$", hasSize(greaterThanOrEqualTo(0)));
     }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "TOURNAMENT_ADMIN")
+    public void testDeleteTournamentAsAdmin() {
+        Tournament tournament = new Tournament();
+        tournament.name = "Delete Me";
+        tournament.status = TournamentStatus.Starting;
+
+        Long id = ((Number) given()
+                .contentType(ContentType.JSON)
+                .body(tournament)
+                .when().post("/api/tournaments")
+                .then()
+                .statusCode(200)
+                .extract().path("id")).longValue();
+
+        given()
+                .when().delete("/api/tournaments/" + id)
+                .then()
+                .statusCode(204);
+
+        given()
+                .when().get("/api/tournaments/" + id)
+                .then()
+                .statusCode(404);
+    }
+
+    @Test
+    @TestSecurity(user = "user", roles = "USER")
+    public void testDeleteTournamentAsUserForbidden() {
+        // Can't create as admin and delete as user in one test with TestSecurity normally
+        // But we can check if it returns 403 just for trying. 
+        // We can't even GET most of the time? No GET is open.
+        
+        given()
+                .when().delete("/api/tournaments/1")
+                .then()
+                .statusCode(403);
+    }
 }

@@ -13,6 +13,7 @@ export default function TournamentsPage() {
     const {user} = useAuth();
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
+    const [isNewlyCreated, setIsNewlyCreated] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const isTournamentAdmin = user?.roles.includes('TOURNAMENT_ADMIN') ?? false;
@@ -38,21 +39,32 @@ export default function TournamentsPage() {
     }, []);
 
     const handleCreate = async () => {
-        const name = prompt('Tournament Name:');
-        if (!name) return;
         try {
             const newT = await tournamentApi.create({
-                name,
+                name: 'New Tournament',
                 format: 'SINGLE_DECK',
                 gameFormat: 'STANDARD',
                 numberOfRounds: 2,
                 status: 'Starting',
-                rules: []
+                rules: [],
+                conditions: []
             });
             await loadTournaments();
+            setIsNewlyCreated(true);
             setSelectedTournament(newT);
         } catch (e) {
             console.error('Failed to create tournament', e);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedTournament) return;
+        try {
+            await tournamentApi.remove(selectedTournament.id);
+            setSelectedTournament(null);
+            await loadTournaments();
+        } catch (e) {
+            console.error('Failed to delete tournament', e);
         }
     };
 
@@ -61,25 +73,31 @@ export default function TournamentsPage() {
             key: 'list',
             label: 'All Tournaments',
             content: (
-                <TournamentListPanel
-                    tournaments={tournaments}
-                    selectedId={selectedTournament?.id}
-                    onSelect={setSelectedTournament}
-                    onCreate={handleCreate}
-                    loading={loading}
-                    isTournamentAdmin={isTournamentAdmin}
-                />
+                <div className="flex-1 min-h-0">
+                    <TournamentListPanel
+                        tournaments={tournaments}
+                        selectedId={selectedTournament?.id}
+                        onSelect={(t) => { setSelectedTournament(t); setIsNewlyCreated(false); }}
+                        onCreate={handleCreate}
+                        loading={loading}
+                        isTournamentAdmin={isTournamentAdmin}
+                    />
+                </div>
             )
         },
         {
             key: 'detail',
             label: 'Tournament Details',
             content: selectedTournament ? (
-                <TournamentDetailPanel
-                    tournament={selectedTournament}
-                    isTournamentAdmin={isTournamentAdmin}
-                    onChanged={loadTournaments}
-                />
+                <div className="flex-1 min-h-0">
+                    <TournamentDetailPanel
+                        tournament={selectedTournament}
+                        isTournamentAdmin={isTournamentAdmin}
+                        onChanged={loadTournaments}
+                        onDelete={handleDelete}
+                        initialEdit={isNewlyCreated}
+                    />
+                </div>
             ) : (
                 <div className="flex-1 flex items-center justify-center bg-panel border border-line rounded-xl">
                     <EmptyState

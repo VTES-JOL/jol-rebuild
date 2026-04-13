@@ -39,12 +39,21 @@ public class Tournament extends PanacheEntity {
     @Column(columnDefinition = "jsonb")
     public List<Rule> rules = new ArrayList<>();
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    public List<Condition> conditions = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     public TournamentStatus status = TournamentStatus.Starting;
 
     public static class Rule {
         public String text;
-        public String condition;
+        public String conditionId; // Points to a Condition
+    }
+
+    public static class Condition {
+        public String id;
+        public String text;
     }
 
     public static List<Tournament> findByStatus(TournamentStatus status) {

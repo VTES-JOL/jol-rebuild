@@ -3,7 +3,12 @@ export type TournamentFormat = 'SINGLE_DECK' | 'MULTI_DECK';
 
 export interface Rule {
     text: string;
-    condition?: string;
+    conditionId?: string; // Points to a ConditionGroup
+}
+
+export interface Condition {
+    id: string;
+    text: string;
 }
 
 export interface Tournament {
@@ -19,5 +24,6 @@ export interface Tournament {
     finalRound: boolean;
     requiresId: boolean;
     rules: Rule[];
+    conditions: Condition[];
     status: TournamentStatus;
 }
