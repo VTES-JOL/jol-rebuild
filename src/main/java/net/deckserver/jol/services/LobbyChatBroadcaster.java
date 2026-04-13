@@ -10,7 +10,6 @@ import net.deckserver.jol.dto.ChatMessageDto;
  * connected to the lobby, without going through LobbyWebSocket directly.
  * <p>
  * Usage example:
- *
  * &#064;Inject LobbyChatBroadcaster broadcaster;
  * <p>
  * broadcaster.announce("Game #42 is starting &mdash; join now!");

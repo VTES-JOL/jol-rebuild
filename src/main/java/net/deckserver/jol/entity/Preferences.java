@@ -1,16 +1,16 @@
 package net.deckserver.jol.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 
 import java.time.ZoneId;
 
 @Entity
-@Table
 public class Preferences extends PanacheEntity {
 
     @OneToOne(mappedBy = "preferences")
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
     public User user;
 
     @Column(name = "country_code")

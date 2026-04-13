@@ -1,5 +1,5 @@
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
-import {useLobbySocket} from './LobbySocketContext.tsx';
+import {useLobbySocket} from '@/features/lobby/LobbySocketContext.tsx';
 
 interface Props {
     username: string;

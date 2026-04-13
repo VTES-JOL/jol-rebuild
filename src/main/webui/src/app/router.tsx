@@ -1,5 +1,5 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import HomePage from "@/features/lobby/HomePage.tsx";
+import HomePage from "@/features/home/HomePage.tsx";
 import LobbyPage from "@/features/lobby/LobbyPage.tsx";
 import ProtectedRoute from "@/shared/components/ProtectedRoute";
 import LoginForm from "@/features/auth/LoginForm.tsx";

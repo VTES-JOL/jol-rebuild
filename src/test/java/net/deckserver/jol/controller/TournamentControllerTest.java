@@ -22,7 +22,7 @@ public class TournamentControllerTest {
         tournament.name = "Test Tournament";
         tournament.status = TournamentStatus.Starting;
 
-        Long id = ((Number) given()
+        long id = ((Number) given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
@@ -46,7 +46,7 @@ public class TournamentControllerTest {
         tournament.name = "Initial Name";
         tournament.status = TournamentStatus.Starting;
 
-        Long id = ((Number) given()
+        long id = ((Number) given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
@@ -100,7 +100,7 @@ public class TournamentControllerTest {
         tournament.name = "Delete Me";
         tournament.status = TournamentStatus.Starting;
 
-        Long id = ((Number) given()
+        long id = ((Number) given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")

@@ -1,6 +1,6 @@
 import AppLayout from "@/shared/layout/AppLayout.tsx";
-import ActiveGames from "./ActiveGames.tsx";
-import {GlobalChatPanel} from "@/features/lobby/GlobalChatPanel.tsx";
+import ActiveGames from "@/features/home/ActiveGames.tsx";
+import {GlobalChatPanel} from "@/features/home/GlobalChatPanel.tsx";
 import {useAuthContext} from "@/hooks/useAuthContext.ts";
 import MasterDetailView from "@/shared/layout/MasterDetailView.tsx";
 

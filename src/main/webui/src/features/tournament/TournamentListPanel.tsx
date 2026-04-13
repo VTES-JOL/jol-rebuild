@@ -26,8 +26,8 @@ export default function TournamentListPanel({
     
     const filtered = tournaments.filter(t => {
         if (tab !== 'All' && t.status !== tab) return false;
-        if (nameFilter.trim() && !t.name.toLowerCase().includes(nameFilter.toLowerCase())) return false;
-        return true;
+        return !(nameFilter.trim() && !t.name.toLowerCase().includes(nameFilter.toLowerCase()));
+
     });
 
     return (

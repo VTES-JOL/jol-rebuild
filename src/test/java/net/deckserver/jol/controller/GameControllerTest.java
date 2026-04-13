@@ -24,10 +24,8 @@ import static org.hamcrest.Matchers.*;
 
 /**
  * Integration tests for GameController.
- *
  * Setup: @BeforeEach/@AfterEach are @Transactional so their changes are committed and
  * visible to the server. API calls under test each run in their own server transaction.
- *
  * Deck fixture: standardSizedDeck() produces a 12-crypt / 60-library deck valid only
  * for STANDARD (Anarch Convert is not in the Duel/V5 whitelists).
  */
