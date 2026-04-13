@@ -73,7 +73,7 @@ export default function LobbyPage() {
     };
 
     return (
-        <AppLayout background={"/Locations76.jpg"}>
+        <AppLayout background={"/Locations4.jpg"}>
             {!authLoading && user && (
                 <MasterDetailView
                     columns="320px 1fr"

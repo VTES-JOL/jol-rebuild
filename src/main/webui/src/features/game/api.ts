@@ -1,3 +1,5 @@
+import {baseFetch, json} from "@/shared/api/client.ts";
+
 export interface GameDto {
     id: number;
     name: string;
@@ -25,46 +27,41 @@ export interface GameDetail extends GameDto {
 
 const OPTS = { credentials: 'include' as const };
 
-async function json<T>(res: Response): Promise<T> {
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    return res.json();
-}
-
 const gameApi = {
     async getGame(id: number): Promise<GameDto> {
-        return json(await fetch(`/api/games/${id}`, OPTS));
+        return json(await baseFetch(`/api/games/${id}`, OPTS));
     },
 
     async listActive(): Promise<GameDto[]> {
-        return json(await fetch('/api/games/active', OPTS));
+        return json(await baseFetch('/api/games/active', OPTS));
     },
 
     async listOpen(): Promise<GameDto[]> {
-        return json(await fetch('/api/games/open', OPTS));
+        return json(await baseFetch('/api/games/open', OPTS));
     },
 
     async listMyActive(): Promise<GameDto[]> {
-        return json(await fetch('/api/games/active/me', OPTS));
+        return json(await baseFetch('/api/games/active/me', OPTS));
     },
 
     async listMyInvited(): Promise<GameDto[]> {
-        return json(await fetch('/api/games/invited/me', OPTS));
+        return json(await baseFetch('/api/games/invited/me', OPTS));
     },
 
     async listMyRegistered(): Promise<GameDto[]> {
-        return json(await fetch('/api/games/registered/me', OPTS));
+        return json(await baseFetch('/api/games/registered/me', OPTS));
     },
 
     async listMyOwned(): Promise<GameDto[]> {
-        return json(await fetch('/api/games/owned/me', OPTS));
+        return json(await baseFetch('/api/games/owned/me', OPTS));
     },
 
     async getGameDetail(id: number): Promise<GameDetail> {
-        return json(await fetch(`/api/games/${id}/registrations`, OPTS));
+        return json(await baseFetch(`/api/games/${id}/registrations`, OPTS));
     },
 
     async createGame(payload: { name?: string; visibility: 'PUBLIC' | 'PRIVATE'; format: 'STANDARD' | 'DUEL' | 'V5' }): Promise<void> {
-        const res = await fetch('/api/games', {
+        const res = await baseFetch('/api/games', {
             ...OPTS, method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -73,12 +70,12 @@ const gameApi = {
     },
 
     async deleteGame(id: number): Promise<void> {
-        const res = await fetch(`/api/games/${id}`, { ...OPTS, method: 'DELETE' });
+        const res = await baseFetch(`/api/games/${id}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
     async registerForGame(id: number, deckId: number): Promise<void> {
-        const res = await fetch(`/api/games/${id}/register`, {
+        const res = await baseFetch(`/api/games/${id}/register`, {
             ...OPTS, method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ deckId }),
@@ -87,12 +84,12 @@ const gameApi = {
     },
 
     async leaveGame(id: number): Promise<void> {
-        const res = await fetch(`/api/games/${id}/register`, { ...OPTS, method: 'DELETE' });
+        const res = await baseFetch(`/api/games/${id}/register`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
     async updateGame(id: number, payload: { name?: string; visibility?: 'PUBLIC' | 'PRIVATE'; format?: 'STANDARD' | 'DUEL' | 'V5' }): Promise<GameDto> {
-        return json(await fetch(`/api/games/${id}`, {
+        return json(await baseFetch(`/api/games/${id}`, {
             ...OPTS, method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
@@ -100,7 +97,7 @@ const gameApi = {
     },
 
     async updateGameFormat(id: number, format: 'STANDARD' | 'DUEL' | 'V5'): Promise<GameDto> {
-        return json(await fetch(`/api/games/${id}/format`, {
+        return json(await baseFetch(`/api/games/${id}/format`, {
             ...OPTS, method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ format }),
@@ -108,7 +105,7 @@ const gameApi = {
     },
 
     async invitePlayer(gameId: number, username: string): Promise<void> {
-        const res = await fetch(`/api/games/${gameId}/invite`, {
+        const res = await baseFetch(`/api/games/${gameId}/invite`, {
             ...OPTS, method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username }),

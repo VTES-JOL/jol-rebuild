@@ -1,4 +1,5 @@
 import React, {useCallback, useRef, useState} from 'react';
+import {baseFetch} from "@/shared/api/client.ts";
 
 export interface CardSuggestion {
     id: string;
@@ -44,7 +45,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
         abortRef.current = new AbortController();
 
         try {
-            const res = await fetch(
+            const res = await baseFetch(
                 `/api/cards/autocomplete?q=${encodeURIComponent(query)}`,
                 { signal: abortRef.current.signal }
             );

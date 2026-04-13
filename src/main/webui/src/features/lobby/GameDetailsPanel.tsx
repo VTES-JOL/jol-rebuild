@@ -8,6 +8,7 @@ import Input from '@/shared/components/Input';
 import gameApi, {type GameDetail, type GameDto} from '@/features/game/api';
 import deckApi from '@/features/deck/api';
 import type {Deck} from '@/features/deck/types';
+import {baseFetch} from '@/shared/api/client.ts';
 
 interface Props {
     game: GameDto;
@@ -42,7 +43,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
             return;
         }
         debounceRef.current = setTimeout(async () => {
-            const res = await fetch(`/user/search?q=${encodeURIComponent(inviteQuery)}`, {credentials: 'include'});
+            const res = await baseFetch(`/user/search?q=${encodeURIComponent(inviteQuery)}`, {credentials: 'include'});
             if (res.ok) {
                 const names: string[] = await res.json();
                 setSuggestions(names);
@@ -161,7 +162,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
             onChange={e => setNameValue(e.target.value)}
             onBlur={commitName}
             onKeyDown={handleNameKey}
-            className="bg-transparent text-ink tracking-wide outline-none border-b border-line-accent w-full max-w-[300px]"
+            className="bg-transparent text-ink tracking-wide outline-none border-b border-line-accent w-full max-w-75"
         />
     ) : (
         <span
