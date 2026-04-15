@@ -8,6 +8,8 @@ import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import jakarta.persistence.*;
 import net.deckserver.jol.enums.Role;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.*;
 
@@ -37,8 +39,9 @@ public class User extends PanacheEntityBase {
     @Column(name = "discord_id")
     public String discordId;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    public Preferences preferences;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "preferences", columnDefinition = "jsonb")
+    public Preferences preferences = new Preferences();
 
     @Roles
     @ElementCollection(fetch = FetchType.EAGER)
@@ -61,7 +64,7 @@ public class User extends PanacheEntityBase {
         user.password = BcryptUtil.bcryptHash(password);
         user.email = email;
         user.roles = new HashSet<>(Arrays.stream(roles).map(Role::toString).toList());
-        user.preferences = new Preferences(user);
+        user.preferences = new Preferences();
         user.persist();
         return user;
     }

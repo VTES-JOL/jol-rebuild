@@ -16,7 +16,7 @@ public class PreferencesTest {
     @TestTransaction
     public void preferencesCreatedWithUser() {
         User user = User.create("prefuser", "password", "pref@test.com", Role.USER);
-        
+
         assertNotNull(user.preferences);
         assertNotNull(user.preferences.zoneId);
         assertTrue(user.preferences.enableImages);
@@ -26,12 +26,12 @@ public class PreferencesTest {
     @TestTransaction
     public void updatePreferences() {
         User user = User.create("prefuser2", "password", "pref2@test.com", Role.USER);
-        Preferences prefs = user.preferences;
-        
+
+        Preferences prefs = new Preferences();
         prefs.countryCode = "US";
         prefs.zoneId = ZoneId.of("America/New_York");
         prefs.enableImages = false;
-        prefs.persist();
+        user.preferences = prefs;
 
         User retrieved = User.findByUsername("prefuser2");
         assertEquals("US", retrieved.preferences.countryCode);

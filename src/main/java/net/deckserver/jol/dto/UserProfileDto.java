@@ -1,7 +1,7 @@
 package net.deckserver.jol.dto;
 
-import io.quarkus.hibernate.orm.panache.common.ProjectedFieldName;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import net.deckserver.jol.entity.Preferences;
 
 import java.time.ZoneId;
 import java.util.Set;
@@ -19,16 +19,16 @@ public class UserProfileDto {
     public Set<String> roles;
 
     public UserProfileDto(String id, String username, String email, String tournamentId, String discordId,
-                          @ProjectedFieldName("preferences.countryCode") String countryCode,
-                          @ProjectedFieldName("preferences.zoneId") ZoneId zoneId,
-                          @ProjectedFieldName("preferences.enableImages") boolean enableImages) {
+                          Preferences preferences) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.tournamentId = tournamentId;
         this.discordId = discordId;
-        this.countryCode = countryCode;
-        this.zoneId = zoneId;
-        this.enableImages = enableImages;
+        if (preferences != null) {
+            this.countryCode = preferences.countryCode;
+            this.zoneId = preferences.zoneId;
+            this.enableImages = preferences.enableImages;
+        }
     }
 }

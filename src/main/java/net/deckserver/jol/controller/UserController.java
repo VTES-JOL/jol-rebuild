@@ -68,8 +68,9 @@ public class UserController {
         }
         String userName = identity.getPrincipal().getName();
         Set<String> roles = identity.getRoles();
-        UserProfileDto dto = User.find("username", userName).project(UserProfileDto.class).firstResultOptional()
-                .orElseThrow(() -> new WebApplicationException("Not Authenticated", Response.Status.UNAUTHORIZED));
+        User user = User.findByUsername(userName);
+        if (user == null) throw new WebApplicationException("Not Authenticated", Response.Status.UNAUTHORIZED);
+        UserProfileDto dto = new UserProfileDto(user.id, user.username, user.email, user.tournamentId, user.discordId, user.preferences);
         dto.roles = roles;
         return Response.ok(dto).build();
     }
