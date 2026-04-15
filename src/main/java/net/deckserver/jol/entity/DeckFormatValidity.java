@@ -33,7 +33,7 @@ public class DeckFormatValidity extends PanacheEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     public List<String> errors;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "computed_at")
     public Instant computedAt;
 
     public static List<DeckFormatValidity> findByDeck(long deckId) {

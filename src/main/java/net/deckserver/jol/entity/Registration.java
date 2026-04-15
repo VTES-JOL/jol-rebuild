@@ -1,6 +1,7 @@
 package net.deckserver.jol.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import net.deckserver.jol.enums.Status;
@@ -18,10 +19,13 @@ public class Registration extends PanacheEntity {
     @ManyToOne
     public Game game;
 
+    @Column(name = "last_updated")
     public OffsetDateTime lastUpdated;
 
     @JdbcTypeCode(SqlTypes.JSON)
     public String deck;
+
+    @Column(name = "deck_name")
     public String deckName;
     public String summary;
 

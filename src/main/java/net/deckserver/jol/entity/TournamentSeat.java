@@ -22,6 +22,7 @@ public class TournamentSeat extends PanacheEntity {
     public TournamentRegistration registration;
 
     /** Seat position 1–5 for real seats; 0 for bye seats */
+    @Column(name = "seat_position")
     public int seatPosition;
 
     /** True when the player is skipping this round */
@@ -31,6 +32,7 @@ public class TournamentSeat extends PanacheEntity {
      * For bye seats (bye=true), stores the round number directly
      * since there is no table reference.
      */
+    @Column(name = "bye_round")
     public int byeRound;
 
     public static TournamentSeat findByTableAndRegistration(TournamentTable table, TournamentRegistration reg) {

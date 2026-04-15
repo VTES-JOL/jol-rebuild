@@ -13,6 +13,7 @@ public class TournamentTable extends PanacheEntity {
     @ManyToOne
     public Tournament tournament;
 
+    @Column(name = "round_number")
     public int roundNumber;
 
     @ManyToOne

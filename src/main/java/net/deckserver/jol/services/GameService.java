@@ -20,7 +20,7 @@ public class GameService {
     @Inject
     NameService nameService;
 
-    @Scheduled(every = "1m")
+//    @Scheduled(every = "1m")
     @Transactional
     public void createGame() {
         for (GameFormat format : GameFormat.values()) {

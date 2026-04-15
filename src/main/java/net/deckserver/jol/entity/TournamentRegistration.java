@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"tournament_id", "user_id"}))
+@Table(name = "tournament_registration", uniqueConstraints = @UniqueConstraint(columnNames = {"tournament_id", "user_id"}))
 public class TournamentRegistration extends PanacheEntity {
 
     @ManyToOne
