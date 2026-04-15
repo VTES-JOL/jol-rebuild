@@ -8,7 +8,7 @@ import type {RegisterField} from "@/features/auth/types.ts";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";
 import {Eye, EyeOff} from "lucide-react";
 
-export default function RegisterForm() {
+export default function RegisterPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");

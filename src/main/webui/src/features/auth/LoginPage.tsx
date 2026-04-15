@@ -7,7 +7,7 @@ import {useState} from "react";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";
 import {Eye, EyeOff} from "lucide-react";
 
-export default function LoginForm() {
+export default function LoginPage() {
     const {login} = useAuthContext();
     const navigate = useNavigate();
     const location = useLocation();

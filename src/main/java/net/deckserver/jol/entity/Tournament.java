@@ -44,7 +44,7 @@ public class Tournament extends PanacheEntity {
     public List<Condition> conditions = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    public TournamentStatus status = TournamentStatus.STARTING;
+    public TournamentStatus status = TournamentStatus.SETUP;
 
     public static class Rule {
         public String text;

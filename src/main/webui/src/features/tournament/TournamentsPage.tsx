@@ -45,7 +45,6 @@ export default function TournamentsPage() {
                 format: 'SINGLE_DECK',
                 gameFormat: 'STANDARD',
                 numberOfRounds: 2,
-                status: 'STARTING',
                 rules: [],
                 conditions: []
             });

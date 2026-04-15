@@ -7,7 +7,19 @@ import {TabStrip} from '@/shared/components/Tabs';
 import type {Tournament, TournamentStatus} from './types';
 
 export type TournamentFilterTab = 'All' | TournamentStatus;
-const TABS: TournamentFilterTab[] = ['All', 'STARTING', 'ACTIVE', 'SEEDING', 'FINALS', 'COMPLETED'];
+const ADMIN_TABS: TournamentFilterTab[] = ['All', 'SETUP', 'REGISTRATION', 'SEATING', 'ACTIVE', 'SEEDING', 'FINALS', 'COMPLETED'];
+const PLAYER_TABS: TournamentFilterTab[] = ['All', 'REGISTRATION', 'ACTIVE', 'COMPLETED'];
+
+const TAB_LABEL: Record<string, string> = {
+    All: 'All',
+    SETUP: 'Setup',
+    REGISTRATION: 'Registration',
+    SEATING: 'Seating',
+    ACTIVE: 'Active',
+    SEEDING: 'Seeding',
+    FINALS: 'Finals',
+    COMPLETED: 'Completed',
+};
 
 interface Props {
     tournaments: Tournament[];
@@ -24,10 +36,16 @@ export default function TournamentListPanel({
     const [nameFilter, setNameFilter] = useState('');
     const [tab, setTab] = useState<TournamentFilterTab>('All');
     
+    const ACTIVE_STATUSES: TournamentStatus[] = ['ACTIVE', 'SEEDING', 'FINALS'];
     const filtered = tournaments.filter(t => {
-        if (tab !== 'All' && t.status !== tab) return false;
+        if (tab !== 'All') {
+            if (tab === 'ACTIVE' && !isTournamentAdmin) {
+                if (!ACTIVE_STATUSES.includes(t.status)) return false;
+            } else if (t.status !== tab) {
+                return false;
+            }
+        }
         return !(nameFilter.trim() && !t.name.toLowerCase().includes(nameFilter.toLowerCase()));
-
     });
 
     return (
@@ -52,7 +70,7 @@ export default function TournamentListPanel({
 
             <div className="px-3 py-2 border-b border-line/50 shrink-0 overflow-x-auto no-scrollbar">
                 <TabStrip
-                    tabs={TABS.map(t => ({key: t, label: t}))}
+                    tabs={(isTournamentAdmin ? ADMIN_TABS : PLAYER_TABS).map(t => ({key: t, label: TAB_LABEL[t] ?? t}))}
                     active={tab}
                     onChange={key => setTab(key as TournamentFilterTab)}
                 />

@@ -20,6 +20,10 @@ public class Game extends PanacheEntity {
     @ManyToOne
     public User owner;
 
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")
+    public Tournament tournament;
+
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
 
@@ -33,15 +37,20 @@ public class Game extends PanacheEntity {
         super.delete();
     }
 
-    public static Game create(User owner, String name, Visibility visibility, GameFormat format) {
+    public static Game create(User owner, Tournament tournament, String name, Visibility visibility, GameFormat format) {
         Game game = new Game();
         game.owner = owner;
+        game.tournament = tournament;
         game.name = name;
         game.visibility = visibility;
         game.gameFormat = format;
         game.status = Status.OPEN;
         game.persist();
         return game;
+    }
+
+    public static Game create(User owner, String name, Visibility visibility, GameFormat format) {
+        return create(owner, null, name, visibility, format);
     }
 
     public static List<Game> findOpenGames() {
