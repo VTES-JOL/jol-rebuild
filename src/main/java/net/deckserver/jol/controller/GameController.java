@@ -1,11 +1,13 @@
 package net.deckserver.jol.controller;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.GameDetailDto;
@@ -35,7 +37,7 @@ public class GameController {
     @POST
     @Transactional
     @RolesAllowed("USER")
-    public Response createGame(GameCreateCommand command) {
+    public Response createGame(@Valid GameCreateCommand command) {
         User owner = User.findByUsername(identity.getPrincipal().getName());
         GameFormat format = command.format() != null ? command.format() : GameFormat.STANDARD;
         Visibility visibility = command.visibility() != null ? command.visibility() : Visibility.PUBLIC;
@@ -48,17 +50,21 @@ public class GameController {
     @PUT
     @Path("/{id}")
     @Transactional
-    @Authenticated
-    public GameDto update(@PathParam("id") Long id, GameUpdateCommand command) {
+    @RolesAllowed("USER")
+    public Response update(@PathParam("id") Long id, @Valid GameUpdateCommand command) {
         Game entity = Game.findById(id);
         if (entity == null) throw new NotFoundException();
+        String username = identity.getPrincipal().getName();
+        if (!entity.isOwnedBy(username)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
         if (command.visibility() != null) {
             entity.visibility = command.visibility();
         }
         if (command.name() != null) {
             entity.name = command.name();
         }
-        return new GameDto(entity);
+        return Response.ok(new GameDto(entity)).build();
     }
 
     @DELETE
@@ -70,7 +76,7 @@ public class GameController {
         if (game == null) throw new NotFoundException();
 
         String username = identity.getPrincipal().getName();
-        if (game.owner == null || !game.owner.username.equals(username)) {
+        if (!game.isOwnedBy(username)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         if (game.status != Status.OPEN) {
@@ -157,7 +163,7 @@ public class GameController {
 
         if (game.visibility == Visibility.PRIVATE) {
             User user = User.findByUsername(identity.getPrincipal().getName());
-            boolean isOwner = game.owner != null && game.owner.username.equals(user.username);
+            boolean isOwner = game.isOwnedBy(user.username);
             boolean hasAccess = isOwner || Registration.findByGameAndUser(game, user) != null;
             if (!hasAccess) {
                 return Response.status(Response.Status.FORBIDDEN).build();
@@ -241,7 +247,7 @@ public class GameController {
         if (game == null) throw new NotFoundException();
 
         String username = identity.getPrincipal().getName();
-        if (game.owner == null || !game.owner.username.equals(username)) {
+        if (!game.isOwnedBy(username)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         if (game.status != Status.OPEN) {
@@ -264,7 +270,7 @@ public class GameController {
         if (game == null) throw new NotFoundException();
 
         String callerUsername = identity.getPrincipal().getName();
-        if (game.owner == null || !game.owner.username.equals(callerUsername)) {
+        if (!game.isOwnedBy(callerUsername)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
@@ -278,14 +284,14 @@ public class GameController {
     }
 
     @RegisterForReflection
-    public record GameCreateCommand(String name, Visibility visibility, GameFormat format) {
+    public record GameCreateCommand(@NotBlank @Size(max = 255) String name, Visibility visibility, GameFormat format) {
         public GameCreateCommand(String name) {
             this(name, Visibility.PUBLIC, GameFormat.STANDARD);
         }
     }
 
     @RegisterForReflection
-    public record GameUpdateCommand(String name, Visibility visibility) {}
+    public record GameUpdateCommand(@NotBlank @Size(max = 255) String name, Visibility visibility) {}
 
     @RegisterForReflection
     public record RegisterCommand(Long deckId) {}

@@ -1,20 +1,18 @@
 import Panel from "@/shared/components/Panel.tsx";
 import Button from "@/shared/components/Button.tsx";
 import Input from "@/shared/components/Input.tsx";
+import PasswordInput from "@/shared/components/PasswordInput.tsx";
 import {useState} from "react";
 import API from "@/features/auth/api.ts";
 import {Link, useNavigate} from "react-router-dom";
 import type {RegisterField} from "@/features/auth/types.ts";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";
-import {Eye, EyeOff} from "lucide-react";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [email, setEmail] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
     const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegisterField | "confirmPassword", string>>>({});
     const [formError, setFormError] = useState<string>("");
     const [loading, setLoading] = useState(false);
@@ -73,50 +71,28 @@ export default function RegisterPage() {
                         error={fieldErrors.email}
                     />
 
-                    <Input
+                    <PasswordInput
                         id="password"
                         name="password"
                         srLabel="Password"
-                        type={showPassword ? "text" : "password"}
                         autoComplete="new-password"
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
                         error={fieldErrors.password}
-                        right={
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(v => !v)}
-                                aria-label={showPassword ? "Hide password" : "Show password"}
-                                className="text-ink-muted hover:text-ink"
-                            >
-                                {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
-                            </button>
-                        }
                     />
 
-                    <Input
+                    <PasswordInput
                         id="confirmPassword"
                         name="confirmPassword"
                         srLabel="Confirm password"
-                        type={showConfirm ? "text" : "password"}
                         autoComplete="new-password"
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder="Confirm password"
                         error={fieldErrors.confirmPassword}
-                        right={
-                            <button
-                                type="button"
-                                onClick={() => setShowConfirm(v => !v)}
-                                aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
-                                className="text-ink-muted hover:text-ink"
-                            >
-                                {showConfirm ? <EyeOff size={16}/> : <Eye size={16}/>}
-                            </button>
-                        }
                     />
 
                     {formError && <p className="text-blood text-sm" role="alert">{formError}</p>}

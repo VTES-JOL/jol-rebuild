@@ -1,11 +1,11 @@
 import Panel from "@/shared/components/Panel.tsx";
 import Button from "@/shared/components/Button.tsx";
 import Input from "@/shared/components/Input.tsx";
+import PasswordInput from "@/shared/components/PasswordInput.tsx";
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 import {useState} from "react";
 import HeroLayout from "@/shared/layout/HeroLayout.tsx";
-import {Eye, EyeOff} from "lucide-react";
 
 export default function LoginPage() {
     const {login} = useAuthContext();
@@ -15,7 +15,6 @@ export default function LoginPage() {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -52,26 +51,15 @@ export default function LoginPage() {
                         placeholder="Username"
                     />
 
-                    <Input
+                    <PasswordInput
                         id="password"
                         name="password"
                         srLabel="Password"
-                        type={showPassword ? "text" : "password"}
                         autoComplete="current-password"
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Password"
-                        right={
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(v => !v)}
-                                aria-label={showPassword ? "Hide password" : "Show password"}
-                                className="text-ink-muted hover:text-ink"
-                            >
-                                {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
-                            </button>
-                        }
                     />
 
                     {error && <p className="text-blood text-sm" role="alert">{error}</p>}

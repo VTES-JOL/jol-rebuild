@@ -57,32 +57,33 @@ public class Deck extends PanacheEntity {
         ).list();
     }
 
-    /** Filter by card — casts JSON column to text for LIKE search (PostgreSQL). */
+    /** Filter by card — uses jsonb_path_exists to safely search within the JSON structure. */
     @SuppressWarnings("unchecked")
     public static List<Deck> findByUsernameContainingCard(String username, String cardId) {
-        String pattern = "%\"" + cardId + "\"%";
         return getEntityManager().createNativeQuery(
             "SELECT d.* FROM deck d " +
             "JOIN users u ON d.user_id = u.id " +
-            "WHERE u.username = :username AND d.contents::text LIKE :pattern " +
+            "WHERE u.username = :username " +
+            "AND (jsonb_path_exists(d.contents::jsonb, '$.crypt.cards[*] ? (@.id == $id)', jsonb_build_object('id', :cardId)) " +
+            "  OR jsonb_path_exists(d.contents::jsonb, '$.library.cards[*].cards[*] ? (@.id == $id)', jsonb_build_object('id', :cardId))) " +
             "ORDER BY d.timestamp DESC",
             Deck.class
-        ).setParameter("username", username).setParameter("pattern", pattern).getResultList();
+        ).setParameter("username", username).setParameter("cardId", cardId).getResultList();
     }
 
     /** Filter by both format validity and card presence. */
     @SuppressWarnings("unchecked")
     public static List<Deck> findByUsernameWithFormatAndCard(String username, GameFormat format, String cardId) {
-        String pattern = "%\"" + cardId + "\"%";
         return getEntityManager().createNativeQuery(
             "SELECT d.* FROM deck d " +
             "JOIN users u ON d.user_id = u.id " +
             "JOIN deck_format_validity v ON v.deck_id = d.id " +
             "WHERE u.username = :username AND v.format = :format AND v.valid = true " +
-            "AND d.contents::text LIKE :pattern " +
+            "AND (jsonb_path_exists(d.contents::jsonb, '$.crypt.cards[*] ? (@.id == $id)', jsonb_build_object('id', :cardId)) " +
+            "  OR jsonb_path_exists(d.contents::jsonb, '$.library.cards[*].cards[*] ? (@.id == $id)', jsonb_build_object('id', :cardId))) " +
             "ORDER BY d.timestamp DESC",
             Deck.class
         ).setParameter("username", username).setParameter("format", format.name())
-         .setParameter("pattern", pattern).getResultList();
+         .setParameter("cardId", cardId).getResultList();
     }
 }

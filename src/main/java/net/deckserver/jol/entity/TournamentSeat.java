@@ -14,7 +14,7 @@ public class TournamentSeat extends PanacheEntity {
      * Round number is derived from table.roundNumber for non-bye seats,
      * or from the byeRound field for bye seats.
      */
-    @ManyToOne(optional = true)
+    @ManyToOne
     @JoinColumn(name = "table_id")
     public TournamentTable table;
 
@@ -56,6 +56,16 @@ public class TournamentSeat extends PanacheEntity {
         return find(
             "bye = true and byeRound = ?1 and registration.tournament.id = ?2",
             roundNumber, tournament.id
+        ).list();
+    }
+
+    /** Fetch all seats (table and bye) for a tournament in a single query. */
+    public static List<TournamentSeat> findAllByTournament(Tournament tournament) {
+        return find(
+            "select s from TournamentSeat s " +
+            "where (s.bye = true and s.registration.tournament.id = ?1) " +
+            "   or (s.bye = false and s.table.tournament.id = ?1)",
+            tournament.id
         ).list();
     }
 }

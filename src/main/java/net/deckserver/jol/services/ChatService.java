@@ -43,6 +43,11 @@ public class ChatService {
         return ChatMessageDto.reaction(messageId, reactions);
     }
 
+    public boolean messageExistsInGame(Long messageId, String gameId) {
+        ChatMessage msg = ChatMessage.findById(messageId);
+        return msg != null && gameId.equals(msg.gameId);
+    }
+
     public ChatMessageDto historyPayload(String gameId) {
         List<ChatMessage> rows = ChatMessage.findRecent(gameId, HISTORY_LIMIT);
         List<ChatMessageDto> messages = rows.stream()

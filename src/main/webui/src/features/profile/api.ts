@@ -1,3 +1,5 @@
+import {baseFetch} from '@/shared/api/client.ts';
+
 export interface PreferencesPayload {
     countryCode: string | null
     zoneId: string
@@ -5,7 +7,7 @@ export interface PreferencesPayload {
 }
 
 export async function updatePreferences(payload: PreferencesPayload): Promise<void> {
-    const res = await fetch("/user/preferences", {
+    const res = await baseFetch("/user/preferences", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

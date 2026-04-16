@@ -8,6 +8,9 @@ import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -100,7 +103,7 @@ public class DeckController {
     @POST
     @Transactional
     @RolesAllowed("USER")
-    public DeckDto create(DeckCreateCommand command) throws JsonProcessingException {
+    public DeckDto create(@Valid DeckCreateCommand command) throws JsonProcessingException {
         User owner = currentUser();
         KrcgDeck empty = new KrcgDeck(command.name, null, new KrcgCrypt(0, List.of()), new KrcgLibrary(0, List.of()));
         Deck deck = Deck.create(owner, command.name(), mapper.writeValueAsString(empty), null);
@@ -111,7 +114,7 @@ public class DeckController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("USER")
-    public Response update(@PathParam("id") long id, DeckUpdateCommand command) throws JsonProcessingException {
+    public Response update(@PathParam("id") long id, @Valid DeckUpdateCommand command) throws JsonProcessingException {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         if (command.name() != null) deck.name = command.name();
@@ -195,11 +198,11 @@ public class DeckController {
     // ── Commands & responses ──────────────────────────────────────────────────
 
     @RegisterForReflection
-    public record DeckCreateCommand(String name) {
+    public record DeckCreateCommand(@NotBlank @Size(max = 255) String name) {
     }
 
     @RegisterForReflection
-    public record DeckUpdateCommand(String name, KrcgDeck contents, String summary, String comments) {
+    public record DeckUpdateCommand(@NotBlank @Size(max = 255) String name, KrcgDeck contents, String summary, String comments) {
     }
 
     @RegisterForReflection

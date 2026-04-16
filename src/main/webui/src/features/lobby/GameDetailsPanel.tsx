@@ -1,14 +1,15 @@
-import {useEffect, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
-import {Check, ExternalLink, Globe, Info, Lock, Pencil, Shield, Users} from 'lucide-react';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {ExternalLink, Globe, Info, Lock, Pencil} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import Badge from '@/shared/components/Badge';
-import Input from '@/shared/components/Input';
 import gameApi, {type GameDetail, type GameDto} from '@/features/game/api';
 import deckApi from '@/features/deck/api';
-import type {Deck} from '@/features/deck/types';
-import {baseFetch} from '@/shared/api/client.ts';
+import {FORMAT_LABELS} from '@/features/game/constants';
+import {useAsyncState} from '@/hooks/useAsyncState';
+import GamePlayerList from './GamePlayerList';
+import GameRegistrationForm from './GameRegistrationForm';
+import GameInviteSection from './GameInviteSection';
 
 interface Props {
     game: GameDto;
@@ -16,57 +17,24 @@ interface Props {
     onChanged?: () => void;
 }
 
-const FORMAT_LABELS: Record<string, string> = {STANDARD: 'Standard', DUEL: 'Duel', V5: 'V5'};
-
 export default function GameDetailsPanel({game, currentUsername, onChanged}: Props) {
-    const [detail, setDetail] = useState<GameDetail | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [myDecks, setMyDecks] = useState<Deck[]>([]);
-    const [selectedDeckId, setSelectedDeckId] = useState<number | string>('');
     const [editingName, setEditingName] = useState(false);
     const [nameValue, setNameValue] = useState(game.name);
+    const [ownerError, setOwnerError] = useState<string | null>(null);
     const nameInputRef = useRef<HTMLInputElement>(null);
 
-    const [inviteQuery, setInviteQuery] = useState('');
-    const [suggestions, setSuggestions] = useState<string[]>([]);
-    const [showSuggest, setShowSuggest] = useState(false);
-    const [suggestPos, setSuggestPos] = useState<{top: number; left: number; width: number} | null>(null);
-    const [submittingInvite, setSubmittingInvite] = useState(false);
-    const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-    const inviteInputRef = useRef<HTMLInputElement>(null);
+    const fetchDetail = useCallback(() => gameApi.getGameDetail(game.id), [game.id]);
+    const {data: detail, loading, refetch: refreshDetail} = useAsyncState<GameDetail>(fetchDetail);
+
+    const fetchDecks = useCallback(() => deckApi.list(), []);
+    const {data: myDecks} = useAsyncState(fetchDecks);
+
+    const isOwner = game.owner === currentUsername;
+    const myRegistration = detail?.registrations.find(r => r.username === currentUsername);
+    const isInvited = detail?.invites.some(i => i.username === currentUsername) ?? false;
+    const isFull = game.registrationCount >= game.maxPlayers;
 
     useEffect(() => {
-        clearTimeout(debounceRef.current);
-        if (inviteQuery.trim().length < 2) {
-            setSuggestions([]);
-            setShowSuggest(false);
-            return;
-        }
-        debounceRef.current = setTimeout(async () => {
-            const res = await baseFetch(`/user/search?q=${encodeURIComponent(inviteQuery)}`, {credentials: 'include'});
-            if (res.ok) {
-                const names: string[] = await res.json();
-                setSuggestions(names);
-                if (names.length > 0 && inviteInputRef.current) {
-                    const rect = inviteInputRef.current.getBoundingClientRect();
-                    setSuggestPos({top: rect.bottom + 4, left: rect.left, width: rect.width});
-                    setShowSuggest(true);
-                } else {
-                    setShowSuggest(false);
-                }
-            }
-        }, 250);
-        return () => clearTimeout(debounceRef.current);
-    }, [inviteQuery]);
-
-    useEffect(() => {
-        setLoading(true);
-        gameApi.getGameDetail(game.id)
-            .then(setDetail)
-            .catch(console.error)
-            .finally(() => setLoading(false));
-            
-        deckApi.list().then(setMyDecks).catch(console.error);
         setNameValue(game.name);
         setEditingName(false);
     }, [game.id, game.name]);
@@ -78,55 +46,16 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
         }
     }, [editingName]);
 
-    const isOwner = game.owner === currentUsername;
-    const myRegistration = detail?.registrations.find(r => r.username === currentUsername);
-    const isRegistered = !!myRegistration;
-    const isInvited = detail?.invites.some(i => i.username === currentUsername);
-    const isFull = game.registrationCount >= game.maxPlayers;
-
-    const handleRegister = async () => {
-        if (!selectedDeckId) return;
-        try {
-            await gameApi.registerForGame(game.id, Number(selectedDeckId));
-            onChanged?.();
-            const updated = await gameApi.getGameDetail(game.id);
-            setDetail(updated);
-        } catch (e) {
-            console.error('Failed to register', e);
-        }
-    };
-
-    const handleLeave = async () => {
-        try {
-            await gameApi.leaveGame(game.id);
-            onChanged?.();
-            const updated = await gameApi.getGameDetail(game.id);
-            setDetail(updated);
-        } catch (e) {
-            console.error('Failed to leave', e);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this game?')) return;
-        try {
-            await gameApi.deleteGame(game.id);
-            onChanged?.();
-        } catch (e) {
-            console.error('Failed to delete game', e);
-        }
-    };
-
     const commitName = async () => {
         const trimmed = nameValue.trim() || game.name;
         setNameValue(trimmed);
         setEditingName(false);
         if (trimmed !== game.name) {
             try {
-                await gameApi.updateGame(game.id, { name: trimmed });
+                await gameApi.updateGame(game.id, {name: trimmed});
                 onChanged?.();
             } catch (e) {
-                console.error('Failed to rename game', e);
+                setOwnerError(e instanceof Error ? e.message : 'Failed to rename game');
             }
         }
     };
@@ -136,22 +65,23 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
         if (e.key === 'Escape') { setNameValue(game.name); setEditingName(false); }
     };
 
-    const handleInvite = async (username: string) => {
-        const name = username.trim();
-        if (!name) return;
-        setSubmittingInvite(true);
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this game?')) return;
         try {
-            await gameApi.invitePlayer(game.id, name);
-            setInviteQuery('');
-            setSuggestions([]);
-            setShowSuggest(false);
-            const updated = await gameApi.getGameDetail(game.id);
-            setDetail(updated);
+            await gameApi.deleteGame(game.id);
             onChanged?.();
         } catch (e) {
-            console.error('Failed to invite player', e);
-        } finally {
-            setSubmittingInvite(false);
+            setOwnerError(e instanceof Error ? e.message : 'Failed to delete game');
+        }
+    };
+
+    const toggleVisibility = async () => {
+        const visibility = game.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
+        try {
+            await gameApi.updateGame(game.id, {visibility});
+            onChanged?.();
+        } catch (e) {
+            setOwnerError(e instanceof Error ? e.message : 'Failed to change visibility');
         }
     };
 
@@ -171,19 +101,11 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
         >
             {game.visibility === 'PRIVATE' && <Lock className="w-3.5 h-3.5 text-ink-muted" />}
             {game.name}
-            {isOwner && game.status === 'OPEN' && <Pencil className="w-3 h-3 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity" />}
+            {isOwner && game.status === 'OPEN' && (
+                <Pencil className="w-3 h-3 text-ink-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
         </span>
     );
-
-    const toggleVisibility = async () => {
-        const visibility = game.visibility === 'PUBLIC' ? 'PRIVATE' : 'PUBLIC';
-        try {
-            await gameApi.updateGame(game.id, { visibility });
-            onChanged?.();
-        } catch (e) {
-            console.error('Failed to change visibility', e);
-        }
-    };
 
     return (
         <Panel
@@ -211,6 +133,12 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
             }
         >
             <div className="p-6 space-y-8 overflow-y-auto">
+                {ownerError && (
+                    <p className="text-sm text-blood bg-blood/5 border border-blood/20 rounded px-3 py-2" role="alert">
+                        {ownerError}
+                    </p>
+                )}
+
                 {/* Status & Info */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-panel-darker/30 rounded-lg p-4 border border-line/30">
@@ -227,7 +155,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                                 className="bg-transparent text-sm font-medium text-ink outline-none cursor-pointer hover:text-accent-soft"
                                 value={game.format}
                                 onChange={e => {
-                                    gameApi.updateGame(game.id, { format: e.target.value as any })
+                                    gameApi.updateGame(game.id, {format: e.target.value as GameDto['format']})
                                         .then(() => onChanged?.())
                                         .catch(console.error);
                                 }}
@@ -246,162 +174,38 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                     </div>
                 </div>
 
-                {/* Registration / Actions */}
+                {/* Registration */}
                 {game.status === 'OPEN' && (
-                    <div className="bg-accent/5 border border-accent/20 rounded-lg p-6">
-                        <h3 className="text-sm font-semibold text-ink mb-4 flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-accent-soft" />
-                            {isRegistered ? 'Your Registration' : 'Join Game'}
-                        </h3>
-                        
-                        {isRegistered ? (
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-xs text-ink-muted">Registered deck:</div>
-                                        <div className="text-sm font-medium text-accent-soft">{myRegistration.deckName || 'No deck selected'}</div>
-                                    </div>
-                                    <Button variant="ghost" size="sm" onClick={handleLeave}>Leave Game</Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <p className="text-xs text-ink-soft leading-relaxed">
-                                    {isInvited 
-                                        ? "You've been invited to this game. Select a deck to join."
-                                        : "This is an open game. You can join by selecting one of your decks."}
-                                </p>
-                                <div className="flex gap-2">
-                                    <select
-                                        className="flex-1 bg-panel border border-line rounded px-3 py-1.5 text-sm text-ink outline-none focus:border-accent"
-                                        value={selectedDeckId}
-                                        onChange={e => setSelectedDeckId(e.target.value)}
-                                    >
-                                        <option value="">Select a deck…</option>
-                                        {myDecks.map(d => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
-                                        ))}
-                                    </select>
-                                    <Button
-                                        variant="secondary"
-                                        disabled={!selectedDeckId || isFull}
-                                        onClick={handleRegister}
-                                    >
-                                        Join
-                                    </Button>
-                                </div>
-                                {isFull && !isRegistered && (
-                                    <p className="text-[10px] text-blood-soft font-medium">This game is currently full.</p>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                    <GameRegistrationForm
+                        gameId={game.id}
+                        myRegistration={myRegistration}
+                        isInvited={isInvited}
+                        isFull={isFull}
+                        myDecks={myDecks ?? []}
+                        onChanged={onChanged}
+                        onDetailRefresh={refreshDetail}
+                    />
                 )}
 
-                {/* Players List */}
-                <div className="space-y-4">
-                    <h3 className="text-sm font-semibold text-ink flex items-center gap-2 px-1">
-                        <Users className="w-4 h-4 text-ink-muted" />
-                        Registered Players
-                    </h3>
-                    <div className="border border-line/40 rounded-lg divide-y divide-line/40">
-                        {loading ? (
-                           <div className="p-4 text-center text-xs text-ink-muted italic">Loading players…</div>
-                        ) : detail?.registrations.length === 0 ? (
-                            <div className="p-4 text-center text-xs text-ink-muted italic">No players registered yet.</div>
-                        ) : (
-                            detail?.registrations.map(r => (
-                                <div key={r.username} className="flex items-center justify-between p-3">
-                                    <div className="flex items-center gap-2">
-                                        <Check className="w-3.5 h-3.5 text-online shrink-0" />
-                                        <span className={`text-sm ${r.username === currentUsername ? 'font-bold text-accent-soft' : 'text-ink'}`}>
-                                            {r.username}
-                                            {r.username === game.owner && <span className="ml-1.5 text-[10px] text-gold font-normal">(host)</span>}
-                                        </span>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </div>
+                {/* Players */}
+                <GamePlayerList
+                    registrations={detail?.registrations ?? []}
+                    invites={detail?.invites ?? []}
+                    currentUsername={currentUsername}
+                    gameOwner={game.owner}
+                    loading={loading}
+                />
 
-                {/* Invited Players */}
-                {detail?.invites && detail.invites.length > 0 && (
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-semibold text-ink flex items-center gap-2 px-1">
-                            <Users className="w-4 h-4 text-ink-muted" />
-                            Invited Players
-                        </h3>
-                        <div className="border border-line/40 rounded-lg divide-y divide-line/40 opacity-70">
-                            {detail.invites.map(r => (
-                                <div key={r.username} className="flex items-center justify-between p-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="w-3.5 h-3.5 shrink-0" />
-                                        <span className={`text-sm ${r.username === currentUsername ? 'font-bold text-accent-soft' : 'text-ink'}`}>
-                                            {r.username}
-                                        </span>
-                                    </div>
-                                    <span className="text-[10px] text-ink-muted italic">invited</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Owner: Invite Player */}
+                {/* Owner: Invite */}
                 {isOwner && game.status === 'OPEN' && (
-                    <div className="space-y-4 pt-2">
-                        <h3 className="text-sm font-semibold text-ink flex items-center gap-2 px-1">
-                            <Users className="w-4 h-4 text-ink-muted" />
-                            Invite Player
-                        </h3>
-                        <div className="flex gap-2">
-                            <Input
-                                ref={inviteInputRef}
-                                size="sm"
-                                srLabel="Username to invite"
-                                value={inviteQuery}
-                                onChange={e => setInviteQuery(e.target.value)}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter') handleInvite(inviteQuery);
-                                    if (e.key === 'Escape') setShowSuggest(false);
-                                }}
-                                onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
-                                placeholder="Username…"
-                                className="flex-1"
-                            />
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => handleInvite(inviteQuery)}
-                                disabled={submittingInvite || !inviteQuery.trim()}
-                            >
-                                Invite
-                            </Button>
-                        </div>
-                        {showSuggest && suggestPos && suggestions.length > 0 && createPortal(
-                            <ul
-                                className="fixed z-[9999] rounded border border-line/60 bg-surface shadow-lg overflow-hidden"
-                                style={{top: suggestPos.top, left: suggestPos.left, width: suggestPos.width}}
-                            >
-                                {suggestions.map(name => (
-                                    <li key={name}>
-                                        <button
-                                            type="button"
-                                            onMouseDown={() => handleInvite(name)}
-                                            className="w-full text-left px-3 py-1.5 text-xs text-ink hover:bg-hover transition-colors cursor-pointer"
-                                        >
-                                            {name}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>,
-                            document.body
-                        )}
-                    </div>
+                    <GameInviteSection
+                        gameId={game.id}
+                        onDetailRefresh={refreshDetail}
+                        onChanged={onChanged}
+                    />
                 )}
-                
-                {/* Active Game Preview placeholder */}
+
+                {/* Active Game Placeholder */}
                 {game.status === 'ACTIVE' && (
                     <div className="bg-panel-darker/50 border border-line/30 rounded-lg p-8 flex flex-col items-center justify-center text-center">
                         <Info className="w-8 h-8 text-ink-muted mb-3" />

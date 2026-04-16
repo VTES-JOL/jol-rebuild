@@ -2,8 +2,7 @@ import {Crown, Lock} from 'lucide-react';
 import Badge from '@/shared/components/Badge';
 import type {GameDto} from '@/features/game/api';
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
-
-const FORMAT_LABELS: Record<string, string> = {STANDARD: 'Standard', DUEL: 'Duel', V5: 'V5'};
+import {FORMAT_LABELS} from '@/features/game/constants';
 
 interface Props {
     game: GameDto;

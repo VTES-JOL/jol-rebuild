@@ -1,11 +1,12 @@
 import React, {createContext, useCallback, useContext, useRef, useState} from 'react';
-import {type ChatMessage, useWebSocket} from '@/hooks/useWebSocket';
+import {type ChatMessage, type ChatMsg, useWebSocket} from '@/hooks/useWebSocket';
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
+import {applyOptimisticReaction} from '@/shared/utils/reactionUtils.ts';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 interface LobbySocketContextValue {
-    messages: ChatMessage[];
+    messages: ChatMsg[];
     status: Status;
     send: (content: string, replyToId?: number) => void;
     react: (messageId: number, emoji: string) => void;
@@ -19,7 +20,7 @@ const LobbySocketContext = createContext<LobbySocketContextValue | null>(null);
 
 export function LobbySocketProvider({children}: {children: React.ReactNode}) {
     const {user} = useAuthContext();
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [messages, setMessages] = useState<ChatMsg[]>([]);
     const gameListenersRef = useRef<Map<number, Set<() => void>>>(new Map());
     const lobbyListenersRef = useRef<Set<() => void>>(new Set());
 
@@ -30,7 +31,7 @@ export function LobbySocketProvider({children}: {children: React.ReactNode}) {
     const handleMessage = useCallback((msg: ChatMessage) => {
         switch (msg.type) {
             case 'HISTORY':
-                setMessages(msg.history ?? []);
+                setMessages(msg.history);
                 break;
             case 'CHAT':
                 setMessages(prev => [...prev, msg]);
@@ -58,28 +59,7 @@ export function LobbySocketProvider({children}: {children: React.ReactNode}) {
 
     const react = useCallback((messageId: number, emoji: string) => {
         if (user) {
-            const username = user.username;
-            setMessages(prev => prev.map(m => {
-                if (m.id !== messageId) return m;
-                const reactions = m.reactions ?? [];
-                const existing = reactions.find(r => r.emoji === emoji);
-                if (existing) {
-                    const alreadyReacted = existing.senders.includes(username);
-                    return {
-                        ...m,
-                        reactions: alreadyReacted
-                            ? reactions
-                                .map(r => r.emoji !== emoji ? r : {
-                                    ...r, senders: r.senders.filter(s => s !== username),
-                                })
-                                .filter(r => r.senders.length > 0)
-                            : reactions.map(r => r.emoji !== emoji ? r : {
-                                ...r, senders: [...r.senders, username],
-                            }),
-                    };
-                }
-                return {...m, reactions: [...reactions, {emoji, senders: [username]}]};
-            }));
+            setMessages(prev => applyOptimisticReaction(prev, messageId, emoji, user.username));
         }
         wsSend({type: 'REACTION', id: messageId, emoji});
     }, [wsSend, user]);

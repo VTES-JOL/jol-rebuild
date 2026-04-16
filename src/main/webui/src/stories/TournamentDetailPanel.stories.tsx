@@ -1,17 +1,17 @@
 import React from 'react';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
-import TournamentDetailPanel from '../features/tournament/TournamentDetailPanel';
+import TournamentDetailPanel from '@/features/tournament/TournamentDetailPanel';
 import type {SeatingDto, Tournament, TournamentRegistration} from '../features/tournament/types';
-import {AuthContext} from '../contexts/AuthContext';
-import type {AuthContextType} from '../contexts/AuthContext';
-import tournamentApi from '../features/tournament/api';
-import deckApi from '../features/deck/api';
+import type {AuthContextType} from '@/contexts/AuthContext';
+import {AuthContext} from '@/contexts/AuthContext';
+import tournamentApi from '@/features/tournament/api';
+import deckApi from '@/features/deck/api';
 
 // ── Mock AuthContext ───────────────────────────────────────────────────────────
 
 const mockAuthCtx: AuthContextType = {
-    user: {id: 1, username: 'dracula', roles: ['USER']},
+    user: {id: '1', username: 'dracula', roles: ['USER'], enableImages: true},
     loading: false,
     login: fn(),
     logout: fn(),

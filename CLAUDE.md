@@ -23,14 +23,6 @@ npm run lint         # ESLint
 npm run storybook    # Storybook on port 6006 (also runs component tests via vitest)
 ```
 
-### Infrastructure
-
-```bash
-docker-compose up -d   # Start PostgreSQL (required for backend)
-```
-
-The `.env` file at the project root provides `DB_USER`, `DB_PASS`, and `DB_NAME` (defaults: `jol`/`jol`/`jol`).
-
 ## Architecture
 
 JOL Quarkus is a multiplayer trading card game lobby platform. Players register, create/join games with different formats and visibility settings, manage decks, and communicate via real-time chat.

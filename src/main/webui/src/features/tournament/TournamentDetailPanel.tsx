@@ -1,12 +1,11 @@
 import {useEffect, useRef, useState} from 'react';
-import {Calendar, CheckCircle2, ChevronDown, ChevronRight, CircleX, Hash, Info, Layers, Pencil, Trash2} from 'lucide-react';
+import {Pencil, Trash2} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
-import Badge from '@/shared/components/Badge';
-import type {Condition, Rule, SeatingDto, Tournament} from './types';
+import type {SeatingDto, Tournament} from './types';
 import tournamentApi from './api';
-import TournamentRegistrationPanel from './TournamentRegistrationPanel';
-import TournamentSeatingPanel from './TournamentSeatingPanel';
+import TournamentInfoView from './TournamentInfoView';
+import TournamentEditForm from './TournamentEditForm';
 
 interface Props {
     tournament: Tournament;
@@ -43,7 +42,8 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
     }, [isEditingName]);
 
     useEffect(() => {
-        if (tournament.status === 'ACTIVE' || tournament.status === 'SEEDING' || tournament.status === 'FINALS' || tournament.status === 'COMPLETED') {
+        if (tournament.status === 'ACTIVE' || tournament.status === 'SEEDING'
+            || tournament.status === 'FINALS' || tournament.status === 'COMPLETED') {
             tournamentApi.getSeating(tournament.id).then(setSeating).catch(() => setSeating('error'));
         }
     }, [tournament.id, tournament.status]);
@@ -72,65 +72,10 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
         }
     };
 
-    const formatDate = (dateStr?: string) => {
-        if (!dateStr) return 'Not set';
-        return new Date(dateStr).toLocaleString();
-    };
-
-    const toUTCISO = (dateStr: string | undefined, field: string) => {
-        if (dateStr) {
-            const date = new Date(dateStr);
-            if (!isNaN(date.getTime())) return date.toISOString().slice(0, 16);
-        }
-        const isEnd = field.toLowerCase().includes('end');
-        const now = new Date();
-        const y = now.getUTCFullYear();
-        const mo = String(now.getUTCMonth() + 1).padStart(2, '0');
-        const d = String(now.getUTCDate()).padStart(2, '0');
-        return isEnd ? `${y}-${mo}-${d}T23:59` : `${y}-${mo}-${d}T00:00`;
-    };
-
-    const handleDateChange = (field: keyof Tournament, value: string) => {
-        if (!value) { updateField(field, null); return; }
-        updateField(field, new Date(value + ':00Z').toISOString());
-    };
-
-    const updateField = (field: keyof Tournament, value: any) => {
-        setEditData(prev => ({...prev, [field]: value}));
-    };
-
-    const addRule = () => {
-        updateField('rules', [...(editData.rules || []), {text: '', conditionId: ''}]);
-    };
-    const removeRule = (index: number) => {
-        const rules = [...(editData.rules || [])];
-        rules.splice(index, 1);
-        updateField('rules', rules);
-    };
-    const updateRule = (index: number, rule: Rule) => {
-        const rules = [...(editData.rules || [])];
-        rules[index] = rule;
-        updateField('rules', rules);
-    };
-    const addCondition = () => {
-        updateField('conditions', [...(editData.conditions || []), {id: crypto.randomUUID(), text: ''}]);
-    };
-    const removeCondition = (id: string) => {
-        const conditions = (editData.conditions || []).filter(c => c.id !== id);
-        updateField('conditions', conditions);
-        updateField('rules', (editData.rules || []).map(r => r.conditionId === id ? {...r, conditionId: ''} : r));
-    };
-    const updateCondition = (index: number, condition: Condition) => {
-        const conditions = [...(editData.conditions || [])];
-        conditions[index] = condition;
-        updateField('conditions', conditions);
-    };
-
     const registrationEndPassed = tournament.registrationEnd
         ? new Date() > new Date(tournament.registrationEnd)
         : false;
 
-    // ─── Status action buttons for admin ──────────────────────────────────────
     const renderAdminActions = () => {
         if (!isTournamentAdmin) return null;
 
@@ -175,279 +120,14 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
         return null;
     };
 
-    // ─── Contextual content below the fixed info ───────────────────────────────
-    const renderContextualContent = () => {
-        if (tournament.status === 'REGISTRATION') {
-            return (
-                <TournamentRegistrationPanel
-                    tournament={tournament}
-                    onChanged={onChanged}
-                />
-            );
-        }
-        if (tournament.status === 'SEATING' && isTournamentAdmin) {
-            return (
-                <TournamentSeatingPanel
-                    tournament={tournament}
-                    onActivated={onChanged}
-                    onChanged={onChanged}
-                />
-            );
-        }
-        if (tournament.status === 'ACTIVE' || tournament.status === 'SEEDING'
-            || tournament.status === 'FINALS' || tournament.status === 'COMPLETED') {
-            return <SeatingReadOnlyView seating={seating}/>;
-        }
-        return (
-            <div className="h-24 flex items-center justify-center border-2 border-dashed border-line rounded-xl text-ink-muted text-sm italic">
-                Player and Table information will appear here once the tournament begins.
-            </div>
-        );
-    };
-
-    const renderDisplay = () => (
-        <div className="p-6 space-y-8 overflow-y-auto flex-1 h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <section className="space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted flex items-center gap-2">
-                        <Info className="w-3 h-3"/> Basic Information
-                    </h3>
-                    <div className="bg-hover/30 rounded-lg p-4 space-y-3">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-ink-muted">Status</span>
-                            <Badge variant={tournament.status === 'ACTIVE' ? 'online' : 'accent'}>
-                                {tournament.status}
-                            </Badge>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-ink-muted">Format</span>
-                            <span className="text-sm text-ink">{tournament.format === 'SINGLE_DECK' ? 'Single Deck' : 'Multi Deck'}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-ink-muted">Game Format</span>
-                            <span className="text-sm text-ink">{tournament.gameFormat}</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted flex items-center gap-2">
-                        <Hash className="w-3 h-3"/> Rules & Settings
-                    </h3>
-                    <div className="bg-hover/30 rounded-lg p-4 space-y-3">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-ink-muted">Number of Rounds</span>
-                            <span className="text-sm text-ink font-mono">{tournament.numberOfRounds}</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-ink-muted">Final Round</span>
-                            {tournament.finalRound ? <CheckCircle2 className="w-4 h-4 text-online"/> : <CircleX className="w-4 h-4 text-ink-muted"/>}
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm text-ink-muted">Requires ID</span>
-                            {tournament.requiresId ? <CheckCircle2 className="w-4 h-4 text-online"/> : <CircleX className="w-4 h-4 text-ink-muted"/>}
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <section className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted flex items-center gap-2">
-                    <Calendar className="w-3 h-3"/> Important Dates
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-hover/30 rounded-lg p-4">
-                        <p className="text-[10px] uppercase font-bold text-ink-muted mb-2">Registration Period</p>
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-xs"><span className="text-ink-muted">Starts:</span><span className="text-ink">{formatDate(tournament.registrationStart)}</span></div>
-                            <div className="flex justify-between text-xs"><span className="text-ink-muted">Ends:</span><span className="text-ink">{formatDate(tournament.registrationEnd)}</span></div>
-                        </div>
-                    </div>
-                    <div className="bg-hover/30 rounded-lg p-4">
-                        <p className="text-[10px] uppercase font-bold text-ink-muted mb-2">Playing Period</p>
-                        <div className="space-y-1">
-                            <div className="flex justify-between text-xs"><span className="text-ink-muted">Starts:</span><span className="text-ink">{formatDate(tournament.playingStart)}</span></div>
-                            <div className="flex justify-between text-xs"><span className="text-ink-muted">Ends:</span><span className="text-ink">{formatDate(tournament.playingEnd)}</span></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted flex items-center gap-2">
-                    <Layers className="w-3 h-3"/> Tournament Rules
-                </h3>
-                <div className="bg-hover/10 rounded-xl border border-line/30 overflow-hidden divide-y divide-line/20">
-                    {tournament.rules && tournament.rules.length > 0 ? (
-                        tournament.rules.map((rule, idx) => {
-                            const condition = tournament.conditions?.find(c => c.id === rule.conditionId);
-                            return (
-                                <div key={idx} className="p-3 hover:bg-hover/20 transition-colors">
-                                    <div className="flex items-start gap-3">
-                                        <span className="mt-1 w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0"/>
-                                        <div className="space-y-1">
-                                            <p className="text-sm text-ink leading-tight">{rule.text}</p>
-                                            {condition && (
-                                                <p className="text-[10px] text-accent-soft font-medium flex items-center gap-1">
-                                                    <span className="uppercase tracking-wider">Condition:</span> {condition.text}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <p className="text-sm text-ink-muted italic p-4 text-center">No specific rules defined for this tournament.</p>
-                    )}
-                </div>
-            </section>
-
-            <div className="pt-4 border-t border-line/30">
-                {renderContextualContent()}
-            </div>
-        </div>
-    );
-
-    const renderEdit = () => (
-        <div className="p-6 space-y-8 overflow-y-auto flex-1 h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                    <section className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted">General Settings</h3>
-                        <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs text-ink-muted mb-1 ml-1">Tournament Format</label>
-                                    <select value={editData.format} onChange={e => updateField('format', e.target.value)}
-                                        className="w-full bg-panel border border-line rounded px-3 py-2 text-sm text-ink outline-none">
-                                        <option value="SINGLE_DECK">Single Deck</option>
-                                        <option value="MULTI_DECK">Multi Deck</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs text-ink-muted mb-1 ml-1">Game Format</label>
-                                    <select value={editData.gameFormat} onChange={e => updateField('gameFormat', e.target.value)}
-                                        className="w-full bg-panel border border-line rounded px-3 py-2 text-sm text-ink outline-none">
-                                        <option value="STANDARD">Standard</option>
-                                        <option value="DUEL">Duel</option>
-                                        <option value="V5">V5</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-xs text-ink-muted mb-1 ml-1">Number of Rounds (2-3)</label>
-                                <input type="number" min="2" max="3" value={editData.numberOfRounds}
-                                    onChange={e => updateField('numberOfRounds', parseInt(e.target.value))}
-                                    className="w-20 bg-panel border border-line rounded px-3 py-2 text-sm text-ink outline-none"/>
-                            </div>
-                            <div className="flex gap-6 pt-2">
-                                <label className="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" checked={editData.finalRound}
-                                        onChange={e => updateField('finalRound', e.target.checked)}
-                                        className="w-4 h-4 rounded border-line bg-panel text-accent focus:ring-accent"/>
-                                    <span className="text-sm text-ink group-hover:text-accent transition-colors">Final Round</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer group">
-                                    <input type="checkbox" checked={editData.requiresId}
-                                        onChange={e => updateField('requiresId', e.target.checked)}
-                                        className="w-4 h-4 rounded border-line bg-panel text-accent focus:ring-accent"/>
-                                    <span className="text-sm text-ink group-hover:text-accent transition-colors">Requires ID</span>
-                                </label>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted flex items-center gap-2">
-                            Important Dates
-                            <span className="text-[10px] font-normal normal-case tracking-normal text-accent-soft bg-accent/10 px-1.5 py-0.5 rounded">UTC</span>
-                        </h3>
-                        <div className="grid grid-cols-2 gap-4">
-                            {(['registrationStart', 'registrationEnd', 'playingStart', 'playingEnd'] as const).map(field => (
-                                <div key={field}>
-                                    <label className="block text-xs text-ink-muted mb-1 ml-1">
-                                        {field === 'registrationStart' ? 'Registration Start' :
-                                         field === 'registrationEnd' ? 'Registration End' :
-                                         field === 'playingStart' ? 'Playing Start' : 'Playing End'}
-                                    </label>
-                                    <input type="datetime-local" value={toUTCISO(editData[field], field)}
-                                        onChange={e => handleDateChange(field, e.target.value)}
-                                        className="w-full bg-panel border border-line rounded px-3 py-2 text-xs text-ink outline-none"/>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                </div>
-
-                <div className="space-y-6">
-                    <section className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted">Conditions</h3>
-                            <Button variant="accent-ghost" size="sm" onClick={addCondition}>+ New Condition</Button>
-                        </div>
-                        <div className="space-y-3">
-                            {(editData.conditions || []).map((condition, cIdx) => (
-                                <div key={condition.id} className="bg-hover/20 border border-line/30 rounded-lg p-3 flex items-center gap-2">
-                                    <input type="text" value={condition.text}
-                                        onChange={e => updateCondition(cIdx, {...condition, text: e.target.value})}
-                                        className="flex-1 bg-transparent border-b border-line text-xs text-ink outline-none py-1"
-                                        placeholder="Condition text..."/>
-                                    <button onClick={() => removeCondition(condition.id)}
-                                        className="text-blood-soft hover:bg-blood/10 p-1 rounded">
-                                        <Trash2 className="w-3.5 h-3.5"/>
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-ink-muted">Rules</h3>
-                            <Button variant="accent-ghost" size="sm" onClick={addRule}>+ New Rule</Button>
-                        </div>
-                        <div className="space-y-3">
-                            {(editData.rules || []).map((rule, rIdx) => (
-                                <div key={rIdx} className="bg-panel border border-line rounded-lg p-3 space-y-2">
-                                    <div className="flex items-start gap-2">
-                                        <textarea value={rule.text}
-                                            onChange={e => updateRule(rIdx, {...rule, text: e.target.value})}
-                                            className="flex-1 bg-transparent border border-line rounded p-2 text-xs text-ink outline-none h-16 resize-none"
-                                            placeholder="Rule text..."/>
-                                        <button onClick={() => removeRule(rIdx)}
-                                            className="text-blood-soft hover:bg-blood/10 p-1 rounded">
-                                            <Trash2 className="w-3.5 h-3.5"/>
-                                        </button>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-ink-muted uppercase font-bold">Condition:</span>
-                                        <select value={rule.conditionId || ''}
-                                            onChange={e => updateRule(rIdx, {...rule, conditionId: e.target.value || undefined})}
-                                            className="flex-1 bg-panel border border-line rounded px-2 py-1 text-[10px] text-ink outline-none">
-                                            <option value="">No Condition</option>
-                                            {(editData.conditions || []).map(c => (
-                                                <option key={c.id} value={c.id}>{c.text || 'Untitled Condition'}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </div>
-    );
-
     const canEditName = canEdit && isEditing;
     const titleSlot = isEditingName ? (
         <input ref={nameInputRef} value={editData.name}
-            onChange={e => updateField('name', e.target.value)}
+            onChange={e => setEditData(prev => ({...prev, name: e.target.value}))}
             onBlur={() => setIsEditingName(false)}
             onKeyDown={e => {
                 if (e.key === 'Enter') setIsEditingName(false);
-                if (e.key === 'Escape') { updateField('name', tournament.name); setIsEditingName(false); }
+                if (e.key === 'Escape') { setEditData(prev => ({...prev, name: tournament.name})); setIsEditingName(false); }
             }}
             className="bg-transparent text-ink tracking-wide outline-none border-b border-line-accent w-full max-w-[300px]"/>
     ) : (
@@ -504,118 +184,10 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
                 </div>
             }
         >
-            {isEditing ? renderEdit() : renderDisplay()}
+            {isEditing
+                ? <TournamentEditForm editData={editData} onDataChange={setEditData} />
+                : <TournamentInfoView tournament={tournament} isTournamentAdmin={isTournamentAdmin} seating={seating} onChanged={onChanged} />
+            }
         </Panel>
-    );
-}
-
-// ─── Read-only seating view ────────────────────────────────────────────────────
-
-function SeatingReadOnlyView({seating}: {seating: SeatingDto | 'error' | null}) {
-    const [expandedRounds, setExpandedRounds] = useState<Set<number>>(() =>
-        new Set(seating && seating !== 'error' ? seating.rounds.map(r => r.roundNumber) : [])
-    );
-
-    if (!seating) {
-        return (
-            <div className="h-24 flex items-center justify-center border-2 border-dashed border-line rounded-xl text-ink-muted text-sm italic">
-                Loading seating...
-            </div>
-        );
-    }
-
-    if (seating === 'error') {
-        return (
-            <div className="h-24 flex items-center justify-center border-2 border-dashed border-line rounded-xl text-ink-muted text-sm italic">
-                Could not load seating information.
-            </div>
-        );
-    }
-
-    if (seating.rounds.length === 0) {
-        return (
-            <div className="h-24 flex items-center justify-center border-2 border-dashed border-line rounded-xl text-ink-muted text-sm italic">
-                No seating information available.
-            </div>
-        );
-    }
-
-    const toggleRound = (r: number) => {
-        setExpandedRounds(prev => {
-            const next = new Set(prev);
-            next.has(r) ? next.delete(r) : next.add(r);
-            return next;
-        });
-    };
-
-    return (
-        <div className="space-y-4">
-            {seating.rounds.map(round => {
-                const isExpanded = expandedRounds.has(round.roundNumber);
-                return (
-                    <div key={round.roundNumber} className="border border-line/30 rounded-xl overflow-hidden">
-                        <button
-                            className="w-full flex items-center justify-between px-4 py-3 bg-hover/20 hover:bg-hover/30 transition-colors"
-                            onClick={() => toggleRound(round.roundNumber)}
-                        >
-                            <div className="flex items-center gap-2">
-                                {isExpanded
-                                    ? <ChevronDown className="w-4 h-4 text-ink-muted"/>
-                                    : <ChevronRight className="w-4 h-4 text-ink-muted"/>}
-                                <span className="text-sm font-semibold text-ink">Round {round.roundNumber}</span>
-                            </div>
-                            <div className="text-[10px] text-ink-muted">
-                                {round.tables.length} table{round.tables.length !== 1 ? 's' : ''}
-                                {round.byes.length > 0 && ` · ${round.byes.length} bye${round.byes.length !== 1 ? 's' : ''}`}
-                            </div>
-                        </button>
-                        {isExpanded && (
-                            <div className="p-4 space-y-4">
-                                {round.tables.map((table, tableIdx) => (
-                                    <div key={table.id} className="border border-line/20 rounded-lg overflow-hidden">
-                                        <div className="px-3 py-2 bg-hover/10">
-                                            <span className="text-xs font-bold text-ink-muted uppercase tracking-wider">
-                                                Table {tableIdx + 1}
-                                            </span>
-                                        </div>
-                                        <div className="p-3 space-y-1.5">
-                                            {[1, 2, 3, 4, 5].map(pos => {
-                                                const seat = table.seats.find(s => s.seatPosition === pos && !s.bye);
-                                                return (
-                                                    <div key={pos} className="flex items-center gap-2">
-                                                        <span className="text-[10px] text-ink-muted w-4 text-right shrink-0">{pos}</span>
-                                                        {seat ? (
-                                                            <div className="flex-1 bg-accent/10 border border-accent/20 rounded px-2 py-1">
-                                                                <span className="text-xs text-ink">{seat.username}</span>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex-1 border border-dashed border-line/30 rounded px-2 py-1">
-                                                                <span className="text-xs text-ink-muted italic">Empty</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                ))}
-                                {round.byes.length > 0 && (
-                                    <div className="space-y-2">
-                                        <span className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Byes</span>
-                                        <div className="flex flex-wrap gap-2">
-                                            {round.byes.map(bye => (
-                                                <div key={bye.id} className="bg-hover/30 border border-line/20 rounded px-2 py-1">
-                                                    <span className="text-xs text-ink-muted">{bye.username}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
-        </div>
     );
 }

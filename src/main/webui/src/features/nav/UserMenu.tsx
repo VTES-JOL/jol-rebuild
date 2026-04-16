@@ -3,6 +3,7 @@ import {createPortal} from "react-dom"
 import {Link} from "react-router-dom"
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {useDarkMode} from "@/hooks/useDarkMode.ts"
+import Avatar from "@/shared/components/Avatar"
 
 export default function UserMenu() {
     const { user, logout } = useAuthContext()
@@ -112,10 +113,3 @@ function MenuLink({ to, children, onNavigate }: { to: string, children: React.Re
     )
 }
 
-function Avatar({ username }: { username: string }) {
-    return (
-        <div className="h-8 w-8 rounded-full bg-accent text-surface flex items-center justify-center font-bold">
-            {username[0].toUpperCase()}
-        </div>
-    )
-}

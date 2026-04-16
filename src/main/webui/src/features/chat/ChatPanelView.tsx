@@ -1,10 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import type {ChatMessage, ReplySnapshot} from '@/hooks/useWebSocket.ts';
+import {MessageSquare} from 'lucide-react';
+import type {ChatMsg, ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {useCardAutocomplete} from '@/hooks/useCardAutocomplete.ts';
 import {useChatInput} from '@/hooks/useChatInput.ts';
 import {groupMessages} from './chatUtils.ts';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
+import EmptyState from '@/shared/components/EmptyState';
 import {CardSuggestions} from '@/features/chat/CardSuggestions.tsx';
 import {ReplyBanner, TimestampDivider} from './ChatPanelExtras.tsx';
 import {MessageGroupView} from './MessageGroupView';
@@ -13,7 +15,7 @@ type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 export type ChatPanelViewProps = {
     title: string;
-    messages: ChatMessage[];
+    messages: ChatMsg[];
     status: Status;
     currentUser: string;
     onSend: (content: string, replyToId?: number) => void;
@@ -114,9 +116,7 @@ export function ChatPanelView({
             <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex-1 min-h-0 overflow-y-auto py-2 px-3">
                     {messages.length === 0 && (
-                        <div className="mt-4 text-center text-lg text-ink-muted">
-                            No messages yet. Say hello!
-                        </div>
+                        <EmptyState icon={MessageSquare} title="No messages yet. Say hello!" />
                     )}
 
                     {groups.map((group, i) => (

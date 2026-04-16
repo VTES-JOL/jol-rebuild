@@ -3,7 +3,10 @@ package net.deckserver.jol.services;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.BadRequestException;
 import net.deckserver.jol.dto.SeatingDto;
-import net.deckserver.jol.dto.SeatingDto.*;
+import net.deckserver.jol.dto.SeatingDto.RoundDto;
+import net.deckserver.jol.dto.SeatingDto.SeatDto;
+import net.deckserver.jol.dto.SeatingDto.TableDto;
+import net.deckserver.jol.dto.SeatingDto.UnseatedPlayerDto;
 import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.TournamentFormat;
@@ -24,7 +27,6 @@ public class TournamentService {
         validateAllPlayersSeated(tournament);
 
         List<TournamentTable> tables = TournamentTable.findByTournament(tournament);
-        // Group tables by round so we can determine deck consumption order per player
         Map<Integer, List<TournamentTable>> byRound = tables.stream()
             .collect(Collectors.groupingBy(t -> t.roundNumber));
 
@@ -32,55 +34,63 @@ public class TournamentService {
         Map<Long, Integer> roundsPlayed = new HashMap<>();
 
         List<Integer> roundNumbers = byRound.keySet().stream().sorted().toList();
-        int tableCounter = 0;
         for (int roundNumber : roundNumbers) {
             List<TournamentTable> roundTables = byRound.get(roundNumber);
             roundTables.sort(Comparator.comparingLong(t -> t.id));
-            tableCounter = 0;
-            for (TournamentTable table : roundTables) {
-                tableCounter++;
-                String gameName = "Round " + roundNumber + " Table " + tableCounter;
-                Game game = Game.create(admin, tournament, gameName, Visibility.PRIVATE, tournament.gameFormat);
-                game.status = Status.ACTIVE;
-                game.persist();
-                table.game = game;
+            createGamesForRound(tournament, admin, roundNumber, roundTables, roundsPlayed);
+        }
+    }
 
-                List<TournamentSeat> nonByeSeats = table.seats.stream()
-                    .filter(s -> !s.bye)
-                    .sorted(Comparator.comparingInt(s -> s.seatPosition))
-                    .toList();
+    private void createGamesForRound(Tournament tournament, User admin, int roundNumber,
+                                     List<TournamentTable> roundTables, Map<Long, Integer> roundsPlayed) {
+        int tableCounter = 0;
+        for (TournamentTable table : roundTables) {
+            tableCounter++;
+            String gameName = "Round " + roundNumber + " Table " + tableCounter;
+            Game game = Game.create(admin, tournament, gameName, Visibility.PRIVATE, tournament.gameFormat);
+            game.status = Status.ACTIVE;
+            game.persist();
+            table.game = game;
 
-                for (TournamentSeat seat : nonByeSeats) {
-                    TournamentRegistration reg = seat.registration;
-                    User player = reg.user;
+            List<TournamentSeat> nonByeSeats = table.seats.stream()
+                .filter(s -> !s.bye)
+                .sorted(Comparator.comparingInt(s -> s.seatPosition))
+                .toList();
 
-                    TournamentRegistration.DeckEntry deckEntry = getDeckForPlayer(reg, roundsPlayed);
+            registerPlayersForGame(game, nonByeSeats, roundsPlayed);
+        }
+    }
 
-                    Registration gameReg = new Registration();
-                    gameReg.game = game;
-                    gameReg.user = player;
-                    gameReg.deck = deckEntry.deck;
-                    gameReg.deckName = deckEntry.deckName;
-                    gameReg.summary = deckEntry.summary;
-                    gameReg.lastUpdated = OffsetDateTime.now();
-                    gameReg.persist();
-                    game.registrations.add(gameReg);
-                    player.registrations.add(gameReg);
+    private void registerPlayersForGame(Game game, List<TournamentSeat> seats, Map<Long, Integer> roundsPlayed) {
+        for (TournamentSeat seat : seats) {
+            TournamentRegistration reg = seat.registration;
+            User player = reg.user;
 
-                    roundsPlayed.merge(reg.id, 1, Integer::sum);
-                }
-            }
+            TournamentRegistration.DeckEntry deckEntry = getDeckForPlayer(reg, roundsPlayed);
+
+            Registration gameReg = new Registration();
+            gameReg.game = game;
+            gameReg.user = player;
+            gameReg.deck = deckEntry.deck;
+            gameReg.deckName = deckEntry.deckName;
+            gameReg.summary = deckEntry.summary;
+            gameReg.lastUpdated = OffsetDateTime.now();
+            gameReg.persist();
+            game.registrations.add(gameReg);
+            player.registrations.add(gameReg);
+
+            roundsPlayed.merge(reg.id, 1, Integer::sum);
         }
     }
 
     private TournamentRegistration.DeckEntry getDeckForPlayer(TournamentRegistration reg, Map<Long, Integer> roundsPlayed) {
         if (reg.tournament.format == TournamentFormat.SINGLE_DECK) {
-            return reg.decks.get(0);
+            return reg.decks.getFirst();
         }
         int index = roundsPlayed.getOrDefault(reg.id, 0);
         if (index >= reg.decks.size()) {
             // Fallback: reuse last registered deck if we run out (shouldn't happen with correct registration)
-            return reg.decks.get(reg.decks.size() - 1);
+            return reg.decks.getLast();
         }
         return reg.decks.get(index);
     }
@@ -88,12 +98,19 @@ public class TournamentService {
     private void validateAllPlayersSeated(Tournament tournament) {
         List<TournamentRegistration> allRegs = TournamentRegistration.findByTournament(tournament);
         int totalRounds = tournament.numberOfRounds;
-        List<String> unseated = new ArrayList<>();
 
+        // Fetch all seats in one query then check in memory
+        List<TournamentSeat> allSeats = TournamentSeat.findAllByTournament(tournament);
+        Set<String> allocatedKeys = new HashSet<>();
+        for (TournamentSeat seat : allSeats) {
+            int round = seat.bye ? seat.byeRound : seat.table.roundNumber;
+            allocatedKeys.add(seat.registration.id + ":" + round);
+        }
+
+        List<String> unseated = new ArrayList<>();
         for (TournamentRegistration reg : allRegs) {
             for (int round = 1; round <= totalRounds; round++) {
-                TournamentSeat seat = TournamentSeat.findByRoundAndRegistration(tournament, round, reg);
-                if (seat == null) {
+                if (!allocatedKeys.contains(reg.id + ":" + round)) {
                     unseated.add(reg.user.username + " (round " + round + ")");
                 }
             }
@@ -119,8 +136,8 @@ public class TournamentService {
             .collect(Collectors.groupingBy(t -> t.roundNumber));
 
         List<RoundDto> rounds = new ArrayList<>();
-        for (int round = 1; round <= tournament.numberOfRounds; round++) {
-            List<TournamentTable> tables = byRound.getOrDefault(round, List.of());
+        for (int r = 1; r <= tournament.numberOfRounds; r++) {
+            List<TournamentTable> tables = new ArrayList<>(byRound.getOrDefault(r, List.of()));
             tables.sort(Comparator.comparingLong(t -> t.id));
 
             List<TableDto> tableDtos = tables.stream().map(table -> {
@@ -132,7 +149,6 @@ public class TournamentService {
             }).toList();
 
             // Explicit bye seats for this round
-            final int r = round;
             List<SeatDto> byeDtos = TournamentSeat.findByesByTournamentAndRound(tournament, r).stream()
                 .map(s -> new SeatDto(s.id, s.registration.id, s.registration.user.username, 0, true))
                 .toList();
@@ -146,14 +162,20 @@ public class TournamentService {
                 .map(reg -> new UnseatedPlayerDto(reg.id, reg.user.username))
                 .toList();
 
-            rounds.add(new RoundDto(round, tableDtos, byeDtos, roundUnseated));
+            rounds.add(new RoundDto(r, tableDtos, byeDtos, roundUnseated));
         }
 
-        // Global unseated: players missing allocation in ANY round
+        // Global unseated: players missing allocation in ANY round (computed from already-loaded seats)
+        List<TournamentSeat> allSeats = TournamentSeat.findAllByTournament(tournament);
+        Set<String> allocatedKeys = new HashSet<>();
+        for (TournamentSeat seat : allSeats) {
+            int round = seat.bye ? seat.byeRound : seat.table.roundNumber;
+            allocatedKeys.add(seat.registration.id + ":" + round);
+        }
         List<UnseatedPlayerDto> globalUnseated = allRegs.stream()
             .filter(reg -> {
                 for (int r = 1; r <= tournament.numberOfRounds; r++) {
-                    if (TournamentSeat.findByRoundAndRegistration(tournament, r, reg) == null) return true;
+                    if (!allocatedKeys.contains(reg.id + ":" + r)) return true;
                 }
                 return false;
             })

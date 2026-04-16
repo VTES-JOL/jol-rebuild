@@ -66,14 +66,13 @@ public class UserController {
     @Path("/profile")
     public Response me() {
         if (identity.isAnonymous()) {
-            return Response.ok().entity("null").build();
+            return Response.noContent().build();
         }
         String userName = identity.getPrincipal().getName();
         Set<String> roles = identity.getRoles();
         User user = User.findByUsername(userName);
         if (user == null) throw new WebApplicationException("Not Authenticated", Response.Status.UNAUTHORIZED);
-        UserProfileDto dto = new UserProfileDto(user.id, user.username, user.email, user.tournamentId, user.discordId, user.preferences);
-        dto.roles = roles;
+        UserProfileDto dto = new UserProfileDto(user.id, user.username, user.email, user.tournamentId, user.discordId, user.preferences, roles);
         return Response.ok(dto).build();
     }
 

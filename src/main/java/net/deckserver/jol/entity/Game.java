@@ -37,6 +37,10 @@ public class Game extends PanacheEntity {
         super.delete();
     }
 
+    public boolean isOwnedBy(String username) {
+        return owner != null && owner.username.equals(username);
+    }
+
     public static Game create(User owner, Tournament tournament, String name, Visibility visibility, GameFormat format) {
         Game game = new Game();
         game.owner = owner;

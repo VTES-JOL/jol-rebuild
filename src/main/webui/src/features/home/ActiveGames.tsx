@@ -1,26 +1,19 @@
-import {useEffect, useState} from "react";
 import {Swords} from "lucide-react";
 import Panel from "@/shared/components/Panel";
 import EmptyState from "@/shared/components/EmptyState";
 import gameApi, {type GameDto} from "@/features/game/api";
 import {Link} from "react-router-dom";
+import {useAsyncState} from "@/hooks/useAsyncState";
 
 export default function ActiveGames() {
-    const [active, setActive] = useState<GameDto[]>([]);
-    const [error,  setError]  = useState(false);
-
-    useEffect(() => {
-        gameApi.listMyActive()
-            .then(a => setActive(a))
-            .catch(() => setError(true));
-    }, []);
+    const {data: active, error} = useAsyncState<GameDto[]>(gameApi.listMyActive.bind(gameApi));
 
     return (
-        <Panel title="Active Games" right={<span className="text-[10px] tabular-nums text-ink-muted">{active.length} Total</span>}>
+        <Panel title="Active Games" right={<span className="text-[10px] tabular-nums text-ink-muted">{active?.length ?? 0} Total</span>}>
             <div className="flex-1 overflow-y-auto min-h-0">
                 {error && <EmptyState title="Failed to load games." className="text-blood-soft" />}
 
-                {active.length > 0 && (
+                {active && active.length > 0 && (
                     <div>
                         <div className="px-3 py-1 bg-panel border-y border-line/50 text-[10px] font-semibold text-ink uppercase tracking-wider">
                             In Progress
@@ -29,7 +22,7 @@ export default function ActiveGames() {
                     </div>
                 )}
 
-                {!error && active.length === 0 && (
+                {!error && active?.length === 0 && (
                     <EmptyState
                         icon={Swords}
                         title="No active games."
@@ -47,7 +40,7 @@ export default function ActiveGames() {
 
 function GameItem({ game }: { game: GameDto }) {
     return (
-        <Link 
+        <Link
             to={`/game/${game.id}`}
             className="flex items-center justify-between px-4 py-2 border-b border-line/40 hover:bg-hover/50 transition-colors group"
         >

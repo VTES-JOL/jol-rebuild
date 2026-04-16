@@ -1,5 +1,6 @@
 package net.deckserver.jol.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -113,7 +114,7 @@ public class DeckImportService {
                     resolveKrcgCard(card, resolved, errors);
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             errors.add(new ImportPreviewDto.ParseError(
                     text.length() > 60 ? text.substring(0, 60) + "…" : text,
                     "Invalid JSON: " + e.getMessage()));

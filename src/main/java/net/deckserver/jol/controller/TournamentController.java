@@ -1,5 +1,6 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
@@ -22,6 +23,9 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class TournamentController {
+
+    private static final int MAX_TABLE_SIZE = 5;
+    private static final int MAX_ROUNDS = 3;
 
     private static final List<TournamentStatus> PLAYER_VISIBLE_STATUSES = List.of(
         TournamentStatus.REGISTRATION, TournamentStatus.SEATING, TournamentStatus.ACTIVE,
@@ -133,7 +137,7 @@ public class TournamentController {
         }
         // Delete all tournament registrations
         TournamentRegistration.find("tournament.id = ?1", id).stream()
-            .forEach(r -> ((TournamentRegistration) r).delete());
+            .forEach(PanacheEntityBase::delete);
         t.status = TournamentStatus.SETUP;
         return t;
     }
@@ -316,11 +320,11 @@ public class TournamentController {
         }
 
         long currentSeats = table.seats.stream().filter(s -> !s.bye).count();
-        if (currentSeats >= 5) {
-            throw new BadRequestException("Table is full (max 5 players)");
+        if (currentSeats >= MAX_TABLE_SIZE) {
+            throw new BadRequestException("Table is full (max " + MAX_TABLE_SIZE + " players)");
         }
-        if (command.seatPosition() < 1 || command.seatPosition() > 5) {
-            throw new BadRequestException("Seat position must be between 1 and 5");
+        if (command.seatPosition() < 1 || command.seatPosition() > MAX_TABLE_SIZE) {
+            throw new BadRequestException("Seat position must be between 1 and " + MAX_TABLE_SIZE);
         }
 
         TournamentSeat seat = new TournamentSeat();
@@ -402,8 +406,8 @@ public class TournamentController {
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Can only add rounds during SEATING status");
         }
-        if (t.numberOfRounds >= 3) {
-            throw new BadRequestException("Maximum number of rounds (3) already reached");
+        if (t.numberOfRounds >= MAX_ROUNDS) {
+            throw new BadRequestException("Maximum number of rounds (" + MAX_ROUNDS + ") already reached");
         }
         t.numberOfRounds++;
         return t;

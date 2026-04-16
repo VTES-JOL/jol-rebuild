@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import MasterDetailView from '@/shared/layout/MasterDetailView';
+import MasterDetailView, {type PanelConfig} from '@/shared/layout/MasterDetailView';
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import tournamentApi from './api';
 import type {Tournament} from './types';
@@ -67,7 +67,7 @@ export default function TournamentsPage() {
         }
     };
 
-    const panels = [
+    const panels: [PanelConfig, PanelConfig] = [
         {
             key: 'list',
             label: 'All Tournaments',
@@ -112,7 +112,7 @@ export default function TournamentsPage() {
     return (
         <AppLayout background={"/Locations52.jpg"}>
             <MasterDetailView
-                panels={panels as any}
+                panels={panels}
                 columns="320px 1fr"
                 activeKey={selectedTournament ? 'detail' : 'list'}
             />

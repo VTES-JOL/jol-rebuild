@@ -7,7 +7,7 @@ const API = {
             credentials: "include",
         });
 
-        if (!res.ok) return null;
+        if (!res.ok || res.status === 204) return null;
         const data = await res.json();
         return data ?? null;
     },

@@ -22,17 +22,15 @@ import org.jboss.logging.Logger;
 public class GameWebSocket {
 
     private static final Logger LOG = Logger.getLogger(GameWebSocket.class);
-
+    private static final int MAX_CONTENT_LENGTH = 4000;
     @Inject
     WebSocketConnection connection;
-
     @Inject
     ChatService chatService;
 
+    // ── Lifecycle ─────────────────────────────────────────────────────────
     @Inject
     SecurityIdentity identity;
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────
 
     @OnOpen
     @Blocking
@@ -58,10 +56,23 @@ public class GameWebSocket {
         }
     }
 
+    @OnError
+    public void onError(Throwable error) {
+        LOG.errorf(error, "Game WS error for session %s", connection.id());
+    }
+
     private void handleChat(String gameId, ChatMessageDto incoming) {
         String content = incoming.content == null ? "" : incoming.content.trim();
         if (content.isEmpty()) {
             connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
+            return;
+        }
+        if (content.length() > MAX_CONTENT_LENGTH) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Message exceeds maximum length of " + MAX_CONTENT_LENGTH + " characters"));
+            return;
+        }
+        if (incoming.replyToId != null && !chatService.messageExistsInGame(incoming.replyToId, gameId)) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Reply target not found in this game"));
             return;
         }
 
@@ -76,11 +87,6 @@ public class GameWebSocket {
         }
         ChatMessageDto updated = chatService.toggleReaction(incoming.id, userName(), incoming.emoji);
         connection.broadcast().sendTextAndAwait(updated);
-    }
-
-    @OnError
-    public void onError(Throwable error) {
-        LOG.errorf(error, "Game WS error for session %s", connection.id());
     }
 
     private String userName() {

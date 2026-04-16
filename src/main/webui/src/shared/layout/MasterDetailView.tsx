@@ -1,7 +1,7 @@
 import {type ReactNode, useEffect, useState} from 'react';
 import {ChevronDown} from 'lucide-react';
 
-interface PanelConfig {
+export interface PanelConfig {
     key:     string;
     label:   string;
     content: ReactNode;
