@@ -8,7 +8,7 @@ import java.time.ZoneId;
 public class Preferences {
 
     public String countryCode;
-    public ZoneId zoneId = ZoneId.systemDefault();
+    public String zoneId = ZoneId.systemDefault().getId();
     public boolean enableImages = true;
 
     public Preferences() {

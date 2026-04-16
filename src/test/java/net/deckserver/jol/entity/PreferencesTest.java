@@ -5,8 +5,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import net.deckserver.jol.enums.Role;
 import org.junit.jupiter.api.Test;
 
-import java.time.ZoneId;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -29,13 +27,13 @@ public class PreferencesTest {
 
         Preferences prefs = new Preferences();
         prefs.countryCode = "US";
-        prefs.zoneId = ZoneId.of("America/New_York");
+        prefs.zoneId = "America/New_York";
         prefs.enableImages = false;
         user.preferences = prefs;
 
         User retrieved = User.findByUsername("prefuser2");
         assertEquals("US", retrieved.preferences.countryCode);
-        assertEquals(ZoneId.of("America/New_York"), retrieved.preferences.zoneId);
+        assertEquals("America/New_York", retrieved.preferences.zoneId);
         assertFalse(retrieved.preferences.enableImages);
     }
 }

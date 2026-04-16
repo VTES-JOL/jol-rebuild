@@ -7,6 +7,7 @@ import RegisterPage from "@/features/auth/RegisterPage.tsx";
 import GamePage from "@/features/game/GamePage.tsx";
 import DecksPage from "@/features/deck/DecksPage.tsx";
 import TournamentsPage from "@/features/tournament/TournamentsPage.tsx";
+import ProfilePage from "@/features/profile/ProfilePage.tsx";
 
 export default function AppRouter() {
     return (
@@ -19,6 +20,7 @@ export default function AppRouter() {
                 <Route path="/decks" element={<ProtectedRoute><DecksPage/></ProtectedRoute>}/>
                 <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage/></ProtectedRoute>}/>
                 <Route path="/game/:gameId" element={<GamePage/>}/>
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>}/>
                 <Route path="/*" element={<ProtectedRoute><HomePage/></ProtectedRoute>}/>
             </Routes>
         </BrowserRouter>

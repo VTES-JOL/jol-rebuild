@@ -3,7 +3,6 @@ package net.deckserver.jol.dto;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import net.deckserver.jol.entity.Preferences;
 
-import java.time.ZoneId;
 import java.util.Set;
 
 @RegisterForReflection
@@ -14,7 +13,7 @@ public class UserProfileDto {
     public String tournamentId;
     public String discordId;
     public String countryCode;
-    public ZoneId zoneId;
+    public String zoneId;
     public boolean enableImages;
     public Set<String> roles;
 

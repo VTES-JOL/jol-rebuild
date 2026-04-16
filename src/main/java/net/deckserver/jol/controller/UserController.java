@@ -12,8 +12,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.UserProfileDto;
+import net.deckserver.jol.entity.Preferences;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.Role;
 
@@ -89,9 +91,31 @@ public class UserController {
             .toList();
     }
 
+    @PUT
+    @Path("/preferences")
+    @Authenticated
+    @Transactional
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updatePreferences(UpdatePreferences body) {
+        String userName = identity.getPrincipal().getName();
+        User user = User.findByUsername(userName);
+        if (user == null) throw new WebApplicationException("Not found", Response.Status.NOT_FOUND);
+        if (user.preferences == null) user.preferences = new Preferences();
+        user.preferences.countryCode = body.countryCode();
+        if (body.zoneId() != null && !body.zoneId().isBlank()) {
+            user.preferences.zoneId = body.zoneId();
+        }
+        user.preferences.enableImages = body.enableImages();
+        return Response.ok().build();
+    }
+
     @RegisterForReflection
     public record Register(@NotBlank(message = "{jol.validation.constraints.username.blank}") String username,
                            @NotBlank(message = "{jol.validation.constrains.password.size}") @Size(min = 8, message = "{jol.validation.constrains.password.size}") String password,
                            @NotBlank(message = "{jol.validation.constraints.email.invalid}") @Email(message = "{jol.validation.constraints.email.invalid}") String email) {
+    }
+
+    @RegisterForReflection
+    public record UpdatePreferences(String countryCode, String zoneId, boolean enableImages) {
     }
 }
