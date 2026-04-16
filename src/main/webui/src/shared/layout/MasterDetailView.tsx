@@ -55,9 +55,9 @@ export default function MasterDetailView({
     }[breakpoint];
 
     const panelResponsiveClass = {
-        md: 'md:flex md:flex-col md:h-full md:min-h-0 md:w-full',
-        lg: 'lg:flex lg:flex-col lg:h-full lg:min-h-0 lg:w-full',
-        xl: 'xl:flex xl:flex-col xl:h-full xl:min-h-0 xl:w-full',
+        md: 'md:flex md:flex-col md:h-full md:min-h-0 md:w-full md:overflow-y-auto',
+        lg: 'lg:flex lg:flex-col lg:h-full lg:min-h-0 lg:w-full lg:overflow-y-auto',
+        xl: 'xl:flex xl:flex-col xl:h-full xl:min-h-0 xl:w-full xl:overflow-y-auto',
     }[breakpoint];
 
     return (
@@ -101,7 +101,7 @@ export default function MasterDetailView({
                         key={p.key}
                         className={
                             p.key === selectedKey
-                                ? 'flex flex-col h-full min-h-0 w-full'
+                                ? 'flex flex-col h-full min-h-0 w-full overflow-y-auto'
                                 : `hidden ${panelResponsiveClass}`
                         }
                     >
