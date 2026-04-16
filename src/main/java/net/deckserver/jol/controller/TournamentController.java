@@ -254,7 +254,7 @@ public class TournamentController {
 
     @GET
     @Path("/{id}/seating")
-    @RolesAllowed("TOURNAMENT_ADMIN")
+    @RolesAllowed({"USER", "TOURNAMENT_ADMIN"})
     public SeatingDto getSeating(@PathParam("id") Long id) {
         Tournament t = require(id);
         return tournamentService.buildSeatingDto(t);

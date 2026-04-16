@@ -2,7 +2,7 @@ import React from 'react';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
 import TournamentDetailPanel from '../features/tournament/TournamentDetailPanel';
-import type {Tournament, TournamentGame, TournamentRegistration} from '../features/tournament/types';
+import type {SeatingDto, Tournament, TournamentRegistration} from '../features/tournament/types';
 import {AuthContext} from '../contexts/AuthContext';
 import type {AuthContextType} from '../contexts/AuthContext';
 import tournamentApi from '../features/tournament/api';
@@ -54,37 +54,65 @@ const registrations: TournamentRegistration[] = [
     {id: 103, userId: 'user-3', username: 'malkav', decks: [{deckName: 'Malkavian Madness', summary: '12,78,3/4'}]},
 ];
 
-const activeGames: TournamentGame[] = [
-    {
-        tableId: 1, roundNumber: 1, gameId: 201, gameName: 'Round 1 — Table A',
-        players: [
-            {username: 'dracula', seatPosition: 1},
-            {username: 'lasombra', seatPosition: 2},
-            {username: 'malkav', seatPosition: 3},
-            {username: 'brujah', seatPosition: 4},
-            {username: 'tremere', seatPosition: 5},
-        ],
-    },
-    {
-        tableId: 2, roundNumber: 1, gameId: 202, gameName: 'Round 1 — Table B',
-        players: [
-            {username: 'gangrel', seatPosition: 1},
-            {username: 'nosferatu', seatPosition: 2},
-            {username: 'toreador', seatPosition: 3},
-            {username: 'ventrue', seatPosition: 4},
-        ],
-    },
-    {
-        tableId: 3, roundNumber: 2, gameId: 203, gameName: 'Round 2 — Table A',
-        players: [
-            {username: 'dracula', seatPosition: 1},
-            {username: 'gangrel', seatPosition: 2},
-            {username: 'tremere', seatPosition: 3},
-            {username: 'nosferatu', seatPosition: 4},
-            {username: 'toreador', seatPosition: 5},
-        ],
-    },
-];
+const activeSeating: SeatingDto = {
+    rounds: [
+        {
+            roundNumber: 1,
+            tables: [
+                {
+                    id: 101,
+                    seats: [
+                        {id: 1001, registrationId: 1, username: 'dracula',   seatPosition: 1, bye: false},
+                        {id: 1002, registrationId: 2, username: 'lasombra',  seatPosition: 2, bye: false},
+                        {id: 1003, registrationId: 3, username: 'malkav',    seatPosition: 3, bye: false},
+                        {id: 1004, registrationId: 4, username: 'brujah',    seatPosition: 4, bye: false},
+                        {id: 1005, registrationId: 5, username: 'tremere',   seatPosition: 5, bye: false},
+                    ],
+                },
+                {
+                    id: 102,
+                    seats: [
+                        {id: 1006, registrationId: 6, username: 'gangrel',   seatPosition: 1, bye: false},
+                        {id: 1007, registrationId: 7, username: 'nosferatu', seatPosition: 2, bye: false},
+                        {id: 1008, registrationId: 8, username: 'toreador',  seatPosition: 3, bye: false},
+                        {id: 1009, registrationId: 9, username: 'ventrue',   seatPosition: 4, bye: false},
+                    ],
+                },
+            ],
+            byes: [],
+            unseated: [],
+        },
+        {
+            roundNumber: 2,
+            tables: [
+                {
+                    id: 201,
+                    seats: [
+                        {id: 2001, registrationId: 3, username: 'malkav',    seatPosition: 1, bye: false},
+                        {id: 2002, registrationId: 6, username: 'gangrel',   seatPosition: 2, bye: false},
+                        {id: 2003, registrationId: 1, username: 'dracula',   seatPosition: 3, bye: false},
+                        {id: 2004, registrationId: 8, username: 'toreador',  seatPosition: 4, bye: false},
+                        {id: 2005, registrationId: 5, username: 'tremere',   seatPosition: 5, bye: false},
+                    ],
+                },
+                {
+                    id: 202,
+                    seats: [
+                        {id: 2006, registrationId: 7, username: 'nosferatu', seatPosition: 1, bye: false},
+                        {id: 2007, registrationId: 4, username: 'brujah',    seatPosition: 2, bye: false},
+                        {id: 2008, registrationId: 9, username: 'ventrue',   seatPosition: 3, bye: false},
+                        {id: 2009, registrationId: 2, username: 'lasombra',  seatPosition: 4, bye: false},
+                    ],
+                },
+            ],
+            byes: [
+                {id: 2010, registrationId: 10, username: 'tzimisce', seatPosition: 0, bye: true},
+            ],
+            unseated: [],
+        },
+    ],
+    unseated: [],
+};
 
 // ── Meta ──────────────────────────────────────────────────────────────────────
 
@@ -183,9 +211,9 @@ export const RegistrationAdminCanClose: Story = {
 };
 
 export const ActiveTournament: Story = {
-    name: 'Active — with games',
+    name: 'Active — with seating',
     render: (args) => {
-        tournamentApi.getTournamentGames = () => Promise.resolve(activeGames);
+        tournamentApi.getSeating = () => Promise.resolve(activeSeating);
         return <TournamentDetailPanel {...args} />;
     },
     args: {
@@ -195,10 +223,10 @@ export const ActiveTournament: Story = {
     },
 };
 
-export const ActiveNoGames: Story = {
-    name: 'Active — no games yet',
+export const ActiveNoSeating: Story = {
+    name: 'Active — no seating yet',
     render: (args) => {
-        tournamentApi.getTournamentGames = () => Promise.resolve([]);
+        tournamentApi.getSeating = () => Promise.resolve({rounds: [], unseated: []});
         return <TournamentDetailPanel {...args} />;
     },
     args: {
@@ -211,7 +239,7 @@ export const ActiveNoGames: Story = {
 export const Finals: Story = {
     name: 'Finals',
     render: (args) => {
-        tournamentApi.getTournamentGames = () => Promise.resolve(activeGames.slice(0, 1));
+        tournamentApi.getSeating = () => Promise.resolve({...activeSeating, rounds: activeSeating.rounds.slice(0, 1)});
         return <TournamentDetailPanel {...args} />;
     },
     args: {
@@ -224,7 +252,7 @@ export const Finals: Story = {
 export const Completed: Story = {
     name: 'Completed',
     render: (args) => {
-        tournamentApi.getTournamentGames = () => Promise.resolve(activeGames);
+        tournamentApi.getSeating = () => Promise.resolve(activeSeating);
         return <TournamentDetailPanel {...args} />;
     },
     args: {

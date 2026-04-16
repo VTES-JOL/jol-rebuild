@@ -130,9 +130,7 @@ INSERT INTO game (id, name, format, status, visibility, owner_id, tournament_id)
 INSERT INTO registration (id, game_id, user_id, deck, deck_name, summary, last_updated) VALUES
 
   -- Game 1 (OPEN): Player1 registered, Player2+3 invited
-  (1,  1, '00000000-0000-0000-0000-000000000001',
-    '{"name":"Gangrel Anarch Toolbox","crypt":{"count":12,"cards":[{"count":2,"id":"200081","name":"André the Manipulator"},{"count":2,"id":"201521","name":"Casey Snyder"},{"count":2,"id":"201574","name":"Kuyén"},{"count":1,"id":"201602","name":"Massimiliano"},{"count":1,"id":"201601","name":"Martina Srnankova"},{"count":1,"id":"201597","name":"Kamile Paukstys"},{"count":1,"id":"201590","name":"Hanna Nokelainen"},{"count":1,"id":"201606","name":"Nathan Turner"},{"count":1,"id":"201592","name":"Indira"}]},"library":{"count":90,"cards":[{"type":"Master","count":21,"cards":[{"count":1,"id":"100052","name":"The Anarch Free Press"},{"count":4,"id":"100616","name":"Effective Management"},{"count":3,"id":"102113","name":"Vessel"},{"count":2,"id":"102121","name":"Villein"}]},{"type":"Action","count":21,"cards":[{"count":4,"id":"100515","name":"Deep Song"},{"count":12,"id":"101972","name":"Thing"}]},{"type":"Reaction","count":22,"cards":[{"count":10,"id":"102230","name":"Organized Resistance"},{"count":6,"id":"102218","name":"Bait and Switch"}]},{"type":"Combat","count":15,"cards":[{"count":10,"id":"100601","name":"Earth Meld"},{"count":3,"id":"100771","name":"Form of Mist"}]}]}}',
-    'Gangrel Anarch Toolbox', 'Crypt: 12, Library: 90', '2026-04-01 10:00:00+00'),
+  (1, 1, '00000000-0000-0000-0000-000000000001', '{"name":"Gangrel Anarch Toolbox","crypt":{"count":12,"cards":[{"count":2,"id":"200081","name":"André the Manipulator"},{"count":2,"id":"201521","name":"Casey Snyder"},{"count":2,"id":"201574","name":"Kuyén"},{"count":1,"id":"201602","name":"Massimiliano"},{"count":1,"id":"201601","name":"Martina Srnankova"},{"count":1,"id":"201597","name":"Kamile Paukstys"},{"count":1,"id":"201590","name":"Hanna Nokelainen"},{"count":1,"id":"201606","name":"Nathan Turner"},{"count":1,"id":"201592","name":"Indira"}]},"library":{"count":90,"cards":[{"type":"Master","count":21,"cards":[{"count":1,"id":"100052","name":"The Anarch Free Press"},{"count":4,"id":"100616","name":"Effective Management"},{"count":3,"id":"102113","name":"Vessel"},{"count":2,"id":"102121","name":"Villein"}]},{"type":"Action","count":21,"cards":[{"count":4,"id":"100515","name":"Deep Song"},{"count":12,"id":"101972","name":"Thing"}]},{"type":"Reaction","count":22,"cards":[{"count":10,"id":"102230","name":"Organized Resistance"},{"count":6,"id":"102218","name":"Bait and Switch"}]},{"type":"Combat","count":15,"cards":[{"count":10,"id":"100601","name":"Earth Meld"},{"count":3,"id":"100771","name":"Form of Mist"}]}]}}', 'Gangrel Anarch Toolbox', 'Crypt: 12, Library: 90', '2026-04-01 10:00:00+00'),
   (2,  1, '00000000-0000-0000-0000-000000000002', NULL, NULL, NULL, '2026-04-01 11:00:00+00'),
   (3,  1, '00000000-0000-0000-0000-000000000003', NULL, NULL, NULL, '2026-04-01 12:00:00+00'),
 
@@ -234,26 +232,26 @@ INSERT INTO tournament_table (id, tournament_id, round_number, game_id) VALUES
 -- ── Tournament Seats ──────────────────────────────────────────
 
 INSERT INTO tournament_seat (id, table_id, registration_id, seat_position, bye, bye_round) VALUES
-  -- T1 Round 1, Table 1 (P1–P5)
+  -- T1 Round 1, Table 1 (P1–P4)
   (1,  1, 1, 1, false, 0),
   (2,  1, 2, 2, false, 0),
   (3,  1, 3, 3, false, 0),
   (4,  1, 4, 4, false, 0),
-  (5,  1, 5, 5, false, 0),
-  -- T1 Round 1, Table 2 (P6, P7, P8)
-  (6,  2, 6, 1, false, 0),
-  (7,  2, 7, 2, false, 0),
-  (8,  2, 8, 3, false, 0),
-  -- T1 Round 2, Table 3 (P1, P6, P2, P7, P3 — crossover seating)
+  -- T1 Round 1, Table 2 (P5-P8)
+  (5,  2, 5, 1, false, 0),
+  (6,  2, 6, 2, false, 0),
+  (7,  2, 7, 3, false, 0),
+  (8,  2, 8, 4, false, 0),
+  -- T1 Round 2, Table 3 (P1, P6, P2, P7 — crossover seating)
   (9,  3, 1, 1, false, 0),
   (10, 3, 6, 2, false, 0),
   (11, 3, 2, 3, false, 0),
   (12, 3, 7, 4, false, 0),
-  (13, 3, 3, 5, false, 0),
-  -- T1 Round 2, Table 4 (P4, P8, P5)
+  -- T1 Round 2, Table 4 (P4, P8, P5, P3)
   (14, 4, 4, 1, false, 0),
   (15, 4, 8, 2, false, 0),
   (16, 4, 5, 3, false, 0),
+  (13, 4, 3, 4, false, 0),
   -- T1 Final, Table 5 (P1, P2, P6, P3, P7 — top scorers)
   (17, 5, 1, 1, false, 0),
   (18, 5, 2, 2, false, 0),
