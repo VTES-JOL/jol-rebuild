@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class DeckImportService {
 
-    private static final Pattern JOL_LINE = Pattern.compile("^(\\d+)\\s*[xX]?\\s*(.+)$");
+    private static final Pattern JOL_LINE = Pattern.compile("^(?:(\\d+)\\s*[xX]?\\s*)?(.+)$");
 
     @Inject
     CardRegistry registry;
@@ -148,12 +148,8 @@ public class DeckImportService {
             if (line.isEmpty() || line.startsWith("//") || line.startsWith("#")) continue;
 
             Matcher m = JOL_LINE.matcher(line);
-            if (!m.matches()) {
-                errors.add(new ImportPreviewDto.ParseError(rawLine, "Expected: {count}[x] {card name}"));
-                continue;
-            }
-
-            int    count = Integer.parseInt(m.group(1));
+            if (!m.matches()) continue;
+            int    count = m.group(1) != null ? Integer.parseInt(m.group(1)) : 1;
             String name  = m.group(2).strip();
             Card   found = registry.findByNormalizedName(StringUtils.stripAccents(name).toLowerCase());
 

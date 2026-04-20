@@ -13,7 +13,7 @@ import type {Deck} from '../features/deck/types';
 
 function withUser(username: string) {
     const ctx: AuthContextType = {
-        user: {id: 1, username, roles: ['USER']},
+        user: {id: '1', username, roles: ['USER'], enableImages: true},
         loading: false,
         login: fn(),
         logout: fn(),

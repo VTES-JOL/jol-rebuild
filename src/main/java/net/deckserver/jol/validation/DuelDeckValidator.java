@@ -17,7 +17,7 @@ public class DuelDeckValidator extends BaseValidator {
 
     @Override
     public int getCryptMinSize() {
-        return 4;
+        return 6;
     }
 
     @Override

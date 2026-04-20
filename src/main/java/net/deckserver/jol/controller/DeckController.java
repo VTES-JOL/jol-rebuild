@@ -202,7 +202,7 @@ public class DeckController {
     }
 
     @RegisterForReflection
-    public record DeckUpdateCommand(@NotBlank @Size(max = 255) String name, KrcgDeck contents, String summary, String comments) {
+    public record DeckUpdateCommand(@Size(max = 255) String name, KrcgDeck contents, String summary, String comments) {
     }
 
     @RegisterForReflection
