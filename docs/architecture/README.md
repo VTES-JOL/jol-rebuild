@@ -21,7 +21,8 @@ config/         Application configuration beans
 converters/     JPA attribute converters (ZoneIdConverter)
 ```
 
-REST and WebSocket security use Quarkus form-based auth with JPA-backed user store. Roles: `USER`, `ADMIN`. WebSocket paths (`/ws/*`) require authentication.
+REST and WebSocket security use Quarkus form-based auth with JPA-backed user store. Roles: `USER`, `ADMIN`, `TOURNAMENT_ADMIN`. 
+WebSocket paths (`/ws/*`) require authentication.
 
 Database is PostgreSQL with Hibernate ORM Panache. Flyway handles migrations in production; in dev mode Quarkus drops/recreates schema on startup.
 
@@ -47,7 +48,8 @@ hooks/      useChat, useChatInput, useWebSocket, useCardAutocomplete,
 stories/    Storybook stories doubling as vitest component tests
 ```
 
-Built with React 19, TypeScript, Tailwind CSS 4, and Vite. The Quinoa Maven plugin bundles the frontend into the backend JAR at build time so the backend serves the SPA in production.
+Built with React 19, TypeScript, Tailwind CSS 4, and Vite. 
+The Quinoa Maven plugin bundles the frontend into the backend JAR at build time so the backend serves the SPA in production.
 
 ### Frontend ↔ Backend
 

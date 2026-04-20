@@ -19,8 +19,9 @@ Parentheses surround All of these additions – for example
 - Theo Bell #201363 would become `Theo Bell (G2 ADV)`
 - Theo Bell #201613 would become `Theo Bell (G6)`
 
-The non-advanced card with the lowest grouping will also be able to use the base name, in the example above that would be 
-- Theo Bell #201362 would also have `Theo Bell`, in the case that a card with the `ANY` grouping is present, then it will take priority.
+The non-advanced card with the lowest grouping will also be able to use the base name, in the case that a card with the `ANY` grouping is present, then it will take priority. 
+In the example above that would be 
+- Theo Bell #201362 would also have `Theo Bell`
 
 ### Diacritics and simplified names
 For names that contain characters outside the standard ASCII range like `L'Épuisette` a simplified version will also be 
