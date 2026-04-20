@@ -70,9 +70,9 @@ const tournamentApi = {
         return json(await baseFetch(`/api/tournaments/${id}/seating`, OPTS));
     },
 
-    async addTable(id: number, roundNumber: number): Promise<{ id: number }> {
+    async addTable(id: number): Promise<{ id: number }> {
         return json(await baseFetch(`/api/tournaments/${id}/tables`, {
-            ...JSON_OPTS, method: 'POST', body: JSON.stringify({ roundNumber }),
+            ...JSON_OPTS, method: 'POST', body: JSON.stringify({}),
         }));
     },
 
@@ -81,9 +81,9 @@ const tournamentApi = {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async addSeat(id: number, tableId: number, registrationId: number, seatPosition: number): Promise<void> {
+    async addSeat(id: number, tableId: number, registrationId: number, seatPosition: number, roundNumber: number): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/tables/${tableId}/seats`, {
-            ...JSON_OPTS, method: 'POST', body: JSON.stringify({ registrationId, seatPosition }),
+            ...JSON_OPTS, method: 'POST', body: JSON.stringify({ registrationId, seatPosition, roundNumber }),
         });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },

@@ -21,6 +21,7 @@ export interface Tournament {
     format: TournamentFormat;
     gameFormat: string;
     numberOfRounds: number;
+    originalNumberOfRounds: number;
     finalRound: boolean;
     requiresId: boolean;
     rules: Rule[];

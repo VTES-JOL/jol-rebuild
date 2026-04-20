@@ -172,21 +172,21 @@ INSERT INTO registration (id, game_id, user_id, deck, deck_name, summary, last_u
 
 -- ── Tournaments ───────────────────────────────────────────────
 
-INSERT INTO tournament (id, name, format, game_format, number_of_rounds, final_round, requires_id, status, registration_start, registration_end, playing_start, playing_end, rules, conditions) VALUES
-  -- 1: COMPLETED — full data with seating history
-  (1, 'Grand Camarilla Open',   'SINGLE_DECK', 'STANDARD', 2, true,  false, 'COMPLETED',
+INSERT INTO tournament (id, name, format, game_format, number_of_rounds, original_number_of_rounds, final_round, requires_id, status, registration_start, registration_end, playing_start, playing_end, rules, conditions) VALUES
+  -- 1: COMPLETED — full data with seating history (3 rounds: 2 regular + 1 final)
+  (1, 'Grand Camarilla Open',   'SINGLE_DECK', 'STANDARD', 3, 2, true,  false, 'COMPLETED',
     '2025-01-01 00:00:00+00', '2025-01-14 23:59:59+00', '2025-01-15 09:00:00+00', '2025-01-15 20:00:00+00',
     '[]', '[]'),
   -- 2: ACTIVE — round 1 seated, round 2 pending
-  (2, 'Anarch Freedom Cup',     'MULTI_DECK',  'STANDARD', 2, false, false, 'ACTIVE',
+  (2, 'Anarch Freedom Cup',     'MULTI_DECK',  'STANDARD', 2, 2, false, false, 'ACTIVE',
     '2026-03-01 00:00:00+00', '2026-03-14 23:59:59+00', '2026-03-15 09:00:00+00', NULL,
     '[]', '[]'),
   -- 3: REGISTRATION — accepting sign-ups, no seating yet
-  (3, 'V5 Championship Series', 'SINGLE_DECK', 'V5',       2, true,  true,  'REGISTRATION',
+  (3, 'V5 Championship Series', 'SINGLE_DECK', 'V5',       2, 0, true,  true,  'REGISTRATION',
     '2026-04-20 00:00:00+00', '2026-05-01 23:59:59+00', '2026-05-10 09:00:00+00', NULL,
     '[]', '[]'),
   -- 4: SETUP — not yet open for registration
-  (4, 'Duel Master Invitational','SINGLE_DECK','DUEL',      2, false, false, 'SETUP',
+  (4, 'Duel Master Invitational','SINGLE_DECK','DUEL',      2, 0, false, false, 'SETUP',
     '2026-06-01 00:00:00+00', '2026-06-14 23:59:59+00', '2026-06-15 09:00:00+00', NULL,
     '[]', '[]');
 
@@ -216,54 +216,52 @@ INSERT INTO tournament_registration (id, tournament_id, user_id, decks) VALUES
   (17, 3, '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]');
 
 -- ── Tournament Tables ─────────────────────────────────────────
+-- Tables now span the whole tournament; seats carry the round number.
 
-INSERT INTO tournament_table (id, tournament_id, round_number, game_id) VALUES
-  -- Tournament 1, Round 1
-  (1, 1, 1, NULL),  -- Table 1: P1, P2, P3, P4, P5
-  (2, 1, 1, NULL),  -- Table 2: P6, P7, P8 (3-player)
-  -- Tournament 1, Round 2
-  (3, 1, 2, NULL),  -- Table 3: P1, P6, P2, P7, P3
-  (4, 1, 2, NULL),  -- Table 4: P4, P8, P5 (3-player)
-  -- Tournament 1, Final (Round 3)
-  (5, 1, 3, NULL),  -- Final:   P1, P2, P6, P3, P7
-  -- Tournament 2, Round 1
-  (6, 2, 1, NULL);  -- Table 1: P1, P2, P3, P4, P5 (P6 has bye)
+INSERT INTO tournament_table (id, tournament_id) VALUES
+  (1, 1),  -- T1 Table A (used in rounds 1, 2, and final)
+  (2, 1),  -- T1 Table B (used in rounds 1 and 2)
+  (3, 2);  -- T2 Table A
 
 -- ── Tournament Seats ──────────────────────────────────────────
 
-INSERT INTO tournament_seat (id, table_id, registration_id, seat_position, bye, bye_round) VALUES
-  -- T1 Round 1, Table 1 (P1–P4)
-  (1,  1, 1, 1, false, 0),
-  (2,  1, 2, 2, false, 0),
-  (3,  1, 3, 3, false, 0),
-  (4,  1, 4, 4, false, 0),
-  -- T1 Round 1, Table 2 (P5-P8)
-  (5,  2, 5, 1, false, 0),
-  (6,  2, 6, 2, false, 0),
-  (7,  2, 7, 3, false, 0),
-  (8,  2, 8, 4, false, 0),
-  -- T1 Round 2, Table 3 (P1, P6, P2, P7 — crossover seating)
-  (9,  3, 1, 1, false, 0),
-  (10, 3, 6, 2, false, 0),
-  (11, 3, 2, 3, false, 0),
-  (12, 3, 7, 4, false, 0),
-  -- T1 Round 2, Table 4 (P4, P8, P5, P3)
-  (14, 4, 4, 1, false, 0),
-  (15, 4, 8, 2, false, 0),
-  (16, 4, 5, 3, false, 0),
-  (13, 4, 3, 4, false, 0),
-  -- T1 Final, Table 5 (P1, P2, P6, P3, P7 — top scorers)
-  (17, 5, 1, 1, false, 0),
-  (18, 5, 2, 2, false, 0),
-  (19, 5, 6, 3, false, 0),
-  (20, 5, 3, 4, false, 0),
-  (21, 5, 7, 5, false, 0),
-  -- T2 Round 1, Table 1 (P1–P5)
-  (22, 6,  9, 1, false, 0),
-  (23, 6, 10, 2, false, 0),
-  (24, 6, 11, 3, false, 0),
-  (25, 6, 12, 4, false, 0),
-  (26, 6, 13, 5, false, 0),
+INSERT INTO tournament_seat (id, table_id, registration_id, seat_position, bye, round_number) VALUES
+  -- T1 Round 1, Table A (P1–P4)
+  (1,  1, 1, 1, false, 1),
+  (2,  1, 2, 2, false, 1),
+  (3,  1, 3, 3, false, 1),
+  (4,  1, 4, 4, false, 1),
+  -- T1 Round 1, Table B (P5–P8)
+  (5,  2, 5, 1, false, 1),
+  (6,  2, 6, 2, false, 1),
+  (7,  2, 7, 3, false, 1),
+  (8,  2, 8, 4, false, 1),
+  -- T1 Round 2, Table A (P1, P6, P2, P7 — crossover seating)
+  (9,  1, 1, 1, false, 2),
+  (10, 1, 6, 2, false, 2),
+  (11, 1, 2, 3, false, 2),
+  (12, 1, 7, 4, false, 2),
+  -- T1 Round 2, Table B (P4, P8, P5, P3)
+  (13, 2, 3, 4, false, 2),
+  (14, 2, 4, 1, false, 2),
+  (15, 2, 8, 2, false, 2),
+  (16, 2, 5, 3, false, 2),
+  -- T1 Final (Round 3), Table A — top 5 scorers
+  (17, 1, 1, 1, false, 3),
+  (18, 1, 2, 2, false, 3),
+  (19, 1, 6, 3, false, 3),
+  (20, 1, 3, 4, false, 3),
+  (21, 1, 7, 5, false, 3),
+  -- T1 Round 3 byes — P4, P5, P8 did not qualify for the final
+  (28, NULL, 4, 0, true, 3),
+  (29, NULL, 5, 0, true, 3),
+  (30, NULL, 8, 0, true, 3),
+  -- T2 Round 1, Table A (P1–P5)
+  (22, 3,  9, 1, false, 1),
+  (23, 3, 10, 2, false, 1),
+  (24, 3, 11, 3, false, 1),
+  (25, 3, 12, 4, false, 1),
+  (26, 3, 13, 5, false, 1),
   -- T2 Round 1, P6 receives a bye
   (27, NULL, 14, 0, true, 1);
 

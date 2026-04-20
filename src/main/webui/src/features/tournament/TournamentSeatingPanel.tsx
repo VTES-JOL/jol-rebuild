@@ -131,7 +131,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                                                         ) : (
                                                             <UnseatedDropdown
                                                                 unseated={round.unseated}
-                                                                onAssign={regId => mutate(() => tournamentApi.addSeat(tournament.id, table.id, regId, pos), 'Failed to assign seat')}
+                                                                onAssign={regId => mutate(() => tournamentApi.addSeat(tournament.id, table.id, regId, pos, round.roundNumber), 'Failed to assign seat')}
                                                                 disabled={saving}
                                                             />
                                                         )}
@@ -144,7 +144,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
 
                                 {round.unseated.length >= 4 && (
                                     <button
-                                        onClick={() => mutate(() => tournamentApi.addTable(tournament.id, round.roundNumber), 'Failed to add table')}
+                                        onClick={() => mutate(() => tournamentApi.addTable(tournament.id), 'Failed to add table')}
                                         disabled={saving}
                                         className="w-full flex items-center justify-center gap-2 border border-dashed border-line/50 rounded-lg py-2 text-xs text-ink-muted hover:text-accent hover:border-accent/50 transition-colors"
                                     >
@@ -197,7 +197,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                 );
             })}
 
-            {tournament.numberOfRounds < 3 && (
+            {tournament.originalNumberOfRounds > 0 && tournament.numberOfRounds < tournament.originalNumberOfRounds + 1 && (
                 <button
                     onClick={() => mutate(async () => { await tournamentApi.addExtraRound(tournament.id); onChanged(); }, 'Failed to add extra round')}
                     disabled={saving}

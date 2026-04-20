@@ -42,6 +42,9 @@ public class Tournament extends PanacheEntity {
     @Column(name = "number_of_rounds")
     public int numberOfRounds = 2; // min: 2, max: 3
 
+    @Column(name = "original_number_of_rounds")
+    public int originalNumberOfRounds = 0;
+
     @Column(name = "final_round")
     public boolean finalRound = false;
 

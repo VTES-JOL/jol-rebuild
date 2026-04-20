@@ -13,21 +13,13 @@ public class TournamentTable extends PanacheEntity {
     @ManyToOne
     public Tournament tournament;
 
-    @Column(name = "round_number")
-    public int roundNumber;
-
-    @ManyToOne
-    @JoinColumn(name = "game_id")
-    public Game game;
-
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<TournamentSeat> seats = new ArrayList<>();
 
-    public static List<TournamentTable> findByTournament(Tournament tournament) {
-        return find("tournament.id = ?1 order by roundNumber, id", tournament.id).list();
-    }
+    @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<TournamentTableGame> games = new ArrayList<>();
 
-    public static List<TournamentTable> findByTournamentAndRound(Tournament tournament, int roundNumber) {
-        return find("tournament.id = ?1 and roundNumber = ?2 order by id", tournament.id, roundNumber).list();
+    public static List<TournamentTable> findByTournament(Tournament tournament) {
+        return find("tournament.id = ?1 order by id", tournament.id).list();
     }
 }

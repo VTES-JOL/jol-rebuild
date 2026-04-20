@@ -135,7 +135,6 @@ public class TournamentController {
         if (t.status != TournamentStatus.REGISTRATION) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to unpublish");
         }
-        // Delete all tournament registrations
         TournamentRegistration.find("tournament.id = ?1", id).stream()
             .forEach(PanacheEntityBase::delete);
         t.status = TournamentStatus.SETUP;
@@ -151,6 +150,7 @@ public class TournamentController {
         if (t.status != TournamentStatus.REGISTRATION) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to begin seating");
         }
+        t.originalNumberOfRounds = t.numberOfRounds;
         t.status = TournamentStatus.SEATING;
         return t;
     }
@@ -177,9 +177,9 @@ public class TournamentController {
     @RolesAllowed({"USER"})
     public List<TournamentRegistrationDto> getRegistrations(@PathParam("id") Long id) {
         Tournament t = require(id);
-            return TournamentRegistration.findByTournament(t).stream()
-                .map(TournamentRegistrationDto::from)
-                .toList();
+        return TournamentRegistration.findByTournament(t).stream()
+            .map(TournamentRegistrationDto::from)
+            .toList();
     }
 
     @POST
@@ -268,17 +268,13 @@ public class TournamentController {
     @Path("/{id}/tables")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response addTable(@PathParam("id") Long id, AddTableCommand command) {
+    public Response addTable(@PathParam("id") Long id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage tables");
         }
-        if (command.roundNumber() < 1 || command.roundNumber() > t.numberOfRounds) {
-            throw new BadRequestException("Round number must be between 1 and " + t.numberOfRounds);
-        }
         TournamentTable table = new TournamentTable();
         table.tournament = t;
-        table.roundNumber = command.roundNumber();
         table.persist();
         return Response.ok(table).build();
     }
@@ -307,19 +303,21 @@ public class TournamentController {
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage seats");
         }
+        if (command.roundNumber() < 1 || command.roundNumber() > t.numberOfRounds) {
+            throw new BadRequestException("Round number must be between 1 and " + t.numberOfRounds);
+        }
         TournamentTable table = TournamentTable.findById(tableId);
         if (table == null || !table.tournament.id.equals(id)) throw new NotFoundException();
 
         TournamentRegistration reg = TournamentRegistration.findById(command.registrationId());
         if (reg == null || !reg.tournament.id.equals(id)) throw new NotFoundException();
 
-        // Ensure player not already seated in this round
-        TournamentSeat existing = TournamentSeat.findByRoundAndRegistration(t, table.roundNumber, reg);
+        TournamentSeat existing = TournamentSeat.findByRoundAndRegistration(t, command.roundNumber(), reg);
         if (existing != null) {
-            throw new BadRequestException(reg.user.username + " is already allocated for round " + table.roundNumber);
+            throw new BadRequestException(reg.user.username + " is already allocated for round " + command.roundNumber());
         }
 
-        long currentSeats = table.seats.stream().filter(s -> !s.bye).count();
+        long currentSeats = table.seats.stream().filter(s -> !s.bye && s.roundNumber == command.roundNumber()).count();
         if (currentSeats >= MAX_TABLE_SIZE) {
             throw new BadRequestException("Table is full (max " + MAX_TABLE_SIZE + " players)");
         }
@@ -331,6 +329,7 @@ public class TournamentController {
         seat.table = table;
         seat.registration = reg;
         seat.seatPosition = command.seatPosition();
+        seat.roundNumber = command.roundNumber();
         seat.bye = false;
         seat.persist();
         table.seats.add(seat);
@@ -373,10 +372,22 @@ public class TournamentController {
             throw new BadRequestException(reg.user.username + " is already allocated for round " + roundNumber);
         }
 
+        // Byes are only allowed once all table seats for this round are full
+        List<TournamentTable> allTables = TournamentTable.findByTournament(t);
+        for (TournamentTable table : allTables) {
+            long seatCount = TournamentSeat.count(
+                "table.id = ?1 and roundNumber = ?2 and bye = false",
+                table.id, roundNumber
+            );
+            if (seatCount > 0 && seatCount < MAX_TABLE_SIZE) {
+                throw new BadRequestException("All table seats must be full before assigning byes for round " + roundNumber);
+            }
+        }
+
         TournamentSeat bye = new TournamentSeat();
         bye.registration = reg;
         bye.bye = true;
-        bye.byeRound = roundNumber;
+        bye.roundNumber = roundNumber;
         bye.seatPosition = 0;
         bye.persist();
         return Response.ok(bye).build();
@@ -406,8 +417,9 @@ public class TournamentController {
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Can only add rounds during SEATING status");
         }
-        if (t.numberOfRounds >= MAX_ROUNDS) {
-            throw new BadRequestException("Maximum number of rounds (" + MAX_ROUNDS + ") already reached");
+        int maxAllowed = Math.min(t.originalNumberOfRounds + 1, MAX_ROUNDS);
+        if (t.numberOfRounds >= maxAllowed) {
+            throw new BadRequestException("Maximum number of rounds (" + maxAllowed + ") already reached");
         }
         t.numberOfRounds++;
         return t;
@@ -425,20 +437,20 @@ public class TournamentController {
             return List.of();
         }
         boolean isAdmin = identity.hasRole("TOURNAMENT_ADMIN");
-        List<TournamentTable> tables = TournamentTable.findByTournament(t);
+        List<TournamentTableGame> tableGames = TournamentTableGame.findByTournament(t);
 
         if (isAdmin) {
-            return tables.stream()
-                .filter(table -> table.game != null)
-                .map(table -> (Object) new TournamentGameDto(table))
+            return tableGames.stream()
+                .map(tg -> (Object) new TournamentGameDto(tg))
                 .toList();
         }
 
         User me = currentUser();
-        return tables.stream()
-            .filter(table -> table.game != null)
-            .filter(table -> table.seats.stream().anyMatch(s -> !s.bye && s.registration.user.id.equals(me.id)))
-            .map(table -> (Object) new TournamentGameDto(table))
+        return tableGames.stream()
+            .filter(tg -> tg.table.seats.stream()
+                .anyMatch(s -> !s.bye && s.roundNumber == tg.roundNumber
+                            && s.registration.user.id.equals(me.id)))
+            .map(tg -> (Object) new TournamentGameDto(tg))
             .toList();
     }
 
@@ -463,10 +475,7 @@ public class TournamentController {
     public record RegisterForTournamentCommand(List<Long> deckIds) {}
 
     @RegisterForReflection
-    public record AddTableCommand(int roundNumber) {}
-
-    @RegisterForReflection
-    public record AddSeatCommand(Long registrationId, int seatPosition) {}
+    public record AddSeatCommand(Long registrationId, int seatPosition, int roundNumber) {}
 
     @RegisterForReflection
     public record AddByeCommand(Long registrationId) {}
@@ -474,14 +483,14 @@ public class TournamentController {
     @RegisterForReflection
     public record TournamentGameDto(Long tableId, int roundNumber, Long gameId, String gameName,
                                     List<SeatInfo> players) {
-        TournamentGameDto(TournamentTable table) {
+        TournamentGameDto(TournamentTableGame tg) {
             this(
-                table.id,
-                table.roundNumber,
-                table.game.id,
-                table.game.name,
-                table.seats.stream()
-                    .filter(s -> !s.bye)
+                tg.table.id,
+                tg.roundNumber,
+                tg.game.id,
+                tg.game.name,
+                tg.table.seats.stream()
+                    .filter(s -> !s.bye && s.roundNumber == tg.roundNumber)
                     .sorted(java.util.Comparator.comparingInt(s -> s.seatPosition))
                     .map(s -> new SeatInfo(s.registration.user.username, s.seatPosition))
                     .toList()

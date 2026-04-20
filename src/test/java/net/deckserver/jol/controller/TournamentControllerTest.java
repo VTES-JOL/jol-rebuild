@@ -334,7 +334,7 @@ public class TournamentControllerTest {
 
         long tableId = ((Number) given()
                 .contentType(ContentType.JSON)
-                .body("{\"roundNumber\": 1}")
+                .body("{}")
                 .when().post("/api/tournaments/" + id + "/tables")
                 .then().statusCode(200)
                 .extract().path("id")).longValue();
@@ -349,9 +349,9 @@ public class TournamentControllerTest {
 
     @Test
     @TestSecurity(user = "admin", roles = "TOURNAMENT_ADMIN")
-    public void testAddTableInvalidRound() {
+    public void testAddSeatWithInvalidRound() {
         Tournament tournament = new Tournament();
-        tournament.name = "Invalid Round Test";
+        tournament.name = "Invalid Round Seat Test";
 
         long id = ((Number) given()
                 .contentType(ContentType.JSON)
@@ -367,10 +367,18 @@ public class TournamentControllerTest {
                 .when().post("/api/tournaments/" + id + "/seat")
                 .then().statusCode(200);
 
+        long tableId = ((Number) given()
+                .contentType(ContentType.JSON)
+                .body("{}")
+                .when().post("/api/tournaments/" + id + "/tables")
+                .then().statusCode(200)
+                .extract().path("id")).longValue();
+
+        // roundNumber 99 is outside [1, numberOfRounds=2] — should be 400
         given()
                 .contentType(ContentType.JSON)
-                .body("{\"roundNumber\": 99}")
-                .when().post("/api/tournaments/" + id + "/tables")
+                .body("{\"registrationId\": 1, \"seatPosition\": 1, \"roundNumber\": 99}")
+                .when().post("/api/tournaments/" + id + "/tables/" + tableId + "/seats")
                 .then().statusCode(400);
 
         // Cleanup

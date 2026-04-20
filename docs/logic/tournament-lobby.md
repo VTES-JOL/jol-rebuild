@@ -63,7 +63,7 @@ Seating is managed during `SEATING` status. The admin arranges all registered pl
 - All available seats must be filled before accepting byes.
 
 ### Extra Rounds
-While in `SEATING` status, an admin can increment `numberOfRounds` up to one higher than originally defined, in order to give each player an similar number of games in the tournament.
+While in `SEATING` status, an admin can increment `numberOfRounds` up to one higher than originally defined, to give each player an similar number of games in the tournament.
 
 ## Activation
 Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation:
