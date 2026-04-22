@@ -7,7 +7,7 @@ import gameApi from '@/features/game/api';
 import {baseFetch} from '@/shared/api/client.ts';
 
 interface Props {
-    gameId: number;
+    gameId: string;
     onDetailRefresh: () => void;
     onChanged?: () => void;
 }

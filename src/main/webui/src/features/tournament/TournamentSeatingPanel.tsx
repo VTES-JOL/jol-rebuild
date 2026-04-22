@@ -231,7 +231,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
 
 function UnseatedDropdown({unseated, onAssign, disabled}: {
     unseated: UnseatedPlayer[];
-    onAssign: (regId: number) => void;
+    onAssign: (regId: string) => void;
     disabled: boolean;
 }) {
     const [open, setOpen] = useState(false);
@@ -266,7 +266,7 @@ function UnseatedDropdown({unseated, onAssign, disabled}: {
 
 function UnseatedByeDropdown({unseated, onAssign, disabled}: {
     unseated: UnseatedPlayer[];
-    onAssign: (regId: number) => void;
+    onAssign: (regId: string) => void;
     disabled: boolean;
 }) {
     const [open, setOpen] = useState(false);

@@ -1,6 +1,6 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -8,7 +8,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "tournament_table")
-public class TournamentTable extends PanacheEntity {
+public class TournamentTable extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
 
     @ManyToOne
     public Tournament tournament;

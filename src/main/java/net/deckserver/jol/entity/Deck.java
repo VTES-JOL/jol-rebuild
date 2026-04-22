@@ -1,6 +1,6 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import net.deckserver.jol.enums.GameFormat;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -11,7 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Deck extends PanacheEntity {
+public class Deck extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
 
     @ManyToOne(optional = false)
     public User user;

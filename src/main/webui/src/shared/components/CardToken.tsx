@@ -1,6 +1,6 @@
 import {useCardPreview} from '@/hooks/useCardPreview.tsx';
 
-export function CardToken({ id, label }: { id: number; label: string }) {
+export function CardToken({ id, label }: { id: string; label: string }) {
     const { anchorRef, onMouseEnter, onMouseLeave, onClick, tooltip } = useCardPreview<HTMLSpanElement>(id);
 
     return (

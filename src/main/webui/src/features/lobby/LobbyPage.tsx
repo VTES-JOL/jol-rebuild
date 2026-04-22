@@ -16,11 +16,11 @@ export default function LobbyPage() {
     const {subscribeToLobby} = useLobbySocket();
     
     const [games, setGames] = useState<GameDto[]>([]);
-    const [invitedIds, setInvitedIds] = useState<Set<number>>(new Set());
-    const [registeredIds, setRegisteredIds] = useState<Set<number>>(new Set());
-    const [ownedIds, setOwnedIds] = useState<Set<number>>(new Set());
-    const [activeIds, setActiveIds] = useState<Set<number>>(new Set());
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
+    const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
+    const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
+    const [activeIds, setActiveIds] = useState<Set<string>>(new Set());
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [showCreate, setShowCreate] = useState(false);
@@ -40,13 +40,13 @@ export default function LobbyPage() {
             setActiveIds(new Set(active.map(g => g.id)));
 
             const all = [...open, ...active, ...registered, ...invited, ...owned];
-            const seen = new Set<number>();
+            const seen = new Set<string>();
             const unique = all.filter(g => {
                 if (seen.has(g.id)) return false;
                 seen.add(g.id);
                 return true;
             });
-            unique.sort((a, b) => b.id - a.id);
+            unique.sort((a, b) => b.id.localeCompare(a.id));
             setGames(unique);
             setLoadError(null);
         }).catch(e => {

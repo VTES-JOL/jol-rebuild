@@ -51,7 +51,7 @@ public class GameController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("USER")
-    public Response update(@PathParam("id") Long id, @Valid GameUpdateCommand command) {
+    public Response update(@PathParam("id") String id, @Valid GameUpdateCommand command) {
         Game entity = Game.findById(id);
         if (entity == null) throw new NotFoundException();
         String username = identity.getPrincipal().getName();
@@ -71,7 +71,7 @@ public class GameController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("USER")
-    public Response deleteGame(@PathParam("id") Long id) {
+    public Response deleteGame(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
@@ -89,7 +89,7 @@ public class GameController {
 
     @GET
     @Path("/{id}")
-    public GameDto get(@PathParam("id") Long id) {
+    public GameDto get(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
         return new GameDto(game);
@@ -157,7 +157,7 @@ public class GameController {
     @GET
     @Path("/{id}/registrations")
     @RolesAllowed("USER")
-    public Response getRegistrations(@PathParam("id") Long id) {
+    public Response getRegistrations(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
@@ -179,7 +179,7 @@ public class GameController {
     @Path("/{id}/register")
     @Transactional
     @RolesAllowed("USER")
-    public Response register(@PathParam("id") Long id, RegisterCommand command) {
+    public Response register(@PathParam("id") String id, RegisterCommand command) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
         if (game.status != Status.OPEN) {
@@ -223,7 +223,7 @@ public class GameController {
     @Path("/{id}/register")
     @Transactional
     @RolesAllowed("USER")
-    public Response leaveGame(@PathParam("id") Long id) {
+    public Response leaveGame(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
@@ -242,7 +242,7 @@ public class GameController {
     @Path("/{id}/format")
     @Transactional
     @RolesAllowed("USER")
-    public Response updateFormat(@PathParam("id") Long id, FormatUpdateCommand command) {
+    public Response updateFormat(@PathParam("id") String id, FormatUpdateCommand command) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
@@ -265,7 +265,7 @@ public class GameController {
     @Path("/{id}/invite")
     @Transactional
     @RolesAllowed("USER")
-    public Response invite(@PathParam("id") Long id, InviteCommand command) {
+    public Response invite(@PathParam("id") String id, InviteCommand command) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
@@ -294,7 +294,7 @@ public class GameController {
     public record GameUpdateCommand(@NotBlank @Size(max = 255) String name, Visibility visibility) {}
 
     @RegisterForReflection
-    public record RegisterCommand(Long deckId) {}
+    public record RegisterCommand(String deckId) {}
 
     @RegisterForReflection
     public record FormatUpdateCommand(GameFormat format) {}

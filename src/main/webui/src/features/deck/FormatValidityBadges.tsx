@@ -14,7 +14,7 @@ const FORMATS = [
 type FormatKey = (typeof FORMATS)[number]['key'];
 
 interface Props {
-    deckId: number;
+    deckId: string;
     formatValidity: Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
     className?: string;
 }

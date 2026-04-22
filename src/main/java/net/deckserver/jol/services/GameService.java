@@ -27,7 +27,7 @@ public class GameService {
             if (openGames.isEmpty()) {
                 String gameName = nameService.generateName();
                 Game game = Game.create(null, gameName, Visibility.PUBLIC, format);
-                String gameToken = String.format("[game:%d:%s]", game.id, gameName);
+                String gameToken = String.format("[game:%s:%s]", game.id, gameName);
                 lobbyChatBroadcaster.announce("A new game " + gameToken + " has been created!");
             }
         }

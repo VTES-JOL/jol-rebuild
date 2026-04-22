@@ -33,11 +33,11 @@ export function useChat({ url, username, onSystemError }: UseChatOptions) {
 
     const { status, send } = useWebSocket({ url, onMessage: handleMessage });
 
-    const handleSend = useCallback((content: string, replyToId?: number) => {
+    const handleSend = useCallback((content: string, replyToId?: string) => {
         send({ type: 'CHAT', content, replyToId });
     }, [send]);
 
-    const handleReact = useCallback((messageId: number, emoji: string) => {
+    const handleReact = useCallback((messageId: string, emoji: string) => {
         setMessages(prev => applyOptimisticReaction(prev, messageId, emoji, username));
         send({ type: 'REACTION', id: messageId, emoji });
     }, [send, username]);

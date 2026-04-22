@@ -1,10 +1,7 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.TournamentFormat;
 import net.deckserver.jol.enums.TournamentStatus;
@@ -16,7 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Tournament extends PanacheEntity {
+public class Tournament extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
 
     public String name;
 

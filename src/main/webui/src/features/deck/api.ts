@@ -24,11 +24,11 @@ const deckApi = {
         }));
     },
 
-    async getContents(id: number): Promise<KrcgContents> {
+    async getContents(id: string): Promise<KrcgContents> {
         return json(await baseFetch(`${BASE}/${id}/contents`, OPTS));
     },
 
-    async save(id: number, patch: { name?: string; contents?: KrcgContents; summary?: string | null; comments?: string | null }): Promise<Deck> {
+    async save(id: string, patch: { name?: string; contents?: KrcgContents; summary?: string | null; comments?: string | null }): Promise<Deck> {
         return json(await baseFetch(`${BASE}/${id}`, {
             ...OPTS, method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -36,15 +36,15 @@ const deckApi = {
         }));
     },
 
-    async validityAll(id: number): Promise<Record<string, boolean>> {
+    async validityAll(id: string): Promise<Record<string, boolean>> {
         return json(await baseFetch(`${BASE}/${id}/validity`, OPTS));
     },
 
-    async validity(id: number, format: string): Promise<FormatValidity> {
+    async validity(id: string, format: string): Promise<FormatValidity> {
         return json(await baseFetch(`${BASE}/${id}/validity/${format}`, OPTS));
     },
 
-    async remove(id: number): Promise<void> {
+    async remove(id: string): Promise<void> {
         const res = await baseFetch(`${BASE}/${id}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },

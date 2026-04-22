@@ -21,7 +21,7 @@ const baseGroup = {
     shortTime: '10:02',
     lines: [
         {
-            id: 1,
+            id: '1',
             content: 'Hello everyone!',
             reactions: [],
             replyTo: null,
@@ -51,7 +51,7 @@ export const WithReactions: Story = {
             ...baseGroup,
             lines: [
                 {
-                    id: 2,
+                    id: '2',
                     content: 'I think [card:100266:Bum\'s Rush] is the play.',
                     reactions: [
                         {emoji: '👍', senders: ['Alex', 'Sam']},

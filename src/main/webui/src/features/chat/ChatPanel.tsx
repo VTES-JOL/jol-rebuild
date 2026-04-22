@@ -19,8 +19,8 @@ type LiveChatPanelProps = BaseChatPanelProps & {
 type ManualChatPanelProps = BaseChatPanelProps & {
     messages: ChatMsg[];
     status: Status;
-    onSend: (content: string, replyToId?: number) => void;
-    onReact: (messageId: number, emoji: string) => void;
+    onSend: (content: string, replyToId?: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
 };
 
 type ChatPanelProps = LiveChatPanelProps | ManualChatPanelProps;

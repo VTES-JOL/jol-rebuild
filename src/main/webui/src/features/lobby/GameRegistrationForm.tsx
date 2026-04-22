@@ -5,7 +5,7 @@ import gameApi, {type RegistrationInfo} from '@/features/game/api';
 import type {Deck} from '@/features/deck/types';
 
 interface Props {
-    gameId: number;
+    gameId: string;
     myRegistration: RegistrationInfo | undefined;
     isInvited: boolean;
     isFull: boolean;
@@ -17,7 +17,7 @@ interface Props {
 export default function GameRegistrationForm({
     gameId, myRegistration, isInvited, isFull, myDecks, onChanged, onDetailRefresh,
 }: Props) {
-    const [selectedDeckId, setSelectedDeckId] = useState<number | string>('');
+    const [selectedDeckId, setSelectedDeckId] = useState<string>('');
     const [error, setError] = useState<string | null>(null);
     const isRegistered = !!myRegistration;
 
@@ -25,7 +25,7 @@ export default function GameRegistrationForm({
         if (!selectedDeckId) return;
         setError(null);
         try {
-            await gameApi.registerForGame(gameId, Number(selectedDeckId));
+            await gameApi.registerForGame(gameId, selectedDeckId);
             onChanged?.();
             onDetailRefresh();
         } catch (e) {

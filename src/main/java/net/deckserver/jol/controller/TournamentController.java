@@ -57,7 +57,7 @@ public class TournamentController {
 
     @GET
     @Path("/{id}")
-    public Tournament get(@PathParam("id") Long id) {
+    public Tournament get(@PathParam("id") String id) {
         Tournament tournament = Tournament.findById(id);
         if (tournament == null) throw new NotFoundException();
         if (!identity.hasRole("TOURNAMENT_ADMIN") && !PLAYER_VISIBLE_STATUSES.contains(tournament.status)) {
@@ -80,7 +80,7 @@ public class TournamentController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament update(@PathParam("id") Long id, Tournament updated) {
+    public Tournament update(@PathParam("id") String id, Tournament updated) {
         Tournament entity = Tournament.findById(id);
         if (entity == null) throw new NotFoundException();
         if (entity.status != TournamentStatus.SETUP) {
@@ -105,7 +105,7 @@ public class TournamentController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public void delete(@PathParam("id") Long id) {
+    public void delete(@PathParam("id") String id) {
         Tournament entity = Tournament.findById(id);
         if (entity == null) throw new NotFoundException();
         entity.delete();
@@ -117,7 +117,7 @@ public class TournamentController {
     @Path("/{id}/publish")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament publish(@PathParam("id") Long id) {
+    public Tournament publish(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SETUP) {
             throw new BadRequestException("Tournament must be in SETUP status to publish");
@@ -130,7 +130,7 @@ public class TournamentController {
     @Path("/{id}/unpublish")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament unpublish(@PathParam("id") Long id) {
+    public Tournament unpublish(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.REGISTRATION) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to unpublish");
@@ -145,7 +145,7 @@ public class TournamentController {
     @Path("/{id}/seat")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament beginSeating(@PathParam("id") Long id) {
+    public Tournament beginSeating(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.REGISTRATION) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to begin seating");
@@ -159,7 +159,7 @@ public class TournamentController {
     @Path("/{id}/activate")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament activate(@PathParam("id") Long id) {
+    public Tournament activate(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to activate");
@@ -175,7 +175,7 @@ public class TournamentController {
     @GET
     @Path("/{id}/registrations")
     @RolesAllowed({"USER"})
-    public List<TournamentRegistrationDto> getRegistrations(@PathParam("id") Long id) {
+    public List<TournamentRegistrationDto> getRegistrations(@PathParam("id") String id) {
         Tournament t = require(id);
         return TournamentRegistration.findByTournament(t).stream()
             .map(TournamentRegistrationDto::from)
@@ -186,7 +186,7 @@ public class TournamentController {
     @Path("/{id}/registrations")
     @Transactional
     @RolesAllowed("USER")
-    public Response register(@PathParam("id") Long id, RegisterForTournamentCommand command) {
+    public Response register(@PathParam("id") String id, RegisterForTournamentCommand command) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.REGISTRATION) {
             return Response.status(Response.Status.CONFLICT).entity("Tournament is not open for registration").build();
@@ -214,7 +214,7 @@ public class TournamentController {
         reg.tournament = t;
         reg.user = me;
 
-        for (Long deckId : command.deckIds()) {
+        for (String deckId : command.deckIds()) {
             Deck deck = Deck.findById(deckId);
             if (deck == null || !deck.user.id.equals(me.id)) {
                 return Response.status(Response.Status.NOT_FOUND).entity("Deck " + deckId + " not found").build();
@@ -240,7 +240,7 @@ public class TournamentController {
     @Path("/{id}/registrations")
     @Transactional
     @RolesAllowed("USER")
-    public Response unregister(@PathParam("id") Long id) {
+    public Response unregister(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.REGISTRATION) {
             return Response.status(Response.Status.CONFLICT).entity("Cannot leave tournament outside of registration period").build();
@@ -259,7 +259,7 @@ public class TournamentController {
     @GET
     @Path("/{id}/seating")
     @RolesAllowed({"USER", "TOURNAMENT_ADMIN"})
-    public SeatingDto getSeating(@PathParam("id") Long id) {
+    public SeatingDto getSeating(@PathParam("id") String id) {
         Tournament t = require(id);
         return tournamentService.buildSeatingDto(t);
     }
@@ -268,7 +268,7 @@ public class TournamentController {
     @Path("/{id}/tables")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response addTable(@PathParam("id") Long id) {
+    public Response addTable(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage tables");
@@ -283,7 +283,7 @@ public class TournamentController {
     @Path("/{id}/tables/{tableId}")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response removeTable(@PathParam("id") Long id, @PathParam("tableId") Long tableId) {
+    public Response removeTable(@PathParam("id") String id, @PathParam("tableId") String tableId) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage tables");
@@ -298,7 +298,7 @@ public class TournamentController {
     @Path("/{id}/tables/{tableId}/seats")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response addSeat(@PathParam("id") Long id, @PathParam("tableId") Long tableId, AddSeatCommand command) {
+    public Response addSeat(@PathParam("id") String id, @PathParam("tableId") String tableId, AddSeatCommand command) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage seats");
@@ -340,7 +340,7 @@ public class TournamentController {
     @Path("/{id}/tables/{tableId}/seats/{seatId}")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response removeSeat(@PathParam("id") Long id, @PathParam("tableId") Long tableId, @PathParam("seatId") Long seatId) {
+    public Response removeSeat(@PathParam("id") String id, @PathParam("tableId") String tableId, @PathParam("seatId") String seatId) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage seats");
@@ -355,7 +355,7 @@ public class TournamentController {
     @Path("/{id}/rounds/{roundNumber}/byes")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response addBye(@PathParam("id") Long id, @PathParam("roundNumber") int roundNumber, AddByeCommand command) {
+    public Response addBye(@PathParam("id") String id, @PathParam("roundNumber") int roundNumber, AddByeCommand command) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage byes");
@@ -397,7 +397,7 @@ public class TournamentController {
     @Path("/{id}/seats/{seatId}")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Response removeSeatOrBye(@PathParam("id") Long id, @PathParam("seatId") Long seatId) {
+    public Response removeSeatOrBye(@PathParam("id") String id, @PathParam("seatId") String seatId) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Tournament must be in SEATING status to manage seats");
@@ -412,7 +412,7 @@ public class TournamentController {
     @Path("/{id}/extra-round")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament addExtraRound(@PathParam("id") Long id) {
+    public Tournament addExtraRound(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Can only add rounds during SEATING status");
@@ -430,7 +430,7 @@ public class TournamentController {
     @GET
     @Path("/{id}/games")
     @RolesAllowed({"USER", "TOURNAMENT_ADMIN"})
-    public List<Object> getTournamentGames(@PathParam("id") Long id) {
+    public List<Object> getTournamentGames(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.ACTIVE && t.status != TournamentStatus.SEEDING
                 && t.status != TournamentStatus.FINALS && t.status != TournamentStatus.COMPLETED) {
@@ -456,7 +456,7 @@ public class TournamentController {
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
-    private Tournament require(Long id) {
+    private Tournament require(String id) {
         Tournament t = Tournament.findById(id);
         if (t == null) throw new NotFoundException();
         return t;
@@ -472,16 +472,16 @@ public class TournamentController {
     public record CreateTournamentCommand(String name) {}
 
     @RegisterForReflection
-    public record RegisterForTournamentCommand(List<Long> deckIds) {}
+    public record RegisterForTournamentCommand(List<String> deckIds) {}
 
     @RegisterForReflection
-    public record AddSeatCommand(Long registrationId, int seatPosition, int roundNumber) {}
+    public record AddSeatCommand(String registrationId, int seatPosition, int roundNumber) {}
 
     @RegisterForReflection
-    public record AddByeCommand(Long registrationId) {}
+    public record AddByeCommand(String registrationId) {}
 
     @RegisterForReflection
-    public record TournamentGameDto(Long tableId, int roundNumber, Long gameId, String gameName,
+    public record TournamentGameDto(String tableId, int roundNumber, String gameId, String gameName,
                                     List<SeatInfo> players) {
         TournamentGameDto(TournamentTableGame tg) {
             this(

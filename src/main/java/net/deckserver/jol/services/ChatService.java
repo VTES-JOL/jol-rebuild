@@ -17,7 +17,7 @@ public class ChatService {
     private static final int HISTORY_LIMIT = 50;
 
     @Transactional
-    public ChatMessageDto save(String gameId, String sender, String content, Long replyToId) {
+    public ChatMessageDto save(String gameId, String sender, String content, String replyToId) {
         ChatMessage replyTo = replyToId != null ? ChatMessage.findById(replyToId) : null;
         ChatMessage entity = ChatMessage.create(gameId, sender, content, replyTo);
 
@@ -30,7 +30,7 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageDto toggleReaction(Long messageId, String sender, String emoji) {
+    public ChatMessageDto toggleReaction(String messageId, String sender, String emoji) {
         ChatMessage message = ChatMessage.findById(messageId);
         if (message == null) throw new IllegalArgumentException("Message not found: " + messageId);
 
@@ -43,7 +43,7 @@ public class ChatService {
         return ChatMessageDto.reaction(messageId, reactions);
     }
 
-    public boolean messageExistsInGame(Long messageId, String gameId) {
+    public boolean messageExistsInGame(String messageId, String gameId) {
         ChatMessage msg = ChatMessage.findById(messageId);
         return msg != null && gameId.equals(msg.gameId);
     }

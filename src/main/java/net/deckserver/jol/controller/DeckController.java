@@ -73,7 +73,7 @@ public class DeckController {
     @GET
     @Path("/{id}/contents")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response contents(@PathParam("id") long id) throws JsonProcessingException {
+    public Response contents(@PathParam("id") String id) throws JsonProcessingException {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         String raw = deck.contents != null ? deck.contents : "{}";
@@ -82,7 +82,7 @@ public class DeckController {
 
     @GET
     @Path("/{id}/validity")
-    public Response validityAll(@PathParam("id") long id) {
+    public Response validityAll(@PathParam("id") String id) {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         Map<String, Boolean> result = DeckFormatValidity.findByDeck(id).stream()
@@ -92,7 +92,7 @@ public class DeckController {
 
     @GET
     @Path("/{id}/validity/{format}")
-    public Response validity(@PathParam("id") long id, @PathParam("format") GameFormat format) {
+    public Response validity(@PathParam("id") String id, @PathParam("format") GameFormat format) {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         return DeckFormatValidity.findByDeckAndFormat(id, format)
@@ -114,7 +114,7 @@ public class DeckController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("USER")
-    public Response update(@PathParam("id") long id, @Valid DeckUpdateCommand command) throws JsonProcessingException {
+    public Response update(@PathParam("id") String id, @Valid DeckUpdateCommand command) throws JsonProcessingException {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         if (command.name() != null) deck.name = command.name();
@@ -135,7 +135,7 @@ public class DeckController {
     @Path("/{id}")
     @Transactional
     @RolesAllowed("USER")
-    public Response delete(@PathParam("id") long id) {
+    public Response delete(@PathParam("id") String id) {
         Deck deck = ownedDeck(id);
         if (deck == null) return Response.status(Response.Status.NOT_FOUND).build();
         deck.delete();
@@ -165,7 +165,7 @@ public class DeckController {
     /**
      * Returns the deck only if it exists and belongs to the current user.
      */
-    private Deck ownedDeck(long id) {
+    private Deck ownedDeck(String id) {
         Deck deck = Deck.findById(id);
         if (deck == null || !deck.user.username.equals(identity.getPrincipal().getName())) return null;
         return deck;

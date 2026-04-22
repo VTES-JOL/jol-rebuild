@@ -22,11 +22,12 @@ type Story = StoryObj<typeof meta>;
 
 const sampleTournaments: Tournament[] = [
     {
-        id: 1,
+        id: '1',
         name: 'Spring Standard Open',
         format: 'SINGLE_DECK',
         gameFormat: 'STANDARD',
         numberOfRounds: 3,
+    originalNumberOfRounds: 3,
         finalRound: true,
         requiresId: false,
         rules: [],
@@ -37,11 +38,12 @@ const sampleTournaments: Tournament[] = [
         playingStart: '2026-04-21T10:00:00Z',
     },
     {
-        id: 2,
+        id: '2',
         name: 'Duel Championship Series',
         format: 'SINGLE_DECK',
         gameFormat: 'DUEL',
         numberOfRounds: 2,
+    originalNumberOfRounds: 3,
         finalRound: true,
         requiresId: true,
         rules: [],
@@ -50,11 +52,12 @@ const sampleTournaments: Tournament[] = [
         playingStart: '2026-04-10T09:00:00Z',
     },
     {
-        id: 3,
+        id: '3',
         name: 'V5 Invitational',
         format: 'MULTI_DECK',
         gameFormat: 'V5',
         numberOfRounds: 3,
+    originalNumberOfRounds: 3,
         finalRound: false,
         requiresId: true,
         rules: [],
@@ -62,11 +65,12 @@ const sampleTournaments: Tournament[] = [
         status: 'SETUP',
     },
     {
-        id: 4,
+        id: '4',
         name: 'Autumn Sealed Tournament',
         format: 'SINGLE_DECK',
         gameFormat: 'STANDARD',
         numberOfRounds: 2,
+    originalNumberOfRounds: 3,
         finalRound: false,
         requiresId: false,
         rules: [],
@@ -78,11 +82,12 @@ const sampleTournaments: Tournament[] = [
         playingEnd: '2025-10-15T20:00:00Z',
     },
     {
-        id: 5,
+        id: '5',
         name: 'Finals Qualifier Round',
         format: 'SINGLE_DECK',
         gameFormat: 'STANDARD',
         numberOfRounds: 3,
+    originalNumberOfRounds: 3,
         finalRound: true,
         requiresId: false,
         rules: [],
@@ -90,11 +95,12 @@ const sampleTournaments: Tournament[] = [
         status: 'FINALS',
     },
     {
-        id: 6,
+        id: '6',
         name: 'Seating Phase Test',
         format: 'SINGLE_DECK',
         gameFormat: 'STANDARD',
         numberOfRounds: 2,
+    originalNumberOfRounds: 3,
         finalRound: false,
         requiresId: false,
         rules: [],
@@ -158,7 +164,7 @@ export const PlayerView: Story = {
 export const WithSelection: Story = {
     args: {
         tournaments: sampleTournaments,
-        selectedId: 2,
+        selectedId: '2',
         loading: false,
         isTournamentAdmin: false,
     },
@@ -166,7 +172,7 @@ export const WithSelection: Story = {
 
 export const Interactive: Story = {
     render: (args) => {
-        const [selectedId, setSelectedId] = useState<number | null>(null);
+        const [selectedId, setSelectedId] = useState<string | null>(null);
         return (
             <div style={{width: 320, height: 560}}>
                 <TournamentListPanel
@@ -185,11 +191,12 @@ export const Interactive: Story = {
 };
 
 const manyTournaments: Tournament[] = Array.from({length: 18}, (_, i) => ({
-    id: 100 + i,
+    id: String(100 + i),
     name: `Tournament ${i + 1} — ${'ABCDEFGHIJKLMNOPQR'[i]}`,
     format: i % 2 === 0 ? 'SINGLE_DECK' : 'MULTI_DECK',
     gameFormat: ['STANDARD', 'DUEL', 'V5'][i % 3],
     numberOfRounds: i % 3 === 0 ? 3 : 2,
+    originalNumberOfRounds: i % 3 === 0 ? 3 : 2,
     finalRound: i % 4 === 0,
     requiresId: i % 5 === 0,
     rules: [],

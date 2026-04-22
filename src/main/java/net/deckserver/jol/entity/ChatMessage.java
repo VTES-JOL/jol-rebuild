@@ -1,6 +1,6 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -9,7 +9,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "chat_messages")
-public class ChatMessage extends PanacheEntity {
+public class ChatMessage extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
 
     @Column(length = 64)
     public String gameId; // null for lobby chat
@@ -49,7 +52,7 @@ public class ChatMessage extends PanacheEntity {
                 .page(0, limit)
                 .list();
 
-        List<Long> ids = recents.stream().map(m -> m.id).toList();
+        List<String> ids = recents.stream().map(m -> m.id).toList();
         if (ids.isEmpty()) return List.of();
 
         return find(

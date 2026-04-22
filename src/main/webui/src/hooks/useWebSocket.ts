@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 
 export interface ReactionDto   { emoji: string; senders: string[] }
-export interface ReplySnapshot { id: number; sender: string; content: string }
+export interface ReplySnapshot { id: string; sender: string; content: string }
 
 // ─── Inbound messages (server → client) ──────────────────────────────────────
 
 export interface ChatMsg {
     type: 'CHAT';
-    id: number;
+    id: string;
     sender: string;
     content: string;
     timestamp: string;
@@ -22,7 +22,7 @@ interface HistoryMsg {
 
 interface ReactionUpdateMsg {
     type: 'REACTION';
-    id: number;
+    id: string;
     reactions: ReactionDto[];
 }
 
@@ -33,7 +33,7 @@ interface ErrorMsg {
 
 interface LobbyUpdateMsg {
     type: 'LOBBY_UPDATE';
-    gameId: number;
+    gameId: string;
 }
 
 export type ChatMessage = ChatMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | LobbyUpdateMsg;
@@ -41,8 +41,8 @@ export type ChatMessage = ChatMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | 
 // ─── Outbound messages (client → server) ─────────────────────────────────────
 
 export type OutboundMessage =
-    | { type: 'CHAT'; content: string; replyToId?: number }
-    | { type: 'REACTION'; id: number; emoji: string };
+    | { type: 'CHAT'; content: string; replyToId?: string }
+    | { type: 'REACTION'; id: string; emoji: string };
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 

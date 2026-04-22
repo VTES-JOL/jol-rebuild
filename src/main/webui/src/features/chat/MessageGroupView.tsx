@@ -20,9 +20,9 @@ interface MessageGroupViewProps {
     group: MessageGroup;
     showLine: boolean;
     currentUser: string;
-    onReact: (messageId: number, emoji: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
     onReply: (snapshot: ReplySnapshot) => void;
-    onJumpTo: (id: number) => void;
+    onJumpTo: (id: string) => void;
     disabled: boolean;
     enableReactions: boolean;
     enableReply: boolean;

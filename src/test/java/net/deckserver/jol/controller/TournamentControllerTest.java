@@ -22,7 +22,7 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Test Tournament";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
@@ -30,7 +30,7 @@ public class TournamentControllerTest {
                 .statusCode(200)
                 .body("name", is("Test Tournament"))
                 .body("status", is("SETUP"))
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given()
                 .when().get("/api/tournaments/" + id)
@@ -46,13 +46,13 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Initial Name";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then()
                 .statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         tournament.name = "Updated Name";
         given()
@@ -94,13 +94,13 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Setup Visibility Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then()
                 .statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         // Admin can see it directly
         given()
@@ -130,13 +130,13 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Delete Me";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then()
                 .statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given()
                 .when().delete("/api/tournaments/" + id)
@@ -166,12 +166,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Publish Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given()
                 .contentType(ContentType.JSON)
@@ -190,12 +190,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Double Publish Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         // First publish succeeds
         given().contentType(ContentType.JSON)
@@ -227,12 +227,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Unpublish Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")
@@ -254,12 +254,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Seating Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")
@@ -281,12 +281,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Activate Fail Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")
@@ -317,12 +317,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Table Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")
@@ -332,12 +332,12 @@ public class TournamentControllerTest {
                 .when().post("/api/tournaments/" + id + "/seat")
                 .then().statusCode(200);
 
-        long tableId = ((Number) given()
+        String tableId = given()
                 .contentType(ContentType.JSON)
                 .body("{}")
                 .when().post("/api/tournaments/" + id + "/tables")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given()
                 .when().delete("/api/tournaments/" + id + "/tables/" + tableId)
@@ -353,12 +353,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Invalid Round Seat Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")
@@ -367,12 +367,12 @@ public class TournamentControllerTest {
                 .when().post("/api/tournaments/" + id + "/seat")
                 .then().statusCode(200);
 
-        long tableId = ((Number) given()
+        String tableId = given()
                 .contentType(ContentType.JSON)
                 .body("{}")
                 .when().post("/api/tournaments/" + id + "/tables")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         // roundNumber 99 is outside [1, numberOfRounds=2] — should be 400
         given()
@@ -392,12 +392,12 @@ public class TournamentControllerTest {
         tournament.name = "Extra Round Test";
         tournament.numberOfRounds = 2;
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")
@@ -430,12 +430,12 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.name = "Seating DTO Test";
 
-        long id = ((Number) given()
+        String id = given()
                 .contentType(ContentType.JSON)
                 .body(tournament)
                 .when().post("/api/tournaments")
                 .then().statusCode(200)
-                .extract().path("id")).longValue();
+                .extract().<String>path("id");
 
         given().contentType(ContentType.JSON)
                 .when().post("/api/tournaments/" + id + "/publish")

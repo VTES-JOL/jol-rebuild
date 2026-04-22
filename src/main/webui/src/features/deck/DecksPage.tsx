@@ -16,7 +16,7 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function DecksPage() {
     const [decks,           setDecks]           = useState<Deck[]>([]);
-    const [selectedId,      setSelectedId]      = useState<number | null>(null);
+    const [selectedId,      setSelectedId]      = useState<string | null>(null);
     const [entries,         setEntries]         = useState<DeckEntry[]>([]);
     const [detailMap,       setDetailMap]       = useState<Map<string, CardDetailData>>(new Map());
     const [saveStatus,      setSaveStatus]      = useState<SaveStatus>('idle');

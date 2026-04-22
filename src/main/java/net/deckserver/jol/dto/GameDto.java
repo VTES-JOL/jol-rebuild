@@ -9,7 +9,7 @@ import net.deckserver.jol.enums.Visibility;
 
 @RegisterForReflection
 public class GameDto {
-    public Long id;
+    public String id;
     public String name;
     public Status status;
     public GameFormat format;

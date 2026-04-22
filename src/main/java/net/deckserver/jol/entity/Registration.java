@@ -1,9 +1,7 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.*;
 import net.deckserver.jol.enums.Status;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -12,7 +10,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
-public class Registration extends PanacheEntity {
+public class Registration extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
     @ManyToOne
     public User user;
 
@@ -78,7 +79,7 @@ public class Registration extends PanacheEntity {
         return find("game.id = ?1 and deck is null", game.id).list();
     }
 
-    public static long countForGame(Long gameId) {
+    public static long countForGame(String gameId) {
         return count("game.id = ?1 and deck is not null", gameId);
     }
 

@@ -33,11 +33,12 @@ const pastDate = (days: number) => new Date(NOW.getTime() - days * 86_400_000).t
 const futureDate = (days: number) => new Date(NOW.getTime() + days * 86_400_000).toISOString();
 
 const baseTournament: Tournament = {
-    id: 42,
+    id: '42',
     name: 'Spring Standard Open',
     format: 'SINGLE_DECK',
     gameFormat: 'STANDARD',
     numberOfRounds: 3,
+    originalNumberOfRounds: 3,
     finalRound: true,
     requiresId: false,
     rules: [],
@@ -48,20 +49,20 @@ const baseTournament: Tournament = {
 };
 
 const availableDecks: Deck[] = [
-    {id: 1, name: 'Weenie Animalism', summary: '12,80,4/5', comments: 'Rush aggro', timestamp: pastDate(10), formatValidity: {STANDARD: true}},
-    {id: 2, name: 'Political Ventrue', summary: '13,77,3/4', comments: null, timestamp: pastDate(3), formatValidity: {STANDARD: true}},
-    {id: 3, name: 'Ravnos Toolbox', summary: '12,78,5/6', comments: null, timestamp: pastDate(20), formatValidity: {STANDARD: true}},
+    {id: '1', name: 'Weenie Animalism', summary: '12,80,4/5', comments: 'Rush aggro', timestamp: pastDate(10), formatValidity: {STANDARD: true}},
+    {id: '2', name: 'Political Ventrue', summary: '13,77,3/4', comments: null, timestamp: pastDate(3), formatValidity: {STANDARD: true}},
+    {id: '3', name: 'Ravnos Toolbox', summary: '12,78,5/6', comments: null, timestamp: pastDate(20), formatValidity: {STANDARD: true}},
 ];
 
 const myRegistration: TournamentRegistration = {
-    id: 101, userId: 'user-1', username: 'dracula',
+    id: '101', userId: 'user-1', username: 'dracula',
     decks: [{deckName: 'Weenie Animalism', summary: '12,80,4/5'}],
 };
 
 const otherRegistrations: TournamentRegistration[] = [
-    {id: 102, userId: 'user-2', username: 'lasombra', decks: [{deckName: 'Political Ventrue', summary: '13,77,3/4'}]},
-    {id: 103, userId: 'user-3', username: 'malkav', decks: [{deckName: 'Malkavian Madness', summary: '12,78,3/4'}]},
-    {id: 104, userId: 'user-4', username: 'brujah', decks: [{deckName: 'Rush Brujah', summary: '12,80,3'}]},
+    {id: '102', userId: 'user-2', username: 'lasombra', decks: [{deckName: 'Political Ventrue', summary: '13,77,3/4'}]},
+    {id: '103', userId: 'user-3', username: 'malkav', decks: [{deckName: 'Malkavian Madness', summary: '12,78,3/4'}]},
+    {id: '104', userId: 'user-4', username: 'brujah', decks: [{deckName: 'Rush Brujah', summary: '12,80,3'}]},
 ];
 
 // ── Meta ──────────────────────────────────────────────────────────────────────
@@ -159,6 +160,7 @@ export const MultiDeckNotRegistered: Story = {
             ...baseTournament,
             format: 'MULTI_DECK',
             numberOfRounds: 3,
+    originalNumberOfRounds: 3,
         },
     },
 };
@@ -168,7 +170,7 @@ export const MultiDeckRegistered: Story = {
     decorators: [withUser('dracula')],
     render: (args) => {
         const multiReg: TournamentRegistration = {
-            id: 101, userId: 'user-1', username: 'dracula',
+            id: '101', userId: 'user-1', username: 'dracula',
             decks: [
                 {deckName: 'Weenie Animalism', summary: '12,80,4/5'},
                 {deckName: 'Political Ventrue', summary: '13,77,3/4'},
@@ -184,6 +186,7 @@ export const MultiDeckRegistered: Story = {
             ...baseTournament,
             format: 'MULTI_DECK',
             numberOfRounds: 3,
+    originalNumberOfRounds: 3,
         },
     },
 };

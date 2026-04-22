@@ -18,8 +18,8 @@ export type ChatPanelViewProps = {
     messages: ChatMsg[];
     status: Status;
     currentUser: string;
-    onSend: (content: string, replyToId?: number) => void;
-    onReact: (messageId: number, emoji: string) => void;
+    onSend: (content: string, replyToId?: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
     onCancelReply?: () => void;
     placeholder?: string;
     enableReactions?: boolean;
@@ -48,7 +48,7 @@ export function ChatPanelView({
     const { draft, displayValue, syncFromDisplay, syncFromEncoded, reset } = useChatInput();
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
-    const messageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
     const inputRef = useRef<HTMLInputElement>(null);
 
     const { suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection } =
@@ -92,7 +92,7 @@ export function ChatPanelView({
         if (e.key === 'Escape') setReplyingTo(null);
     };
 
-    const handleJumpTo = (id: number) => {
+    const handleJumpTo = (id: string) => {
         messageRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 

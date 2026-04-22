@@ -12,11 +12,11 @@ const TABS: GameFilterTab[] = ['All', 'Invited', 'Registered', 'Active', 'Open',
 
 interface Props {
     games: GameDto[];
-    invitedIds?: Set<number>;
-    registeredIds?: Set<number>;
-    ownedIds?: Set<number>;
-    activeIds?: Set<number>;
-    selectedId?: number | null;
+    invitedIds?: Set<string>;
+    registeredIds?: Set<string>;
+    ownedIds?: Set<string>;
+    activeIds?: Set<string>;
+    selectedId?: string | null;
     currentUsername?: string;
     onSelect?: (game: GameDto) => void;
     onCreate?: () => void;

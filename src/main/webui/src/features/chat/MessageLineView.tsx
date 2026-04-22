@@ -6,7 +6,7 @@ import {MessageContent} from './MessageContent';
 const EMOJI_PALETTE = ['👍', '❤️', '😂', '😮'];
 
 export interface MessageLine {
-    id: number;
+    id: string;
     content: string;
     reactions: ReactionDto[];
     replyTo: ReplySnapshot | null;
@@ -49,7 +49,7 @@ function ReactionPills({ reactions, currentUser, onReact, disabled }: ReactionPi
     );
 }
 
-function ReplyQuote({ replyTo, onJumpTo }: { replyTo: ReplySnapshot; onJumpTo: (id: number) => void }) {
+function ReplyQuote({ replyTo, onJumpTo }: { replyTo: ReplySnapshot; onJumpTo: (id: string) => void }) {
     return (
         <button
             onClick={() => onJumpTo(replyTo.id)}
@@ -70,9 +70,9 @@ interface MessageLineViewProps {
     line: MessageLine;
     sender: string;
     currentUser: string;
-    onReact: (messageId: number, emoji: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
     onReply: (snapshot: ReplySnapshot) => void;
-    onJumpTo: (id: number) => void;
+    onJumpTo: (id: string) => void;
     disabled: boolean;
     enableReactions: boolean;
     enableReply: boolean;

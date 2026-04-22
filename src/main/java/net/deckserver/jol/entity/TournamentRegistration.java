@@ -1,6 +1,6 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -10,7 +10,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "tournament_registration", uniqueConstraints = @UniqueConstraint(columnNames = {"tournament_id", "user_id"}))
-public class TournamentRegistration extends PanacheEntity {
+public class TournamentRegistration extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
 
     @ManyToOne
     public Tournament tournament;

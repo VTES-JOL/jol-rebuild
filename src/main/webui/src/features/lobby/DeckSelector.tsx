@@ -8,8 +8,8 @@ import {useAsyncState} from '@/hooks/useAsyncState';
 
 interface Props {
     format: 'STANDARD' | 'DUEL' | 'V5';
-    selectedId: number | null;
-    onSelect: (deckId: number) => void;
+    selectedId: string | null;
+    onSelect: (deckId: string) => void;
 }
 
 export default function DeckSelector({format, selectedId, onSelect}: Props) {

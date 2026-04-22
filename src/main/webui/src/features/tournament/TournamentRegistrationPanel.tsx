@@ -17,7 +17,7 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
     const [myRegistration, setMyRegistration] = useState<TournamentRegistration | null>(null);
     const [allRegistrations, setAllRegistrations] = useState<TournamentRegistration[]>([]);
     const [availableDecks, setAvailableDecks] = useState<Deck[]>([]);
-    const [selectedDeckIds, setSelectedDeckIds] = useState<number[]>([]);
+    const [selectedDeckIds, setSelectedDeckIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
                 setAllRegistrations(regs);
                 setMyRegistration(regs.find(r => r.username === user?.username) ?? null);
                 setAvailableDecks(decks);
-                setSelectedDeckIds(Array(deckCount).fill(0));
+                setSelectedDeckIds(Array(deckCount).fill(''));
             } finally {
                 setLoading(false);
             }
@@ -148,15 +148,15 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
                                         </label>
                                     )}
                                     <select
-                                        value={selectedDeckIds[i] ?? 0}
+                                        value={selectedDeckIds[i] ?? ''}
                                         onChange={e => {
                                             const ids = [...selectedDeckIds];
-                                            ids[i] = Number(e.target.value);
+                                            ids[i] = e.target.value;
                                             setSelectedDeckIds(ids);
                                         }}
                                         className="w-full bg-panel border border-line rounded px-3 py-2 text-sm text-ink outline-none"
                                     >
-                                        <option value={0}>— Select a deck —</option>
+                                        <option value=''>— Select a deck —</option>
                                         {availableDecks.map(d => (
                                             <option key={d.id} value={d.id}>{d.name}</option>
                                         ))}

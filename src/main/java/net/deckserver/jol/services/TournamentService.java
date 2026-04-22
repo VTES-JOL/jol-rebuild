@@ -28,10 +28,10 @@ public class TournamentService {
 
         List<TournamentSeat> allSeats = TournamentSeat.findAllByTournament(tournament);
         List<TournamentTable> tables = TournamentTable.findByTournament(tournament);
-        Map<Long, TournamentTable> tableMap = tables.stream().collect(Collectors.toMap(t -> t.id, t -> t));
+        Map<String, TournamentTable> tableMap = tables.stream().collect(Collectors.toMap(t -> t.id, t -> t));
 
         // Group non-bye seats by round → table id (sorted)
-        Map<Integer, Map<Long, List<TournamentSeat>>> byRound = new HashMap<>();
+        Map<Integer, Map<String, List<TournamentSeat>>> byRound = new HashMap<>();
         for (TournamentSeat seat : allSeats) {
             if (!seat.bye) {
                 byRound.computeIfAbsent(seat.roundNumber, r -> new HashMap<>())
@@ -40,14 +40,14 @@ public class TournamentService {
             }
         }
 
-        Map<Long, Integer> roundsPlayed = new HashMap<>();
+        Map<String, Integer> roundsPlayed = new HashMap<>();
         List<Integer> roundNumbers = byRound.keySet().stream().sorted().toList();
 
         for (int roundNumber : roundNumbers) {
-            Map<Long, List<TournamentSeat>> seatsByTable = byRound.get(roundNumber);
-            List<Long> tableIds = seatsByTable.keySet().stream().sorted().toList();
+            Map<String, List<TournamentSeat>> seatsByTable = byRound.get(roundNumber);
+            List<String> tableIds = seatsByTable.keySet().stream().sorted().toList();
             int tableCounter = 0;
-            for (Long tableId : tableIds) {
+            for (String tableId : tableIds) {
                 tableCounter++;
                 List<TournamentSeat> roundSeats = new ArrayList<>(seatsByTable.get(tableId));
                 roundSeats.sort(Comparator.comparingInt(s -> s.seatPosition));
@@ -68,7 +68,7 @@ public class TournamentService {
         }
     }
 
-    private void registerPlayersForGame(Game game, List<TournamentSeat> seats, Map<Long, Integer> roundsPlayed) {
+    private void registerPlayersForGame(Game game, List<TournamentSeat> seats, Map<String, Integer> roundsPlayed) {
         for (TournamentSeat seat : seats) {
             TournamentRegistration reg = seat.registration;
             User player = reg.user;
@@ -90,7 +90,7 @@ public class TournamentService {
         }
     }
 
-    private TournamentRegistration.DeckEntry getDeckForPlayer(TournamentRegistration reg, Map<Long, Integer> roundsPlayed) {
+    private TournamentRegistration.DeckEntry getDeckForPlayer(TournamentRegistration reg, Map<String, Integer> roundsPlayed) {
         if (reg.tournament.format == TournamentFormat.SINGLE_DECK) {
             return reg.decks.getFirst();
         }
@@ -139,7 +139,7 @@ public class TournamentService {
             final int round = r;
 
             List<TableDto> tableDtos = allTables.stream()
-                .sorted(Comparator.comparingLong(t -> t.id))
+                .sorted(Comparator.comparing(t -> t.id))
                 .map(table -> {
                     List<SeatDto> seats = allSeats.stream()
                         .filter(s -> !s.bye && s.roundNumber == round
@@ -156,7 +156,7 @@ public class TournamentService {
                 .map(s -> new SeatDto(s.id, s.registration.id, s.registration.user.username, 0, true))
                 .toList();
 
-            Set<Long> allocatedIds = new HashSet<>();
+            Set<String> allocatedIds = new HashSet<>();
             tableDtos.forEach(t -> t.seats().forEach(s -> allocatedIds.add(s.registrationId())));
             byeDtos.forEach(b -> allocatedIds.add(b.registrationId()));
 

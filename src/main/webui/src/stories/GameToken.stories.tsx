@@ -40,14 +40,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        id: 10,
+        id: '10',
         label: 'Match #10',
     },
 };
 
 export const AnotherExample: Story = {
     args: {
-        id: 99,
+        id: '99',
         label: 'Ranked Duel',
     },
 };

@@ -1,5 +1,5 @@
 export interface Deck {
-    id: number;
+    id: string;
     name: string;
     /** Compact summary stored as "{crypt},{library},{groups}" e.g. "12,80,4/5" */
     summary: string | null;

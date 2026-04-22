@@ -12,7 +12,7 @@ export interface Condition {
 }
 
 export interface Tournament {
-    id: number;
+    id: string;
     name: string;
     registrationStart?: string;
     registrationEnd?: string;
@@ -35,27 +35,27 @@ export interface DeckEntry {
 }
 
 export interface TournamentRegistration {
-    id: number;
+    id: string;
     userId: string;
     username: string;
     decks: DeckEntry[];
 }
 
 export interface Seat {
-    id: number;
-    registrationId: number;
+    id: string;
+    registrationId: string;
     username: string;
     seatPosition: number;
     bye: boolean;
 }
 
 export interface SeatingTable {
-    id: number;
+    id: string;
     seats: Seat[];
 }
 
 export interface UnseatedPlayer {
-    registrationId: number;
+    registrationId: string;
     username: string;
 }
 
@@ -77,9 +77,9 @@ export interface TournamentGamePlayer {
 }
 
 export interface TournamentGame {
-    tableId: number;
+    tableId: string;
     roundNumber: number;
-    gameId: number;
+    gameId: string;
     gameName: string;
     players: TournamentGamePlayer[];
 }

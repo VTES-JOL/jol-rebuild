@@ -23,7 +23,7 @@ const TAB_LABEL: Record<string, string> = {
 
 interface Props {
     tournaments: Tournament[];
-    selectedId?: number | null;
+    selectedId?: string | null;
     onSelect?: (tournament: Tournament) => void;
     onCreate?: () => void;
     loading?: boolean;

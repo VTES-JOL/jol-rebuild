@@ -40,11 +40,11 @@ INSERT INTO user_roles (user_id, role) VALUES
   ('00000000-0000-0000-0000-000000000099', 'ADMIN'),
   ('00000000-0000-0000-0000-000000000099', 'TOURNAMENT_ADMIN');
 
--- ── Decks (real 2025 KRCG tournament decks, IDs as strings) ──
+-- ── Decks (real 2025 KRCG tournament decks) ──────────────────
 
 -- Deck 1: Gangrel Anarch Toolbox (Player1)
 INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
-  1,
+  '00000000-0000-0000-0000-000000000d01',
   '2025-01-20 10:00:00+00',
   'Gangrel Anarch Toolbox',
   '12,90,5/6',
@@ -55,7 +55,7 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
 
 -- Deck 2: Shalmath (Player2)
 INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
-  2,
+  '00000000-0000-0000-0000-000000000d02',
   '2025-01-25 14:00:00+00',
   'Shalmath Colecionador de Cabeças',
   '12,78,5/6',
@@ -66,7 +66,7 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
 
 -- Deck 3: The Path of Enkidu (Player3)
 INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
-  3,
+  '00000000-0000-0000-0000-000000000d03',
   '2025-02-01 09:00:00+00',
   'The Path of Enkidu',
   '12,90,4/5',
@@ -77,7 +77,7 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
 
 -- Deck 4: Popó (Player4)
 INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
-  4,
+  '00000000-0000-0000-0000-000000000d04',
   '2025-02-10 16:00:00+00',
   'Popó',
   '13,90,1/2',
@@ -88,7 +88,7 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
 
 -- Deck 5: Banu bleed (Player5)
 INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
-  5,
+  '00000000-0000-0000-0000-000000000d05',
   '2025-03-01 12:00:00+00',
   'Banu bleed',
   '12,80,5/6',
@@ -100,12 +100,12 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
 -- ── Deck Format Validity ──────────────────────────────────────
 
 INSERT INTO deck_format_validity (id, deck_id, format, valid, errors, computed_at) VALUES
-  (1, 1, 'STANDARD', true,  NULL, '2025-01-20 10:01:00+00'),
-  (2, 2, 'STANDARD', true,  NULL, '2025-01-25 14:01:00+00'),
-  (3, 3, 'STANDARD', true,  NULL, '2025-02-01 09:01:00+00'),
-  (4, 4, 'STANDARD', true,  NULL, '2025-02-10 16:01:00+00'),
-  (5, 5, 'STANDARD', true,  NULL, '2025-03-01 12:01:00+00'),
-  (6, 5, 'DUEL',     false, '["Duel format requires exactly 40 library cards and a crypt of at least 2."]', '2025-03-01 12:01:00+00');
+  ('00000000-0000-0000-0000-000000000f01', '00000000-0000-0000-0000-000000000d01', 'STANDARD', true,  NULL, '2025-01-20 10:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f02', '00000000-0000-0000-0000-000000000d02', 'STANDARD', true,  NULL, '2025-01-25 14:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f03', '00000000-0000-0000-0000-000000000d03', 'STANDARD', true,  NULL, '2025-02-01 09:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f04', '00000000-0000-0000-0000-000000000d04', 'STANDARD', true,  NULL, '2025-02-10 16:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f05', '00000000-0000-0000-0000-000000000d05', 'STANDARD', true,  NULL, '2025-03-01 12:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f06', '00000000-0000-0000-0000-000000000d05', 'DUEL',     false, '["Duel format requires exactly 40 library cards and a crypt of at least 2."]', '2025-03-01 12:01:00+00');
 
 -- ── Games ─────────────────────────────────────────────────────
 -- format: STANDARD=0, DUEL=1, V5=2
@@ -113,161 +113,151 @@ INSERT INTO deck_format_validity (id, deck_id, format, valid, errors, computed_a
 -- visibility: PUBLIC=0, PRIVATE=1
 
 INSERT INTO game (id, name, format, status, visibility, owner_id, tournament_id) VALUES
-  (1, 'Shadow Conclave',    0, 0, 0, '00000000-0000-0000-0000-000000000001', NULL),  -- STANDARD, OPEN,      PUBLIC
-  (2, 'Blood Moon Rising',  0, 1, 0, '00000000-0000-0000-0000-000000000002', NULL),  -- STANDARD, ACTIVE,    PUBLIC
-  (3, 'The Final Dusk',     0, 2, 0, '00000000-0000-0000-0000-000000000003', NULL),  -- STANDARD, FINISHED,  PUBLIC
-  (4, 'Crimson Accord',     1, 0, 1, '00000000-0000-0000-0000-000000000004', NULL),  -- DUEL,     OPEN,      PRIVATE
-  (5, 'Velvet Masquerade',  1, 1, 0, '00000000-0000-0000-0000-000000000005', NULL),  -- DUEL,     ACTIVE,    PUBLIC
-  (6, 'Ancient Reckoning',  2, 0, 0, '00000000-0000-0000-0000-000000000006', NULL),  -- V5,       OPEN,      PUBLIC
-  (7, 'Midnight Tribunal',  0, 1, 1, '00000000-0000-0000-0000-000000000007', NULL),  -- STANDARD, ACTIVE,    PRIVATE
-  (8, 'Forsaken Covenant',  0, 3, 0, '00000000-0000-0000-0000-000000000008', NULL);  -- STANDARD, ABANDONED, PUBLIC
+  ('00000000-0000-0000-0000-000000000a01', 'Shadow Conclave',    0, 0, 0, '00000000-0000-0000-0000-000000000001', NULL),  -- STANDARD, OPEN,      PUBLIC
+  ('00000000-0000-0000-0000-000000000a02', 'Blood Moon Rising',  0, 1, 0, '00000000-0000-0000-0000-000000000002', NULL),  -- STANDARD, ACTIVE,    PUBLIC
+  ('00000000-0000-0000-0000-000000000a03', 'The Final Dusk',     0, 2, 0, '00000000-0000-0000-0000-000000000003', NULL),  -- STANDARD, FINISHED,  PUBLIC
+  ('00000000-0000-0000-0000-000000000a04', 'Crimson Accord',     1, 0, 1, '00000000-0000-0000-0000-000000000004', NULL),  -- DUEL,     OPEN,      PRIVATE
+  ('00000000-0000-0000-0000-000000000a05', 'Velvet Masquerade',  1, 1, 0, '00000000-0000-0000-0000-000000000005', NULL),  -- DUEL,     ACTIVE,    PUBLIC
+  ('00000000-0000-0000-0000-000000000a06', 'Ancient Reckoning',  2, 0, 0, '00000000-0000-0000-0000-000000000006', NULL),  -- V5,       OPEN,      PUBLIC
+  ('00000000-0000-0000-0000-000000000a07', 'Midnight Tribunal',  0, 1, 1, '00000000-0000-0000-0000-000000000007', NULL),  -- STANDARD, ACTIVE,    PRIVATE
+  ('00000000-0000-0000-0000-000000000a08', 'Forsaken Covenant',  0, 3, 0, '00000000-0000-0000-0000-000000000008', NULL);  -- STANDARD, ABANDONED, PUBLIC
 
 -- ── Game Registrations ────────────────────────────────────────
 -- deck IS NULL  → invited (no deck chosen yet)
 -- deck NOT NULL → registered with a deck
--- Placeholder deck used for registered players without a stored deck
 
 INSERT INTO registration (id, game_id, user_id, deck, deck_name, summary, last_updated) VALUES
 
   -- Game 1 (OPEN): Player1 registered, Player2+3 invited
-  (1, 1, '00000000-0000-0000-0000-000000000001', '{"name":"Gangrel Anarch Toolbox","crypt":{"count":12,"cards":[{"count":2,"id":"200081","name":"André the Manipulator"},{"count":2,"id":"201521","name":"Casey Snyder"},{"count":2,"id":"201574","name":"Kuyén"},{"count":1,"id":"201602","name":"Massimiliano"},{"count":1,"id":"201601","name":"Martina Srnankova"},{"count":1,"id":"201597","name":"Kamile Paukstys"},{"count":1,"id":"201590","name":"Hanna Nokelainen"},{"count":1,"id":"201606","name":"Nathan Turner"},{"count":1,"id":"201592","name":"Indira"}]},"library":{"count":90,"cards":[{"type":"Master","count":21,"cards":[{"count":1,"id":"100052","name":"The Anarch Free Press"},{"count":4,"id":"100616","name":"Effective Management"},{"count":3,"id":"102113","name":"Vessel"},{"count":2,"id":"102121","name":"Villein"}]},{"type":"Action","count":21,"cards":[{"count":4,"id":"100515","name":"Deep Song"},{"count":12,"id":"101972","name":"Thing"}]},{"type":"Reaction","count":22,"cards":[{"count":10,"id":"102230","name":"Organized Resistance"},{"count":6,"id":"102218","name":"Bait and Switch"}]},{"type":"Combat","count":15,"cards":[{"count":10,"id":"100601","name":"Earth Meld"},{"count":3,"id":"100771","name":"Form of Mist"}]}]}}', 'Gangrel Anarch Toolbox', 'Crypt: 12, Library: 90', '2026-04-01 10:00:00+00'),
-  (2,  1, '00000000-0000-0000-0000-000000000002', NULL, NULL, NULL, '2026-04-01 11:00:00+00'),
-  (3,  1, '00000000-0000-0000-0000-000000000003', NULL, NULL, NULL, '2026-04-01 12:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r01', '00000000-0000-0000-0000-000000000a01', '00000000-0000-0000-0000-000000000001', '{"name":"Gangrel Anarch Toolbox","crypt":{"count":12,"cards":[{"count":2,"id":"200081","name":"André the Manipulator"},{"count":2,"id":"201521","name":"Casey Snyder"},{"count":2,"id":"201574","name":"Kuyén"},{"count":1,"id":"201602","name":"Massimiliano"},{"count":1,"id":"201601","name":"Martina Srnankova"},{"count":1,"id":"201597","name":"Kamile Paukstys"},{"count":1,"id":"201590","name":"Hanna Nokelainen"},{"count":1,"id":"201606","name":"Nathan Turner"},{"count":1,"id":"201592","name":"Indira"}]},"library":{"count":90,"cards":[{"type":"Master","count":21,"cards":[{"count":1,"id":"100052","name":"The Anarch Free Press"},{"count":4,"id":"100616","name":"Effective Management"},{"count":3,"id":"102113","name":"Vessel"},{"count":2,"id":"102121","name":"Villein"}]},{"type":"Action","count":21,"cards":[{"count":4,"id":"100515","name":"Deep Song"},{"count":12,"id":"101972","name":"Thing"}]},{"type":"Reaction","count":22,"cards":[{"count":10,"id":"102230","name":"Organized Resistance"},{"count":6,"id":"102218","name":"Bait and Switch"}]},{"type":"Combat","count":15,"cards":[{"count":10,"id":"100601","name":"Earth Meld"},{"count":3,"id":"100771","name":"Form of Mist"}]}]}}', 'Gangrel Anarch Toolbox', 'Crypt: 12, Library: 90', '2026-04-01 10:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r02', '00000000-0000-0000-0000-000000000a01', '00000000-0000-0000-0000-000000000002', NULL, NULL, NULL, '2026-04-01 11:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r03', '00000000-0000-0000-0000-000000000a01', '00000000-0000-0000-0000-000000000003', NULL, NULL, NULL, '2026-04-01 12:00:00+00'),
 
   -- Game 2 (ACTIVE, STANDARD): all 5 registered
-  (4,  2, '00000000-0000-0000-0000-000000000002', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Shalmath Colecionador de Cabecas', 'Crypt: 12, Library: 78', '2026-03-28 09:00:00+00'),
-  (5,  2, '00000000-0000-0000-0000-000000000003', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'The Path of Enkidu',            'Crypt: 12, Library: 90', '2026-03-28 09:05:00+00'),
-  (6,  2, '00000000-0000-0000-0000-000000000004', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Popo',                          'Crypt: 13, Library: 90', '2026-03-28 09:10:00+00'),
-  (7,  2, '00000000-0000-0000-0000-000000000005', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Banu bleed',                    'Crypt: 12, Library: 80', '2026-03-28 09:15:00+00'),
-  (8,  2, '00000000-0000-0000-0000-000000000006', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Camarilla Toolbox',             'Crypt: 12, Library: 90', '2026-03-28 09:20:00+00'),
+  ('00000000-0000-0000-0000-000000000r04', '00000000-0000-0000-0000-000000000a02', '00000000-0000-0000-0000-000000000002', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Shalmath Colecionador de Cabecas', 'Crypt: 12, Library: 78', '2026-03-28 09:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r05', '00000000-0000-0000-0000-000000000a02', '00000000-0000-0000-0000-000000000003', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'The Path of Enkidu',            'Crypt: 12, Library: 90', '2026-03-28 09:05:00+00'),
+  ('00000000-0000-0000-0000-000000000r06', '00000000-0000-0000-0000-000000000a02', '00000000-0000-0000-0000-000000000004', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Popo',                          'Crypt: 13, Library: 90', '2026-03-28 09:10:00+00'),
+  ('00000000-0000-0000-0000-000000000r07', '00000000-0000-0000-0000-000000000a02', '00000000-0000-0000-0000-000000000005', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Banu bleed',                    'Crypt: 12, Library: 80', '2026-03-28 09:15:00+00'),
+  ('00000000-0000-0000-0000-000000000r08', '00000000-0000-0000-0000-000000000a02', '00000000-0000-0000-0000-000000000006', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Camarilla Toolbox',             'Crypt: 12, Library: 90', '2026-03-28 09:20:00+00'),
 
   -- Game 3 (FINISHED, STANDARD): all 5 registered
-  (9,  3, '00000000-0000-0000-0000-000000000003', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'The Path of Enkidu',  'Crypt: 12, Library: 90', '2026-02-15 10:00:00+00'),
-  (10, 3, '00000000-0000-0000-0000-000000000004', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Popo',                'Crypt: 13, Library: 90', '2026-02-15 10:05:00+00'),
-  (11, 3, '00000000-0000-0000-0000-000000000005', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Banu bleed',          'Crypt: 12, Library: 80', '2026-02-15 10:10:00+00'),
-  (12, 3, '00000000-0000-0000-0000-000000000006', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Camarilla Toolbox',   'Crypt: 12, Library: 90', '2026-02-15 10:15:00+00'),
-  (13, 3, '00000000-0000-0000-0000-000000000007', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Tremere Vote Control', 'Crypt: 12, Library: 90', '2026-02-15 10:20:00+00'),
+  ('00000000-0000-0000-0000-000000000r09', '00000000-0000-0000-0000-000000000a03', '00000000-0000-0000-0000-000000000003', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'The Path of Enkidu',  'Crypt: 12, Library: 90', '2026-02-15 10:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r10', '00000000-0000-0000-0000-000000000a03', '00000000-0000-0000-0000-000000000004', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Popo',                'Crypt: 13, Library: 90', '2026-02-15 10:05:00+00'),
+  ('00000000-0000-0000-0000-000000000r11', '00000000-0000-0000-0000-000000000a03', '00000000-0000-0000-0000-000000000005', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Banu bleed',          'Crypt: 12, Library: 80', '2026-02-15 10:10:00+00'),
+  ('00000000-0000-0000-0000-000000000r12', '00000000-0000-0000-0000-000000000a03', '00000000-0000-0000-0000-000000000006', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Camarilla Toolbox',   'Crypt: 12, Library: 90', '2026-02-15 10:15:00+00'),
+  ('00000000-0000-0000-0000-000000000r13', '00000000-0000-0000-0000-000000000a03', '00000000-0000-0000-0000-000000000007', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Tremere Vote Control', 'Crypt: 12, Library: 90', '2026-02-15 10:20:00+00'),
 
   -- Game 4 (OPEN DUEL, PRIVATE): Player4 invited only
-  (14, 4, '00000000-0000-0000-0000-000000000004', NULL, NULL, NULL, '2026-04-10 08:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r14', '00000000-0000-0000-0000-000000000a04', '00000000-0000-0000-0000-000000000004', NULL, NULL, NULL, '2026-04-10 08:00:00+00'),
 
   -- Game 5 (ACTIVE DUEL): both registered
-  (15, 5, '00000000-0000-0000-0000-000000000005', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Banu bleed',       'Crypt: 12, Library: 80', '2026-04-05 15:00:00+00'),
-  (16, 5, '00000000-0000-0000-0000-000000000006', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Camarilla Toolbox', 'Crypt: 12, Library: 90', '2026-04-05 15:05:00+00'),
+  ('00000000-0000-0000-0000-000000000r15', '00000000-0000-0000-0000-000000000a05', '00000000-0000-0000-0000-000000000005', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Banu bleed',       'Crypt: 12, Library: 80', '2026-04-05 15:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r16', '00000000-0000-0000-0000-000000000a05', '00000000-0000-0000-0000-000000000006', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Camarilla Toolbox', 'Crypt: 12, Library: 90', '2026-04-05 15:05:00+00'),
 
   -- Game 6 (OPEN V5): Player6+7 invited only
-  (17, 6, '00000000-0000-0000-0000-000000000006', NULL, NULL, NULL, '2026-04-12 09:00:00+00'),
-  (18, 6, '00000000-0000-0000-0000-000000000007', NULL, NULL, NULL, '2026-04-12 09:30:00+00'),
+  ('00000000-0000-0000-0000-000000000r17', '00000000-0000-0000-0000-000000000a06', '00000000-0000-0000-0000-000000000006', NULL, NULL, NULL, '2026-04-12 09:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r18', '00000000-0000-0000-0000-000000000a06', '00000000-0000-0000-0000-000000000007', NULL, NULL, NULL, '2026-04-12 09:30:00+00'),
 
   -- Game 7 (ACTIVE, PRIVATE): all 5 registered
-  (19, 7, '00000000-0000-0000-0000-000000000007', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Tremere Vote Control', 'Crypt: 12, Library: 90', '2026-04-08 18:00:00+00'),
-  (20, 7, '00000000-0000-0000-0000-000000000008', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Ventrue Lawfirm',      'Crypt: 12, Library: 90', '2026-04-08 18:05:00+00'),
-  (21, 7, '00000000-0000-0000-0000-000000000009', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Ravnos Bleed',         'Crypt: 12, Library: 90', '2026-04-08 18:10:00+00'),
-  (22, 7, '00000000-0000-0000-0000-000000000010', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Malkavian Madness',    'Crypt: 12, Library: 90', '2026-04-08 18:15:00+00'),
-  (23, 7, '00000000-0000-0000-0000-000000000001', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Gangrel Anarch Toolbox','Crypt: 12, Library: 90', '2026-04-08 18:20:00+00'),
+  ('00000000-0000-0000-0000-000000000r19', '00000000-0000-0000-0000-000000000a07', '00000000-0000-0000-0000-000000000007', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Tremere Vote Control', 'Crypt: 12, Library: 90', '2026-04-08 18:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r20', '00000000-0000-0000-0000-000000000a07', '00000000-0000-0000-0000-000000000008', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Ventrue Lawfirm',      'Crypt: 12, Library: 90', '2026-04-08 18:05:00+00'),
+  ('00000000-0000-0000-0000-000000000r21', '00000000-0000-0000-0000-000000000a07', '00000000-0000-0000-0000-000000000009', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Ravnos Bleed',         'Crypt: 12, Library: 90', '2026-04-08 18:10:00+00'),
+  ('00000000-0000-0000-0000-000000000r22', '00000000-0000-0000-0000-000000000a07', '00000000-0000-0000-0000-000000000010', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Malkavian Madness',    'Crypt: 12, Library: 90', '2026-04-08 18:15:00+00'),
+  ('00000000-0000-0000-0000-000000000r23', '00000000-0000-0000-0000-000000000a07', '00000000-0000-0000-0000-000000000001', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Gangrel Anarch Toolbox','Crypt: 12, Library: 90', '2026-04-08 18:20:00+00'),
 
   -- Game 8 (ABANDONED): Player8 invited, Player9 registered
-  (24, 8, '00000000-0000-0000-0000-000000000008', NULL, NULL, NULL, '2026-03-20 14:00:00+00'),
-  (25, 8, '00000000-0000-0000-0000-000000000009', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Ravnos Bleed', 'Crypt: 12, Library: 90', '2026-03-20 14:30:00+00');
+  ('00000000-0000-0000-0000-000000000r24', '00000000-0000-0000-0000-000000000a08', '00000000-0000-0000-0000-000000000008', NULL, NULL, NULL, '2026-03-20 14:00:00+00'),
+  ('00000000-0000-0000-0000-000000000r25', '00000000-0000-0000-0000-000000000a08', '00000000-0000-0000-0000-000000000009', '{"name":"Test Deck","crypt":{"count":12,"cards":[{"id":"200076","count":12,"name":"Anarch Convert"}]},"library":{"count":60,"cards":[{"type":"Master","count":60,"cards":[{"id":"102121","count":60,"name":"Villein"}]}]}}', 'Ravnos Bleed', 'Crypt: 12, Library: 90', '2026-03-20 14:30:00+00');
 
 -- ── Tournaments ───────────────────────────────────────────────
 
 INSERT INTO tournament (id, name, format, game_format, number_of_rounds, original_number_of_rounds, final_round, requires_id, status, registration_start, registration_end, playing_start, playing_end, rules, conditions) VALUES
-  -- 1: COMPLETED — full data with seating history (3 rounds: 2 regular + 1 final)
-  (1, 'Grand Camarilla Open',   'SINGLE_DECK', 'STANDARD', 3, 2, true,  false, 'COMPLETED',
+  -- T1: COMPLETED — full data with seating history (3 rounds: 2 regular + 1 final)
+  ('00000000-0000-0000-0000-000000000t01', 'Grand Camarilla Open',   'SINGLE_DECK', 'STANDARD', 3, 2, true,  false, 'COMPLETED',
     '2025-01-01 00:00:00+00', '2025-01-14 23:59:59+00', '2025-01-15 09:00:00+00', '2025-01-15 20:00:00+00',
     '[]', '[]'),
-  -- 2: ACTIVE — round 1 seated, round 2 pending
-  (2, 'Anarch Freedom Cup',     'MULTI_DECK',  'STANDARD', 2, 2, false, false, 'ACTIVE',
+  -- T2: ACTIVE — round 1 seated, round 2 pending
+  ('00000000-0000-0000-0000-000000000t02', 'Anarch Freedom Cup',     'MULTI_DECK',  'STANDARD', 2, 2, false, false, 'ACTIVE',
     '2026-03-01 00:00:00+00', '2026-03-14 23:59:59+00', '2026-03-15 09:00:00+00', NULL,
     '[]', '[]'),
-  -- 3: REGISTRATION — accepting sign-ups, no seating yet
-  (3, 'V5 Championship Series', 'SINGLE_DECK', 'V5',       2, 0, true,  true,  'REGISTRATION',
+  -- T3: REGISTRATION — accepting sign-ups, no seating yet
+  ('00000000-0000-0000-0000-000000000t03', 'V5 Championship Series', 'SINGLE_DECK', 'V5',       2, 0, true,  true,  'REGISTRATION',
     '2026-04-20 00:00:00+00', '2026-05-01 23:59:59+00', '2026-05-10 09:00:00+00', NULL,
     '[]', '[]'),
-  -- 4: SETUP — not yet open for registration
-  (4, 'Duel Master Invitational','SINGLE_DECK','DUEL',      2, 0, false, false, 'SETUP',
+  -- T4: SETUP — not yet open for registration
+  ('00000000-0000-0000-0000-000000000t04', 'Duel Master Invitational','SINGLE_DECK','DUEL',      2, 0, false, false, 'SETUP',
     '2026-06-01 00:00:00+00', '2026-06-14 23:59:59+00', '2026-06-15 09:00:00+00', NULL,
     '[]', '[]');
 
 -- ── Tournament Registrations ──────────────────────────────────
--- decks: array of DeckEntry {deckName, summary} — deck contents omitted for brevity
 
 INSERT INTO tournament_registration (id, tournament_id, user_id, decks) VALUES
   -- Tournament 1 (COMPLETED): Player1–Player8
-  (1,  1, '00000000-0000-0000-0000-000000000001', '[{"deckName":"Gangrel Anarch Toolbox","summary":"Crypt: 12, Library: 90"}]'),
-  (2,  1, '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
-  (3,  1, '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
-  (4,  1, '00000000-0000-0000-0000-000000000004', '[{"deckName":"Popo","summary":"Crypt: 13, Library: 90"}]'),
-  (5,  1, '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
-  (6,  1, '00000000-0000-0000-0000-000000000006', '[{"deckName":"Camarilla Toolbox","summary":"Crypt: 12, Library: 90"}]'),
-  (7,  1, '00000000-0000-0000-0000-000000000007', '[{"deckName":"Tremere Vote Control","summary":"Crypt: 12, Library: 90"}]'),
-  (8,  1, '00000000-0000-0000-0000-000000000008', '[{"deckName":"Ventrue Lawfirm","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e01', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000001', '[{"deckName":"Gangrel Anarch Toolbox","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e02', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
+  ('00000000-0000-0000-0000-000000000e03', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e04', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000004', '[{"deckName":"Popo","summary":"Crypt: 13, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e05', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
+  ('00000000-0000-0000-0000-000000000e06', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000006', '[{"deckName":"Camarilla Toolbox","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e07', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000007', '[{"deckName":"Tremere Vote Control","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e08', '00000000-0000-0000-0000-000000000t01', '00000000-0000-0000-0000-000000000008', '[{"deckName":"Ventrue Lawfirm","summary":"Crypt: 12, Library: 90"}]'),
   -- Tournament 2 (ACTIVE): Player1–Player6
-  (9,  2, '00000000-0000-0000-0000-000000000001', '[{"deckName":"Gangrel Anarch Toolbox","summary":"Crypt: 12, Library: 90"}]'),
-  (10, 2, '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
-  (11, 2, '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
-  (12, 2, '00000000-0000-0000-0000-000000000004', '[{"deckName":"Popo","summary":"Crypt: 13, Library: 90"}]'),
-  (13, 2, '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
-  (14, 2, '00000000-0000-0000-0000-000000000006', '[{"deckName":"Camarilla Toolbox","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e09', '00000000-0000-0000-0000-000000000t02', '00000000-0000-0000-0000-000000000001', '[{"deckName":"Gangrel Anarch Toolbox","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e10', '00000000-0000-0000-0000-000000000t02', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
+  ('00000000-0000-0000-0000-000000000e11', '00000000-0000-0000-0000-000000000t02', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e12', '00000000-0000-0000-0000-000000000t02', '00000000-0000-0000-0000-000000000004', '[{"deckName":"Popo","summary":"Crypt: 13, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e13', '00000000-0000-0000-0000-000000000t02', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
+  ('00000000-0000-0000-0000-000000000e14', '00000000-0000-0000-0000-000000000t02', '00000000-0000-0000-0000-000000000006', '[{"deckName":"Camarilla Toolbox","summary":"Crypt: 12, Library: 90"}]'),
   -- Tournament 3 (REGISTRATION): Player2, Player3, Player5
-  (15, 3, '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
-  (16, 3, '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
-  (17, 3, '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]');
+  ('00000000-0000-0000-0000-000000000e15', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
+  ('00000000-0000-0000-0000-000000000e16', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e17', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]');
 
 -- ── Tournament Tables ─────────────────────────────────────────
--- Tables now span the whole tournament; seats carry the round number.
 
 INSERT INTO tournament_table (id, tournament_id) VALUES
-  (1, 1),  -- T1 Table A (used in rounds 1, 2, and final)
-  (2, 1),  -- T1 Table B (used in rounds 1 and 2)
-  (3, 2);  -- T2 Table A
+  ('00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000t01'),  -- T1 Table A
+  ('00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000t01'),  -- T1 Table B
+  ('00000000-0000-0000-0000-000000000b03', '00000000-0000-0000-0000-000000000t02');  -- T2 Table A
 
 -- ── Tournament Seats ──────────────────────────────────────────
 
 INSERT INTO tournament_seat (id, table_id, registration_id, seat_position, bye, round_number) VALUES
   -- T1 Round 1, Table A (P1–P4)
-  (1,  1, 1, 1, false, 1),
-  (2,  1, 2, 2, false, 1),
-  (3,  1, 3, 3, false, 1),
-  (4,  1, 4, 4, false, 1),
+  ('00000000-0000-0000-0000-000000000s01', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e01', 1, false, 1),
+  ('00000000-0000-0000-0000-000000000s02', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e02', 2, false, 1),
+  ('00000000-0000-0000-0000-000000000s03', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e03', 3, false, 1),
+  ('00000000-0000-0000-0000-000000000s04', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e04', 4, false, 1),
   -- T1 Round 1, Table B (P5–P8)
-  (5,  2, 5, 1, false, 1),
-  (6,  2, 6, 2, false, 1),
-  (7,  2, 7, 3, false, 1),
-  (8,  2, 8, 4, false, 1),
+  ('00000000-0000-0000-0000-000000000s05', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e05', 1, false, 1),
+  ('00000000-0000-0000-0000-000000000s06', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e06', 2, false, 1),
+  ('00000000-0000-0000-0000-000000000s07', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e07', 3, false, 1),
+  ('00000000-0000-0000-0000-000000000s08', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e08', 4, false, 1),
   -- T1 Round 2, Table A (P1, P6, P2, P7 — crossover seating)
-  (9,  1, 1, 1, false, 2),
-  (10, 1, 6, 2, false, 2),
-  (11, 1, 2, 3, false, 2),
-  (12, 1, 7, 4, false, 2),
+  ('00000000-0000-0000-0000-000000000s09', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e01', 1, false, 2),
+  ('00000000-0000-0000-0000-000000000s10', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e06', 2, false, 2),
+  ('00000000-0000-0000-0000-000000000s11', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e02', 3, false, 2),
+  ('00000000-0000-0000-0000-000000000s12', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e07', 4, false, 2),
   -- T1 Round 2, Table B (P4, P8, P5, P3)
-  (13, 2, 3, 4, false, 2),
-  (14, 2, 4, 1, false, 2),
-  (15, 2, 8, 2, false, 2),
-  (16, 2, 5, 3, false, 2),
+  ('00000000-0000-0000-0000-000000000s13', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e03', 4, false, 2),
+  ('00000000-0000-0000-0000-000000000s14', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e04', 1, false, 2),
+  ('00000000-0000-0000-0000-000000000s15', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e08', 2, false, 2),
+  ('00000000-0000-0000-0000-000000000s16', '00000000-0000-0000-0000-000000000b02', '00000000-0000-0000-0000-000000000e05', 3, false, 2),
   -- T1 Final (Round 3), Table A — top 5 scorers
-  (17, 1, 1, 1, false, 3),
-  (18, 1, 2, 2, false, 3),
-  (19, 1, 6, 3, false, 3),
-  (20, 1, 3, 4, false, 3),
-  (21, 1, 7, 5, false, 3),
+  ('00000000-0000-0000-0000-000000000s17', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e01', 1, false, 3),
+  ('00000000-0000-0000-0000-000000000s18', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e02', 2, false, 3),
+  ('00000000-0000-0000-0000-000000000s19', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e06', 3, false, 3),
+  ('00000000-0000-0000-0000-000000000s20', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e03', 4, false, 3),
+  ('00000000-0000-0000-0000-000000000s21', '00000000-0000-0000-0000-000000000b01', '00000000-0000-0000-0000-000000000e07', 5, false, 3),
   -- T1 Round 3 byes — P4, P5, P8 did not qualify for the final
-  (28, NULL, 4, 0, true, 3),
-  (29, NULL, 5, 0, true, 3),
-  (30, NULL, 8, 0, true, 3),
+  ('00000000-0000-0000-0000-000000000s28', NULL, '00000000-0000-0000-0000-000000000e04', 0, true, 3),
+  ('00000000-0000-0000-0000-000000000s29', NULL, '00000000-0000-0000-0000-000000000e05', 0, true, 3),
+  ('00000000-0000-0000-0000-000000000s30', NULL, '00000000-0000-0000-0000-000000000e08', 0, true, 3),
   -- T2 Round 1, Table A (P1–P5)
-  (22, 3,  9, 1, false, 1),
-  (23, 3, 10, 2, false, 1),
-  (24, 3, 11, 3, false, 1),
-  (25, 3, 12, 4, false, 1),
-  (26, 3, 13, 5, false, 1),
+  ('00000000-0000-0000-0000-000000000s22', '00000000-0000-0000-0000-000000000b03', '00000000-0000-0000-0000-000000000e09', 1, false, 1),
+  ('00000000-0000-0000-0000-000000000s23', '00000000-0000-0000-0000-000000000b03', '00000000-0000-0000-0000-000000000e10', 2, false, 1),
+  ('00000000-0000-0000-0000-000000000s24', '00000000-0000-0000-0000-000000000b03', '00000000-0000-0000-0000-000000000e11', 3, false, 1),
+  ('00000000-0000-0000-0000-000000000s25', '00000000-0000-0000-0000-000000000b03', '00000000-0000-0000-0000-000000000e12', 4, false, 1),
+  ('00000000-0000-0000-0000-000000000s26', '00000000-0000-0000-0000-000000000b03', '00000000-0000-0000-0000-000000000e13', 5, false, 1),
   -- T2 Round 1, P6 receives a bye
-  (27, NULL, 14, 0, true, 1);
-
--- ── Advance all sequences past inserted IDs ───────────────────
--- Resets every sequence in the DB to 1000 so Hibernate-generated
--- IDs do not conflict with the sample data above (max ID ≈ 27–25).
--- Single statement avoids dollar-quote splitting by Hibernate's import.sql parser.
-
-SELECT setval(sequencename::regclass, 1000, false) FROM pg_sequences WHERE schemaname = 'public';
+  ('00000000-0000-0000-0000-000000000s27', NULL, '00000000-0000-0000-0000-000000000e14', 0, true, 1);

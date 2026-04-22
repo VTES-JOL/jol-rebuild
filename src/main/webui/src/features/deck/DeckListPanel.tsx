@@ -10,7 +10,7 @@ import type {Deck} from './types';
 
 interface Props {
     decks: Deck[];
-    selectedId?: number | null;
+    selectedId?: string | null;
     onSelect?: (deck: Deck) => void;
     onNew?: () => void;
     onImport?: () => void;

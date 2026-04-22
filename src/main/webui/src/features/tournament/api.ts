@@ -12,7 +12,7 @@ const tournamentApi = {
         return json(await baseFetch(url, OPTS));
     },
 
-    async get(id: number): Promise<Tournament> {
+    async get(id: string): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}`, OPTS));
     },
 
@@ -20,98 +20,98 @@ const tournamentApi = {
         return json(await baseFetch('/api/tournaments', { ...JSON_OPTS, method: 'POST', body: JSON.stringify(payload) }));
     },
 
-    async update(id: number, payload: Partial<Tournament>): Promise<Tournament> {
+    async update(id: string, payload: Partial<Tournament>): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}`, { ...JSON_OPTS, method: 'PUT', body: JSON.stringify(payload) }));
     },
 
-    async remove(id: number): Promise<void> {
+    async remove(id: string): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
     // ── Status Transitions ─────────────────────────────────────────────────────
 
-    async publish(id: number): Promise<Tournament> {
+    async publish(id: string): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}/publish`, { ...JSON_OPTS, method: 'POST' }));
     },
 
-    async unpublish(id: number): Promise<Tournament> {
+    async unpublish(id: string): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}/unpublish`, { ...JSON_OPTS, method: 'POST' }));
     },
 
-    async beginSeating(id: number): Promise<Tournament> {
+    async beginSeating(id: string): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}/seat`, { ...JSON_OPTS, method: 'POST' }));
     },
 
-    async activate(id: number): Promise<Tournament> {
+    async activate(id: string): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}/activate`, { ...JSON_OPTS, method: 'POST' }));
     },
 
     // ── Player Registration ────────────────────────────────────────────────────
 
-    async getRegistrations(id: number): Promise<TournamentRegistration[]> {
+    async getRegistrations(id: string): Promise<TournamentRegistration[]> {
         return json(await baseFetch(`/api/tournaments/${id}/registrations`, OPTS));
     },
 
-    async register(id: number, deckIds: number[]): Promise<TournamentRegistration> {
+    async register(id: string, deckIds: string[]): Promise<TournamentRegistration> {
         return json(await baseFetch(`/api/tournaments/${id}/registrations`, {
             ...JSON_OPTS, method: 'POST', body: JSON.stringify({ deckIds }),
         }));
     },
 
-    async unregister(id: number): Promise<void> {
+    async unregister(id: string): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/registrations`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
     // ── Seating Management ─────────────────────────────────────────────────────
 
-    async getSeating(id: number): Promise<SeatingDto> {
+    async getSeating(id: string): Promise<SeatingDto> {
         return json(await baseFetch(`/api/tournaments/${id}/seating`, OPTS));
     },
 
-    async addTable(id: number): Promise<{ id: number }> {
+    async addTable(id: string): Promise<{ id: string }> {
         return json(await baseFetch(`/api/tournaments/${id}/tables`, {
             ...JSON_OPTS, method: 'POST', body: JSON.stringify({}),
         }));
     },
 
-    async removeTable(id: number, tableId: number): Promise<void> {
+    async removeTable(id: string, tableId: string): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/tables/${tableId}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async addSeat(id: number, tableId: number, registrationId: number, seatPosition: number, roundNumber: number): Promise<void> {
+    async addSeat(id: string, tableId: string, registrationId: string, seatPosition: number, roundNumber: number): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/tables/${tableId}/seats`, {
             ...JSON_OPTS, method: 'POST', body: JSON.stringify({ registrationId, seatPosition, roundNumber }),
         });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async removeSeat(id: number, tableId: number, seatId: number): Promise<void> {
+    async removeSeat(id: string, tableId: string, seatId: string): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/tables/${tableId}/seats/${seatId}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async addBye(id: number, roundNumber: number, registrationId: number): Promise<void> {
+    async addBye(id: string, roundNumber: number, registrationId: string): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/rounds/${roundNumber}/byes`, {
             ...JSON_OPTS, method: 'POST', body: JSON.stringify({ registrationId }),
         });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async removeSeatOrBye(id: number, seatId: number): Promise<void> {
+    async removeSeatOrBye(id: string, seatId: string): Promise<void> {
         const res = await baseFetch(`/api/tournaments/${id}/seats/${seatId}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async addExtraRound(id: number): Promise<Tournament> {
+    async addExtraRound(id: string): Promise<Tournament> {
         return json(await baseFetch(`/api/tournaments/${id}/extra-round`, { ...JSON_OPTS, method: 'POST' }));
     },
 
     // ── Active Tournament ──────────────────────────────────────────────────────
 
-    async getTournamentGames(id: number): Promise<TournamentGame[]> {
+    async getTournamentGames(id: string): Promise<TournamentGame[]> {
         return json(await baseFetch(`/api/tournaments/${id}/games`, OPTS));
     },
 };

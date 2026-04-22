@@ -1,6 +1,6 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
@@ -10,7 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Game extends PanacheEntity {
+public class Game extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
     public String name;
     public Visibility visibility = Visibility.PUBLIC;
     public Status status = Status.OPEN;

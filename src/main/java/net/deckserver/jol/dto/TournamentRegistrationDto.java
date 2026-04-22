@@ -7,7 +7,7 @@ import java.util.List;
 
 @RegisterForReflection
 public record TournamentRegistrationDto(
-    Long id,
+    String id,
     String userId,
     String username,
     List<DeckEntryDto> decks

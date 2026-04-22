@@ -73,7 +73,7 @@ export const WithHistory: Story = {
         messages: [
             {
                 type: 'CHAT',
-                id: 1,
+                id: '1',
                 sender: 'Alex',
                 content: 'Hello everyone!',
                 timestamp: '2026-04-07T10:02:00Z',
@@ -81,7 +81,7 @@ export const WithHistory: Story = {
             },
             {
                 type: 'CHAT',
-                id: 2,
+                id: '2',
                 sender: 'Sam',
                 content: 'I played [card:100266:Bum\'s Rush] earlier.',
                 timestamp: '2026-04-07T10:03:00Z',
@@ -105,7 +105,7 @@ export const WithGroupedMessages: Story = {
         messages: [
             {
                 type: 'CHAT',
-                id: 1,
+                id: '1',
                 sender: 'Alex',
                 content: 'First message in the group.',
                 timestamp: '2026-04-07T10:02:00Z',
@@ -113,7 +113,7 @@ export const WithGroupedMessages: Story = {
             },
             {
                 type: 'CHAT',
-                id: 2,
+                id: '2',
                 sender: 'Alex',
                 content: 'Second message in the same group.',
                 timestamp: '2026-04-07T10:02:30Z',
@@ -121,7 +121,7 @@ export const WithGroupedMessages: Story = {
             },
             {
                 type: 'CHAT',
-                id: 3,
+                id: '3',
                 sender: 'Sam',
                 content: 'A separate sender group.',
                 timestamp: '2026-04-07T10:05:00Z',
@@ -129,7 +129,7 @@ export const WithGroupedMessages: Story = {
             },
             {
                 type: 'CHAT',
-                id: 4,
+                id: '4',
                 sender: 'Sam',
                 content: 'Another line from Sam in the same group.',
                 timestamp: '2026-04-07T10:05:20Z',
@@ -153,7 +153,7 @@ export const WithReplyState: Story = {
         messages: [
             {
                 type: 'CHAT',
-                id: 1,
+                id: '1',
                 sender: 'Alex',
                 content: 'What should I do next?',
                 timestamp: '2026-04-07T10:02:00Z',

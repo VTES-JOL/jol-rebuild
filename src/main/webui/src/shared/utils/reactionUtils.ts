@@ -7,7 +7,7 @@ import type {ChatMsg, ReactionDto} from '@/hooks/useWebSocket.ts';
  */
 export function applyOptimisticReaction(
     messages: ChatMsg[],
-    messageId: number,
+    messageId: string,
     emoji: string,
     username: string
 ): ChatMsg[] {

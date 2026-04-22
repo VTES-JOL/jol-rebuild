@@ -1,7 +1,7 @@
 import {baseFetch, json} from "@/shared/api/client.ts";
 
 export interface GameDto {
-    id: number;
+    id: string;
     name: string;
     status: 'OPEN' | 'ACTIVE' | 'FINISHED' | 'ABANDONED';
     format: 'STANDARD' | 'DUEL' | 'V5';
@@ -28,7 +28,7 @@ export interface GameDetail extends GameDto {
 const OPTS = { credentials: 'include' as const };
 
 const gameApi = {
-    async getGame(id: number): Promise<GameDto> {
+    async getGame(id: string): Promise<GameDto> {
         return json(await baseFetch(`/api/games/${id}`, OPTS));
     },
 
@@ -56,7 +56,7 @@ const gameApi = {
         return json(await baseFetch('/api/games/owned/me', OPTS));
     },
 
-    async getGameDetail(id: number): Promise<GameDetail> {
+    async getGameDetail(id: string): Promise<GameDetail> {
         return json(await baseFetch(`/api/games/${id}/registrations`, OPTS));
     },
 
@@ -69,12 +69,12 @@ const gameApi = {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async deleteGame(id: number): Promise<void> {
+    async deleteGame(id: string): Promise<void> {
         const res = await baseFetch(`/api/games/${id}`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async registerForGame(id: number, deckId: number): Promise<void> {
+    async registerForGame(id: string, deckId: string): Promise<void> {
         const res = await baseFetch(`/api/games/${id}/register`, {
             ...OPTS, method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -83,12 +83,12 @@ const gameApi = {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async leaveGame(id: number): Promise<void> {
+    async leaveGame(id: string): Promise<void> {
         const res = await baseFetch(`/api/games/${id}/register`, { ...OPTS, method: 'DELETE' });
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     },
 
-    async updateGame(id: number, payload: { name?: string; visibility?: 'PUBLIC' | 'PRIVATE'; format?: 'STANDARD' | 'DUEL' | 'V5' }): Promise<GameDto> {
+    async updateGame(id: string, payload: { name?: string; visibility?: 'PUBLIC' | 'PRIVATE'; format?: 'STANDARD' | 'DUEL' | 'V5' }): Promise<GameDto> {
         return json(await baseFetch(`/api/games/${id}`, {
             ...OPTS, method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -96,7 +96,7 @@ const gameApi = {
         }));
     },
 
-    async updateGameFormat(id: number, format: 'STANDARD' | 'DUEL' | 'V5'): Promise<GameDto> {
+    async updateGameFormat(id: string, format: 'STANDARD' | 'DUEL' | 'V5'): Promise<GameDto> {
         return json(await baseFetch(`/api/games/${id}/format`, {
             ...OPTS, method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -104,7 +104,7 @@ const gameApi = {
         }));
     },
 
-    async invitePlayer(gameId: number, username: string): Promise<void> {
+    async invitePlayer(gameId: string, username: string): Promise<void> {
         const res = await baseFetch(`/api/games/${gameId}/invite`, {
             ...OPTS, method: 'POST',
             headers: { 'Content-Type': 'application/json' },
