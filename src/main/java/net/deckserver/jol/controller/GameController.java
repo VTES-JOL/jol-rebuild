@@ -21,6 +21,7 @@ import net.deckserver.jol.services.NameService;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/games")
 public class GameController {
@@ -83,6 +84,10 @@ public class GameController {
             return Response.status(Response.Status.CONFLICT)
                 .entity("Game can only be deleted when OPEN").build();
         }
+        if (game.tournament != null) {
+            return Response.status(Response.Status.CONFLICT)
+                .entity("Cannot delete tournament games").build();
+        }
         game.delete();
         return Response.noContent().build();
     }
@@ -98,14 +103,14 @@ public class GameController {
     @GET
     @Path("/active")
     public List<GameDto> activeGames() {
-        return Game.findActiveGames().stream().map(GameDto::new).toList();
+        return toDtos(Game.findActiveGames());
     }
 
     @GET
     @Path("/active/me")
     public List<GameDto> myGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.findActiveGames(user).stream().map(GameDto::new).toList();
+        return toDtos(Game.findActiveGames(user));
     }
 
     @GET
@@ -126,7 +131,7 @@ public class GameController {
                 .filter(g -> !result.contains(g))
                 .forEach(result::add);
         }
-        return result.stream().map(GameDto::new).toList();
+        return toDtos(result);
     }
 
     @GET
@@ -134,7 +139,7 @@ public class GameController {
     @RolesAllowed("USER")
     public List<GameDto> myInvitedGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.findInvitedGames(user).stream().map(GameDto::new).toList();
+        return toDtos(Game.findInvitedGames(user));
     }
 
     @GET
@@ -142,7 +147,7 @@ public class GameController {
     @RolesAllowed("USER")
     public List<GameDto> myRegisteredGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.findRegisteredGames(user).stream().map(GameDto::new).toList();
+        return toDtos(Game.findRegisteredGames(user));
     }
 
     @GET
@@ -150,8 +155,7 @@ public class GameController {
     @RolesAllowed("USER")
     public List<GameDto> myOwnedGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.<Game>find("owner.id = ?1 and status = ?2", user.id, Status.OPEN)
-            .stream().map(GameDto::new).toList();
+        return toDtos(Game.<Game>find("owner.id = ?1 and status = ?2", user.id, Status.OPEN).list());
     }
 
     @GET
@@ -281,6 +285,14 @@ public class GameController {
 
         Registration.invite(game, user);
         return Response.ok().build();
+    }
+
+    private List<GameDto> toDtos(List<Game> games) {
+        List<String> ids = games.stream().map(g -> g.id).toList();
+        Map<String, Long> counts = Registration.countsByGameIds(ids);
+        return games.stream()
+            .map(g -> new GameDto(g, counts.getOrDefault(g.id, 0L).intValue()))
+            .toList();
     }
 
     @RegisterForReflection

@@ -8,6 +8,8 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Entity
 public class Registration extends PanacheEntityBase {
@@ -81,6 +83,14 @@ public class Registration extends PanacheEntityBase {
 
     public static long countForGame(String gameId) {
         return count("game.id = ?1 and deck is not null", gameId);
+    }
+
+    public static Map<String, Long> countsByGameIds(List<String> gameIds) {
+        if (gameIds.isEmpty()) return Map.of();
+        return find("game.id IN ?1 AND deck IS NOT NULL", gameIds)
+            .<Registration>list()
+            .stream()
+            .collect(Collectors.groupingBy(r -> r.game.id, Collectors.counting()));
     }
 
     public static void delete(Game game, User user) {

@@ -1,6 +1,5 @@
 package net.deckserver.jol.controller;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
@@ -86,6 +85,9 @@ public class TournamentController {
         if (entity.status != TournamentStatus.SETUP) {
             throw new ForbiddenException("Can only edit tournaments in SETUP status");
         }
+        if (updated.numberOfRounds > MAX_ROUNDS) {
+            throw new BadRequestException("Maximum number of rounds is " + MAX_ROUNDS);
+        }
         entity.name = updated.name;
         entity.registrationStart = updated.registrationStart;
         entity.registrationEnd = updated.registrationEnd;
@@ -135,8 +137,7 @@ public class TournamentController {
         if (t.status != TournamentStatus.REGISTRATION) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to unpublish");
         }
-        TournamentRegistration.find("tournament.id = ?1", id).stream()
-            .forEach(PanacheEntityBase::delete);
+        TournamentRegistration.delete("tournament.id = ?1", id);
         t.status = TournamentStatus.SETUP;
         return t;
     }

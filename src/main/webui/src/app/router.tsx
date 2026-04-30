@@ -19,7 +19,7 @@ export default function AppRouter() {
                 <Route path="/lobby" element={<ProtectedRoute><LobbyPage/></ProtectedRoute>}/>
                 <Route path="/decks" element={<ProtectedRoute><DecksPage/></ProtectedRoute>}/>
                 <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage/></ProtectedRoute>}/>
-                <Route path="/game/:gameId" element={<GamePage/>}/>
+                <Route path="/game/:gameId" element={<ProtectedRoute><GamePage/></ProtectedRoute>}/>
                 <Route path="/profile" element={<ProtectedRoute><ProfilePage/></ProtectedRoute>}/>
                 <Route path="/*" element={<ProtectedRoute><HomePage/></ProtectedRoute>}/>
             </Routes>
