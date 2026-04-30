@@ -9,7 +9,6 @@ import net.deckserver.jol.enums.Visibility;
 
 import java.util.List;
 
-// Example: notify the lobby when a new game is created
 @ApplicationScoped
 public class GameService {
 
@@ -19,7 +18,8 @@ public class GameService {
     @Inject
     NameService nameService;
 
-//    @Scheduled(every = "1m")
+    // Disabled: auto-game creation removed; games are created on demand by players.
+    // @Scheduled(every = "1m")
     @Transactional
     public void createGame() {
         for (GameFormat format : GameFormat.values()) {

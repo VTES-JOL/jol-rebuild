@@ -5,9 +5,12 @@ import jakarta.persistence.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.TournamentFormat;
 import net.deckserver.jol.enums.TournamentStatus;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +64,26 @@ public class Tournament extends PanacheEntityBase {
 
     @Enumerated(EnumType.STRING)
     public TournamentStatus status = TournamentStatus.SETUP;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    public Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    public Instant updatedAt;
+
+    public boolean canPublish() {
+        return status == TournamentStatus.SETUP;
+    }
+
+    public boolean canBeginSeating() {
+        return status == TournamentStatus.REGISTRATION;
+    }
+
+    public boolean canActivate() {
+        return status == TournamentStatus.SEATING;
+    }
 
     public static class Rule {
         public String text;

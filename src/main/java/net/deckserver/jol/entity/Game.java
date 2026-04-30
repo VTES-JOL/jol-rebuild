@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.Visibility;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +22,14 @@ public class Game extends PanacheEntityBase {
     public Status status = Status.OPEN;
     @Column(name = "format")
     public GameFormat gameFormat = GameFormat.STANDARD;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    public Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    public Instant updatedAt;
 
     @ManyToOne
     public User owner;
@@ -42,6 +53,14 @@ public class Game extends PanacheEntityBase {
 
     public boolean isOwnedBy(String username) {
         return owner != null && owner.username.equals(username);
+    }
+
+    public boolean isFull(long registrationCount) {
+        return registrationCount >= gameFormat.getMaxPlayers();
+    }
+
+    public boolean canStart(long registrationCount) {
+        return status == Status.OPEN && registrationCount >= 2;
     }
 
     public static Game create(User owner, Tournament tournament, String name, Visibility visibility, GameFormat format) {

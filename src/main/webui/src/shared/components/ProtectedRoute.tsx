@@ -1,6 +1,7 @@
 import {Navigate} from "react-router-dom";
 import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import type {JSX} from "react";
+import Spinner from "./Spinner";
 
 type ProtectedRouteViewProps = {
     children: JSX.Element;
@@ -9,7 +10,7 @@ type ProtectedRouteViewProps = {
 };
 
 export function ProtectedRouteView({ children, loading, user }: ProtectedRouteViewProps) {
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Spinner message="Loading..." className="justify-center h-screen" />;
 
     if (!user) {
         return <Navigate to="/login" replace />;

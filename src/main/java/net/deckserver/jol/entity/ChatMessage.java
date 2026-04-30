@@ -44,6 +44,26 @@ public class ChatMessage extends PanacheEntityBase {
         return msg;
     }
 
+    public static List<ChatMessage> findPaginated(String gameId, int page, int limit) {
+        String query = gameId == null ? "gameId IS NULL" : "gameId = ?1";
+        Object[] params = gameId == null ? new Object[]{} : new Object[]{gameId};
+
+        List<ChatMessage> paged = find(query + " ORDER BY timestamp DESC", params)
+                .page(page, limit)
+                .list();
+
+        List<String> ids = paged.stream().map(m -> m.id).toList();
+        if (ids.isEmpty()) return List.of();
+
+        return find(
+                "SELECT DISTINCT m FROM ChatMessage m " +
+                        "LEFT JOIN FETCH m.reactions " +
+                        "LEFT JOIN FETCH m.replyTo " +
+                        "WHERE m.id IN ?1 " +
+                        "ORDER BY m.timestamp ASC", ids)
+                .list();
+    }
+
     public static List<ChatMessage> findRecent(String gameId, int limit) {
         String query = gameId == null ? "gameId IS NULL" : "gameId = ?1";
         Object[] params = gameId == null ? new Object[]{} : new Object[]{gameId};

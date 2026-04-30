@@ -1,6 +1,7 @@
 import {useCallback, useState} from 'react';
 import {ChevronDown, ChevronRight, PlusCircle, Users, X} from 'lucide-react';
 import Button from '@/shared/components/Button';
+import Spinner from '@/shared/components/Spinner';
 import type {SeatingDto, Tournament, UnseatedPlayer} from './types';
 import tournamentApi from './api';
 import {useAsyncState} from '@/hooks/useAsyncState';
@@ -28,8 +29,8 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
         try {
             await action();
             reloadSeating();
-        } catch (e: any) {
-            setMutationError(e.message ?? errorMsg);
+        } catch (e: unknown) {
+            setMutationError(e instanceof Error ? e.message : errorMsg);
         } finally {
             setSaving(false);
         }
@@ -49,14 +50,14 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
         try {
             await tournamentApi.activate(tournament.id);
             onActivated();
-        } catch (e: any) {
-            setMutationError(e.message ?? 'Failed to activate tournament');
+        } catch (e: unknown) {
+            setMutationError(e instanceof Error ? e.message : 'Failed to activate tournament');
         } finally {
             setActivating(false);
         }
     };
 
-    if (loading) return <div className="p-4 text-sm text-ink-muted">Loading seating...</div>;
+    if (loading) return <Spinner message="Loading seating..." />;
     if (!seating) return null;
 
     const allSeated = seating.unseated.length === 0;

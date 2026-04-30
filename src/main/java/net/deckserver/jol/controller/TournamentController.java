@@ -13,6 +13,7 @@ import net.deckserver.jol.dto.TournamentRegistrationDto;
 import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.TournamentFormat;
 import net.deckserver.jol.enums.TournamentStatus;
+import net.deckserver.jol.config.Config;
 import net.deckserver.jol.services.TournamentService;
 
 import java.time.OffsetDateTime;
@@ -23,8 +24,8 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class TournamentController {
 
-    private static final int MAX_TABLE_SIZE = 5;
-    private static final int MAX_ROUNDS = 3;
+    @Inject
+    Config config;
 
     private static final List<TournamentStatus> PLAYER_VISIBLE_STATUSES = List.of(
         TournamentStatus.REGISTRATION, TournamentStatus.SEATING, TournamentStatus.ACTIVE,
@@ -82,11 +83,11 @@ public class TournamentController {
     public Tournament update(@PathParam("id") String id, Tournament updated) {
         Tournament entity = Tournament.findById(id);
         if (entity == null) throw new NotFoundException();
-        if (entity.status != TournamentStatus.SETUP) {
+        if (!entity.canPublish()) {
             throw new ForbiddenException("Can only edit tournaments in SETUP status");
         }
-        if (updated.numberOfRounds > MAX_ROUNDS) {
-            throw new BadRequestException("Maximum number of rounds is " + MAX_ROUNDS);
+        if (updated.numberOfRounds > config.tournament().maxRounds()) {
+            throw new BadRequestException("Maximum number of rounds is " + config.tournament().maxRounds());
         }
         entity.name = updated.name;
         entity.registrationStart = updated.registrationStart;
@@ -121,7 +122,7 @@ public class TournamentController {
     @RolesAllowed("TOURNAMENT_ADMIN")
     public Tournament publish(@PathParam("id") String id) {
         Tournament t = require(id);
-        if (t.status != TournamentStatus.SETUP) {
+        if (!t.canPublish()) {
             throw new BadRequestException("Tournament must be in SETUP status to publish");
         }
         t.status = TournamentStatus.REGISTRATION;
@@ -134,7 +135,7 @@ public class TournamentController {
     @RolesAllowed("TOURNAMENT_ADMIN")
     public Tournament unpublish(@PathParam("id") String id) {
         Tournament t = require(id);
-        if (t.status != TournamentStatus.REGISTRATION) {
+        if (!t.canBeginSeating()) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to unpublish");
         }
         TournamentRegistration.delete("tournament.id = ?1", id);
@@ -148,7 +149,7 @@ public class TournamentController {
     @RolesAllowed("TOURNAMENT_ADMIN")
     public Tournament beginSeating(@PathParam("id") String id) {
         Tournament t = require(id);
-        if (t.status != TournamentStatus.REGISTRATION) {
+        if (!t.canBeginSeating()) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to begin seating");
         }
         t.originalNumberOfRounds = t.numberOfRounds;
@@ -162,7 +163,7 @@ public class TournamentController {
     @RolesAllowed("TOURNAMENT_ADMIN")
     public Tournament activate(@PathParam("id") String id) {
         Tournament t = require(id);
-        if (t.status != TournamentStatus.SEATING) {
+        if (!t.canActivate()) {
             throw new BadRequestException("Tournament must be in SEATING status to activate");
         }
         User admin = currentUser();
@@ -319,11 +320,11 @@ public class TournamentController {
         }
 
         long currentSeats = table.seats.stream().filter(s -> !s.bye && s.roundNumber == command.roundNumber()).count();
-        if (currentSeats >= MAX_TABLE_SIZE) {
-            throw new BadRequestException("Table is full (max " + MAX_TABLE_SIZE + " players)");
+        if (currentSeats >= config.tournament().maxTableSize()) {
+            throw new BadRequestException("Table is full (max " + config.tournament().maxTableSize() + " players)");
         }
-        if (command.seatPosition() < 1 || command.seatPosition() > MAX_TABLE_SIZE) {
-            throw new BadRequestException("Seat position must be between 1 and " + MAX_TABLE_SIZE);
+        if (command.seatPosition() < 1 || command.seatPosition() > config.tournament().maxTableSize()) {
+            throw new BadRequestException("Seat position must be between 1 and " + config.tournament().maxTableSize());
         }
 
         TournamentSeat seat = new TournamentSeat();
@@ -380,7 +381,7 @@ public class TournamentController {
                 "table.id = ?1 and roundNumber = ?2 and bye = false",
                 table.id, roundNumber
             );
-            if (seatCount > 0 && seatCount < MAX_TABLE_SIZE) {
+            if (seatCount > 0 && seatCount < config.tournament().maxTableSize()) {
                 throw new BadRequestException("All table seats must be full before assigning byes for round " + roundNumber);
             }
         }
@@ -418,7 +419,7 @@ public class TournamentController {
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Can only add rounds during SEATING status");
         }
-        int maxAllowed = Math.min(t.originalNumberOfRounds + 1, MAX_ROUNDS);
+        int maxAllowed = Math.min(t.originalNumberOfRounds + 1, config.tournament().maxRounds());
         if (t.numberOfRounds >= maxAllowed) {
             throw new BadRequestException("Maximum number of rounds (" + maxAllowed + ") already reached");
         }

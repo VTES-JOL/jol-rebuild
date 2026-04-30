@@ -5,6 +5,7 @@ import io.quarkus.websockets.next.*;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
+import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.services.ChatService;
 import org.jboss.logging.Logger;
@@ -22,13 +23,15 @@ import org.jboss.logging.Logger;
 public class GameWebSocket {
 
     private static final Logger LOG = Logger.getLogger(GameWebSocket.class);
-    private static final int MAX_CONTENT_LENGTH = 4000;
+
+    @Inject
+    Config config;
+
     @Inject
     WebSocketConnection connection;
     @Inject
     ChatService chatService;
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────
     @Inject
     SecurityIdentity identity;
 
@@ -59,6 +62,9 @@ public class GameWebSocket {
     @OnError
     public void onError(Throwable error) {
         LOG.errorf(error, "Game WS error for session %s", connection.id());
+        try {
+            connection.sendTextAndAwait(ChatMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
+        } catch (Exception ignored) {}
     }
 
     private void handleChat(String gameId, ChatMessageDto incoming) {
@@ -67,8 +73,8 @@ public class GameWebSocket {
             connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
             return;
         }
-        if (content.length() > MAX_CONTENT_LENGTH) {
-            connection.sendTextAndAwait(ChatMessageDto.error("Message exceeds maximum length of " + MAX_CONTENT_LENGTH + " characters"));
+        if (content.length() > config.chat().maxContentLength()) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Message exceeds maximum length of " + config.chat().maxContentLength() + " characters"));
             return;
         }
         if (incoming.replyToId != null && !chatService.messageExistsInGame(incoming.replyToId, gameId)) {

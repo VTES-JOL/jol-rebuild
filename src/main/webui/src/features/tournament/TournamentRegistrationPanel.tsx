@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {CheckCircle2, LogOut, UserPlus} from 'lucide-react';
 import Button from '@/shared/components/Button';
+import Spinner from '@/shared/components/Spinner';
 import type {Deck} from '@/features/deck/types';
 import type {Tournament, TournamentRegistration} from './types';
 import tournamentApi from './api';
@@ -63,8 +64,8 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
             setMyRegistration(reg);
             setAllRegistrations(prev => [...prev, reg]);
             onChanged();
-        } catch (e: any) {
-            setError(e.message ?? 'Failed to register');
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Failed to register');
         } finally {
             setSaving(false);
         }
@@ -79,8 +80,8 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
             setAllRegistrations(prev => prev.filter(r => r.id !== myRegistration?.id));
             setConfirmLeave(false);
             onChanged();
-        } catch (e: any) {
-            setError(e.message ?? 'Failed to leave tournament');
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Failed to leave tournament');
         } finally {
             setSaving(false);
         }
@@ -89,7 +90,7 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
     const canRegister = isWithinRegistrationWindow();
 
     if (loading) {
-        return <div className="p-4 text-sm text-ink-muted">Loading...</div>;
+        return <Spinner message="Loading tournament..." />;
     }
 
     return (

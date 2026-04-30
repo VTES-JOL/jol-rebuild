@@ -10,12 +10,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.dto.GameDetailDto;
 import net.deckserver.jol.dto.GameDto;
 import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.Visibility;
+import net.deckserver.jol.services.ChatService;
 import net.deckserver.jol.services.NameService;
 
 import java.net.URI;
@@ -31,6 +33,9 @@ public class GameController {
 
     @Inject
     NameService nameService;
+
+    @Inject
+    ChatService chatService;
 
     @Inject
     net.deckserver.jol.services.LobbyChatBroadcaster lobbyChatBroadcaster;
@@ -102,8 +107,14 @@ public class GameController {
 
     @GET
     @Path("/active")
-    public List<GameDto> activeGames() {
-        return toDtos(Game.findActiveGames());
+    public List<GameDto> activeGames(
+        @QueryParam("limit") @DefaultValue("50") int limit,
+        @QueryParam("offset") @DefaultValue("0") int offset) {
+        int clampedLimit = Math.min(limit, 200);
+        List<Game> games = Game.<Game>find("visibility = ?1 and status = ?2", Visibility.PUBLIC, Status.ACTIVE)
+            .range(offset, offset + clampedLimit - 1)
+            .list();
+        return toDtos(games);
     }
 
     @GET
@@ -115,8 +126,15 @@ public class GameController {
 
     @GET
     @Path("/open")
-    public List<GameDto> openGames() {
-        List<Game> result = new ArrayList<>(Game.findOpenGames());
+    public List<GameDto> openGames(
+        @QueryParam("limit") @DefaultValue("50") int limit,
+        @QueryParam("offset") @DefaultValue("0") int offset) {
+        int clampedLimit = Math.min(limit, 200);
+        List<Game> result = new ArrayList<>(
+            Game.<Game>find("visibility = ?1 and status = ?2", Visibility.PUBLIC, Status.OPEN)
+                .range(offset, offset + clampedLimit - 1)
+                .list()
+        );
         if (!identity.isAnonymous()) {
             User user = User.findByUsername(identity.getPrincipal().getName());
             // Private games the user was invited to
@@ -179,6 +197,18 @@ public class GameController {
         return Response.ok(new GameDetailDto(game, registrations, invites)).build();
     }
 
+    @GET
+    @Path("/{id}/messages")
+    @RolesAllowed("USER")
+    public List<ChatMessageDto> getMessages(
+        @PathParam("id") String id,
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("limit") @DefaultValue("50") int limit) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+        return chatService.getHistory(id, page, limit);
+    }
+
     @POST
     @Path("/{id}/register")
     @Transactional
@@ -203,7 +233,7 @@ public class GameController {
         }
 
         long registrationCount = Registration.countForGame(game.id);
-        if (registrationCount >= game.gameFormat.getMaxPlayers()) {
+        if (game.isFull(registrationCount)) {
             return Response.status(Response.Status.CONFLICT).entity("Game is full").build();
         }
 

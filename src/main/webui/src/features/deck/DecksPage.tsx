@@ -21,6 +21,7 @@ export default function DecksPage() {
     const [detailMap,       setDetailMap]       = useState<Map<string, CardDetailData>>(new Map());
     const [saveStatus,      setSaveStatus]      = useState<SaveStatus>('idle');
     const [loadError,       setLoadError]       = useState<string | null>(null);
+    const [operationError,  setOperationError]  = useState<string | null>(null);
     const [entriesLoading,  setEntriesLoading]  = useState(false);
     const [showImport,      setShowImport]      = useState(false);
     const [deckFilter,      setDeckFilter]      = useState<DeckFilter>({});
@@ -113,6 +114,7 @@ export default function DecksPage() {
     }, [selectedId]);
 
     const handleNew = useCallback(async () => {
+        setOperationError(null);
         try {
             const deck = await deckApi.create('New Deck');
             setDecks(ds => [deck, ...ds]);
@@ -120,7 +122,7 @@ export default function DecksPage() {
             setSelectedId(deck.id);
             setSaveStatus('idle');
         } catch (e) {
-            console.error('Failed to create deck', e);
+            setOperationError('Failed to create deck');
         }
     }, []);
 
@@ -151,11 +153,12 @@ export default function DecksPage() {
 
     const handleRename = useCallback(async (name: string) => {
         if (selectedId == null) return;
+        setOperationError(null);
         try {
             const updated = await deckApi.save(selectedId, { name });
             setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
-        } catch (e) {
-            console.error('Failed to rename deck', e);
+        } catch {
+            setOperationError('Failed to rename deck');
         }
     }, [selectedId]);
 
@@ -178,24 +181,27 @@ export default function DecksPage() {
 
     const handleCommentsChange = useCallback(async (comments: string | null) => {
         if (selectedId == null) return;
+        setOperationError(null);
         try {
             const updated = await deckApi.save(selectedId, { comments });
             setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
-        } catch (e) {
-            console.error('Failed to save comments', e);
+        } catch {
+            setOperationError('Failed to save comments');
         }
     }, [selectedId]);
 
     const handleDelete = useCallback(async () => {
         if (selectedId == null) return;
+        if (!window.confirm('Delete this deck? This cannot be undone.')) return;
+        setOperationError(null);
         try {
             await deckApi.remove(selectedId);
             setDecks(ds => ds.filter(d => d.id !== selectedId));
             setSelectedId(null);
             setEntries([]);
             setSaveStatus('idle');
-        } catch (e) {
-            console.error('Failed to delete deck', e);
+        } catch {
+            setOperationError('Failed to delete deck');
             setSaveStatus('error');
         }
     }, [selectedId]);
@@ -242,7 +248,7 @@ export default function DecksPage() {
                                 onImport={() => setShowImport(true)}
                                 onFilter={setDeckFilter}
                                 activeFilter={deckFilter}
-                                loadError={loadError ?? undefined}
+                                loadError={operationError ?? loadError ?? undefined}
                             />
                         )
                     },

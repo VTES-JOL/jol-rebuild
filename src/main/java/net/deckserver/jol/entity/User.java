@@ -84,6 +84,7 @@ public class User extends PanacheEntityBase {
     @Override
     public void delete() {
         TournamentRegistration.delete("user.id = ?1", this.id);
+        Registration.delete("user.id = ?1", this.id);
         for (Deck deck : decks) {
             deck.delete();
         }

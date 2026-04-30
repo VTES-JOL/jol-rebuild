@@ -3,9 +3,12 @@ package net.deckserver.jol.entity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import net.deckserver.jol.enums.Status;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +19,11 @@ public class Registration extends PanacheEntityBase {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     public String id;
+
+    @Version
+    @Column(nullable = false)
+    public Long version = 0L;
+
     @ManyToOne
     public User user;
 
@@ -24,6 +32,14 @@ public class Registration extends PanacheEntityBase {
 
     @Column(name = "last_updated")
     public OffsetDateTime lastUpdated;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    public Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    public Instant updatedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     public String deck;
