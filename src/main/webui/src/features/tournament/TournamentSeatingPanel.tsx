@@ -33,9 +33,10 @@ interface Props {
     tournament: Tournament;
     onActivated: () => void;
     onChanged: () => void;
+    onSeatingChanged?: () => void;
 }
 
-export default function TournamentSeatingPanel({tournament, onActivated, onChanged}: Props) {
+export default function TournamentSeatingPanel({tournament, onActivated, onChanged, onSeatingChanged}: Props) {
     const fetchSeating = useCallback(() => tournamentApi.getSeating(tournament.id), [tournament.id]);
     const {data: seating, loading, error: loadError, refetch: reloadSeating} = useAsyncState<SeatingDto>(fetchSeating);
 
@@ -58,6 +59,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
         try {
             await action();
             reloadSeating();
+            onSeatingChanged?.();
         } catch (e: unknown) {
             setMutationError(e instanceof Error ? e.message : errorMsg);
         } finally {
@@ -72,6 +74,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
         try {
             await tournamentApi.removeSeat(tournament.id, tableId, seatId);
             reloadSeating();
+            onSeatingChanged?.();
         } catch (e) {
             setLocalSeating(snapshot);
             setMutationError(e instanceof Error ? e.message : 'Failed to remove seat');
@@ -98,10 +101,12 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                 setLocalSeating(applyUnallocatedToBye(localSeating, roundNumber, source));
                 await tournamentApi.addBye(tournament.id, roundNumber, source.registrationId);
                 reloadSeating();
+                onSeatingChanged?.();
             } else if (source.type === 'UNALLOCATED' && target.type === 'seat' && !target.occupiedBy) {
                 setLocalSeating(applyUnallocatedToSeat(localSeating, roundNumber, source, target));
                 await tournamentApi.addSeat(tournament.id, target.tableId, source.registrationId, target.position, roundNumber);
                 reloadSeating();
+                onSeatingChanged?.();
             } else if (source.type === 'SEATED' && target.type === 'seat' && source.tableId === target.tableId) {
                 if (source.seatPosition === target.position) return;
                 if (!target.occupiedBy) {
@@ -109,6 +114,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                     await tournamentApi.removeSeat(tournament.id, source.tableId, source.seatId);
                     await tournamentApi.addSeat(tournament.id, target.tableId, source.registrationId, target.position, roundNumber);
                     reloadSeating();
+                    onSeatingChanged?.();
                 } else {
                     setLocalSeating(applySwapSeats(localSeating, roundNumber, source, target));
                     await tournamentApi.removeSeat(tournament.id, source.tableId, source.seatId);
@@ -116,6 +122,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                     await tournamentApi.addSeat(tournament.id, target.tableId, source.registrationId, target.position, roundNumber);
                     await tournamentApi.addSeat(tournament.id, source.tableId, target.occupiedBy.registrationId, source.seatPosition, roundNumber);
                     reloadSeating();
+                    onSeatingChanged?.();
                 }
             }
         } catch (e) {

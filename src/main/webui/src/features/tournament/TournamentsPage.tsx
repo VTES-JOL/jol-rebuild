@@ -5,8 +5,10 @@ import tournamentApi from './api';
 import type {Tournament} from './types';
 import TournamentListPanel from './TournamentListPanel';
 import TournamentDetailPanel from './TournamentDetailPanel';
+import TournamentSeatingStats from './TournamentSeatingStats';
+import Panel from '@/shared/components/Panel';
 import EmptyState from '@/shared/components/EmptyState';
-import {Trophy} from 'lucide-react';
+import {BarChart2, Trophy} from 'lucide-react';
 import AppLayout from "@/shared/layout/AppLayout.tsx";
 
 export default function TournamentsPage() {
@@ -17,6 +19,11 @@ export default function TournamentsPage() {
     const [loading, setLoading] = useState(true);
 
     const isTournamentAdmin = user?.roles.includes('TOURNAMENT_ADMIN') ?? false;
+    const [seatingRefreshKey, setSeatingRefreshKey] = useState(0);
+
+    useEffect(() => { setSeatingRefreshKey(0); }, [selectedTournament?.id]);
+
+    const handleSeatingChanged = () => setSeatingRefreshKey(v => v + 1);
 
     const loadTournaments = async () => {
         setLoading(true);
@@ -67,7 +74,7 @@ export default function TournamentsPage() {
         }
     };
 
-    const panels: [PanelConfig, PanelConfig] = [
+    const panels: [PanelConfig, PanelConfig, PanelConfig] = [
         {
             key: 'list',
             label: 'All Tournaments',
@@ -94,6 +101,7 @@ export default function TournamentsPage() {
                         isTournamentAdmin={isTournamentAdmin}
                         onChanged={loadTournaments}
                         onDelete={handleDelete}
+                        onSeatingChanged={handleSeatingChanged}
                         initialEdit={isNewlyCreated}
                     />
                 </div>
@@ -106,6 +114,28 @@ export default function TournamentsPage() {
                     />
                 </div>
             )
+        },
+        {
+            key: 'stats',
+            label: 'Seating Stats',
+            content: selectedTournament ? (
+                <Panel title={<span className="flex items-center gap-2"><BarChart2 className="w-3.5 h-3.5" />Seating Stats</span>}>
+                    <div className="overflow-y-auto flex-1 min-h-0 p-4">
+                        <TournamentSeatingStats
+                            tournamentId={selectedTournament.id}
+                            refreshKey={seatingRefreshKey}
+                        />
+                    </div>
+                </Panel>
+            ) : (
+                <div className="flex-1 flex items-center justify-center bg-panel border border-line rounded-xl">
+                    <EmptyState
+                        icon={BarChart2}
+                        title="No stats"
+                        description="Select a tournament to view seating statistics."
+                    />
+                </div>
+            )
         }
     ];
 
@@ -113,7 +143,7 @@ export default function TournamentsPage() {
         <AppLayout background={"/Locations52.jpg"}>
             <MasterDetailView
                 panels={panels}
-                columns="320px 1fr"
+                columns="320px 1fr 320px"
                 activeKey={selectedTournament ? 'detail' : 'list'}
             />
         </AppLayout>

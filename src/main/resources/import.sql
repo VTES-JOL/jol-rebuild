@@ -1,11 +1,11 @@
 -- ============================================================
 -- JOL Quarkus Dev Mode Sample Data
 --
--- Users:       Player1–Player10 (USER) + Admin1 (USER, ADMIN, TOURNAMENT_ADMIN)
+-- Users:       Player1–Player11 (USER) + Admin1 (USER, ADMIN, TOURNAMENT_ADMIN)
 -- Password:    "password" for all accounts
--- Decks:       10 real KRCG tournament decks (2025 season), one per player
+-- Decks:       11 real KRCG tournament decks (2024/2025 season), one per player
 -- Games:       8 games across all formats, statuses, and visibilities
--- Tournaments: 5 tournaments spanning SETUP → COMPLETED (incl. SEATING with all 10 players)
+-- Tournaments: 5 tournaments spanning SETUP → COMPLETED (incl. SEATING with all 11 players)
 -- ============================================================
 
 -- ── Users ────────────────────────────────────────────────────
@@ -21,6 +21,7 @@ INSERT INTO users (id, username, password, email, discord_id, tournament_id, pre
   ('00000000-0000-0000-0000-000000000008', 'Player8',  '$2a$10$lRqqX9Yt5tPNuz1N8ZneSOSNU62DZ9uoCyw70FbQSAs2aDriRkiaK', 'player8@test.com',  NULL, NULL, '{"countryCode":"NZ","zoneId":"Pacific/Auckland","enableImages":true}'),
   ('00000000-0000-0000-0000-000000000009', 'Player9',  '$2a$10$lRqqX9Yt5tPNuz1N8ZneSOSNU62DZ9uoCyw70FbQSAs2aDriRkiaK', 'player9@test.com',  NULL, NULL, '{"countryCode":"BR","zoneId":"America/Sao_Paulo","enableImages":true}'),
   ('00000000-0000-0000-0000-000000000010', 'Player10', '$2a$10$lRqqX9Yt5tPNuz1N8ZneSOSNU62DZ9uoCyw70FbQSAs2aDriRkiaK', 'player10@test.com', NULL, NULL, '{"countryCode":null,"zoneId":"UTC","enableImages":true}'),
+  ('00000000-0000-0000-0000-000000000011', 'Player11', '$2a$10$lRqqX9Yt5tPNuz1N8ZneSOSNU62DZ9uoCyw70FbQSAs2aDriRkiaK', 'player11@test.com', NULL, NULL, '{"countryCode":"FI","zoneId":"Europe/Helsinki","enableImages":true}'),
   ('00000000-0000-0000-0000-000000000099', 'Admin1',   '$2a$10$lRqqX9Yt5tPNuz1N8ZneSOSNU62DZ9uoCyw70FbQSAs2aDriRkiaK', 'admin1@test.com',   NULL, NULL, '{"countryCode":null,"zoneId":"UTC","enableImages":true}');
 
 -- ── Roles ─────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ INSERT INTO user_roles (user_id, role) VALUES
   ('00000000-0000-0000-0000-000000000008', 'USER'),
   ('00000000-0000-0000-0000-000000000009', 'USER'),
   ('00000000-0000-0000-0000-000000000010', 'USER'),
+  ('00000000-0000-0000-0000-000000000011', 'USER'),
   ('00000000-0000-0000-0000-000000000099', 'USER'),
   ('00000000-0000-0000-0000-000000000099', 'ADMIN'),
   ('00000000-0000-0000-0000-000000000099', 'TOURNAMENT_ADMIN');
@@ -152,6 +154,17 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
   $d10${"name":"Yesterday's Brutalism","comments":"don't try this at home unless it's yesterday\nThe Eve before the Night 2025 (Vilnius, Lithuania)\n","crypt":{"count":12,"cards":[{"count":5,"id":"201274","name":"Shalmath"},{"count":1,"id":"200080","name":"Andre LeRoux"},{"count":1,"id":"200062","name":"Alu"},{"count":1,"id":"201052","name":"New Blood"},{"count":1,"id":"200048","name":"Alex Wilkins"},{"count":1,"id":"200365","name":"Donald Cargill"},{"count":1,"id":"200482","name":"Freddy Gage"},{"count":1,"id":"201462","name":"Walker Grimes"}]},"library":{"count":69,"cards":[{"type":"Master","count":9,"cards":[{"count":6,"id":"100106","name":"Ashur Tablets"},{"count":1,"id":"101439","name":"Powerbase: Montreal"},{"count":1,"id":"101924","name":"Tabriz Assembly"},{"count":1,"id":"102180","name":"Wider View"}]},{"type":"Action","count":12,"cards":[{"count":1,"id":"100046","name":"Ambush"},{"count":1,"id":"100159","name":"Big Game"},{"count":1,"id":"100266","name":"Bum's Rush"},{"count":1,"id":"100494","name":"Dark Mirror of the Mind"},{"count":1,"id":"100941","name":"Hourglass of the Mind"},{"count":7,"id":"101897","name":"Summon History"}]},{"type":"Ally","count":4,"cards":[{"count":1,"id":"100855","name":"Gregory Winter"},{"count":1,"id":"101261","name":"Mylan Horseed"},{"count":1,"id":"101272","name":"Nephandus"},{"count":1,"id":"102053","name":"Tye Cooper"}]},{"type":"Equipment","count":3,"cards":[{"count":1,"id":"100678","name":"Eye of Hazimel"},{"count":1,"id":"100903","name":"Heart of Nizchetus"},{"count":1,"id":"101931","name":"Talbot's Chainsaw"}]},{"type":"Retainer","count":1,"cards":[{"count":1,"id":"101249","name":"Mr. Winthrop"}]},{"type":"Action Modifier","count":8,"cards":[{"count":6,"id":"100571","name":"Domain of Evernight"},{"count":2,"id":"100645","name":"Enkil Cog"}]},{"type":"Combat","count":32,"cards":[{"count":3,"id":"100511","name":"Decapitate"},{"count":7,"id":"100549","name":"Disarm"},{"count":8,"id":"101144","name":"Majesty"},{"count":10,"id":"101338","name":"Outside the Hourglass"},{"count":4,"id":"101945","name":"Taste of Vitae"}]}]}}$d10$
 );
 
+-- Deck 11: Power of Debate (Player11)
+INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
+  '00000000-0000-0000-0000-000000000d11',
+  '2024-05-02 12:00:00+00',
+  'Power of Debate',
+  '12,80,2/3',
+  '2nd Game of Malkav - Helsinki, Finland 2024 — Brujah Debate vote',
+  '00000000-0000-0000-0000-000000000011',
+  $d11${"name":"Power of Debate","comments":"2nd Game of Malkav - Helsinki, Finland\n","crypt":{"count":12,"cards":[{"count":2,"id":"201576","name":"Aline Gädeke"},{"count":2,"id":"201579","name":"Atiena"},{"count":2,"id":"201526","name":"Leumeah"},{"count":1,"id":"201658","name":"Saku Pihlajamäki"},{"count":1,"id":"201614","name":"Valeriya Zinovieva"},{"count":1,"id":"201585","name":"Elen Kamjian"},{"count":1,"id":"200132","name":"Ariane"},{"count":1,"id":"200893","name":"Lynn Thompson"},{"count":1,"id":"201610","name":"Rayne"}]},"library":{"count":80,"cards":[{"type":"Master","count":26,"cards":[{"count":1,"id":"100052","name":"The Anarch Free Press"},{"count":7,"id":"100260","name":"Brujah Debate"},{"count":1,"id":"100297","name":"Carfax Abbey"},{"count":1,"id":"100435","name":"The Coven"},{"count":7,"id":"100774","name":"Fortitude"},{"count":1,"id":"100809","name":"Garibaldi-Meucci Museum"},{"count":1,"id":"100824","name":"Giant's Blood"},{"count":1,"id":"101019","name":"Jake Washington"},{"count":1,"id":"101350","name":"Papillon"},{"count":5,"id":"102121","name":"Villein"}]},{"type":"Action","count":14,"cards":[{"count":1,"id":"100079","name":"Aranthebes, The Immortal"},{"count":8,"id":"102246","name":"Childe of the Revolution"},{"count":4,"id":"102229","name":"Line Brawl"},{"count":1,"id":"101324","name":"Open War"}]},{"type":"Equipment","count":1,"cards":[{"count":1,"id":"100903","name":"Heart of Nizchetus"}]},{"type":"Reaction","count":24,"cards":[{"count":7,"id":"102218","name":"Bait and Switch"},{"count":13,"id":"102230","name":"Organized Resistance"},{"count":4,"id":"101428","name":"Power of All"}]},{"type":"Combat","count":14,"cards":[{"count":8,"id":"100563","name":"Diversion"},{"count":2,"id":"100959","name":"Immortal Grapple"},{"count":4,"id":"101945","name":"Taste of Vitae"}]},{"type":"Event","count":1,"cards":[{"count":1,"id":"102057","name":"The Uncoiling"}]}]}}$d11$
+);
+
 -- ── Deck Format Validity ──────────────────────────────────────
 
 INSERT INTO deck_format_validity (id, deck_id, format, valid, errors, computed_at) VALUES
@@ -165,7 +178,8 @@ INSERT INTO deck_format_validity (id, deck_id, format, valid, errors, computed_a
   ('00000000-0000-0000-0000-000000000f08', '00000000-0000-0000-0000-000000000d07', 'STANDARD', true,  NULL, '2025-07-27 10:01:00+00'),
   ('00000000-0000-0000-0000-000000000f09', '00000000-0000-0000-0000-000000000d08', 'STANDARD', true,  NULL, '2025-08-17 10:01:00+00'),
   ('00000000-0000-0000-0000-000000000f10', '00000000-0000-0000-0000-000000000d09', 'STANDARD', true,  NULL, '2025-02-16 10:01:00+00'),
-  ('00000000-0000-0000-0000-000000000f11', '00000000-0000-0000-0000-000000000d10', 'STANDARD', true,  NULL, '2025-02-28 10:01:00+00');
+  ('00000000-0000-0000-0000-000000000f11', '00000000-0000-0000-0000-000000000d10', 'STANDARD', true,  NULL, '2025-02-28 10:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f12', '00000000-0000-0000-0000-000000000d11', 'STANDARD', true,  NULL, '2024-05-02 12:01:00+00');
 
 -- ── Games ─────────────────────────────────────────────────────
 -- format: STANDARD=0, DUEL=1, V5=2
@@ -276,7 +290,7 @@ INSERT INTO tournament_registration (id, tournament_id, user_id, decks) VALUES
   ('00000000-0000-0000-0000-000000000e15', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
   ('00000000-0000-0000-0000-000000000e16', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
   ('00000000-0000-0000-0000-000000000e17', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
-  -- Tournament 5 (SEATING): all 10 players with their real decks, no seating arranged yet
+  -- Tournament 5 (SEATING): all 11 players with their real decks, no seating arranged yet
   ('00000000-0000-0000-0000-000000000e18', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000001', '[{"deckName":"Gangrel Anarch Toolbox","summary":"Crypt: 12, Library: 90"}]'),
   ('00000000-0000-0000-0000-000000000e19', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
   ('00000000-0000-0000-0000-000000000e20', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
@@ -286,7 +300,8 @@ INSERT INTO tournament_registration (id, tournament_id, user_id, decks) VALUES
   ('00000000-0000-0000-0000-000000000e24', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000007', '[{"deckName":"Sascha Oddities","summary":"Crypt: 12, Library: 90"}]'),
   ('00000000-0000-0000-0000-000000000e25', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000008', '[{"deckName":"Esqueci","summary":"Crypt: 12, Library: 90"}]'),
   ('00000000-0000-0000-0000-000000000e26', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000009', '[{"deckName":"Great Beast Temp Agency","summary":"Crypt: 12, Library: 90"}]'),
-  ('00000000-0000-0000-0000-000000000e27', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000010', '[{"deckName":"Yesterday''s Brutalism","summary":"Crypt: 12, Library: 69"}]');
+  ('00000000-0000-0000-0000-000000000e27', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000010', '[{"deckName":"Yesterday''s Brutalism","summary":"Crypt: 12, Library: 69"}]'),
+  ('00000000-0000-0000-0000-000000000e28', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000011', '[{"deckName":"Power of Debate","summary":"Crypt: 12, Library: 80"}]');
 
 -- ── Tournament Tables ─────────────────────────────────────────
 

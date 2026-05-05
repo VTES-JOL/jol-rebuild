@@ -12,11 +12,13 @@ interface Props {
     isTournamentAdmin: boolean;
     seating: SeatingDto | 'error' | null;
     onChanged: () => void;
+    onSeatingChanged?: () => void;
 }
 
 const ACTIVE_STATUSES = new Set(['ACTIVE', 'SEEDING', 'FINALS', 'COMPLETED']);
 
-export default function TournamentInfoView({tournament, isTournamentAdmin, seating, onChanged}: Props) {
+export default function TournamentInfoView({tournament, isTournamentAdmin, seating, onChanged, onSeatingChanged}: Props) {
+
     const renderContextualContent = () => {
         if (tournament.status === 'REGISTRATION') {
             return <TournamentRegistrationPanel tournament={tournament} onChanged={onChanged} />;
@@ -27,6 +29,7 @@ export default function TournamentInfoView({tournament, isTournamentAdmin, seati
                     tournament={tournament}
                     onActivated={onChanged}
                     onChanged={onChanged}
+                    onSeatingChanged={onSeatingChanged}
                 />
             );
         }
@@ -46,8 +49,8 @@ export default function TournamentInfoView({tournament, isTournamentAdmin, seati
                 <TournamentBasicInfo tournament={tournament} />
                 <TournamentRulesSettings tournament={tournament} />
             </div>
-            <TournamentDates tournament={tournament} />
             <TournamentRulesList tournament={tournament} />
+            <TournamentDates tournament={tournament} />
             <div className="pt-4 border-t border-line/30">
                 {renderContextualContent()}
             </div>

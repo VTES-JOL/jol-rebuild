@@ -12,10 +12,11 @@ interface Props {
     isTournamentAdmin: boolean;
     onChanged: () => void;
     onDelete: () => void;
+    onSeatingChanged?: () => void;
     initialEdit?: boolean;
 }
 
-export default function TournamentDetailPanel({tournament, isTournamentAdmin, onChanged, onDelete, initialEdit}: Props) {
+export default function TournamentDetailPanel({tournament, isTournamentAdmin, onChanged, onDelete, onSeatingChanged, initialEdit}: Props) {
     const [isEditing, setIsEditing] = useState(initialEdit || false);
     const [editData, setEditData] = useState<Tournament>(tournament);
     const [isEditingName, setIsEditingName] = useState(false);
@@ -186,7 +187,7 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
         >
             {isEditing
                 ? <TournamentEditForm editData={editData} onDataChange={setEditData} />
-                : <TournamentInfoView tournament={tournament} isTournamentAdmin={isTournamentAdmin} seating={seating} onChanged={onChanged} />
+                : <TournamentInfoView tournament={tournament} isTournamentAdmin={isTournamentAdmin} seating={seating} onChanged={onChanged} onSeatingChanged={onSeatingChanged} />
             }
         </Panel>
     );
