@@ -3,9 +3,9 @@
 --
 -- Users:       Player1–Player10 (USER) + Admin1 (USER, ADMIN, TOURNAMENT_ADMIN)
 -- Password:    "password" for all accounts
--- Decks:       5 real KRCG tournament decks (2025 season)
+-- Decks:       10 real KRCG tournament decks (2025 season), one per player
 -- Games:       8 games across all formats, statuses, and visibilities
--- Tournaments: 4 tournaments spanning SETUP → COMPLETED
+-- Tournaments: 5 tournaments spanning SETUP → COMPLETED (incl. SEATING with all 10 players)
 -- ============================================================
 
 -- ── Users ────────────────────────────────────────────────────
@@ -97,6 +97,61 @@ INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VAL
   $d5${"name":"Banu bleed","comments":"Last week I played in Liga Fest with a Path of Power and Inner Voice and voting was a hassle. Everyone had titled vampires, no one was willing to negotiate. So for this tournment I decided to go with a deck that didn't rely in any table talk whatsoever.\n-- I cruised the first 2 rounds quite easily. Got 4 VP and 1 GW in the first table (with 4 players), then 5 VP and 1 GW in the next, puting me in first place drawed with my dear friend Roberto Mautone, who was playing a serious not meme deck like I was.\n","crypt":{"count":12,"cards":[{"count":4,"id":"201596","name":"Kalinda (G6)"},{"count":2,"id":"201472","name":"Wise Frog"},{"count":2,"id":"200062","name":"Alu"},{"count":1,"id":"201599","name":"Khadija Al-Kindi"},{"count":1,"id":"201655","name":"Arjun Shah"},{"count":1,"id":"201589","name":"Greg Mazouni"},{"count":1,"id":"201636","name":"Adisa"}]},"library":{"count":80,"cards":[{"type":"Master","count":17,"cards":[{"count":1,"id":"100435","name":"The Coven"},{"count":1,"id":"100588","name":"Dreams of the Sphinx"},{"count":8,"id":"102226","name":"Haqim's Law: Retribution"},{"count":1,"id":"100984","name":"Information Highway"},{"count":1,"id":"101042","name":"The Khabar: Community"},{"count":1,"id":"101310","name":"Obfuscate"},{"count":1,"id":"101355","name":"The Parthenon"},{"count":3,"id":"102121","name":"Villein"}]},{"type":"Action","count":7,"cards":[{"count":3,"id":"100633","name":"The Embrace"},{"count":2,"id":"101043","name":"Khabar: Glory"},{"count":2,"id":"102165","name":"Web of Knives Recruit"}]},{"type":"Action Modifier","count":14,"cards":[{"count":2,"id":"100362","name":"Cloak the Gathering"},{"count":2,"id":"100617","name":"Elder Impersonation"},{"count":2,"id":"100687","name":"Faceless Night"},{"count":4,"id":"101125","name":"Lost in Crowds"},{"count":2,"id":"101857","name":"Spying Mission"},{"count":2,"id":"102097","name":"Veil the Legions"}]},{"type":"Action Modifier/Combat","count":37,"cards":[{"count":6,"id":"101610","name":"Resist Earth's Grasp"},{"count":31,"id":"101913","name":"Swallowed by the Night"}]},{"type":"Combat","count":3,"cards":[{"count":3,"id":"102185","name":"Wind Dance"}]},{"type":"Event","count":2,"cards":[{"count":1,"id":"100163","name":"The Bitter and Sweet Story"},{"count":1,"id":"101265","name":"Narrow Minds"}]}]}}$d5$
 );
 
+-- Deck 6: Break the Bonds Stealth Bleed (Player6)
+INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
+  '00000000-0000-0000-0000-000000000d06',
+  '2025-05-18 11:00:00+00',
+  'Break the Bonds Stealth Bleed',
+  '13,80,3/4',
+  'Liga GL/PT 24/25 - Mercy for the Weak (Lisboa, Portugal) — 3R+F, Ricardo Fernandes',
+  '00000000-0000-0000-0000-000000000006',
+  $d6${"name":"Break the Bonds Stealth Bleed","comments":"Liga GL/PT 24/25 - Mercy for the Weak (Lisboa, Portugal)\n","crypt":{"count":13,"cards":[{"count":2,"id":"201687","name":"Sreelekha"},{"count":2,"id":"201683","name":"Roberto Rivamonte"},{"count":2,"id":"201681","name":"Phaibun"},{"count":1,"id":"201670","name":"Doc Martina"},{"count":1,"id":"201523","name":"Jacques Rouge"},{"count":1,"id":"201675","name":"Luciano Carvalho"},{"count":1,"id":"201672","name":"Gathii"},{"count":1,"id":"201674","name":"Jean-François"},{"count":1,"id":"201692","name":"Zafira"},{"count":1,"id":"201679","name":"Oleg Kaprizov"}]},"library":{"count":80,"cards":[{"type":"Master","count":18,"cards":[{"count":1,"id":"100058","name":"Anarch Troublemaker"},{"count":2,"id":"100366","name":"Club Illusion"},{"count":4,"id":"100485","name":"Dabbler"},{"count":2,"id":"100588","name":"Dreams of the Sphinx"},{"count":3,"id":"100616","name":"Effective Management"},{"count":1,"id":"100777","name":"Fortune Teller Shop"},{"count":1,"id":"100809","name":"Garibaldi-Meucci Museum"},{"count":3,"id":"102121","name":"Villein"},{"count":1,"id":"102166","name":"Week of Nightmares"}]},{"type":"Action","count":17,"cards":[{"count":12,"id":"102247","name":"Break the Bonds"},{"count":3,"id":"100725","name":"Field Training"},{"count":2,"id":"101513","name":"Public Trust"}]},{"type":"Equipment","count":1,"cards":[{"count":1,"id":"101767","name":"Shilmulo Tarot"}]},{"type":"Action Modifier","count":30,"cards":[{"count":2,"id":"100362","name":"Cloak the Gathering"},{"count":4,"id":"100617","name":"Elder Impersonation"},{"count":2,"id":"100687","name":"Faceless Night"},{"count":4,"id":"101125","name":"Lost in Crowds"},{"count":4,"id":"101199","name":"Memory Rift"},{"count":2,"id":"101857","name":"Spying Mission"},{"count":2,"id":"102041","name":"True Love's Face"},{"count":2,"id":"102097","name":"Veil the Legions"},{"count":8,"id":"102264","name":"Visions of Gehenna"}]},{"type":"Action Modifier/Combat","count":5,"cards":[{"count":5,"id":"101913","name":"Swallowed by the Night"}]},{"type":"Reaction","count":8,"cards":[{"count":2,"id":"100519","name":"Delaying Tactics"},{"count":6,"id":"102265","name":"Visions of Zapathasura"}]},{"type":"Event","count":1,"cards":[{"count":1,"id":"101265","name":"Narrow Minds"}]}]}}$d6$
+);
+
+-- Deck 7: Sascha Oddities (Player7)
+INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
+  '00000000-0000-0000-0000-000000000d07',
+  '2025-07-27 10:00:00+00',
+  'Sascha Oddities',
+  '12,90,2/3',
+  'Sires Command, Childer Inherit (Castelnuovo di Garfagnana, Italy) — 2R+F, Filippo del Re',
+  '00000000-0000-0000-0000-000000000007',
+  $d7${"name":"Sascha Oddities","comments":"Sires Command, Childer Inherit (Castelnuovo di Garfagnana, Italy)\n","crypt":{"count":12,"cards":[{"count":4,"id":"201245","name":"Sascha Vykos, The Angel of Caine (ADV)"},{"count":1,"id":"200980","name":"Meshenka"},{"count":1,"id":"200766","name":"Kazimir Savostin"},{"count":1,"id":"200236","name":"Caliban"},{"count":1,"id":"200290","name":"Corine Marcón"},{"count":1,"id":"200339","name":"Devin Bisley"},{"count":1,"id":"200415","name":"Elizabeth Westcott"},{"count":1,"id":"201205","name":"The Rose"},{"count":1,"id":"200850","name":"Lolita Houston"}]},"library":{"count":90,"cards":[{"type":"Master","count":17,"cards":[{"count":6,"id":"102236","name":"The British Museum, London"},{"count":1,"id":"100728","name":"Filchware's Pawn Shop"},{"count":2,"id":"100860","name":"Grooming the Protégé"},{"count":1,"id":"101102","name":"Library Hunting Ground"},{"count":1,"id":"101442","name":"Powerbase: Savannah"},{"count":1,"id":"101536","name":"The Rack"},{"count":1,"id":"101654","name":"Rötschreck"},{"count":3,"id":"102121","name":"Villein"},{"count":1,"id":"102180","name":"Wider View"}]},{"type":"Action","count":9,"cards":[{"count":8,"id":"100726","name":"Fiendish Tongue"},{"count":1,"id":"102063","name":"Under Siege"}]},{"type":"Ally","count":3,"cards":[{"count":3,"id":"100103","name":"Asanbonsam Ghoul"}]},{"type":"Equipment","count":18,"cards":[{"count":1,"id":"100212","name":"Blood Tears of Kephran"},{"count":1,"id":"100243","name":"Bowl of Convergence"},{"count":3,"id":"100422","name":"Cooler"},{"count":1,"id":"100847","name":"Gran Madre di Dio, Italy"},{"count":1,"id":"100903","name":"Heart of Nizchetus"},{"count":3,"id":"101081","name":"Leather Jacket"},{"count":5,"id":"101114","name":"Living Manse"},{"count":1,"id":"101345","name":"Palatial Estate"},{"count":1,"id":"101670","name":"Sacré-Cœur Cathedral, France"},{"count":1,"id":"101781","name":"The Signet of King Saul"}]},{"type":"Action Modifier","count":8,"cards":[{"count":8,"id":"100324","name":"Changeling"}]},{"type":"Action Modifier/Combat","count":4,"cards":[{"count":4,"id":"101402","name":"Plasmic Form"}]},{"type":"Reaction","count":22,"cards":[{"count":1,"id":"100519","name":"Delaying Tactics"},{"count":3,"id":"100644","name":"Enhanced Senses"},{"count":5,"id":"100680","name":"Eyes of Argus"},{"count":3,"id":"101259","name":"My Enemy's Enemy"},{"count":3,"id":"101321","name":"On the Qui Vive"},{"count":7,"id":"101949","name":"Telepathic Misdirection"}]},{"type":"Combat","count":8,"cards":[{"count":2,"id":"100250","name":"Breath of the Dragon"},{"count":6,"id":"100344","name":"Chiropteran Marauder"}]},{"type":"Event","count":1,"cards":[{"count":1,"id":"101305","name":"NRA PAC"}]}]}}$d7$
+);
+
+-- Deck 8: Esqueci — Kindred Spirits Stealth Bleed (Player8)
+INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
+  '00000000-0000-0000-0000-000000000d08',
+  '2025-08-17 10:00:00+00',
+  'Esqueci',
+  '12,90,1/2',
+  'Tiago Honorato 2025 (Fortaleza, Brazil) — 2R+F, Johnson Gonçalves',
+  '00000000-0000-0000-0000-000000000008',
+  $d8${"name":"Esqueci","comments":"Tiago Honorato 2025 (Fortaleza, Brazil)\n","crypt":{"count":12,"cards":[{"count":4,"id":"200076","name":"Anarch Convert"},{"count":2,"id":"201110","name":"Persephone Tar-Anis"},{"count":2,"id":"200123","name":"Apolonia Czarnecki"},{"count":2,"id":"201085","name":"Osric Vladislav"},{"count":2,"id":"201010","name":"Morel"}]},"library":{"count":90,"cards":[{"type":"Master","count":15,"cards":[{"count":1,"id":"100054","name":"Anarch Railroad"},{"count":1,"id":"100108","name":"Asylum Hunting Ground"},{"count":1,"id":"100135","name":"The Barrens"},{"count":1,"id":"100297","name":"Carfax Abbey"},{"count":1,"id":"100588","name":"Dreams of the Sphinx"},{"count":1,"id":"100620","name":"Elder Library"},{"count":1,"id":"100809","name":"Garibaldi-Meucci Museum"},{"count":1,"id":"101384","name":"Pentex™ Subversion"},{"count":1,"id":"101711","name":"Secure Haven"},{"count":1,"id":"101896","name":"Sudden Reversal"},{"count":3,"id":"102113","name":"Vessel"},{"count":2,"id":"102121","name":"Villein"}]},{"type":"Action","count":14,"cards":[{"count":14,"id":"101055","name":"Kindred Spirits"}]},{"type":"Retainer","count":2,"cards":[{"count":1,"id":"101015","name":"J. S. Simmons, Esq."},{"count":1,"id":"101943","name":"Tasha Morgan"}]},{"type":"Action Modifier","count":36,"cards":[{"count":2,"id":"100362","name":"Cloak the Gathering"},{"count":5,"id":"100405","name":"Confusion"},{"count":5,"id":"100617","name":"Elder Impersonation"},{"count":4,"id":"100682","name":"Eyes of Chaos"},{"count":4,"id":"100687","name":"Faceless Night"},{"count":6,"id":"101125","name":"Lost in Crowds"},{"count":5,"id":"101199","name":"Memory Rift"},{"count":2,"id":"101216","name":"Mind Tricks"},{"count":3,"id":"101857","name":"Spying Mission"}]},{"type":"Action Modifier/Combat","count":4,"cards":[{"count":4,"id":"101913","name":"Swallowed by the Night"}]},{"type":"Reaction","count":15,"cards":[{"count":2,"id":"100519","name":"Delaying Tactics"},{"count":2,"id":"100680","name":"Eyes of Argus"},{"count":4,"id":"101321","name":"On the Qui Vive"},{"count":7,"id":"101949","name":"Telepathic Misdirection"}]},{"type":"Combat","count":4,"cards":[{"count":2,"id":"100378","name":"Coma"},{"count":2,"id":"101292","name":"No Trace"}]}]}}$d8$
+);
+
+-- Deck 9: Great Beast Temp Agency (Player9)
+INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
+  '00000000-0000-0000-0000-000000000d09',
+  '2025-02-16 10:00:00+00',
+  'Great Beast Temp Agency',
+  '12,90,2/3',
+  'Riposte 2025 (Los Angeles, CA, USA) — 2R+F, Bill Troxel',
+  '00000000-0000-0000-0000-000000000009',
+  $d9${"name":"Great Beast Temp Agency","comments":"Second seed at 1GW5 going into the final + 4vp in final\nRiposte 2025 (Los Angeles, CA, USA)\n","crypt":{"count":12,"cards":[{"count":12,"id":"201411","name":"The unnamed"}]},"library":{"count":90,"cards":[{"type":"Master","count":18,"cards":[{"count":10,"id":"100009","name":"Abombwe"},{"count":1,"id":"100073","name":"Antediluvian Awakening"},{"count":2,"id":"100588","name":"Dreams of the Sphinx"},{"count":1,"id":"100824","name":"Giant's Blood"},{"count":3,"id":"100842","name":"Golconda: Inner Peace"},{"count":1,"id":"102121","name":"Villein"}]},{"type":"Action","count":24,"cards":[{"count":2,"id":"100046","name":"Ambush"},{"count":1,"id":"100159","name":"Big Game"},{"count":1,"id":"100266","name":"Bum's Rush"},{"count":6,"id":"100280","name":"Call the Great Beast"},{"count":5,"id":"100592","name":"Dual Form"},{"count":1,"id":"100747","name":"Fleetness"},{"count":1,"id":"100752","name":"Flurry of Action"},{"count":1,"id":"100886","name":"Harass"},{"count":1,"id":"101161","name":"Mantle of the Bestial Majesty"},{"count":2,"id":"101897","name":"Summon History"},{"count":3,"id":"102076","name":"Unleash Hell's Fury"}]},{"type":"Ally","count":1,"cards":[{"count":1,"id":"102053","name":"Tye Cooper"}]},{"type":"Equipment","count":6,"cards":[{"count":6,"id":"101832","name":"Soul Gem of Etrius"}]},{"type":"Action Modifier","count":18,"cards":[{"count":1,"id":"100362","name":"Cloak the Gathering"},{"count":3,"id":"100571","name":"Domain of Evernight"},{"count":2,"id":"100600","name":"Earth Control"},{"count":2,"id":"100645","name":"Enkil Cog"},{"count":9,"id":"100994","name":"Instantaneous Transformation"},{"count":1,"id":"101405","name":"Pocket Out of Time"}]},{"type":"Action Modifier/Combat","count":2,"cards":[{"count":1,"id":"101610","name":"Resist Earth's Grasp"},{"count":1,"id":"101928","name":"Taking the Skin: Minion"}]},{"type":"Combat","count":21,"cards":[{"count":2,"id":"100356","name":"Claws of the Dead"},{"count":5,"id":"100601","name":"Earth Meld"},{"count":3,"id":"100771","name":"Form of Mist"},{"count":3,"id":"100980","name":"Infernal Pursuit"},{"count":1,"id":"101338","name":"Outside the Hourglass"},{"count":5,"id":"101507","name":"Psyche!"},{"count":2,"id":"101523","name":"Pursuit"}]}]}}$d9$
+);
+
+-- Deck 10: Yesterday's Brutalism (Player10)
+INSERT INTO deck (id, timestamp, name, summary, comments, user_id, contents) VALUES (
+  '00000000-0000-0000-0000-000000000d10',
+  '2025-02-28 10:00:00+00',
+  'Yesterday''s Brutalism',
+  '12,69,1/2',
+  'The Eve before the Night 2025 (Vilnius, Lithuania) — 2R+F, Bram Van Stappen',
+  '00000000-0000-0000-0000-000000000010',
+  $d10${"name":"Yesterday's Brutalism","comments":"don't try this at home unless it's yesterday\nThe Eve before the Night 2025 (Vilnius, Lithuania)\n","crypt":{"count":12,"cards":[{"count":5,"id":"201274","name":"Shalmath"},{"count":1,"id":"200080","name":"Andre LeRoux"},{"count":1,"id":"200062","name":"Alu"},{"count":1,"id":"201052","name":"New Blood"},{"count":1,"id":"200048","name":"Alex Wilkins"},{"count":1,"id":"200365","name":"Donald Cargill"},{"count":1,"id":"200482","name":"Freddy Gage"},{"count":1,"id":"201462","name":"Walker Grimes"}]},"library":{"count":69,"cards":[{"type":"Master","count":9,"cards":[{"count":6,"id":"100106","name":"Ashur Tablets"},{"count":1,"id":"101439","name":"Powerbase: Montreal"},{"count":1,"id":"101924","name":"Tabriz Assembly"},{"count":1,"id":"102180","name":"Wider View"}]},{"type":"Action","count":12,"cards":[{"count":1,"id":"100046","name":"Ambush"},{"count":1,"id":"100159","name":"Big Game"},{"count":1,"id":"100266","name":"Bum's Rush"},{"count":1,"id":"100494","name":"Dark Mirror of the Mind"},{"count":1,"id":"100941","name":"Hourglass of the Mind"},{"count":7,"id":"101897","name":"Summon History"}]},{"type":"Ally","count":4,"cards":[{"count":1,"id":"100855","name":"Gregory Winter"},{"count":1,"id":"101261","name":"Mylan Horseed"},{"count":1,"id":"101272","name":"Nephandus"},{"count":1,"id":"102053","name":"Tye Cooper"}]},{"type":"Equipment","count":3,"cards":[{"count":1,"id":"100678","name":"Eye of Hazimel"},{"count":1,"id":"100903","name":"Heart of Nizchetus"},{"count":1,"id":"101931","name":"Talbot's Chainsaw"}]},{"type":"Retainer","count":1,"cards":[{"count":1,"id":"101249","name":"Mr. Winthrop"}]},{"type":"Action Modifier","count":8,"cards":[{"count":6,"id":"100571","name":"Domain of Evernight"},{"count":2,"id":"100645","name":"Enkil Cog"}]},{"type":"Combat","count":32,"cards":[{"count":3,"id":"100511","name":"Decapitate"},{"count":7,"id":"100549","name":"Disarm"},{"count":8,"id":"101144","name":"Majesty"},{"count":10,"id":"101338","name":"Outside the Hourglass"},{"count":4,"id":"101945","name":"Taste of Vitae"}]}]}}$d10$
+);
+
 -- ── Deck Format Validity ──────────────────────────────────────
 
 INSERT INTO deck_format_validity (id, deck_id, format, valid, errors, computed_at) VALUES
@@ -105,7 +160,12 @@ INSERT INTO deck_format_validity (id, deck_id, format, valid, errors, computed_a
   ('00000000-0000-0000-0000-000000000f03', '00000000-0000-0000-0000-000000000d03', 'STANDARD', true,  NULL, '2025-02-01 09:01:00+00'),
   ('00000000-0000-0000-0000-000000000f04', '00000000-0000-0000-0000-000000000d04', 'STANDARD', true,  NULL, '2025-02-10 16:01:00+00'),
   ('00000000-0000-0000-0000-000000000f05', '00000000-0000-0000-0000-000000000d05', 'STANDARD', true,  NULL, '2025-03-01 12:01:00+00'),
-  ('00000000-0000-0000-0000-000000000f06', '00000000-0000-0000-0000-000000000d05', 'DUEL',     false, '["Duel format requires exactly 40 library cards and a crypt of at least 2."]', '2025-03-01 12:01:00+00');
+  ('00000000-0000-0000-0000-000000000f06', '00000000-0000-0000-0000-000000000d05', 'DUEL',     false, '["Duel format requires exactly 40 library cards and a crypt of at least 2."]', '2025-03-01 12:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f07', '00000000-0000-0000-0000-000000000d06', 'STANDARD', true,  NULL, '2025-05-18 11:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f08', '00000000-0000-0000-0000-000000000d07', 'STANDARD', true,  NULL, '2025-07-27 10:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f09', '00000000-0000-0000-0000-000000000d08', 'STANDARD', true,  NULL, '2025-08-17 10:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f10', '00000000-0000-0000-0000-000000000d09', 'STANDARD', true,  NULL, '2025-02-16 10:01:00+00'),
+  ('00000000-0000-0000-0000-000000000f11', '00000000-0000-0000-0000-000000000d10', 'STANDARD', true,  NULL, '2025-02-28 10:01:00+00');
 
 -- ── Games ─────────────────────────────────────────────────────
 -- format: STANDARD=0, DUEL=1, V5=2
@@ -187,7 +247,11 @@ INSERT INTO tournament (id, name, format, game_format, number_of_rounds, origina
   -- T4: SETUP — not yet open for registration
   ('00000000-0000-0000-0000-000000000t04', 'Duel Master Invitational','SINGLE_DECK','DUEL',      2, 0, false, false, 'SETUP',
     '2026-06-01 00:00:00+00', '2026-06-14 23:59:59+00', '2026-06-15 09:00:00+00', NULL,
-    '[]', '[]', '2026-06-01 00:00:00+00', '2026-06-01 00:00:00+00');
+    '[]', '[]', '2026-06-01 00:00:00+00', '2026-06-01 00:00:00+00'),
+  -- T5: SEATING — registration closed, all 10 players registered, no seating yet (ready for Admin1 to arrange)
+  ('00000000-0000-0000-0000-000000000t05', 'Endless Night Invitational', 'SINGLE_DECK', 'STANDARD', 2, 2, true, false, 'SEATING',
+    '2026-04-28 00:00:00+00', '2026-05-09 23:59:59+00', '2026-05-17 09:00:00+00', NULL,
+    '[]', '[]', '2026-04-28 00:00:00+00', '2026-05-10 00:00:00+00');
 
 -- ── Tournament Registrations ──────────────────────────────────
 
@@ -211,7 +275,18 @@ INSERT INTO tournament_registration (id, tournament_id, user_id, decks) VALUES
   -- Tournament 3 (REGISTRATION): Player2, Player3, Player5
   ('00000000-0000-0000-0000-000000000e15', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
   ('00000000-0000-0000-0000-000000000e16', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
-  ('00000000-0000-0000-0000-000000000e17', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]');
+  ('00000000-0000-0000-0000-000000000e17', '00000000-0000-0000-0000-000000000t03', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
+  -- Tournament 5 (SEATING): all 10 players with their real decks, no seating arranged yet
+  ('00000000-0000-0000-0000-000000000e18', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000001', '[{"deckName":"Gangrel Anarch Toolbox","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e19', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000002', '[{"deckName":"Shalmath Colecionador de Cabecas","summary":"Crypt: 12, Library: 78"}]'),
+  ('00000000-0000-0000-0000-000000000e20', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000003', '[{"deckName":"The Path of Enkidu","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e21', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000004', '[{"deckName":"Popó","summary":"Crypt: 13, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e22', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000005', '[{"deckName":"Banu bleed","summary":"Crypt: 12, Library: 80"}]'),
+  ('00000000-0000-0000-0000-000000000e23', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000006', '[{"deckName":"Break the Bonds Stealth Bleed","summary":"Crypt: 13, Library: 80"}]'),
+  ('00000000-0000-0000-0000-000000000e24', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000007', '[{"deckName":"Sascha Oddities","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e25', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000008', '[{"deckName":"Esqueci","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e26', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000009', '[{"deckName":"Great Beast Temp Agency","summary":"Crypt: 12, Library: 90"}]'),
+  ('00000000-0000-0000-0000-000000000e27', '00000000-0000-0000-0000-000000000t05', '00000000-0000-0000-0000-000000000010', '[{"deckName":"Yesterday''s Brutalism","summary":"Crypt: 12, Library: 69"}]');
 
 -- ── Tournament Tables ─────────────────────────────────────────
 
