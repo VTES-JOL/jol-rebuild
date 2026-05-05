@@ -24,9 +24,14 @@ export function AuthProvider({children}: { children: React.ReactNode }) {
     }, []);
 
     async function refresh() {
-        const u = await API.profile();
-        setUser(u);
-        setLoading(false);
+        try {
+            const u = await API.profile();
+            setUser(u);
+        } catch {
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
