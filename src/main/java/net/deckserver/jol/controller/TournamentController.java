@@ -374,18 +374,6 @@ public class TournamentController {
             throw new BadRequestException(reg.user.username + " is already allocated for round " + roundNumber);
         }
 
-        // Byes are only allowed once all table seats for this round are full
-        List<TournamentTable> allTables = TournamentTable.findByTournament(t);
-        for (TournamentTable table : allTables) {
-            long seatCount = TournamentSeat.count(
-                "table.id = ?1 and roundNumber = ?2 and bye = false",
-                table.id, roundNumber
-            );
-            if (seatCount > 0 && seatCount < config.tournament().maxTableSize()) {
-                throw new BadRequestException("All table seats must be full before assigning byes for round " + roundNumber);
-            }
-        }
-
         TournamentSeat bye = new TournamentSeat();
         bye.registration = reg;
         bye.bye = true;

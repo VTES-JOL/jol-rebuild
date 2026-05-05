@@ -25,6 +25,8 @@ public class TournamentService {
      */
     public void activate(Tournament tournament, User admin) {
         validateAllPlayersSeated(tournament);
+        validateTableSizes(tournament);
+        validatePredatorPreyUniqueness(tournament);
 
         List<TournamentSeat> allSeats = TournamentSeat.findAllByTournament(tournament);
         List<TournamentTable> tables = TournamentTable.findByTournament(tournament);
@@ -101,6 +103,72 @@ public class TournamentService {
             return reg.decks.getLast();
         }
         return reg.decks.get(index);
+    }
+
+    private void validateTableSizes(Tournament tournament) {
+        List<TournamentSeat> allSeats = TournamentSeat.findAllByTournament(tournament);
+
+        Map<String, Long> seatCounts = new HashMap<>();
+        for (TournamentSeat seat : allSeats) {
+            if (!seat.bye) {
+                String key = seat.roundNumber + ":" + seat.table.id;
+                seatCounts.merge(key, 1L, Long::sum);
+            }
+        }
+
+        List<String> errors = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : seatCounts.entrySet()) {
+            long count = entry.getValue();
+            if (count < 4 || count > 5) {
+                String round = entry.getKey().split(":")[0];
+                errors.add("Round " + round + " has a table with " + count + " players (must be 4 or 5)");
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new BadRequestException("Invalid table sizes: " + String.join("; ", errors));
+        }
+    }
+
+    private void validatePredatorPreyUniqueness(Tournament tournament) {
+        List<TournamentSeat> allSeats = TournamentSeat.findAllByTournament(tournament);
+
+        Map<Integer, Map<String, List<TournamentSeat>>> byRoundAndTable = new HashMap<>();
+        for (TournamentSeat seat : allSeats) {
+            if (!seat.bye) {
+                byRoundAndTable
+                    .computeIfAbsent(seat.roundNumber, r -> new HashMap<>())
+                    .computeIfAbsent(seat.table.id, t -> new ArrayList<>())
+                    .add(seat);
+            }
+        }
+
+        Map<String, Integer> seenPairs = new HashMap<>();
+        List<String> errors = new ArrayList<>();
+
+        List<Integer> rounds = byRoundAndTable.keySet().stream().sorted().toList();
+        for (int round : rounds) {
+            for (List<TournamentSeat> tableSeats : byRoundAndTable.get(round).values()) {
+                tableSeats.sort(Comparator.comparingInt(s -> s.seatPosition));
+                int n = tableSeats.size();
+                for (int i = 0; i < n; i++) {
+                    String predatorId = tableSeats.get(i).registration.id;
+                    String preyId = tableSeats.get((i + 1) % n).registration.id;
+                    String pair = predatorId + "->" + preyId;
+                    if (seenPairs.containsKey(pair)) {
+                        String predator = tableSeats.get(i).registration.user.username;
+                        String prey = tableSeats.get((i + 1) % n).registration.user.username;
+                        errors.add(predator + " predates " + prey + " in both round " + seenPairs.get(pair) + " and round " + round);
+                    } else {
+                        seenPairs.put(pair, round);
+                    }
+                }
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new BadRequestException("Duplicate predator-prey relationships: " + String.join("; ", errors));
+        }
     }
 
     private void validateAllPlayersSeated(Tournament tournament) {

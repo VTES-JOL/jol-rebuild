@@ -23,7 +23,9 @@ export async function baseFetch(input: RequestInfo | URL, init?: RequestInit): P
 
 export async function json<T>(res: Response): Promise<T> {
     if (!res.ok) {
-        throw new Error(`${res.status} ${res.statusText}`);
+        const body = await res.json().catch(() => null);
+        const message = body?.message ?? `${res.status} ${res.statusText}`;
+        throw new Error(message);
     }
     return res.json();
 }

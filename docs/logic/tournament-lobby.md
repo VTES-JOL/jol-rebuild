@@ -54,21 +54,25 @@ Seating is managed during `SEATING` status. The admin arranges all registered pl
 ### Tables
 - Tables are created for the duration of the tournament.  Each round the same table has the same number of seats.
 - Maximum **5 players** per table
+- Minimum **4 players** per table
 - Seat positions are numbered 1–5
 - A player cannot be seated more than once in the same round
 
 ### Byes
 - A bye can be assigned per player per round as an alternative to a table seat
 - A player assigned a bye for a round will not play that round
-- All available seats must be filled before accepting byes.
+- Byes are necessary when the number of registered players cannot be evenly divided into tables of 4 and 5 (e.g., 6, 7, or 11 players)
 
 ### Extra Rounds
 While in `SEATING` status, an admin can increment `numberOfRounds` up to one higher than originally defined, to give each player an similar number of games in the tournament.
 
 ## Activation
-Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation:
+Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation, the following hard constraints are validated:
 - Every registered player must be allocated for **every** round — either seated at a table or given a bye
-- If any player is unallocated for any round, activation is rejected
+- Every table must have exactly **4 or 5** players per round
+- No exact predator-prey relationship (player A directly predates player B in seat order) may be duplicated across rounds
+
+If any constraint is violated, activation is rejected with a descriptive error.
 
 On activation, a private `ACTIVE` game is created for each table, named `"NAME: Round N Table M"`. 
 Players are registered to their respective games with the appropriate deck:
