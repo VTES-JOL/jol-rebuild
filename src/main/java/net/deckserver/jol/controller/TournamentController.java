@@ -335,7 +335,7 @@ public class TournamentController {
         seat.bye = false;
         seat.persist();
         table.seats.add(seat);
-        return Response.ok(seat).build();
+        return Response.noContent().build();
     }
 
     @DELETE
@@ -380,7 +380,7 @@ public class TournamentController {
         bye.roundNumber = roundNumber;
         bye.seatPosition = 0;
         bye.persist();
-        return Response.ok(bye).build();
+        return Response.noContent().build();
     }
 
     @DELETE

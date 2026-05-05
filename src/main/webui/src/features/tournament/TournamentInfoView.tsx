@@ -47,7 +47,7 @@ export default function TournamentInfoView({tournament, isTournamentAdmin, seati
                 <TournamentRulesSettings tournament={tournament} />
             </div>
             <TournamentDates tournament={tournament} />
-            <TournamentRulesList rules={tournament.rules ?? []} conditions={tournament.conditions} />
+            <TournamentRulesList tournament={tournament} />
             <div className="pt-4 border-t border-line/30">
                 {renderContextualContent()}
             </div>
