@@ -64,29 +64,28 @@ export default function TournamentSeatingReadOnlyView({seating}: Props) {
                                 {round.byes.length > 0 && ` · ${round.byes.length} bye${round.byes.length !== 1 ? 's' : ''}`}
                             </div>
                         </button>
+
                         {isExpanded && (
-                            <div className="p-4 space-y-4">
+                            <div className="p-4 space-y-3">
                                 {round.tables.map((table, tableIdx) => (
-                                    <div key={table.id} className="border border-line/20 rounded-lg overflow-hidden">
-                                        <div className="px-3 py-2 bg-hover/10">
+                                    <div key={table.id}>
+                                        <div className="mb-1.5">
                                             <span className="text-xs font-bold text-ink-muted uppercase tracking-wider">
                                                 Table {tableIdx + 1}
                                             </span>
                                         </div>
-                                        <div className="p-3 space-y-1.5">
+                                        <div className="flex gap-1.5">
                                             {[1, 2, 3, 4, 5].map(pos => {
                                                 const seat = table.seats.find(s => s.seatPosition === pos && !s.bye);
                                                 return (
-                                                    <div key={pos} className="flex items-center gap-2">
-                                                        <span className="text-[10px] text-ink-muted w-4 text-right shrink-0">{pos}</span>
+                                                    <div key={pos} className="flex-1 min-w-0 flex flex-col gap-0.5">
+                                                        <span className="text-[10px] text-ink-muted text-center">{pos}</span>
                                                         {seat ? (
-                                                            <div className="flex-1 bg-accent/10 border border-accent/20 rounded px-2 py-1">
-                                                                <span className="text-xs text-ink">{seat.username}</span>
+                                                            <div className="bg-accent/10 border border-accent/20 rounded px-1.5 py-1">
+                                                                <span className="text-xs text-ink truncate block">{seat.username}</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="flex-1 border border-dashed border-line/30 rounded px-2 py-1">
-                                                                <span className="text-xs text-ink-muted italic">Empty</span>
-                                                            </div>
+                                                            <div className="h-7 rounded border border-dashed border-line/30 bg-hover/10"/>
                                                         )}
                                                     </div>
                                                 );
@@ -94,8 +93,9 @@ export default function TournamentSeatingReadOnlyView({seating}: Props) {
                                         </div>
                                     </div>
                                 ))}
+
                                 {round.byes.length > 0 && (
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <span className="text-[10px] font-bold uppercase tracking-widest text-ink-muted">Byes</span>
                                         <div className="flex flex-wrap gap-2">
                                             {round.byes.map(bye => (

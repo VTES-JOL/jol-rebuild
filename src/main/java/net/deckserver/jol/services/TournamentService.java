@@ -45,7 +45,9 @@ public class TournamentService {
 
         for (int roundNumber : roundNumbers) {
             Map<String, List<TournamentSeat>> seatsByTable = byRound.get(roundNumber);
-            List<String> tableIds = seatsByTable.keySet().stream().sorted().toList();
+            List<String> tableIds = seatsByTable.keySet().stream()
+                    .sorted(Comparator.comparing(tid -> tableMap.get(tid).createdAt))
+                    .toList();
             int tableCounter = 0;
             for (String tableId : tableIds) {
                 tableCounter++;
@@ -139,7 +141,7 @@ public class TournamentService {
             final int round = r;
 
             List<TableDto> tableDtos = allTables.stream()
-                .sorted(Comparator.comparing(t -> t.id))
+                .sorted(Comparator.comparing(t -> t.createdAt))
                 .map(table -> {
                     List<SeatDto> seats = allSeats.stream()
                         .filter(s -> !s.bye && s.roundNumber == round
