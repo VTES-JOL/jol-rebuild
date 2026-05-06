@@ -164,7 +164,7 @@ function findSameTableEveryRound(records: PlayerRoundRecord[]): Anomaly[] {
                 const usernameB = byPlayer.get(idB)![0].username;
                 anomalies.push({
                     type: 'same-table-every-round',
-                    severity: 1,
+                    severity: 2,
                     players: [usernameA, usernameB],
                     description: `${usernameA} and ${usernameB} share the same table in every round they both play`,
                 });
@@ -203,6 +203,34 @@ function findRepeatSeatPosition(records: PlayerRoundRecord[]): Anomaly[] {
                 description: `${playerRecords[0].username} is in seat ${pos} in ${c} rounds`,
             }));
     });
+}
+
+function findDuplicatePredatorPrey(records: PlayerRoundRecord[]): Anomaly[] {
+    const byRoundTable = groupBy(records.filter(r => !r.isBye), r => `${r.roundNumber}::${r.tableId}`);
+    const pairData = new Map<string, {predatorName: string; preyName: string; rounds: number[]}>();
+
+    for (const tableRecords of byRoundTable.values()) {
+        const sorted = [...tableRecords].sort((a, b) => a.seatPosition - b.seatPosition);
+        const n = sorted.length;
+        const roundNumber = sorted[0].roundNumber;
+        for (let i = 0; i < n; i++) {
+            const predator = sorted[i];
+            const prey = sorted[(i + 1) % n];
+            const key = `${predator.registrationId}->${prey.registrationId}`;
+            const existing = pairData.get(key) ?? {predatorName: predator.username, preyName: prey.username, rounds: []};
+            if (!existing.rounds.includes(roundNumber)) existing.rounds.push(roundNumber);
+            pairData.set(key, existing);
+        }
+    }
+
+    return Array.from(pairData.values())
+        .filter(({rounds}) => rounds.length >= 2)
+        .map(({predatorName, preyName, rounds}) => ({
+            type: 'duplicate-predator-prey',
+            severity: 1 as const,
+            players: [predatorName, preyName],
+            description: `${predatorName} is predator of ${preyName} in rounds ${rounds.sort((a, b) => a - b).join(', ')}`,
+        }));
 }
 
 function findRepeatRelativePosition(
@@ -259,6 +287,7 @@ function computeSeatingStats(seating: SeatingDto) {
     const records = buildRecords(seating.rounds);
     const players = computePlayerStats(seating);
     const anomalies: Anomaly[] = [
+        ...findDuplicatePredatorPrey(records),
         ...findSameTableEveryRound(records),
         ...findPosition5Repeat(records),
         ...findRepeatSeatPosition(records),
@@ -280,7 +309,7 @@ function PlayerStatsTable({players}: {players: PlayerStats[]}) {
                         <tr className="border-b border-line/20">
                             <th className="text-left px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Player</th>
                             <th className="text-right px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Avg Transfers</th>
-                            <th className="text-right px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Avg VP Pool</th>
+                            <th className="text-right px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Avg VP Available</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-line/20">
