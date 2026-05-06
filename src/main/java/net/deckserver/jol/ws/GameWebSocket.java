@@ -5,6 +5,7 @@ import io.quarkus.websockets.next.*;
 import io.smallrye.common.annotation.Blocking;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
+import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.services.ChatService;
 import org.jboss.logging.Logger;
@@ -24,15 +25,15 @@ public class GameWebSocket {
     private static final Logger LOG = Logger.getLogger(GameWebSocket.class);
 
     @Inject
-    WebSocketConnection connection;
+    Config config;
 
+    @Inject
+    WebSocketConnection connection;
     @Inject
     ChatService chatService;
 
     @Inject
     SecurityIdentity identity;
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────
 
     @OnOpen
     @Blocking
@@ -58,10 +59,26 @@ public class GameWebSocket {
         }
     }
 
+    @OnError
+    public void onError(Throwable error) {
+        LOG.errorf(error, "Game WS error for session %s", connection.id());
+        try {
+            connection.sendTextAndAwait(ChatMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
+        } catch (Exception ignored) {}
+    }
+
     private void handleChat(String gameId, ChatMessageDto incoming) {
         String content = incoming.content == null ? "" : incoming.content.trim();
         if (content.isEmpty()) {
             connection.sendTextAndAwait(ChatMessageDto.error("Message content cannot be empty"));
+            return;
+        }
+        if (content.length() > config.chat().maxContentLength()) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Message exceeds maximum length of " + config.chat().maxContentLength() + " characters"));
+            return;
+        }
+        if (incoming.replyToId != null && !chatService.messageExistsInGame(incoming.replyToId, gameId)) {
+            connection.sendTextAndAwait(ChatMessageDto.error("Reply target not found in this game"));
             return;
         }
 
@@ -76,11 +93,6 @@ public class GameWebSocket {
         }
         ChatMessageDto updated = chatService.toggleReaction(incoming.id, userName(), incoming.emoji);
         connection.broadcast().sendTextAndAwait(updated);
-    }
-
-    @OnError
-    public void onError(Throwable error) {
-        LOG.errorf(error, "Game WS error for session %s", connection.id());
     }
 
     private String userName() {

@@ -29,6 +29,7 @@ interface CardPreview<T extends HTMLElement> {
     anchorRef: RefObject<T | null>;
     onMouseEnter: () => void;
     onMouseLeave: () => void;
+    onClick: (e: React.MouseEvent) => void;
     tooltip: ReactPortal | null;
 }
 
@@ -38,12 +39,12 @@ interface CardPreview<T extends HTMLElement> {
  *   const { anchorRef } = useCardPreview<HTMLDivElement>(id);
  */
 export function useCardPreview<T extends HTMLElement = HTMLElement>(cardId: string | number): CardPreview<T> {
-    const [hovered, setHovered] = useState(false);
+    const [visible, setVisible] = useState(false);
     const [pos, setPos]         = useState<TooltipPos | null>(null);
     const anchorRef             = useRef<T | null>(null);
 
     useEffect(() => {
-        if (!hovered || !anchorRef.current) return;
+        if (!visible || !anchorRef.current) return;
 
         const update = () => {
             if (!anchorRef.current) return;
@@ -51,16 +52,24 @@ export function useCardPreview<T extends HTMLElement = HTMLElement>(cardId: stri
             setPos(getTooltipPosition(rect, window.innerWidth, window.innerHeight));
         };
 
+        const handleClickOutside = (e: MouseEvent) => {
+            if (anchorRef.current && !anchorRef.current.contains(e.target as Node)) {
+                setVisible(false);
+            }
+        };
+
         update();
         window.addEventListener('resize', update);
         window.addEventListener('scroll', update, true);
+        window.addEventListener('mousedown', handleClickOutside);
         return () => {
             window.removeEventListener('resize', update);
             window.removeEventListener('scroll', update, true);
+            window.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [hovered]);
+    }, [visible]);
 
-    const tooltip = (hovered && pos)
+    const tooltip = (visible && pos)
         ? createPortal(
             <div
                 className="fixed z-9999 pointer-events-none rounded-lg border border-line/60 shadow-2xl overflow-hidden bg-panel/95 backdrop-blur-sm"
@@ -81,8 +90,12 @@ export function useCardPreview<T extends HTMLElement = HTMLElement>(cardId: stri
 
     return {
         anchorRef,
-        onMouseEnter: () => setHovered(true),
-        onMouseLeave: () => setHovered(false),
+        onMouseEnter: () => setVisible(true),
+        onMouseLeave: () => setVisible(false),
+        onClick: (e: React.MouseEvent) => {
+            e.stopPropagation();
+            setVisible(v => !v);
+        },
         tooltip,
     };
 }

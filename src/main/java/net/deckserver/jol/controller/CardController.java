@@ -5,7 +5,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import net.deckserver.jol.dto.CardDetailDto;
 import net.deckserver.jol.dto.ImportPreviewDto;
-import net.deckserver.jol.model.Card;
 import net.deckserver.jol.services.CardSearchService;
 import net.deckserver.jol.services.DeckImportService;
 import org.jboss.resteasy.reactive.RestQuery;
@@ -21,11 +20,6 @@ public class CardController {
 
     @Inject
     DeckImportService deckImportService;
-
-    @GET
-    public List<Card> cards() {
-        return cardSearchService.findAll();
-    }
 
     @GET
     @Path("/autocomplete")

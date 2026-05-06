@@ -14,7 +14,7 @@ interface Props {
     saveError?:        boolean;
     comments?:         string | null;
     entriesLoading?:   boolean;
-    deckId?:           number;
+    deckId?:           string;
     formatValidity?:   Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
     onRename?:         (name: string) => void;
     onDelete?:         () => void;

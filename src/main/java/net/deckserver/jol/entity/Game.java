@@ -1,24 +1,42 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.Visibility;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Game extends PanacheEntity {
+public class Game extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
     public String name;
     public Visibility visibility = Visibility.PUBLIC;
     public Status status = Status.OPEN;
     @Column(name = "format")
     public GameFormat gameFormat = GameFormat.STANDARD;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    public Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    public Instant updatedAt;
+
     @ManyToOne
     public User owner;
+
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")
+    public Tournament tournament;
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
@@ -33,15 +51,32 @@ public class Game extends PanacheEntity {
         super.delete();
     }
 
-    public static Game create(User owner, String name, Visibility visibility, GameFormat format) {
+    public boolean isOwnedBy(String username) {
+        return owner != null && owner.username.equals(username);
+    }
+
+    public boolean isFull(long registrationCount) {
+        return registrationCount >= gameFormat.getMaxPlayers();
+    }
+
+    public boolean canStart(long registrationCount) {
+        return status == Status.OPEN && registrationCount >= 2;
+    }
+
+    public static Game create(User owner, Tournament tournament, String name, Visibility visibility, GameFormat format) {
         Game game = new Game();
         game.owner = owner;
+        game.tournament = tournament;
         game.name = name;
         game.visibility = visibility;
         game.gameFormat = format;
         game.status = Status.OPEN;
         game.persist();
         return game;
+    }
+
+    public static Game create(User owner, String name, Visibility visibility, GameFormat format) {
+        return create(owner, null, name, visibility, format);
     }
 
     public static List<Game> findOpenGames() {

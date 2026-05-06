@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState} from "react"
 import {createPortal} from "react-dom"
 import {Link} from "react-router-dom"
-import {useAuthContext} from "@/hooks/useAuthContext.ts"
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
 import {useDarkMode} from "@/hooks/useDarkMode.ts"
+import Avatar from "@/shared/components/Avatar"
 
 export default function UserMenu() {
     const { user, logout } = useAuthContext()
@@ -83,7 +84,7 @@ export default function UserMenu() {
 
             <div className="border-t border-line/60" />
 
-            <button onClick={logout} className="w-full text-left px-4 py-3 text-blood hover:bg-hover transition-colors">Logout</button>
+            <button onClick={logout} className="w-full text-left px-4 py-3 text-sm text-blood hover:bg-hover transition-colors cursor-pointer">Logout</button>
         </div>,
         document.body
     )
@@ -112,10 +113,3 @@ function MenuLink({ to, children, onNavigate }: { to: string, children: React.Re
     )
 }
 
-function Avatar({ username }: { username: string }) {
-    return (
-        <div className="h-8 w-8 rounded-full bg-accent text-surface flex items-center justify-center font-bold">
-            {username[0].toUpperCase()}
-        </div>
-    )
-}

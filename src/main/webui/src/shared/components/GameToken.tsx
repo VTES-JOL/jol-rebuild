@@ -4,12 +4,12 @@ import {useNavigate} from 'react-router';
 import {Check} from 'lucide-react';
 import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from '@/features/lobby/DeckSelector';
-import {useAuthContext} from '@/hooks/useAuthContext';
-import {useLobbySocket} from '@/features/lobby/LobbySocketContext';
+import {useAuthContext} from "@/contexts/AuthContext.tsx";
+import {useLobbySocket} from '@/contexts/LobbySocketContext';
 
 type Phase = 'idle' | 'registering' | 'waiting';
 
-export default function GameToken({ id, label }: { id: number; label: string }) {
+export default function GameToken({ id, label }: { id: string; label: string }) {
     const {user} = useAuthContext();
     const currentUsername = user?.username ?? null;
     const [isOpen, setIsOpen] = useState(false);
@@ -19,7 +19,7 @@ export default function GameToken({ id, label }: { id: number; label: string }) 
     const [error, setError] = useState<string | null>(null);
     const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number } | null>(null);
     const [phase, setPhase] = useState<Phase>('idle');
-    const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
+    const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [actionError, setActionError] = useState<string | null>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);

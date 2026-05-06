@@ -1,38 +1,26 @@
-import {useEffect, useState} from 'react';
+import {useCallback} from 'react';
 import deckApi from '@/features/deck/api';
 import type {Deck} from '@/features/deck/types';
 import {parseSummary} from '@/features/deck/deckUtils';
 import SummaryStats from '@/shared/components/SummaryStats';
+import {FORMAT_LABELS} from '@/features/game/constants';
+import {useAsyncState} from '@/hooks/useAsyncState';
 
 interface Props {
     format: 'STANDARD' | 'DUEL' | 'V5';
-    selectedId: number | null;
-    onSelect: (deckId: number) => void;
+    selectedId: string | null;
+    onSelect: (deckId: string) => void;
 }
 
-const FORMAT_LABELS: Record<string, string> = {
-    STANDARD: 'Standard',
-    DUEL: 'Duel',
-    V5: 'V5',
-};
-
 export default function DeckSelector({format, selectedId, onSelect}: Props) {
-    const [decks, setDecks] = useState<Deck[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        setLoading(true);
-        deckApi.list({format})
-            .then(setDecks)
-            .catch(() => setDecks([]))
-            .finally(() => setLoading(false));
-    }, [format]);
+    const fetchDecks = useCallback(() => deckApi.list({format}), [format]);
+    const {data: decks, loading} = useAsyncState<Deck[]>(fetchDecks);
 
     if (loading) {
         return <p className="text-xs text-ink-muted p-3 animate-pulse">Loading decks…</p>;
     }
 
-    if (!decks.length) {
+    if (!decks?.length) {
         return (
             <p className="text-xs text-ink-muted p-3">
                 No decks valid for {FORMAT_LABELS[format]}. Build one in the Decks section first.

@@ -1,9 +1,12 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {FolderOpen} from 'lucide-react';
 import AppLayout from '@/shared/layout/AppLayout';
+import MasterDetailView from "@/shared/layout/MasterDetailView.tsx";
 import DeckListPanel from './DeckListPanel';
 import DeckEditorPanel from './DeckEditorPanel';
 import DeckAnalyticsPanel from './DeckAnalyticsPanel';
 import DeckImportModal from './DeckImportModal';
+import EmptyState from '@/shared/components/EmptyState';
 import {computeSummary, enrichEntry, extractKrcgCards, formatSummaryCompact, toKrcgContents} from './deckUtils';
 import deckApi from './api';
 import type {DeckFilter} from './DeckFilterModal';
@@ -13,11 +16,12 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function DecksPage() {
     const [decks,           setDecks]           = useState<Deck[]>([]);
-    const [selectedId,      setSelectedId]      = useState<number | null>(null);
+    const [selectedId,      setSelectedId]      = useState<string | null>(null);
     const [entries,         setEntries]         = useState<DeckEntry[]>([]);
     const [detailMap,       setDetailMap]       = useState<Map<string, CardDetailData>>(new Map());
     const [saveStatus,      setSaveStatus]      = useState<SaveStatus>('idle');
     const [loadError,       setLoadError]       = useState<string | null>(null);
+    const [operationError,  setOperationError]  = useState<string | null>(null);
     const [entriesLoading,  setEntriesLoading]  = useState(false);
     const [showImport,      setShowImport]      = useState(false);
     const [deckFilter,      setDeckFilter]      = useState<DeckFilter>({});
@@ -110,6 +114,7 @@ export default function DecksPage() {
     }, [selectedId]);
 
     const handleNew = useCallback(async () => {
+        setOperationError(null);
         try {
             const deck = await deckApi.create('New Deck');
             setDecks(ds => [deck, ...ds]);
@@ -117,7 +122,7 @@ export default function DecksPage() {
             setSelectedId(deck.id);
             setSaveStatus('idle');
         } catch (e) {
-            console.error('Failed to create deck', e);
+            setOperationError('Failed to create deck');
         }
     }, []);
 
@@ -148,11 +153,12 @@ export default function DecksPage() {
 
     const handleRename = useCallback(async (name: string) => {
         if (selectedId == null) return;
+        setOperationError(null);
         try {
             const updated = await deckApi.save(selectedId, { name });
             setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
-        } catch (e) {
-            console.error('Failed to rename deck', e);
+        } catch {
+            setOperationError('Failed to rename deck');
         }
     }, [selectedId]);
 
@@ -175,24 +181,27 @@ export default function DecksPage() {
 
     const handleCommentsChange = useCallback(async (comments: string | null) => {
         if (selectedId == null) return;
+        setOperationError(null);
         try {
             const updated = await deckApi.save(selectedId, { comments });
             setDecks(ds => ds.map(d => d.id === updated.id ? updated : d));
-        } catch (e) {
-            console.error('Failed to save comments', e);
+        } catch {
+            setOperationError('Failed to save comments');
         }
     }, [selectedId]);
 
     const handleDelete = useCallback(async () => {
         if (selectedId == null) return;
+        if (!window.confirm('Delete this deck? This cannot be undone.')) return;
+        setOperationError(null);
         try {
             await deckApi.remove(selectedId);
             setDecks(ds => ds.filter(d => d.id !== selectedId));
             setSelectedId(null);
             setEntries([]);
             setSaveStatus('idle');
-        } catch (e) {
-            console.error('Failed to delete deck', e);
+        } catch {
+            setOperationError('Failed to delete deck');
             setSaveStatus('error');
         }
     }, [selectedId]);
@@ -222,49 +231,82 @@ export default function DecksPage() {
 
     return (
         <AppLayout background={"/Locations23.jpg"}>
-            <div className="grid grid-cols-[280px_1fr] lg:grid-cols-[280px_1fr_240px] xl:grid-cols-[280px_1fr_280px] 2xl:grid-cols-[320px_1fr_300px] grid-rows-1 gap-6 h-[85dvh]">
-                <DeckListPanel
-                    decks={decks}
-                    selectedId={selectedId}
-                    onSelect={handleSelect}
-                    onNew={handleNew}
-                    onImport={() => setShowImport(true)}
-                    onFilter={setDeckFilter}
-                    activeFilter={deckFilter}
-                    loadError={loadError ?? undefined}
-                />
-                {selectedId != null ? (
-                    <DeckEditorPanel
-                        key={selectedId}
-                        title={selectedDeck?.name ?? 'Editor'}
-                        saveLabel={saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : undefined}
-                        saveError={saveStatus === 'error'}
-                        comments={selectedDeck?.comments}
-                        deckId={selectedDeck?.id}
-                        formatValidity={selectedDeck?.formatValidity}
-                        entriesLoading={entriesLoading}
-                        onRename={handleRename}
-                        onCommentsChange={handleCommentsChange}
-                        onRetrySave={handleRetrySave}
-                        onDelete={handleDelete}
-                        entries={entries}
-                        detailMap={detailMap}
-                        onIncrement={handleIncrement}
-                        onDecrement={handleDecrement}
-                        onAddCard={handleAddCard}
-                        onSearch={deckApi.autocomplete}
-                    />
-                ) : (
-                    <div className="flex items-center justify-center text-ink-muted text-sm">
-                        Select a deck to begin editing.
-                    </div>
-                )}
-                {selectedId != null && (
-                    <div className="hidden lg:contents">
-                        <DeckAnalyticsPanel entries={entries} detailMap={detailMap} />
-                    </div>
-                )}
-            </div>
+            <MasterDetailView
+                breakpoint="lg"
+                columns="320px 1fr 320px"
+                activeKey={selectedId != null ? 'editor' : 'list'}
+                panels={[
+                    {
+                        key: 'list',
+                        label: 'My Decks',
+                        content: (
+                            <DeckListPanel
+                                decks={decks}
+                                selectedId={selectedId}
+                                onSelect={handleSelect}
+                                onNew={handleNew}
+                                onImport={() => setShowImport(true)}
+                                onFilter={setDeckFilter}
+                                activeFilter={deckFilter}
+                                loadError={operationError ?? loadError ?? undefined}
+                            />
+                        )
+                    },
+                    {
+                        key: 'editor',
+                        label: selectedDeck ? `Deck: ${selectedDeck.name}` : 'Deck Editor',
+                        content: (
+                            selectedId != null ? (
+                                <DeckEditorPanel
+                                    key={selectedId}
+                                    title={selectedDeck?.name ?? 'Editor'}
+                                    saveLabel={saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved' : undefined}
+                                    saveError={saveStatus === 'error'}
+                                    comments={selectedDeck?.comments}
+                                    deckId={selectedDeck?.id}
+                                    formatValidity={selectedDeck?.formatValidity}
+                                    entriesLoading={entriesLoading}
+                                    onRename={handleRename}
+                                    onCommentsChange={handleCommentsChange}
+                                    onRetrySave={handleRetrySave}
+                                    onDelete={handleDelete}
+                                    entries={entries}
+                                    detailMap={detailMap}
+                                    onIncrement={handleIncrement}
+                                    onDecrement={handleDecrement}
+                                    onAddCard={handleAddCard}
+                                    onSearch={deckApi.autocomplete}
+                                />
+                            ) : (
+                                <div className="h-full bg-surface/70 backdrop-blur-md border border-line/75 rounded-lg flex items-center justify-center shadow-lg">
+                                    <EmptyState
+                                        icon={FolderOpen}
+                                        title="No deck selected"
+                                        description="Choose a deck from the list to start editing."
+                                    />
+                                </div>
+                            )
+                        )
+                    },
+                    {
+                        key: 'analytics',
+                        label: 'Analytics',
+                        content: (
+                            selectedId != null ? (
+                                <DeckAnalyticsPanel entries={entries} detailMap={detailMap} />
+                            ) : (
+                                <div className="h-full bg-surface/70 backdrop-blur-md border border-line/75 rounded-lg flex items-center justify-center shadow-lg">
+                                    <EmptyState
+                                        icon={FolderOpen}
+                                        title="No analytics"
+                                        description="Select a deck to see its analytics."
+                                    />
+                                </div>
+                            )
+                        )
+                    }
+                ]}
+            />
 
             {showImport && (
                 <DeckImportModal

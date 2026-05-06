@@ -1,5 +1,7 @@
 import {useState} from 'react';
 import {X} from 'lucide-react';
+import Button from '@/shared/components/Button';
+import Input from '@/shared/components/Input';
 import gameApi from '@/features/game/api';
 
 interface Props {
@@ -58,19 +60,14 @@ export default function CreateGameModal({onCreated, onClose}: Props) {
                 {/* Body */}
                 <div className="flex flex-col gap-4 px-4 py-4">
                     {/* Name */}
-                    <div>
-                        <label htmlFor="game-name" className="block text-xs text-ink-muted mb-2">
-                            Name <span className="text-ink-muted/60">(optional)</span>
-                        </label>
-                        <input
-                            id="game-name"
-                            type="text"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            placeholder="Leave blank for a random name…"
-                            className="w-full rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink placeholder:text-ink-muted outline-none focus:border-accent/60"
-                        />
-                    </div>
+                    <Input
+                        id="game-name"
+                        size="sm"
+                        label={<>Name <span className="text-ink-muted/60">(optional)</span></>}
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        placeholder="Leave blank for a random name…"
+                    />
 
                     {/* Format */}
                     <fieldset>
@@ -126,19 +123,10 @@ export default function CreateGameModal({onCreated, onClose}: Props) {
 
                 {/* Footer */}
                 <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-line/75">
-                    <button
-                        onClick={onClose}
-                        className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover transition-colors cursor-pointer"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                        className="text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent disabled:opacity-50 transition-colors cursor-pointer"
-                    >
+                    <Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
+                    <Button variant="primary" size="sm" loading={submitting} onClick={handleSubmit}>
                         {submitting ? 'Creating…' : 'Create'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

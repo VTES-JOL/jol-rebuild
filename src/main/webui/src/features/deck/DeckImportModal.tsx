@@ -1,5 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {AlertCircle, CheckCircle, X} from 'lucide-react';
+import Button from '@/shared/components/Button';
+import Input from '@/shared/components/Input';
 import deckApi from './api';
 import type {ImportPreview} from './types';
 
@@ -153,16 +155,13 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
                     {/* Deck name + comments */}
                     {hasResolved && (
                         <>
-                            <div>
-                                <label className="block text-xs text-ink-muted mb-1">Deck name</label>
-                                <input
-                                    type="text"
-                                    value={deckName}
-                                    placeholder="Imported Deck"
-                                    onChange={e => setDeckName(e.target.value)}
-                                    className="w-full rounded border border-line/60 bg-panel/30 px-3 py-1.5 text-xs text-ink outline-none focus:border-accent/60"
-                                />
-                            </div>
+                            <Input
+                                size="sm"
+                                label="Deck name"
+                                value={deckName}
+                                placeholder="Imported Deck"
+                                onChange={e => setDeckName(e.target.value)}
+                            />
                             <div>
                                 <label className="block text-xs text-ink-muted mb-1">Comments</label>
                                 <textarea
@@ -185,20 +184,10 @@ export default function DeckImportModal({ onImport, onClose }: Props) {
                             {createError}
                         </p>
                     )}
-                    <button
-                        onClick={onClose}
-                        disabled={creating}
-                        className="text-xs px-3 py-1.5 rounded border border-line/60 text-ink-muted hover:text-ink hover:bg-hover disabled:opacity-40 transition-colors cursor-pointer"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleCreate}
-                        disabled={!hasResolved || creating}
-                        className="text-xs px-3 py-1.5 rounded bg-accent/80 text-white hover:bg-accent disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                    >
+                    <Button variant="secondary" size="sm" onClick={onClose} disabled={creating}>Cancel</Button>
+                    <Button variant="primary" size="sm" loading={creating} disabled={!hasResolved} onClick={handleCreate}>
                         {creating ? 'Creating…' : 'Create Deck'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

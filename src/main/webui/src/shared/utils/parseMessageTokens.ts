@@ -1,6 +1,6 @@
 export type TextSegment   = { type: 'text';  content: string };
-export type CardSegment   = { type: 'card';  id: number; label: string };
-export type GameSegment   = { type: 'game';  id: number; label: string }; // ready for later
+export type CardSegment   = { type: 'card';  id: string; label: string };
+export type GameSegment   = { type: 'game';  id: string; label: string };
 
 export type MessageSegment = TextSegment | CardSegment | GameSegment;
 
@@ -15,7 +15,7 @@ export function parseMessageTokens(content: string): MessageSegment[] {
             segments.push({ type: 'text', content: content.slice(last, match.index) });
         }
         const [, kind, id, label] = match;
-        segments.push({ type: kind as 'card' | 'game', id: Number(id), label });
+        segments.push({ type: kind as 'card' | 'game', id, label });
         last = match.index! + match[0].length;
     }
 

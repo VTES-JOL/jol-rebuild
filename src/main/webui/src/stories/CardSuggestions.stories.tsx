@@ -10,6 +10,13 @@ const meta = {
         layout: 'centered',
     },
     tags: ['autodocs'],
+    decorators: [
+        (Story) => (
+            <div className="relative w-80 mt-50 flex items-end p-4 border border-dashed border-line/40 rounded-lg">
+                <Story />
+            </div>
+        ),
+    ],
 } satisfies Meta<typeof CardSuggestions>;
 
 export default meta;

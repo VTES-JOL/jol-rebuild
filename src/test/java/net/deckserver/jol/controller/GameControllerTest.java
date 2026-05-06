@@ -4,7 +4,10 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MediaType;
-import net.deckserver.jol.entity.*;
+import net.deckserver.jol.entity.Deck;
+import net.deckserver.jol.entity.Game;
+import net.deckserver.jol.entity.Registration;
+import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Role;
 import net.deckserver.jol.enums.Visibility;
@@ -21,17 +24,13 @@ import static org.hamcrest.Matchers.*;
 
 /**
  * Integration tests for GameController.
- *
  * Setup: @BeforeEach/@AfterEach are @Transactional so their changes are committed and
  * visible to the server. API calls under test each run in their own server transaction.
- *
  * Deck fixture: standardSizedDeck() produces a 12-crypt / 60-library deck valid only
  * for STANDARD (Anarch Convert is not in the Duel/V5 whitelists).
  */
 @QuarkusTest
 public class GameControllerTest {
-
-    private long otherUserDeckId;
 
     @BeforeEach
     @Transactional
@@ -50,7 +49,6 @@ public class GameControllerTest {
         deck.contents  = "{}";
         deck.timestamp = java.time.Instant.now();
         deck.persist();
-        otherUserDeckId = deck.id;
     }
 
     @AfterEach
@@ -96,7 +94,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void deleteOwnGame() {
-        long id = createGame("My Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String id = createGame("My Game", Visibility.PUBLIC, GameFormat.STANDARD);
 
         given().delete("/api/games/" + id)
                 .then().statusCode(HttpStatus.SC_NO_CONTENT);
@@ -105,7 +103,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void deleteOtherUsersGame() {
-        long id = createGameAsOtherUser();
+        String id = createGameAsOtherUser();
 
         given().delete("/api/games/" + id)
                 .then().statusCode(HttpStatus.SC_FORBIDDEN);
@@ -116,11 +114,11 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void getRegistrations_publicGame_anyUserCanView() {
-        long id = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String id = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
 
         given().get("/api/games/" + id + "/registrations")
                 .then().statusCode(HttpStatus.SC_OK)
-                .body("id",                equalTo((int) id))
+                .body("id",                equalTo(id))
                 .body("registrations",     notNullValue())
                 .body("invites",           notNullValue())
                 .body("registrationCount", equalTo(0))
@@ -130,7 +128,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void getRegistrations_privateGame_forbiddenWithoutInvite() {
-        long id = createGameAsOtherUser(Visibility.PRIVATE);
+        String id = createGameAsOtherUser(Visibility.PRIVATE);
 
         given().get("/api/games/" + id + "/registrations")
                 .then().statusCode(HttpStatus.SC_FORBIDDEN);
@@ -141,8 +139,8 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void registerForPublicGame() {
-        long gameId = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
-        long deckId = createAndValidateDeck("My Deck");
+        String gameId = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String deckId = createAndValidateDeck("My Deck");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.RegisterCommand(deckId))
@@ -159,8 +157,8 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void registerForPrivateGameWithoutInvite() {
-        long gameId = createGameAsOtherUser(Visibility.PRIVATE);
-        long deckId = createAndValidateDeck("My Deck");
+        String gameId = createGameAsOtherUser(Visibility.PRIVATE);
+        String deckId = createAndValidateDeck("My Deck");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.RegisterCommand(deckId))
@@ -172,8 +170,8 @@ public class GameControllerTest {
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void registerWithInvalidFormatDeck() {
         // DUEL game, but the deck is only valid for STANDARD
-        long gameId = createGame("Duel Game", Visibility.PUBLIC, GameFormat.DUEL);
-        long deckId = createAndValidateDeck("Standard-only Deck");
+        String gameId = createGame("Duel Game", Visibility.PUBLIC, GameFormat.DUEL);
+        String deckId = createAndValidateDeck("Standard-only Deck");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.RegisterCommand(deckId))
@@ -185,9 +183,9 @@ public class GameControllerTest {
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void registerWhenGameFull() {
         // Create a STANDARD game (max 5) and fill all slots via the entity layer
-        long gameId = fillStandardGame();
+        String gameId = fillStandardGame();
 
-        long deckId = createAndValidateDeck("My Deck");
+        String deckId = createAndValidateDeck("My Deck");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.RegisterCommand(deckId))
@@ -200,8 +198,8 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void leaveGame() {
-        long gameId = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
-        long deckId = createAndValidateDeck("My Deck");
+        String gameId = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String deckId = createAndValidateDeck("My Deck");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.RegisterCommand(deckId))
@@ -219,7 +217,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void leaveGameNotRegistered() {
-        long gameId = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String gameId = createGame("Public Game", Visibility.PUBLIC, GameFormat.STANDARD);
 
         given().delete("/api/games/" + gameId + "/register")
                 .then().statusCode(HttpStatus.SC_NOT_FOUND);
@@ -230,7 +228,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void changeFormat() {
-        long id = createGame("My Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String id = createGame("My Game", Visibility.PUBLIC, GameFormat.STANDARD);
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.FormatUpdateCommand(GameFormat.DUEL))
@@ -243,7 +241,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void changeFormatForbiddenForNonOwner() {
-        long id = createGameAsOtherUser();
+        String id = createGameAsOtherUser();
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.FormatUpdateCommand(GameFormat.DUEL))
@@ -254,8 +252,8 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void changeFormatBlockedWhenPlayersRegistered() {
-        long gameId = createGame("My Game", Visibility.PUBLIC, GameFormat.STANDARD);
-        long deckId = createAndValidateDeck("My Deck");
+        String gameId = createGame("My Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String deckId = createAndValidateDeck("My Deck");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.RegisterCommand(deckId))
@@ -273,7 +271,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void invitePlayerToGame() {
-        long gameId = createGame("Private Game", Visibility.PRIVATE, GameFormat.STANDARD);
+        String gameId = createGame("Private Game", Visibility.PRIVATE, GameFormat.STANDARD);
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.InviteCommand("otheruser"))
@@ -289,7 +287,7 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void inviteForbiddenForNonOwner() {
-        long gameId = createGameAsOtherUser();
+        String gameId = createGameAsOtherUser();
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.InviteCommand("testuser"))
@@ -302,12 +300,12 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void myInvitedGames() {
-        long gameId = inviteTestuserToPrivateGame();
+        String gameId = inviteTestuserToPrivateGame();
 
         given().get("/api/games/invited/me")
                 .then().statusCode(HttpStatus.SC_OK)
                 .body("$.size()", equalTo(1))
-                .body("[0].id", equalTo((int) gameId));
+                .body("[0].id", equalTo(gameId));
     }
 
     @Test
@@ -323,33 +321,33 @@ public class GameControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void openGames_includesPrivateGamesUserIsInvitedTo() {
-        long privateGameId = inviteTestuserToPrivateGame();
+        String privateGameId = inviteTestuserToPrivateGame();
 
         given().get("/api/games/open")
                 .then().statusCode(HttpStatus.SC_OK)
-                .body("id", hasItem((int) privateGameId));
+                .body("id", hasItem(privateGameId));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /** Creates a game via the API as testuser and returns the game ID. */
-    private long createGame(String name, Visibility visibility, GameFormat format) {
+    private String createGame(String name, Visibility visibility, GameFormat format) {
         String location = given().contentType(MediaType.APPLICATION_JSON)
                 .body(new GameController.GameCreateCommand(name, visibility, format))
                 .post("/api/games")
                 .then().statusCode(HttpStatus.SC_CREATED)
                 .extract().header("Location");
-        return Long.parseLong(location.substring(location.lastIndexOf('/') + 1));
+        return location.substring(location.lastIndexOf('/') + 1);
     }
 
     /** Creates a PUBLIC STANDARD game owned by otheruser via the entity layer. */
     @Transactional
-    long createGameAsOtherUser() {
+    String createGameAsOtherUser() {
         return createGameAsOtherUser(Visibility.PUBLIC);
     }
 
     @Transactional
-    long createGameAsOtherUser(Visibility visibility) {
+    String createGameAsOtherUser(Visibility visibility) {
         User other = User.findByUsername("otheruser");
         Game game = Game.create(other, "Other Game", visibility, GameFormat.STANDARD);
         return game.id;
@@ -360,12 +358,12 @@ public class GameControllerTest {
      * format validation. Returns the deck ID.
      * The fixture deck (Anarch Convert crypt) is valid for STANDARD only.
      */
-    private long createAndValidateDeck(String name) {
-        long id = given().contentType(MediaType.APPLICATION_JSON)
+    private String createAndValidateDeck(String name) {
+        String id = given().contentType(MediaType.APPLICATION_JSON)
                 .body(new DeckController.DeckCreateCommand(name))
                 .post("/api/decks")
                 .then().statusCode(HttpStatus.SC_OK)
-                .extract().<Integer>path("id").longValue();
+                .extract().<String>path("id");
 
         given().contentType(MediaType.APPLICATION_JSON)
                 .body(new DeckController.DeckUpdateCommand(null, standardSizedDeck(), null, null))
@@ -380,7 +378,7 @@ public class GameControllerTest {
      * via the entity layer. Returns the game ID so the test can attempt a 6th registration.
      */
     @Transactional
-    long fillStandardGame() {
+    String fillStandardGame() {
         String fakeDeck = "{\"crypt\":{\"count\":12,\"cards\":[]},\"library\":{\"count\":60,\"cards\":[]}}";
         User other = User.findByUsername("otheruser");
         Game game  = Game.create(other, "Full Standard", Visibility.PUBLIC, GameFormat.STANDARD);
@@ -404,7 +402,7 @@ public class GameControllerTest {
 
     /** Invites testuser to a private game owned by otheruser. Returns the game ID. */
     @Transactional
-    long inviteTestuserToPrivateGame() {
+    String inviteTestuserToPrivateGame() {
         User other    = User.findByUsername("otheruser");
         User testuser = User.findByUsername("testuser");
         Game game     = Game.create(other, "Private Game", Visibility.PRIVATE, GameFormat.STANDARD);

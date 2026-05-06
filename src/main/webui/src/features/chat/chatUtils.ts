@@ -1,4 +1,4 @@
-import type {ChatMessage} from '@/hooks/useWebSocket.ts';
+import type {ChatMsg} from '@/hooks/useWebSocket.ts';
 import type {MessageLine} from '@/features/chat/MessageLineView.tsx';
 
 export interface MessageGroup {
@@ -12,18 +12,16 @@ export interface MessageGroup {
 const dateFormat = new Intl.DateTimeFormat('UTC', { dateStyle: 'medium', timeStyle: 'short' });
 const timeOnlyFormat = new Intl.DateTimeFormat('UTC', { timeStyle: 'short' });
 
-export function groupMessages(messages: ChatMessage[], currentUser: string): MessageGroup[] {
+export function groupMessages(messages: ChatMsg[], currentUser: string): MessageGroup[] {
     const groups: MessageGroup[] = [];
     let lastSender = '';
     let lastFormattedFull = '';
 
     for (const msg of messages) {
-        if (!msg.id) continue;
-
-        const sender = msg.sender ?? '';
+        const sender = msg.sender;
         const isSelf = sender === currentUser;
-        const fullTs = msg.timestamp ? dateFormat.format(new Date(msg.timestamp)) : '';
-        const shortTs = msg.timestamp ? timeOnlyFormat.format(new Date(msg.timestamp)) : '';
+        const fullTs = dateFormat.format(new Date(msg.timestamp));
+        const shortTs = timeOnlyFormat.format(new Date(msg.timestamp));
 
         const timestampChanged = fullTs !== lastFormattedFull;
         const senderChanged = sender !== lastSender;
@@ -31,8 +29,8 @@ export function groupMessages(messages: ChatMessage[], currentUser: string): Mes
 
         const line: MessageLine = {
             id: msg.id,
-            content: msg.content ?? '',
-            reactions: msg.reactions ?? [],
+            content: msg.content,
+            reactions: msg.reactions,
             replyTo: msg.replyTo ?? null,
         };
 

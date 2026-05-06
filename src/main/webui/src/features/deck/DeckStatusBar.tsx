@@ -6,7 +6,7 @@ import type {DeckEntry} from './types';
 
 interface Props {
     entries: DeckEntry[];
-    deckId?: number;
+    deckId?: string;
     formatValidity?: Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
 }
 

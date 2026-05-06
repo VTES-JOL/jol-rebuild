@@ -1,5 +1,6 @@
 package net.deckserver.jol.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class DeckImportService {
 
-    private static final Pattern JOL_LINE = Pattern.compile("^(\\d+)\\s*[xX]?\\s*(.+)$");
+    private static final Pattern JOL_LINE = Pattern.compile("^(?:(\\d+)\\s*[xX]?\\s*)?(.+)$");
 
     @Inject
     CardRegistry registry;
@@ -113,7 +114,7 @@ public class DeckImportService {
                     resolveKrcgCard(card, resolved, errors);
                 }
             }
-        } catch (Exception e) {
+        } catch (JsonProcessingException e) {
             errors.add(new ImportPreviewDto.ParseError(
                     text.length() > 60 ? text.substring(0, 60) + "…" : text,
                     "Invalid JSON: " + e.getMessage()));
@@ -147,12 +148,8 @@ public class DeckImportService {
             if (line.isEmpty() || line.startsWith("//") || line.startsWith("#")) continue;
 
             Matcher m = JOL_LINE.matcher(line);
-            if (!m.matches()) {
-                errors.add(new ImportPreviewDto.ParseError(rawLine, "Expected: {count}[x] {card name}"));
-                continue;
-            }
-
-            int    count = Integer.parseInt(m.group(1));
+            if (!m.matches()) continue;
+            int    count = m.group(1) != null ? Integer.parseInt(m.group(1)) : 1;
             String name  = m.group(2).strip();
             Card   found = registry.findByNormalizedName(StringUtils.stripAccents(name).toLowerCase());
 

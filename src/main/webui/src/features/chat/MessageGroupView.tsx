@@ -1,20 +1,16 @@
 import React from 'react';
 import type {ReplySnapshot} from '@/hooks/useWebSocket.ts';
-import {avatarStyle, initials, nameColorStyle} from '@/shared/utils/avatarUtils';
+import {nameColorStyle} from '@/shared/utils/avatarUtils';
+import Avatar from '@/shared/components/Avatar';
 import {MessageLineView} from './MessageLineView';
-import type {MessageGroup} from '@/shared/utils/chatUtils.ts';
+import type {MessageGroup} from './chatUtils.ts';
 
 export type { MessageGroup };
 
-function Avatar({ name, showLine }: { name: string; showLine: boolean }) {
+function AvatarWithLine({ name, showLine }: { name: string; showLine: boolean }) {
     return (
         <div className="flex flex-col items-center w-7 shrink-0 cursor-default">
-            <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-medium shrink-0"
-                style={avatarStyle(name)}
-            >
-                {initials(name)}
-            </div>
+            <Avatar username={name} size="sm" />
             {showLine && <div className="w-px flex-1 bg-line/40 mt-1" />}
         </div>
     );
@@ -24,9 +20,9 @@ interface MessageGroupViewProps {
     group: MessageGroup;
     showLine: boolean;
     currentUser: string;
-    onReact: (messageId: number, emoji: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
     onReply: (snapshot: ReplySnapshot) => void;
-    onJumpTo: (id: number) => void;
+    onJumpTo: (id: string) => void;
     disabled: boolean;
     enableReactions: boolean;
     enableReply: boolean;
@@ -45,7 +41,7 @@ export const MessageGroupView = React.memo(function MessageGroupView({
 }: MessageGroupViewProps) {
     return (
         <div className="flex gap-2.5 mb-2.5">
-            <Avatar name={group.sender} showLine={showLine} />
+            <AvatarWithLine name={group.sender} showLine={showLine} />
             <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-0.5">
                     <span className="text-sm font-medium" style={nameColorStyle(group.sender)}>

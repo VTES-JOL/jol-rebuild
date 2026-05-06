@@ -1,8 +1,11 @@
 export interface User {
-    id: number;
+    id: string;
     username: string;
     email?: string;
     roles: string[];
+    countryCode?: string;
+    zoneId?: string;
+    enableImages: boolean;
 }
 
 export type RegisterField = "username" | "password" | "email";

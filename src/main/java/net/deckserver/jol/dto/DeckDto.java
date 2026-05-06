@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 @RegisterForReflection
 public class DeckDto {
-    public Long id;
+    public String id;
     public String name;
     public String summary;
     public String comments;

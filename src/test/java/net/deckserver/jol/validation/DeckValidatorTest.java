@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Integration tests for all three DeckValidator implementations.
  * Uses real card data from the CSV registry — all card IDs reference real cards.
- *
  * Card fixtures used:
  *   200076 - Anarch Convert      (non-banned, NOT in duel/V5 whitelists)
  *   201634 - Abraham Mellon      (non-banned, duel whitelist, V5 via FOL set)
@@ -161,7 +160,7 @@ class DeckValidatorTest {
     void duel_valid() {
         // 4 crypt, 40 library, all cards in duel whitelist
         // Abraham Mellon (201634) and Deflection (100518) are both in the duel whitelist
-        KrcgDeck deck = deck("201634", "Abraham Mellon", 4, "100518", "Deflection", 40);
+        KrcgDeck deck = deck("201634", "Abraham Mellon", 6, "100518", "Deflection", 40);
         ValidationResult result = duel.validate(deck, GameFormat.DUEL);
 
         assertTrue(result.valid());
@@ -175,12 +174,12 @@ class DeckValidatorTest {
 
         assertFalse(result.valid());
         assertThat(result.errors(), hasSize(1));
-        assertThat(result.errors().getFirst(), containsString("4"));
+        assertThat(result.errors().getFirst(), containsString("6"));
     }
 
     @Test
     void duel_libraryTooSmall() {
-        KrcgDeck deck = deck("201634", "Abraham Mellon", 4, "100518", "Deflection", 39);
+        KrcgDeck deck = deck("201634", "Abraham Mellon", 6, "100518", "Deflection", 39);
         ValidationResult result = duel.validate(deck, GameFormat.DUEL);
 
         assertFalse(result.valid());
@@ -189,7 +188,7 @@ class DeckValidatorTest {
 
     @Test
     void duel_libraryTooLarge() {
-        KrcgDeck deck = deck("201634", "Abraham Mellon", 4, "100518", "Deflection", 61);
+        KrcgDeck deck = deck("201634", "Abraham Mellon", 6, "100518", "Deflection", 61);
         ValidationResult result = duel.validate(deck, GameFormat.DUEL);
 
         assertFalse(result.valid());
@@ -199,7 +198,7 @@ class DeckValidatorTest {
     @Test
     void duel_cardNotInWhitelist() {
         // Anarch Convert (200076) is NOT in the duel whitelist
-        KrcgDeck deck = deck("200076", "Anarch Convert", 4, "100518", "Deflection", 40);
+        KrcgDeck deck = deck("200076", "Anarch Convert", 6, "100518", "Deflection", 40);
         ValidationResult result = duel.validate(deck, GameFormat.DUEL);
 
         assertFalse(result.valid());
@@ -210,7 +209,7 @@ class DeckValidatorTest {
     @Test
     void duel_multipleInvalidCards() {
         // Both Anarch Convert (200076) and Govern the Unaligned (100845) are NOT in duel whitelist
-        var crypt = new KrcgCrypt(4, List.of(new KrcgCard("200076", 4, "Anarch Convert")));
+        var crypt = new KrcgCrypt(4, List.of(new KrcgCard("200076", 6, "Anarch Convert")));
         var library = new KrcgLibrary(40, List.of(
                 new KrcgLibraryGroup("Action", 40, List.of(
                         new KrcgCard("100518", 30, "Deflection"),

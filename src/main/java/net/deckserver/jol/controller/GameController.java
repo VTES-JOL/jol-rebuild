@@ -1,24 +1,29 @@
 package net.deckserver.jol.controller;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.*;
-import net.deckserver.jol.services.NameService;
 import jakarta.ws.rs.core.Response;
+import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.dto.GameDetailDto;
 import net.deckserver.jol.dto.GameDto;
 import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.Visibility;
+import net.deckserver.jol.services.ChatService;
+import net.deckserver.jol.services.NameService;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Path("/api/games")
 public class GameController {
@@ -30,12 +35,15 @@ public class GameController {
     NameService nameService;
 
     @Inject
+    ChatService chatService;
+
+    @Inject
     net.deckserver.jol.services.LobbyChatBroadcaster lobbyChatBroadcaster;
 
     @POST
     @Transactional
     @RolesAllowed("USER")
-    public Response createGame(GameCreateCommand command) {
+    public Response createGame(@Valid GameCreateCommand command) {
         User owner = User.findByUsername(identity.getPrincipal().getName());
         GameFormat format = command.format() != null ? command.format() : GameFormat.STANDARD;
         Visibility visibility = command.visibility() != null ? command.visibility() : Visibility.PUBLIC;
@@ -48,30 +56,42 @@ public class GameController {
     @PUT
     @Path("/{id}")
     @Transactional
-    @Authenticated
-    public GameDto update(@PathParam("id") Long id, GameUpdateCommand command) {
+    @RolesAllowed("USER")
+    public Response update(@PathParam("id") String id, @Valid GameUpdateCommand command) {
         Game entity = Game.findById(id);
         if (entity == null) throw new NotFoundException();
-        entity.visibility = command.visibility();
-        entity.name = command.name();
-        return new GameDto(entity);
+        String username = identity.getPrincipal().getName();
+        if (!entity.isOwnedBy(username)) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        if (command.visibility() != null) {
+            entity.visibility = command.visibility();
+        }
+        if (command.name() != null) {
+            entity.name = command.name();
+        }
+        return Response.ok(new GameDto(entity)).build();
     }
 
     @DELETE
     @Path("/{id}")
     @Transactional
     @RolesAllowed("USER")
-    public Response deleteGame(@PathParam("id") Long id) {
+    public Response deleteGame(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
         String username = identity.getPrincipal().getName();
-        if (game.owner == null || !game.owner.username.equals(username)) {
+        if (!game.isOwnedBy(username)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         if (game.status != Status.OPEN) {
             return Response.status(Response.Status.CONFLICT)
                 .entity("Game can only be deleted when OPEN").build();
+        }
+        if (game.tournament != null) {
+            return Response.status(Response.Status.CONFLICT)
+                .entity("Cannot delete tournament games").build();
         }
         game.delete();
         return Response.noContent().build();
@@ -79,7 +99,7 @@ public class GameController {
 
     @GET
     @Path("/{id}")
-    public GameDto get(@PathParam("id") Long id) {
+    public GameDto get(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
         return new GameDto(game);
@@ -87,21 +107,34 @@ public class GameController {
 
     @GET
     @Path("/active")
-    public List<GameDto> activeGames() {
-        return Game.findActiveGames().stream().map(GameDto::new).toList();
+    public List<GameDto> activeGames(
+        @QueryParam("limit") @DefaultValue("50") int limit,
+        @QueryParam("offset") @DefaultValue("0") int offset) {
+        int clampedLimit = Math.min(limit, 200);
+        List<Game> games = Game.<Game>find("visibility = ?1 and status = ?2", Visibility.PUBLIC, Status.ACTIVE)
+            .range(offset, offset + clampedLimit - 1)
+            .list();
+        return toDtos(games);
     }
 
     @GET
     @Path("/active/me")
     public List<GameDto> myGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.findActiveGames(user).stream().map(GameDto::new).toList();
+        return toDtos(Game.findActiveGames(user));
     }
 
     @GET
     @Path("/open")
-    public List<GameDto> openGames() {
-        List<Game> result = new ArrayList<>(Game.findOpenGames());
+    public List<GameDto> openGames(
+        @QueryParam("limit") @DefaultValue("50") int limit,
+        @QueryParam("offset") @DefaultValue("0") int offset) {
+        int clampedLimit = Math.min(limit, 200);
+        List<Game> result = new ArrayList<>(
+            Game.<Game>find("visibility = ?1 and status = ?2", Visibility.PUBLIC, Status.OPEN)
+                .range(offset, offset + clampedLimit - 1)
+                .list()
+        );
         if (!identity.isAnonymous()) {
             User user = User.findByUsername(identity.getPrincipal().getName());
             // Private games the user was invited to
@@ -116,7 +149,7 @@ public class GameController {
                 .filter(g -> !result.contains(g))
                 .forEach(result::add);
         }
-        return result.stream().map(GameDto::new).toList();
+        return toDtos(result);
     }
 
     @GET
@@ -124,7 +157,7 @@ public class GameController {
     @RolesAllowed("USER")
     public List<GameDto> myInvitedGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.findInvitedGames(user).stream().map(GameDto::new).toList();
+        return toDtos(Game.findInvitedGames(user));
     }
 
     @GET
@@ -132,7 +165,7 @@ public class GameController {
     @RolesAllowed("USER")
     public List<GameDto> myRegisteredGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.findRegisteredGames(user).stream().map(GameDto::new).toList();
+        return toDtos(Game.findRegisteredGames(user));
     }
 
     @GET
@@ -140,20 +173,19 @@ public class GameController {
     @RolesAllowed("USER")
     public List<GameDto> myOwnedGames() {
         User user = User.findByUsername(identity.getPrincipal().getName());
-        return Game.<Game>find("owner.id = ?1 and status = ?2", user.id, Status.OPEN)
-            .stream().map(GameDto::new).toList();
+        return toDtos(Game.<Game>find("owner.id = ?1 and status = ?2", user.id, Status.OPEN).list());
     }
 
     @GET
     @Path("/{id}/registrations")
     @RolesAllowed("USER")
-    public Response getRegistrations(@PathParam("id") Long id) {
+    public Response getRegistrations(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
         if (game.visibility == Visibility.PRIVATE) {
             User user = User.findByUsername(identity.getPrincipal().getName());
-            boolean isOwner = game.owner != null && game.owner.username.equals(user.username);
+            boolean isOwner = game.isOwnedBy(user.username);
             boolean hasAccess = isOwner || Registration.findByGameAndUser(game, user) != null;
             if (!hasAccess) {
                 return Response.status(Response.Status.FORBIDDEN).build();
@@ -165,11 +197,23 @@ public class GameController {
         return Response.ok(new GameDetailDto(game, registrations, invites)).build();
     }
 
+    @GET
+    @Path("/{id}/messages")
+    @RolesAllowed("USER")
+    public List<ChatMessageDto> getMessages(
+        @PathParam("id") String id,
+        @QueryParam("page") @DefaultValue("0") int page,
+        @QueryParam("limit") @DefaultValue("50") int limit) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+        return chatService.getHistory(id, page, limit);
+    }
+
     @POST
     @Path("/{id}/register")
     @Transactional
     @RolesAllowed("USER")
-    public Response register(@PathParam("id") Long id, RegisterCommand command) {
+    public Response register(@PathParam("id") String id, RegisterCommand command) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
         if (game.status != Status.OPEN) {
@@ -189,7 +233,7 @@ public class GameController {
         }
 
         long registrationCount = Registration.countForGame(game.id);
-        if (registrationCount >= game.gameFormat.getMaxPlayers()) {
+        if (game.isFull(registrationCount)) {
             return Response.status(Response.Status.CONFLICT).entity("Game is full").build();
         }
 
@@ -213,7 +257,7 @@ public class GameController {
     @Path("/{id}/register")
     @Transactional
     @RolesAllowed("USER")
-    public Response leaveGame(@PathParam("id") Long id) {
+    public Response leaveGame(@PathParam("id") String id) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
@@ -232,12 +276,12 @@ public class GameController {
     @Path("/{id}/format")
     @Transactional
     @RolesAllowed("USER")
-    public Response updateFormat(@PathParam("id") Long id, FormatUpdateCommand command) {
+    public Response updateFormat(@PathParam("id") String id, FormatUpdateCommand command) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
         String username = identity.getPrincipal().getName();
-        if (game.owner == null || !game.owner.username.equals(username)) {
+        if (!game.isOwnedBy(username)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         if (game.status != Status.OPEN) {
@@ -255,12 +299,12 @@ public class GameController {
     @Path("/{id}/invite")
     @Transactional
     @RolesAllowed("USER")
-    public Response invite(@PathParam("id") Long id, InviteCommand command) {
+    public Response invite(@PathParam("id") String id, InviteCommand command) {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
 
         String callerUsername = identity.getPrincipal().getName();
-        if (game.owner == null || !game.owner.username.equals(callerUsername)) {
+        if (!game.isOwnedBy(callerUsername)) {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
@@ -273,18 +317,26 @@ public class GameController {
         return Response.ok().build();
     }
 
+    private List<GameDto> toDtos(List<Game> games) {
+        List<String> ids = games.stream().map(g -> g.id).toList();
+        Map<String, Long> counts = Registration.countsByGameIds(ids);
+        return games.stream()
+            .map(g -> new GameDto(g, counts.getOrDefault(g.id, 0L).intValue()))
+            .toList();
+    }
+
     @RegisterForReflection
-    public record GameCreateCommand(String name, Visibility visibility, GameFormat format) {
+    public record GameCreateCommand(@NotBlank @Size(max = 255) String name, Visibility visibility, GameFormat format) {
         public GameCreateCommand(String name) {
             this(name, Visibility.PUBLIC, GameFormat.STANDARD);
         }
     }
 
     @RegisterForReflection
-    public record GameUpdateCommand(String name, Visibility visibility) {}
+    public record GameUpdateCommand(@NotBlank @Size(max = 255) String name, Visibility visibility) {}
 
     @RegisterForReflection
-    public record RegisterCommand(Long deckId) {}
+    public record RegisterCommand(String deckId) {}
 
     @RegisterForReflection
     public record FormatUpdateCommand(GameFormat format) {}

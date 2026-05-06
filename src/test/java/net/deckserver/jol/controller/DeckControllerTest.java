@@ -21,11 +21,9 @@ import static org.hamcrest.Matchers.*;
 
 /**
  * Integration tests for DeckController.
- *
  * Setup strategy: @BeforeEach/@AfterEach are @Transactional (each commits its own transaction),
  * so data they persist is visible to the server. Test methods use the HTTP API for further
  * setup so every state change goes through a committed server transaction.
- *
  * Card fixtures:
  *   200076 - Anarch Convert  (non-banned; NOT in duel/V5 whitelists)
  *   100518 - Deflection       (non-banned; duel ✓, V5 via V5/NB/V5C sets ✓)
@@ -36,7 +34,7 @@ import static org.hamcrest.Matchers.*;
 public class DeckControllerTest {
 
     /** Deck ID created for otheruser — available to cross-user access tests. */
-    private long otherUserDeckId;
+    private String otherUserDeckId;
 
     @BeforeEach
     @Transactional
@@ -130,7 +128,7 @@ public class DeckControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void updateDeck_nameOnly_doesNotRunValidation() {
-        long id = postDeck("Old Name");
+        String id = postDeck("Old Name");
 
         given()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +144,7 @@ public class DeckControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void updateDeck_withContents_populatesFormatValidity() {
-        long id = postDeck("My Deck");
+        String id = postDeck("My Deck");
 
         given()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -169,7 +167,7 @@ public class DeckControllerTest {
     public void updateDeck_twice_doesNotViolateUniqueConstraint() {
         // Regression test: saving a deck twice must not produce a duplicate-key error
         // on deck_format_validity(deck_id, format). Fixed by em.flush() after clear().
-        long id = postDeck("My Deck");
+        String id = postDeck("My Deck");
         var command = new DeckController.DeckUpdateCommand(null, standardSizedDeck(), null, null);
 
         given()
@@ -194,7 +192,7 @@ public class DeckControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void getValidity_returnsErrorsForInvalidFormat() {
-        long id = postDeck("My Deck");
+        String id = postDeck("My Deck");
         putContents(id, standardSizedDeck());
 
         given()
@@ -209,7 +207,7 @@ public class DeckControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void getValidity_returnsEmptyErrorsForValidFormat() {
-        long id = postDeck("My Deck");
+        String id = postDeck("My Deck");
         putContents(id, standardSizedDeck());
 
         given()
@@ -224,7 +222,7 @@ public class DeckControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void getValidity_notFoundWhenNeverValidated() {
-        long id = postDeck("My Deck");
+        String id = postDeck("My Deck");
 
         given()
                 .when().get("/api/decks/" + id + "/validity/" + GameFormat.STANDARD.name())
@@ -237,7 +235,7 @@ public class DeckControllerTest {
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
     public void deleteDeck_removesFromList() {
-        long id = postDeck("To Delete");
+        String id = postDeck("To Delete");
 
         given()
                 .when().delete("/api/decks/" + id)
@@ -285,18 +283,18 @@ public class DeckControllerTest {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /** Creates a deck via the API and returns the assigned ID. */
-    private long postDeck(String name) {
+    private String postDeck(String name) {
         return given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new DeckController.DeckCreateCommand(name))
                 .when().post("/api/decks")
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .extract().<Integer>path("id").longValue();
+                .extract().<String>path("id");
     }
 
     /** Updates deck contents via the API. */
-    private void putContents(long id, KrcgDeck contents) {
+    private void putContents(String id, KrcgDeck contents) {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new DeckController.DeckUpdateCommand(null, contents, null, null))

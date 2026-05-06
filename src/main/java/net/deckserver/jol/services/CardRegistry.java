@@ -99,14 +99,27 @@ public class CardRegistry {
             }
         }
         int bareAdded = 0;
+        int bareDisambiguated = 0;
         for (Map.Entry<String, Set<Card>> entry : bareNameToCards.entrySet()) {
             if (entry.getValue().size() == 1) {
                 lowerLookupMap.putIfAbsent(entry.getKey(), entry.getValue().iterator().next());
                 bareAdded++;
+            } else {
+                // Multiple versions share this name (e.g. different groups or ADV).
+                // Resolve to the non-advanced card with the lowest numeric group,
+                // matching the old JOL convention that the bare name refers to the original.
+                Optional<Card> canonical = entry.getValue().stream()
+                        .filter(c -> c instanceof CryptCard cc && !cc.advanced())
+                        .filter(c -> ((CryptCard) c).group().matches("\\d+"))
+                        .min(Comparator.comparingInt(c -> Integer.parseInt(((CryptCard) c).group())));
+                if (canonical.isPresent()) {
+                    lowerLookupMap.putIfAbsent(entry.getKey(), canonical.get());
+                    bareDisambiguated++;
+                }
             }
         }
-        LOG.infof("Loaded %d cards (%d lookup keys, %d unambiguous crypt bare names)",
-                allCards.size(), lookupMap.size(), bareAdded);
+        LOG.infof("Loaded %d cards (%d lookup keys, %d unambiguous crypt bare names, %d disambiguated to lowest non-adv group)",
+                allCards.size(), lookupMap.size(), bareAdded, bareDisambiguated);
     }
 
     // ── Public accessors ──────────────────────────────────────────────────────
