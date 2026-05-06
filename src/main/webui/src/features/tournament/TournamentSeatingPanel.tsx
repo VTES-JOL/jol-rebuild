@@ -263,18 +263,6 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                                         saving={mutating}
                                     />
 
-                                    {round.unseated.length > 0 && (
-                                        <div className="bg-blood/5 border border-blood/20 rounded-lg p-3">
-                                            <p className="text-[10px] font-bold uppercase text-blood mb-2">Unallocated</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {round.unseated.map(p => (
-                                                    <span key={p.registrationId} className="text-xs bg-blood/10 text-blood px-2 py-0.5 rounded">
-                                                        {p.username}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
 
                                 <DragOverlay>

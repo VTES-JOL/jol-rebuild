@@ -120,8 +120,8 @@ export default function TournamentsPage() {
         },
         {
             key: 'stats',
-            label: 'Seating Stats',
-            content: selectedTournament ? (
+            label: 'Stats',
+            content: (selectedTournament) ? (
                 <Panel title={<span className="flex items-center gap-2"><BarChart2 className="w-3.5 h-3.5" />Seating Stats</span>}>
                     <div className="overflow-y-auto flex-1 min-h-0 p-4">
                         <TournamentSeatingStats

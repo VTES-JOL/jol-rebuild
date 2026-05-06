@@ -39,5 +39,5 @@ Any errors will be reported back to the user in a way that explains the reason f
 
 ### V5 format rules
 - Standard rules apply for deck size and banned cards
-- Cards must be either present in the list `vaild-v5-cards.txt`
+- Cards must be either present in the list `valid-v5-cards.txt`
 - or have a `set` item that's present in the list `valid-v5-sets.txt`

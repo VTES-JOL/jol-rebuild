@@ -10,7 +10,7 @@ interface PlayerStats {
     username: string;
     seatedRounds: number;
     avgTransfers: number;
-    avgVpAvailable: number;
+    vpAvailable: number;
 }
 
 interface Anomaly {
@@ -95,7 +95,7 @@ function computePlayerStats(seating: SeatingDto): PlayerStats[] {
                 username: d.username,
                 seatedRounds,
                 avgTransfers: seatedRounds > 0 ? d.transferSum / seatedRounds : 0,
-                avgVpAvailable: seatedRounds > 0 ? d.vpSum / seatedRounds : 0,
+                vpAvailable: seatedRounds > 0 ? d.vpSum : 0,
             };
         })
         .sort((a, b) => a.username.localeCompare(b.username));
@@ -309,7 +309,7 @@ function PlayerStatsTable({players}: {players: PlayerStats[]}) {
                         <tr className="border-b border-line/20">
                             <th className="text-left px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Player</th>
                             <th className="text-right px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Avg Transfers</th>
-                            <th className="text-right px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">Avg VP Available</th>
+                            <th className="text-right px-4 py-2 text-ink-muted font-bold uppercase tracking-wider">VP Available</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-line/20">
@@ -320,7 +320,7 @@ function PlayerStatsTable({players}: {players: PlayerStats[]}) {
                                     {p.seatedRounds > 0 ? p.avgTransfers.toFixed(2) : '—'}
                                 </td>
                                 <td className="px-4 py-2 text-ink font-mono text-right">
-                                    {p.seatedRounds > 0 ? p.avgVpAvailable.toFixed(2) : '—'}
+                                    {p.seatedRounds > 0 ? p.vpAvailable : '—'}
                                 </td>
                             </tr>
                         ))}

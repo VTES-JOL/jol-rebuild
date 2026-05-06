@@ -27,8 +27,8 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
     const isWithinRegistrationWindow = () => {
         const now = new Date();
         if (tournament.registrationStart && now < new Date(tournament.registrationStart)) return false;
-        if (tournament.registrationEnd && now > new Date(tournament.registrationEnd)) return false;
-        return true;
+        return !(tournament.registrationEnd && now > new Date(tournament.registrationEnd));
+
     };
 
     const deckCount = tournament.format === 'SINGLE_DECK' ? 1 : tournament.numberOfRounds;

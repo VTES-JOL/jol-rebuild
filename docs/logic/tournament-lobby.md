@@ -16,8 +16,8 @@ Tournaments are multi-round events administered by users with the `TOURNAMENT_AD
 | numberOfRounds      | How many rounds will be played (max 3)                         |
 | finalRound          | Whether a final round is included                              |
 | requiresId          | Whether players must present identification                    |
-| rules               | Free-text rules for the tournament                             |
-| conditions          | Free-text entry conditions                                     |
+| rules               | List of rule objects (`text`, optional `conditionId` reference) |
+| conditions          | List of condition objects (`id`, `text`)                       |
 
 Tournament fields can only be edited while the tournament is in `SETUP` status.
 
@@ -27,6 +27,8 @@ SETUP → REGISTRATION → SEATING → ACTIVE → SEEDING → FINALS → COMPLET
 ```
 
 Non-admin players can only see tournaments in: `REGISTRATION`, `SEATING`, `ACTIVE`, `SEEDING`, `FINALS`, `COMPLETED`. Tournaments in `SETUP` are not visible to players.
+
+> **Note:** Transitions beyond `ACTIVE` (`SEEDING`, `FINALS`, `COMPLETED`) are defined in the status enum but are not yet implemented. No API endpoints exist for those transitions.
 
 ### Status Transitions (admin only)
 | Transition    | From          | To           | Side Effects                                 |
@@ -64,7 +66,7 @@ Seating is managed during `SEATING` status. The admin arranges all registered pl
 - Byes are necessary when the number of registered players cannot be evenly divided into tables of 4 and 5 (e.g., 6, 7, or 11 players)
 
 ### Extra Rounds
-While in `SEATING` status, an admin can increment `numberOfRounds` up to one higher than originally defined, to give each player an similar number of games in the tournament.
+While in `SEATING` status, an admin can increment `numberOfRounds` by one, subject to two limits: it cannot exceed `originalNumberOfRounds + 1`, and it cannot exceed the global maximum (`maxRounds`, default 3). If the tournament was originally configured at the global maximum, no extra round is possible.
 
 ## Activation
 Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation, the following hard constraints are validated:

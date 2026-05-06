@@ -24,7 +24,7 @@ Games are created in `OPEN` status and transition to `ACTIVE` when play begins.
 
 ## Creating a Game
 Any authenticated user can create a game. The following fields can be specified:
-- **name** — optional; a random name is generated if not provided
+- **name** — required; must be non-blank
 - **visibility** — defaults to `PUBLIC`
 - **format** — defaults to `STANDARD`
 
