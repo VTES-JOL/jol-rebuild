@@ -31,6 +31,7 @@
     --arcane-soft: #7c5aaa;   /* humanity bars, soft highlights      */
 
     --blood:       #7a2020;   /* blood red — vitae bars, hostiles    */
+    --blood-bright: #e13737;
     --blood-soft:  #9e3a3a;   /* softer red — hostile tints          */
 
     /* — Status dots — */
@@ -68,8 +69,9 @@
     --arcane:      #8b4dcc;   /* reuses accent in dark               */
     --arcane-soft: #6b3a9e;
 
-    --blood:       #8c2b2b;
-    --blood-soft:  #6b1e1e;
+    --blood:       #c23b3b;
+    --blood-bright: #e13737;
+    --blood-soft:  #9e2a2a;
 
     /* — Status dots — */
     --online:  #5c9e6e;
@@ -80,6 +82,11 @@
 /* — Global base styles — */
 html, body, #root {
     height: 100%;
+}
+
+/* iOS safe area for bottom nav */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @theme inline {
@@ -108,6 +115,7 @@ html, body, #root {
     --color-arcane-soft: var(--arcane-soft);
 
     --color-blood: var(--blood);
+    --color-blood-bright: var(--blood-bright);
     --color-blood-soft: var(--blood-soft);
 
     --color-online: var(--online);

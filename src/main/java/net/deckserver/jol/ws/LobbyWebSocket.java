@@ -57,6 +57,9 @@ public class LobbyWebSocket {
     @OnError
     public void onError(Throwable error) {
         LOG.errorf(error, "Lobby WS error for session %s", connection.id());
+        try {
+            connection.sendTextAndAwait(ChatMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
+        } catch (Exception ignored) {}
     }
 
     private String userName() {

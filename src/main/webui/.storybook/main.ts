@@ -1,4 +1,4 @@
-import type { StorybookConfig } from '@storybook/react-vite/dist';
+import type {StorybookConfig} from '@storybook/react-vite/dist';
 
 const config: StorybookConfig = {
   "stories": [

@@ -1,16 +1,26 @@
 package net.deckserver.jol.enums;
 
-public enum GameFormat {
-    STANDARD("Standard"),
-    DUEL("Duel"),
-    V5("V5");
-    private final String label;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
-    GameFormat(String label) {
+@RegisterForReflection
+public enum GameFormat {
+    STANDARD("Standard", 5),
+    DUEL("Duel", 2),
+    V5("V5", 5);
+
+    private final String label;
+    private final int maxPlayers;
+
+    GameFormat(String label, int maxPlayers) {
         this.label = label;
+        this.maxPlayers = maxPlayers;
     }
 
     public String getLabel() {
         return label;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
     }
 }

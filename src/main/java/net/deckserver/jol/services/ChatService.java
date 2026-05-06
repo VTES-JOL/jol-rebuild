@@ -1,7 +1,9 @@
 package net.deckserver.jol.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.dto.ReactionDto;
 import net.deckserver.jol.dto.ReplySnapshotDto;
@@ -14,10 +16,11 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class ChatService {
 
-    private static final int HISTORY_LIMIT = 50;
+    @Inject
+    Config config;
 
     @Transactional
-    public ChatMessageDto save(String gameId, String sender, String content, Long replyToId) {
+    public ChatMessageDto save(String gameId, String sender, String content, String replyToId) {
         ChatMessage replyTo = replyToId != null ? ChatMessage.findById(replyToId) : null;
         ChatMessage entity = ChatMessage.create(gameId, sender, content, replyTo);
 
@@ -30,21 +33,25 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageDto toggleReaction(Long messageId, String sender, String emoji) {
+    public ChatMessageDto toggleReaction(String messageId, String sender, String emoji) {
         ChatMessage message = ChatMessage.findById(messageId);
         if (message == null) throw new IllegalArgumentException("Message not found: " + messageId);
 
         ChatMessageReaction.toggle(message, sender, emoji);
 
-        // Re-query reactions fresh after the toggle
         List<ReactionDto> reactions = buildReactionDtos(
                 ChatMessageReaction.findByMessage(messageId));
 
         return ChatMessageDto.reaction(messageId, reactions);
     }
 
+    public boolean messageExistsInGame(String messageId, String gameId) {
+        ChatMessage msg = ChatMessage.findById(messageId);
+        return msg != null && gameId.equals(msg.gameId);
+    }
+
     public ChatMessageDto historyPayload(String gameId) {
-        List<ChatMessage> rows = ChatMessage.findRecent(gameId, HISTORY_LIMIT);
+        List<ChatMessage> rows = ChatMessage.findRecent(gameId, config.chat().historyLimit());
         List<ChatMessageDto> messages = rows.stream()
                 .map(m -> {
                     ReplySnapshotDto replySnapshot = m.replyTo != null
@@ -58,8 +65,22 @@ public class ChatService {
         return ChatMessageDto.history(messages);
     }
 
+    @Transactional
+    public List<ChatMessageDto> getHistory(String gameId, int page, int limit) {
+        int effectiveLimit = Math.min(limit, 200);
+        List<ChatMessage> rows = ChatMessage.findPaginated(gameId, page, effectiveLimit);
+        return rows.stream()
+                .map(m -> {
+                    ReplySnapshotDto reply = m.replyTo != null
+                            ? ReplySnapshotDto.of(m.replyTo.id, m.replyTo.sender, m.replyTo.content)
+                            : null;
+                    return ChatMessageDto.chat(m.id, m.sender, m.content,
+                            m.timestamp, reply, buildReactionDtos(m.reactions));
+                })
+                .toList();
+    }
+
     private List<ReactionDto> buildReactionDtos(List<ChatMessageReaction> reactions) {
-        // Group by emoji, collect sender names
         return reactions.stream()
                 .collect(Collectors.groupingBy(
                         r -> r.emoji,

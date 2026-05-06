@@ -1,8 +1,11 @@
 // ReactionDto.java
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.List;
 
+@RegisterForReflection
 public class ReactionDto {
     public String emoji;
     public List<String> senders;

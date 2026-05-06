@@ -32,6 +32,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - "./csv:/csv"
 
 volumes:
   postgres_data:

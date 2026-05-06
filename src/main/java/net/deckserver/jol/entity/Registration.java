@@ -1,27 +1,50 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.*;
 import net.deckserver.jol.enums.Status;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Entity
-public class Registration extends PanacheEntity {
+public class Registration extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
+
+    @Version
+    @Column(nullable = false)
+    public Long version = 0L;
+
     @ManyToOne
     public User user;
 
     @ManyToOne
     public Game game;
 
+    @Column(name = "last_updated")
     public OffsetDateTime lastUpdated;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    public Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    public Instant updatedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     public String deck;
+
+    @Column(name = "deck_name")
     public String deckName;
     public String summary;
 
@@ -72,6 +95,18 @@ public class Registration extends PanacheEntity {
 
     public static List<Registration> getInvites(Game game) {
         return find("game.id = ?1 and deck is null", game.id).list();
+    }
+
+    public static long countForGame(String gameId) {
+        return count("game.id = ?1 and deck is not null", gameId);
+    }
+
+    public static Map<String, Long> countsByGameIds(List<String> gameIds) {
+        if (gameIds.isEmpty()) return Map.of();
+        return find("game.id IN ?1 AND deck IS NOT NULL", gameIds)
+            .<Registration>list()
+            .stream()
+            .collect(Collectors.groupingBy(r -> r.game.id, Collectors.counting()));
     }
 
     public static void delete(Game game, User user) {

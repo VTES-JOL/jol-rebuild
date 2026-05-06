@@ -1,13 +1,16 @@
 package net.deckserver.jol.entity;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
 @Table(name = "chat_message_reactions",
         uniqueConstraints = @UniqueConstraint(columnNames = {"message_id", "sender", "emoji"}))
-public class ChatMessageReaction extends PanacheEntity {
+public class ChatMessageReaction extends PanacheEntityBase {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    public String id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "message_id", nullable = false)
@@ -19,7 +22,7 @@ public class ChatMessageReaction extends PanacheEntity {
     @Column(nullable = false, length = 32)
     public String emoji;
 
-    public static List<ChatMessageReaction> findByMessage(Long messageId) {
+    public static List<ChatMessageReaction> findByMessage(String messageId) {
         return find("message.id", messageId).list();
     }
 

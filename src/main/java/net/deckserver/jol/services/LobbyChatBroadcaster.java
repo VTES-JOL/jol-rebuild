@@ -10,10 +10,9 @@ import net.deckserver.jol.dto.ChatMessageDto;
  * connected to the lobby, without going through LobbyWebSocket directly.
  * <p>
  * Usage example:
- *
- * @Inject LobbyChatBroadcaster broadcaster;
+ * &#064;Inject LobbyChatBroadcaster broadcaster;
  * <p>
- * broadcaster.announce("Game #42 is starting — join now!");
+ * broadcaster.announce("Game #42 is starting &mdash; join now!");
  * broadcaster.broadcast(ChatMessageDto.chat("System", "Server restarting in 5 minutes", Instant.now()));
  */
 @ApplicationScoped
@@ -43,5 +42,13 @@ public class LobbyChatBroadcaster {
     public void announce(String text) {
         ChatMessageDto dto = chatService.save(null, "SYSTEM", text, null);
         broadcast(dto);
+    }
+
+    /**
+     * Broadcasts a LOBBY_UPDATE event to all lobby sessions, indicating that
+     * the registration state of the given game has changed.
+     */
+    public void broadcastLobbyUpdate(String gameId) {
+        broadcast(ChatMessageDto.lobbyUpdate(gameId));
     }
 }

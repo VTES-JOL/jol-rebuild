@@ -1,6 +1,16 @@
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+* Don't create eclipse IDE settings files
+
+## Logical Model
+JOL is a representation of the Vampire: The Eternal Struggle card game.  As such it tries to mimic the logic and constraints that apply in a real-world game.
+
+Below is the detailed documentation for the logical constraints each domain model works under:
+- [Cards Import and Searching](/docs/logic/cards.md)
+- [Deck Building and Importing](/docs/logic/deck-building.md)
+- [Game lobby](docs/logic/game-lobby.md)
+- [Tournament lobby](docs/logic/tournament-lobby.md)
 
 ## Commands
 
@@ -23,52 +33,10 @@ npm run lint         # ESLint
 npm run storybook    # Storybook on port 6006 (also runs component tests via vitest)
 ```
 
-### Infrastructure
-
-```bash
-docker-compose up -d   # Start PostgreSQL (required for backend)
-```
-
-The `.env` file at the project root provides `DB_USER`, `DB_PASS`, and `DB_NAME` (defaults: `jol`/`jol`/`jol`).
-
 ## Architecture
+JOL is a Java quarkus + quinoa application with a React / Typescript / TailwindCSS front end.
 
-JOL Quarkus is a multiplayer trading card game lobby platform. Players register, create/join games with different formats and visibility settings, manage decks, and communicate via real-time chat.
-
-### Backend — `src/main/java/net/deckserver/jol/`
-
-```
-controller/     REST endpoints (GameController, UserController, CardController)
-ws/             WebSocket handlers (GameWebSocket, LobbyWebSocket)
-entity/         JPA/Panache entities (User, Game, Registration, Deck, ChatMessage, …)
-services/       Business logic (ChatService, GameService, CardService, …)
-dto/            Request/response DTOs
-enums/          Status, Role, Visibility, GameFormat
-config/         Application configuration beans
-converters/     JPA attribute converters
-```
-
-REST and WebSocket security use Quarkus form-based auth with JPA-backed user store. Roles: `USER`, `ADMIN`. WebSocket paths (`/ws/*`) require authentication.
-
-Database is PostgreSQL with Hibernate ORM Panache. Flyway handles migrations in production; in dev mode Quarkus drops/recreates schema on startup.
-
-### Frontend — `src/main/webui/src/`
-
-```
-app/        Router setup (React Router 7) and App.tsx
-features/   Vertical slices: auth, chat, game, lobby, nav
-shared/     Reusable components, utilities, types
-hooks/      Custom React hooks (useAuthContext, etc.)
-stories/    Storybook stories doubling as vitest component tests
-```
-
-Built with React 19, TypeScript, Tailwind CSS 4, and Vite. The Quinoa Maven plugin bundles the frontend into the backend JAR at build time so the backend serves the SPA in production.
-
-### Frontend ↔ Backend
-
-- **REST**: `/games`, `/user/*` — fetched via standard `fetch` with session cookies
-- **WebSockets**: `/ws/game/{gameId}` (in-game chat/events) and `/ws/lobby` (lobby-wide events) using Quarkus WebSockets Next
-- **Dev proxy**: Vite proxies API/WebSocket calls to `localhost:8080` in dev mode; CORS is enabled on the backend for `localhost:5173`
+See detailed architecture guide at [Architecture Document](docs/architecture/README.md)
 
 ### Backend Test Pattern
 
@@ -76,4 +44,4 @@ Tests use `@QuarkusTest` + `@TestSecurity(user="...", roles={...})` with `rest-a
 
 ### Card Data
 
-Card definitions are loaded from CSV files in `src/main/resources/csv/` and `csv/` at the project root via `CardService`. The `names_nouns.txt`, `names_adjectives.txt`, and `names_verbs.txt` resources power the `GameToken` random-name generator.
+Card definitions are loaded from `vtescrypt.csv` and `vteslib.csv` in `src/main/resources/` (and optionally `csv/` at the project root) via `CardRegistry` on startup. `CardSearchService` provides fuzzy search over the registry. The `names_nouns.txt`, `names_adjectives.txt`, and `names_verbs.txt` resources power the `GameToken` random-name generator. Deck format validation is handled by `DeckValidatorService` with per-format validators (`StandardDeckValidator`, `DuelDeckValidator`, `V5DeckValidator`).

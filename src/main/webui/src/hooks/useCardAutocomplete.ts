@@ -1,8 +1,12 @@
 import React, {useCallback, useRef, useState} from 'react';
+import {baseFetch} from "@/shared/api/client.ts";
 
 export interface CardSuggestion {
-    id: number;
+    id: string;
     name: string;
+    crypt: boolean;
+    group: string | null;
+    advanced: boolean;
 }
 
 interface UseCardAutocompleteOptions {
@@ -41,10 +45,11 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
         abortRef.current = new AbortController();
 
         try {
-            const res = await fetch(
-                `/cards/autocomplete?q=${encodeURIComponent(query)}`,
+            const res = await baseFetch(
+                `/api/cards/autocomplete?q=${encodeURIComponent(query)}`,
                 { signal: abortRef.current.signal }
             );
+            if (!res.ok) return;
             const data: CardSuggestion[] = await res.json();
             const limited = data.slice(0, 5);
             setSuggestions(limited);

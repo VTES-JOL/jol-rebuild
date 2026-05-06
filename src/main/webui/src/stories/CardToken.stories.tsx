@@ -17,14 +17,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     args: {
-        id: 1,
-        label: 'Fireball',
+        id: '100266',
+        label: 'Bum\'s Rush',
     },
 };
 
 export const LongLabel: Story = {
     args: {
-        id: 42,
-        label: 'Ancient Dragon',
+        id: '200349',
+        label: 'Dmitra Ilyanova',
     },
 };

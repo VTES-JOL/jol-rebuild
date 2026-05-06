@@ -1,27 +1,40 @@
 package net.deckserver.jol.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
-import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.MediaType;
 import net.deckserver.jol.entity.Deck;
 import net.deckserver.jol.entity.User;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Role;
+import net.deckserver.jol.model.krcg.*;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
+/**
+ * Integration tests for DeckController.
+ * Setup strategy: @BeforeEach/@AfterEach are @Transactional (each commits its own transaction),
+ * so data they persist is visible to the server. Test methods use the HTTP API for further
+ * setup so every state change goes through a committed server transaction.
+ * Card fixtures:
+ *   200076 - Anarch Convert  (non-banned; NOT in duel/V5 whitelists)
+ *   100518 - Deflection       (non-banned; duel ✓, V5 via V5/NB/V5C sets ✓)
+ *   201634 - Abraham Mellon   (non-banned; duel ✓, V5 via FOL set ✓)
+ *   100046 - Ambush           (non-banned; duel ✓, V5 ID whitelist ✓)
+ */
 @QuarkusTest
 public class DeckControllerTest {
 
-    @Inject
-    ObjectMapper mapper;
+    /** Deck ID created for otheruser — available to cross-user access tests. */
+    private String otherUserDeckId;
 
     @BeforeEach
     @Transactional
@@ -29,7 +42,17 @@ public class DeckControllerTest {
         Deck.deleteAll();
         User.deleteAll();
         User.create("testuser", "password", "testuser@example.com", Role.USER);
-        User.create("otheruser", "password", "otheruser@example.com", Role.USER);
+        User otherUser = User.create("otheruser", "password", "otheruser@example.com", Role.USER);
+
+        // Persist a deck owned by otheruser — committed at end of this @Transactional method
+        // so the server can see it in cross-user tests.
+        Deck deck = new Deck();
+        deck.user = otherUser;
+        deck.name = "Other Deck";
+        deck.contents = "{}";
+        deck.timestamp = java.time.Instant.now();
+        deck.persist();
+        otherUserDeckId = deck.id;
     }
 
     @AfterEach
@@ -39,128 +62,244 @@ public class DeckControllerTest {
         User.deleteAll();
     }
 
+    // ── Deck content fixtures ─────────────────────────────────────────────────
+
+    /**
+     * Satisfies Standard size rules (12 crypt, 60 library).
+     * Anarch Convert (200076) is not in duel/V5 whitelists → Standard=true, Duel=false, V5=false.
+     */
+    private static KrcgDeck standardSizedDeck() {
+        var crypt = new KrcgCrypt(12, List.of(new KrcgCard("200076", 12, "Anarch Convert")));
+        var library = new KrcgLibrary(60, List.of(
+                new KrcgLibraryGroup("Reaction", 60, List.of(new KrcgCard("100518", 60, "Deflection")))));
+        return new KrcgDeck(null, null, crypt, library);
+    }
+
+    // ── List decks ────────────────────────────────────────────────────────────
+
     @Test
-    @Transactional
     @TestSecurity(user = "testuser", roles = {"USER"})
-    public void listDecks() {
-        User user = User.findByUsername("testuser");
-        createDeck(user, "Deck 1", "{}", "Summary 1");
-        createDeck(user, "Deck 2", "{}", "Summary 2");
+    public void listDecks_returnsOnlyOwnedDecks() {
+        // Create two decks for testuser via API (each call commits its own transaction)
+        postDeck("Deck 1");
+        postDeck("Deck 2");
 
         given()
                 .when().get("/api/decks")
                 .then()
-                .statusCode(HttpStatus.SC_OK);
+                .statusCode(HttpStatus.SC_OK)
+                .body("$.size()", is(2))
+                .body("[0].name", notNullValue());
     }
 
     @Test
     @TestSecurity(user = "testuser", roles = {"USER"})
-    public void createDeck() {
-        DeckController.DeckCreateCommand command = new DeckController.DeckCreateCommand("New Deck");
+    public void listDecks_includesFormatValidityMap() {
+        postDeck("My Deck");
 
+        // Newly created decks have no validity rows — map is present but empty
+        given()
+                .when().get("/api/decks")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("[0].formatValidity", notNullValue())
+                .body("[0].formatValidity.STANDARD", nullValue());
+    }
+
+    // ── Create deck ───────────────────────────────────────────────────────────
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void createDeck_returnsNameAndEmptyValidity() {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(command)
+                .body(new DeckController.DeckCreateCommand("New Deck"))
                 .when().post("/api/decks")
                 .then()
                 .statusCode(HttpStatus.SC_OK)
-                .body("name", is("New Deck"));
+                .body("name", is("New Deck"))
+                // No validation on create — formatValidity map is empty but present
+                .body("formatValidity", notNullValue())
+                .body("formatValidity.STANDARD", nullValue());
+    }
+
+    // ── Update deck ───────────────────────────────────────────────────────────
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void updateDeck_nameOnly_doesNotRunValidation() {
+        String id = postDeck("Old Name");
+
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new DeckController.DeckUpdateCommand("New Name", null, null, null))
+                .when().put("/api/decks/" + id)
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("name", is("New Name"))
+                // No contents change → no validation rows written
+                .body("formatValidity.STANDARD", nullValue());
     }
 
     @Test
-    @Transactional
     @TestSecurity(user = "testuser", roles = {"USER"})
-    public void updateDeck() {
-        User user = User.findByUsername("testuser");
-        Deck deck = createDeck(user, "Old Name", "{}", "Old Summary");
+    public void updateDeck_withContents_populatesFormatValidity() {
+        String id = postDeck("My Deck");
 
-        DeckController.DeckUpdateCommand command = new DeckController.DeckUpdateCommand(
-                "New Name", mapper.createObjectNode().put("cards", 1), "New Summary", "New Comment"
-        );
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new DeckController.DeckUpdateCommand(null, standardSizedDeck(), null, null))
+                .when().put("/api/decks/" + id)
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                // All three format keys present
+                .body("formatValidity.STANDARD", notNullValue())
+                .body("formatValidity.DUEL", notNullValue())
+                .body("formatValidity.V5", notNullValue())
+                // Standard passes (12 crypt, 60 library, no whitelist restriction)
+                .body("formatValidity.STANDARD", is(true))
+                // Duel fails: Anarch Convert not in duel whitelist
+                .body("formatValidity.DUEL", is(false));
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void updateDeck_twice_doesNotViolateUniqueConstraint() {
+        // Regression test: saving a deck twice must not produce a duplicate-key error
+        // on deck_format_validity(deck_id, format). Fixed by em.flush() after clear().
+        String id = postDeck("My Deck");
+        var command = new DeckController.DeckUpdateCommand(null, standardSizedDeck(), null, null);
 
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(command)
-                .when().put("/api/decks/" + deck.id)
+                .when().put("/api/decks/" + id)
                 .then()
-                .log().all();
+                .statusCode(HttpStatus.SC_OK);
+
+        // Second save — triggered the duplicate key constraint before the flush fix
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(command)
+                .when().put("/api/decks/" + id)
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("formatValidity.STANDARD", is(true));
+    }
+
+    // ── Validity detail endpoint ──────────────────────────────────────────────
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void getValidity_returnsErrorsForInvalidFormat() {
+        String id = postDeck("My Deck");
+        putContents(id, standardSizedDeck());
+
+        given()
+                .when().get("/api/decks/" + id + "/validity/" + GameFormat.DUEL.name())
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .body("format", is("DUEL"))
+                .body("valid", is(false))
+                .body("errors", not(empty()));
     }
 
     @Test
-    @Transactional
     @TestSecurity(user = "testuser", roles = {"USER"})
-    public void getContents() {
-        User user = User.findByUsername("testuser");
-        Deck deck = createDeck(user, "Deck", "{\"cards\": [1, 2, 3]}", "Summary");
+    public void getValidity_returnsEmptyErrorsForValidFormat() {
+        String id = postDeck("My Deck");
+        putContents(id, standardSizedDeck());
 
         given()
-                .when().get("/api/decks/" + deck.id + "/contents")
+                .when().get("/api/decks/" + id + "/validity/" + GameFormat.STANDARD.name())
                 .then()
-                .log().all();
+                .statusCode(HttpStatus.SC_OK)
+                .body("format", is("STANDARD"))
+                .body("valid", is(true))
+                .body("errors", empty());
     }
 
     @Test
-    @Transactional
     @TestSecurity(user = "testuser", roles = {"USER"})
-    public void deleteDeck() {
-        User user = User.findByUsername("testuser");
-        Deck deck = createDeck(user, "To Delete", "{}", "Summary");
+    public void getValidity_notFoundWhenNeverValidated() {
+        String id = postDeck("My Deck");
 
         given()
-                .when().delete("/api/decks/" + deck.id)
+                .when().get("/api/decks/" + id + "/validity/" + GameFormat.STANDARD.name())
                 .then()
-                .log().all();
+                .statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    // ── Delete deck ───────────────────────────────────────────────────────────
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void deleteDeck_removesFromList() {
+        String id = postDeck("To Delete");
+
+        given()
+                .when().delete("/api/decks/" + id)
+                .then()
+                .statusCode(HttpStatus.SC_NO_CONTENT);
 
         given()
                 .when().get("/api/decks")
                 .then()
-                .statusCode(HttpStatus.SC_OK);
+                .statusCode(HttpStatus.SC_OK)
+                .body("$.size()", is(0));
     }
 
-    @Test
-    @Transactional
-    @TestSecurity(user = "testuser", roles = {"USER"})
-    public void unauthorizedAccess() {
-        User otherUser = User.findByUsername("otheruser");
-        Deck otherDeck = createDeck(otherUser, "Other Deck", "{}", "Other Summary");
+    // ── Access control ────────────────────────────────────────────────────────
 
-        // Try to update other user's deck
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void unauthorizedAccess_returnsNotFound() {
         given()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new DeckController.DeckUpdateCommand("Hacked", null, null, null))
-                .when().put("/api/decks/" + otherDeck.id)
+                .when().put("/api/decks/" + otherUserDeckId)
                 .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND);
 
-        // Try to delete other user's deck
         given()
-                .when().delete("/api/decks/" + otherDeck.id)
+                .when().delete("/api/decks/" + otherUserDeckId)
                 .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND);
 
-        // Try to get contents of other user's deck
         given()
-                .when().get("/api/decks/" + otherDeck.id + "/contents")
+                .when().get("/api/decks/" + otherUserDeckId + "/contents")
                 .then()
                 .statusCode(HttpStatus.SC_NOT_FOUND);
-    }
-
-    private Deck createDeck(User user, String name, String contents, String summary) {
-        Deck deck = new Deck();
-        deck.user = user;
-        deck.name = name;
-        deck.contents = contents;
-        deck.summary = summary;
-        deck.timestamp = java.time.Instant.now();
-        deck.persist();
-        return deck;
     }
 
     @Test
-    public void unauthenticatedAccess() {
+    public void unauthenticatedAccess_returnsUnauthorized() {
         given()
                 .when().get("/api/decks")
                 .then()
                 .statusCode(HttpStatus.SC_UNAUTHORIZED);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /** Creates a deck via the API and returns the assigned ID. */
+    private String postDeck(String name) {
+        return given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new DeckController.DeckCreateCommand(name))
+                .when().post("/api/decks")
+                .then()
+                .statusCode(HttpStatus.SC_OK)
+                .extract().<String>path("id");
+    }
+
+    /** Updates deck contents via the API. */
+    private void putContents(String id, KrcgDeck contents) {
+        given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new DeckController.DeckUpdateCommand(null, contents, null, null))
+                .when().put("/api/decks/" + id)
+                .then()
+                .statusCode(HttpStatus.SC_OK);
     }
 }

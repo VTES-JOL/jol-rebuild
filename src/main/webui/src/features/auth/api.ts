@@ -1,11 +1,13 @@
 import type {RegisterField, RegisterResult, User} from "./types";
+import {baseFetch} from "@/shared/api/client.ts";
 
 const API = {
     async profile(): Promise<User | null> {
-        const res = await fetch("/user/profile", {
+        const res = await baseFetch("/user/profile", {
             credentials: "include",
         });
 
+        if (!res.ok || res.status === 204) return null;
         const data = await res.json();
         return data ?? null;
     },
@@ -15,7 +17,7 @@ const API = {
         form.append("j_username", username);
         form.append("j_password", password);
 
-        const res = await fetch("/user/login", {
+        const res = await baseFetch("/user/login", {
             method: "POST",
             body: form,
             credentials: "include",
@@ -28,7 +30,7 @@ const API = {
     },
 
     async logout(): Promise<void> {
-        await fetch("/user/logout", {
+        await baseFetch("/user/logout", {
             method: "POST",
             credentials: "include",
         });
@@ -39,7 +41,7 @@ const API = {
         password: string,
         email: string
     ): Promise<RegisterResult> {
-        const res = await fetch("/user/register", {
+        const res = await baseFetch("/user/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

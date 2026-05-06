@@ -19,7 +19,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
     args: {
         line: {
-            id: 1,
+            id: '1',
             content: 'This is a regular message.',
             reactions: [],
             replyTo: null,
@@ -39,11 +39,11 @@ export const Default: Story = {
 export const WithReplyQuote: Story = {
     args: {
         line: {
-            id: 2,
+            id: '2',
             content: 'Replying to your question.',
             reactions: [],
             replyTo: {
-                id: 1,
+                id: '1',
                 sender: 'Sam',
                 content: 'What do you think?',
             },
@@ -63,8 +63,8 @@ export const WithReplyQuote: Story = {
 export const WithReactions: Story = {
     args: {
         line: {
-            id: 3,
-            content: 'I played [card:1:Fireball] and it worked.',
+            id: '3',
+            content: 'I played [card:100266:Bum\'s Rush] and it worked.',
             reactions: [
                 { emoji: '👍', senders: ['Alex', 'Jill'] },
                 { emoji: '😂', senders: ['Sam'] },

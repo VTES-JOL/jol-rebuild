@@ -1,4 +1,4 @@
-import type {ChatMessage} from '@/hooks/useWebSocket.ts';
+import type {ChatMsg} from '@/hooks/useWebSocket.ts';
 import {useChat} from '@/hooks/useChat.ts';
 import {ChatPanelView} from './ChatPanelView.tsx';
 
@@ -17,10 +17,10 @@ type LiveChatPanelProps = BaseChatPanelProps & {
 };
 
 type ManualChatPanelProps = BaseChatPanelProps & {
-    messages: ChatMessage[];
+    messages: ChatMsg[];
     status: Status;
-    onSend: (content: string, replyToId?: number) => void;
-    onReact: (messageId: number, emoji: string) => void;
+    onSend: (content: string, replyToId?: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
 };
 
 type ChatPanelProps = LiveChatPanelProps | ManualChatPanelProps;

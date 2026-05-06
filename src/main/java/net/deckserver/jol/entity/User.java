@@ -8,10 +8,10 @@ import io.quarkus.security.jpa.UserDefinition;
 import io.quarkus.security.jpa.Username;
 import jakarta.persistence.*;
 import net.deckserver.jol.enums.Role;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"username"}))
@@ -23,12 +23,14 @@ public class User extends PanacheEntityBase {
     public String id;
 
     @Username
-    @Column(unique = true)
+    @Column(nullable = false)
     public String username;
 
     @Password
+    @Column(nullable = false)
     public String password;
 
+    @Column(nullable = false)
     public String email;
 
     @Column(name = "tournament_id")
@@ -37,14 +39,15 @@ public class User extends PanacheEntityBase {
     @Column(name = "discord_id")
     public String discordId;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    public Preferences preferences;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "preferences", columnDefinition = "jsonb")
+    public Preferences preferences = new Preferences();
 
     @Roles
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role")
-    public List<String> roles = new ArrayList<>();
+    public Set<String> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
@@ -60,8 +63,8 @@ public class User extends PanacheEntityBase {
         user.username = username;
         user.password = BcryptUtil.bcryptHash(password);
         user.email = email;
-        user.roles = new ArrayList<>(Arrays.stream(roles).map(Role::toString).toList());
-        user.preferences = new Preferences(user);
+        user.roles = new HashSet<>(Arrays.stream(roles).map(Role::toString).toList());
+        user.preferences = new Preferences();
         user.persist();
         return user;
     }
@@ -80,7 +83,8 @@ public class User extends PanacheEntityBase {
 
     @Override
     public void delete() {
-        // clean up player decks
+        TournamentRegistration.delete("user.id = ?1", this.id);
+        Registration.delete("user.id = ?1", this.id);
         for (Deck deck : decks) {
             deck.delete();
         }

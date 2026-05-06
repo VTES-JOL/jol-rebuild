@@ -1,5 +1,7 @@
 package net.deckserver.jol.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.List;
 
 /**
@@ -21,10 +23,12 @@ import java.util.List;
  *
  * burnOption — true when the Burn Option column contains "Y" or "Yes".
  */
+@RegisterForReflection
 public record LibraryCard(
         String id,
         String name,
         List<String> aka,
+        List<String> sets,
         String cardText,
         String artist,
         boolean banned,

@@ -8,13 +8,12 @@ import org.jboss.logging.Logger;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @ApplicationScoped
 public class NameService {
 
     private static final Logger LOG = Logger.getLogger(NameService.class);
-    private static final Random rand = new Random();
 
     private List<String> adjectives;
     private List<String> verbs;
@@ -35,14 +34,14 @@ public class NameService {
     }
 
     public String getAdjective() {
-        return adjectives.get(rand.nextInt(adjectives.size()));
+        return adjectives.get(ThreadLocalRandom.current().nextInt(adjectives.size()));
     }
 
     public String getVerb() {
-        return verbs.get(rand.nextInt(verbs.size()));
+        return verbs.get(ThreadLocalRandom.current().nextInt(verbs.size()));
     }
 
     public String getNoun() {
-        return nouns.get(rand.nextInt(nouns.size()));
+        return nouns.get(ThreadLocalRandom.current().nextInt(nouns.size()));
     }
 }

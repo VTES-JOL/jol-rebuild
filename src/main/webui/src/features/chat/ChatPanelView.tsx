@@ -1,9 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
-import type {ChatMessage, ReplySnapshot} from '@/hooks/useWebSocket.ts';
+import {MessageSquare} from 'lucide-react';
+import type {ChatMsg, ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {useCardAutocomplete} from '@/hooks/useCardAutocomplete.ts';
 import {useChatInput} from '@/hooks/useChatInput.ts';
-import {groupMessages} from '@/shared/utils/chatUtils.ts';
+import {groupMessages} from './chatUtils.ts';
 import Panel from '@/shared/components/Panel';
+import Button from '@/shared/components/Button';
+import EmptyState from '@/shared/components/EmptyState';
 import {CardSuggestions} from '@/features/chat/CardSuggestions.tsx';
 import {ReplyBanner, TimestampDivider} from './ChatPanelExtras.tsx';
 import {MessageGroupView} from './MessageGroupView';
@@ -12,11 +15,11 @@ type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 export type ChatPanelViewProps = {
     title: string;
-    messages: ChatMessage[];
+    messages: ChatMsg[];
     status: Status;
     currentUser: string;
-    onSend: (content: string, replyToId?: number) => void;
-    onReact: (messageId: number, emoji: string) => void;
+    onSend: (content: string, replyToId?: string) => void;
+    onReact: (messageId: string, emoji: string) => void;
     onCancelReply?: () => void;
     placeholder?: string;
     enableReactions?: boolean;
@@ -45,7 +48,7 @@ export function ChatPanelView({
     const { draft, displayValue, syncFromDisplay, syncFromEncoded, reset } = useChatInput();
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
-    const messageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
     const inputRef = useRef<HTMLInputElement>(null);
 
     const { suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection } =
@@ -89,7 +92,7 @@ export function ChatPanelView({
         if (e.key === 'Escape') setReplyingTo(null);
     };
 
-    const handleJumpTo = (id: number) => {
+    const handleJumpTo = (id: string) => {
         messageRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     };
 
@@ -99,7 +102,6 @@ export function ChatPanelView({
     return (
         <Panel
             title={title}
-            className="h-full min-h-0"
             right={
                 <div className="flex items-center gap-2">
                     <span
@@ -114,23 +116,20 @@ export function ChatPanelView({
             <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex-1 min-h-0 overflow-y-auto py-2 px-3">
                     {messages.length === 0 && (
-                        <div className="mt-4 text-center text-lg text-ink-muted">
-                            No messages yet. Say hello!
-                        </div>
+                        <EmptyState icon={MessageSquare} title="No messages yet. Say hello!" />
                     )}
 
                     {groups.map((group, i) => (
-                        <React.Fragment key={i}>
+                        <div
+                            key={i}
+                            ref={el => {
+                                for (const line of group.lines) {
+                                    if (el) messageRefs.current.set(line.id, el);
+                                    else messageRefs.current.delete(line.id);
+                                }
+                            }}
+                        >
                             {group.dividerTimestamp && <TimestampDivider label={group.dividerTimestamp} />}
-                            {group.lines.map(line => (
-                                <div
-                                    key={line.id}
-                                    ref={el => {
-                                        if (el) messageRefs.current.set(line.id, el);
-                                        else messageRefs.current.delete(line.id);
-                                    }}
-                                />
-                            ))}
                             <MessageGroupView
                                 group={group}
                                 showLine={i < groups.length - 1 && !groups[i + 1].dividerTimestamp}
@@ -142,7 +141,7 @@ export function ChatPanelView({
                                 enableReactions={enableReactions}
                                 enableReply={enableReply}
                             />
-                        </React.Fragment>
+                        </div>
                     ))}
 
                     <div ref={bottomRef} />
@@ -185,13 +184,15 @@ export function ChatPanelView({
                             maxLength={1000}
                         />
                     </div>
-                    <button
-                        className="cursor-pointer rounded-lg bg-accent px-3 py-1.5 text-sm text-surface transition-colors hover:bg-accent-dim disabled:cursor-not-allowed disabled:opacity-50"
+                    <Button
+                        variant="primary"
+                        size="md"
                         onClick={handleSend}
                         disabled={!connected || !draft.trim()}
+                        className="rounded-lg shrink-0"
                     >
                         Send
-                    </button>
+                    </Button>
                 </div>
             </div>
         </Panel>

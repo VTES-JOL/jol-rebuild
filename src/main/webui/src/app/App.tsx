@@ -1,10 +1,13 @@
 import AppRouter from "./router";
-import {AuthProvider} from "@/features/auth/AuthContext.tsx";
+import {AuthProvider} from "@/contexts/AuthContext.tsx";
+import {LobbySocketProvider} from "@/contexts/LobbySocketContext";
 
 export default function App() {
     return (
         <AuthProvider>
-            <AppRouter />
+            <LobbySocketProvider>
+                <AppRouter />
+            </LobbySocketProvider>
         </AuthProvider>
     );
 }

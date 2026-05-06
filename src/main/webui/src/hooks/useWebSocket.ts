@@ -1,53 +1,84 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 
-export type MessageType = 'CHAT' | 'HISTORY' | 'ERROR' | 'REACTION';
-
 export interface ReactionDto   { emoji: string; senders: string[] }
-export interface ReplySnapshot { id: number; sender: string; content: string }
+export interface ReplySnapshot { id: string; sender: string; content: string }
 
-export interface ChatMessage {
-    type: MessageType;
-    id?: number;           // present on CHAT and REACTION
-    sender?: string;
-    content?: string;
-    timestamp?: string;
+// ─── Inbound messages (server → client) ──────────────────────────────────────
+
+export interface ChatMsg {
+    type: 'CHAT';
+    id: string;
+    sender: string;
+    content: string;
+    timestamp: string;
     replyTo?: ReplySnapshot;
-    reactions?: ReactionDto[];
-    history?: ChatMessage[];
-    error?: string;
-    // outbound-only fields (never in server responses)
-    replyToId?: number;
-    emoji?: string;
+    reactions: ReactionDto[];
 }
+
+interface HistoryMsg {
+    type: 'HISTORY';
+    history: ChatMsg[];
+}
+
+interface ReactionUpdateMsg {
+    type: 'REACTION';
+    id: string;
+    reactions: ReactionDto[];
+}
+
+interface ErrorMsg {
+    type: 'ERROR';
+    error: string;
+}
+
+interface LobbyUpdateMsg {
+    type: 'LOBBY_UPDATE';
+    gameId: string;
+}
+
+export type ChatMessage = ChatMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | LobbyUpdateMsg;
+
+// ─── Outbound messages (client → server) ─────────────────────────────────────
+
+export type OutboundMessage =
+    | { type: 'CHAT'; content: string; replyToId?: string }
+    | { type: 'REACTION'; id: string; emoji: string };
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
 interface UseWebSocketOptions {
     url: string | null;
     onMessage: (msg: ChatMessage) => void;
-    /** Milliseconds between reconnect attempts. Default: 3000 */
+    /** Initial reconnect delay in ms. Doubles on each attempt up to maxReconnectDelay. Default: 1000 */
     reconnectDelay?: number;
+    /** Maximum reconnect delay in ms. Default: 30000 */
+    maxReconnectDelay?: number;
 }
 
 interface UseWebSocketReturn {
     status: Status;
-    send: (msg: ChatMessage) => void;
+    send: (msg: OutboundMessage) => void;
 }
 
 export function useWebSocket({
                                  url,
                                  onMessage,
-                                 reconnectDelay = 3000,
+                                 reconnectDelay = 1000,
+                                 maxReconnectDelay = 30000,
                              }: UseWebSocketOptions): UseWebSocketReturn {
     const [status, setStatus] = useState<Status>('connecting');
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const epochRef = useRef(0);
+    const currentDelayRef = useRef(reconnectDelay);
     const onMessageRef = useRef(onMessage);
     useEffect(() => { onMessageRef.current = onMessage; }, [onMessage]);
 
     useEffect(() => {
         const epoch = ++epochRef.current;
+        currentDelayRef.current = reconnectDelay;
 
         const clearReconnect = () => {
             if (reconnectTimer.current) { clearTimeout(reconnectTimer.current); reconnectTimer.current = null; }
@@ -64,6 +95,7 @@ export function useWebSocket({
 
             ws.onopen = () => {
                 if (epoch !== epochRef.current) { ws.close(); return; }
+                currentDelayRef.current = reconnectDelay; // reset backoff on successful connect
                 setStatus('connected');
             };
 
@@ -81,7 +113,9 @@ export function useWebSocket({
                 if (epoch !== epochRef.current) return;
                 console.warn('[WS] closed — code:', event.code, 'reason:', event.reason, 'wasClean:', event.wasClean);
                 setStatus('disconnected');
-                reconnectTimer.current = setTimeout(connect, reconnectDelay);
+                const delay = currentDelayRef.current;
+                currentDelayRef.current = Math.min(delay * 2, maxReconnectDelay);
+                reconnectTimer.current = setTimeout(connect, delay);
             };
 
             ws.onerror = () => {
@@ -100,9 +134,9 @@ export function useWebSocket({
             wsRef.current?.close();
             wsRef.current = null;
         };
-    }, [url, reconnectDelay]);
+    }, [url, reconnectDelay, maxReconnectDelay]);
 
-    const send = useCallback((msg: ChatMessage) => {
+    const send = useCallback((msg: OutboundMessage) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify(msg));
         } else {

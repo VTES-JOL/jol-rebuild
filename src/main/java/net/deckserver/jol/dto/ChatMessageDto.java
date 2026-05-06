@@ -1,5 +1,7 @@
 package net.deckserver.jol.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -9,21 +11,23 @@ import java.util.List;
  * Client → Server:  type = CHAT | REACTION
  * Server → Client:  type = CHAT | REACTION | HISTORY | ERROR
  */
+@RegisterForReflection
 public class ChatMessageDto {
 
     public Type type;
     public String sender;
     public String content;
     public Instant timestamp;
-    public Long id;                        // message ID — needed for reaction targeting
+    public String id;                       // message ID — needed for reaction targeting
     public ReplySnapshotDto replyTo;       // null unless this is a reply
     public List<ReactionDto> reactions;    // null on outbound CHAT, populated in HISTORY
     public java.util.List<ChatMessageDto> history;
     public String error;
-    public Long replyToId;   // client sends this when replying
-    public String emoji;     // client sends this for REACTION messages
+    public String replyToId;  // client sends this when replying
+    public String emoji;      // client sends this for REACTION messages
+    public String gameId;     // populated on LOBBY_UPDATE events
 
-    public static ChatMessageDto chat(Long id, String sender, String content,
+    public static ChatMessageDto chat(String id, String sender, String content,
                                       Instant timestamp, ReplySnapshotDto replyTo,
                                       List<ReactionDto> reactions) {
         ChatMessageDto dto = new ChatMessageDto();
@@ -40,7 +44,7 @@ public class ChatMessageDto {
     // ── Factories ──────────────────────────────────────────────────────────
 
     // Reaction broadcast factory:
-    public static ChatMessageDto reaction(Long messageId, List<ReactionDto> updatedReactions) {
+    public static ChatMessageDto reaction(String messageId, List<ReactionDto> updatedReactions) {
         ChatMessageDto dto = new ChatMessageDto();
         dto.type = Type.REACTION;
         dto.id = messageId;
@@ -62,5 +66,12 @@ public class ChatMessageDto {
         return dto;
     }
 
-    public enum Type {CHAT, HISTORY, ERROR, REACTION}
+    public static ChatMessageDto lobbyUpdate(String gameId) {
+        ChatMessageDto dto = new ChatMessageDto();
+        dto.type = Type.LOBBY_UPDATE;
+        dto.gameId = gameId;
+        return dto;
+    }
+
+    public enum Type {CHAT, HISTORY, ERROR, REACTION, LOBBY_UPDATE}
 }

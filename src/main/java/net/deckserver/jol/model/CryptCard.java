@@ -1,5 +1,7 @@
 package net.deckserver.jol.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.List;
 
 /**
@@ -13,10 +15,12 @@ import java.util.List;
  *
  * Group is "1"–"7" or "ANY" (Anarch Convert, New Blood).
  */
+@RegisterForReflection
 public record CryptCard(
         String id,
         String name,
         List<String> aka,
+        List<String> sets,
         String cardText,
         String artist,
         boolean banned,

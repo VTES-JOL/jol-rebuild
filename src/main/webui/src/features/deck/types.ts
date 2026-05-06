@@ -1,10 +1,19 @@
 export interface Deck {
-    id: number;
+    id: string;
     name: string;
     /** Compact summary stored as "{crypt},{library},{groups}" e.g. "12,80,4/5" */
     summary: string | null;
     comments: string | null;
     timestamp: string; // ISO-8601 instant
+    /** Format key → valid. Missing key means not yet validated for that format. */
+    formatValidity: Partial<Record<'STANDARD' | 'DUEL' | 'V5', boolean>>;
+}
+
+export interface FormatValidity {
+    format: string;
+    valid: boolean;
+    errors: string[];
+    computedAt: string;
 }
 
 export interface DeckSummary {
@@ -24,18 +33,15 @@ export interface DeckEntry {
     /** Crypt only: "1"–"7" | "ANY". */
     group?: string;
     banned: boolean;
+    advanced?: boolean;
 }
 
-// ── KRCG deck format (with extensions for round-tripping DeckEntry) ──────────
+// ── KRCG deck format (pure — no extension fields) ────────────────────────────
 
 interface KrcgCard {
     id: string;
     count: number;
     name: string;
-    // Extensions: stored alongside KRCG fields so we can restore DeckEntry metadata
-    group?: string;
-    banned?: boolean;
-    types?: string[];
 }
 
 interface KrcgLibraryGroup {
@@ -49,13 +55,39 @@ export interface KrcgContents {
     library: { count: number; cards: KrcgLibraryGroup[] };
 }
 
-/** Matches CardSuggestionDto from the backend /cards/autocomplete endpoint. */
-export interface CardSearchResult {
+/**
+ * Matches CardDetailDto from the backend /cards/details endpoint.
+ * Combines entry metadata (types, group, banned) with icon display data
+ * so a single fetch covers everything the deck editor needs.
+ */
+export interface CardDetailData {
     id: string;
     name: string;
     crypt: boolean;
+    // Entry metadata
+    types: string[];
     group: string | null;
-    cryptType: string | null;  // "Vampire" | "Imbued" for crypt, null for library
-    types: string[];           // library types; empty array for crypt
     banned: boolean;
+    advanced: boolean;
+    // Crypt display
+    clan: string | null;
+    path: string | null;
+    capacity: number | null;
+    disciplines: string[];
+    // Library display
+    andDisciplines: string[];
+    orDisciplines: string[];
+    requirementClans: string[];
+    requirementPath: string | null;
+    poolCost: number | null;
+    bloodCost: number | null;
+}
+
+/** Resolved card entry returned by POST /cards/preview. */
+export interface ImportPreview {
+    format:          'krcg' | 'jol';
+    deckName:        string | null;
+    deckDescription: string | null;
+    resolved:        Array<{ count: number; card: CardDetailData }>;
+    errors:          Array<{ line: string; reason: string }>;
 }
