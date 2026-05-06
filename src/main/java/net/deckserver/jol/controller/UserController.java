@@ -1,5 +1,6 @@
 package net.deckserver.jol.controller;
 
+import io.quarkus.elytron.security.common.BcryptUtil;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import io.quarkus.security.Authenticated;
 import io.quarkus.security.identity.SecurityIdentity;
@@ -43,14 +44,18 @@ public class UserController {
 
     @POST
     @Path("/change-password")
+    @Authenticated
     @Transactional
-    public Response changePassword(@NotBlank @Size(min = 8, max = 50) String newPassword) {
+    public Response changePassword(@Valid ChangePasswordCommand command) {
         String userName = identity.getPrincipal().getName();
         User user = User.findByUsername(userName);
         if (user == null) {
             throw new WebApplicationException("Authenticated user not found", Response.Status.NOT_FOUND);
         }
-        user.updatePassword(newPassword);
+        if (!BcryptUtil.matches(command.currentPassword(), user.password)) {
+            throw new ForbiddenException("Current password is incorrect");
+        }
+        user.updatePassword(command.newPassword());
         return Response.ok().build();
     }
 
@@ -112,6 +117,12 @@ public class UserController {
     public record Register(@NotBlank(message = "{jol.validation.constraints.username.blank}") String username,
                            @NotBlank(message = "{jol.validation.constrains.password.size}") @Size(min = 8, message = "{jol.validation.constrains.password.size}") String password,
                            @NotBlank(message = "{jol.validation.constraints.email.invalid}") @Email(message = "{jol.validation.constraints.email.invalid}") String email) {
+    }
+
+    @RegisterForReflection
+    public record ChangePasswordCommand(
+            @NotBlank String currentPassword,
+            @NotBlank @Size(min = 8, max = 50) String newPassword) {
     }
 
     @RegisterForReflection

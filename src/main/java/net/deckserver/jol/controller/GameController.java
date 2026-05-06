@@ -86,12 +86,10 @@ public class GameController {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         if (game.status != Status.OPEN) {
-            return Response.status(Response.Status.CONFLICT)
-                .entity("Game can only be deleted when OPEN").build();
+            throw new WebApplicationException("Game can only be deleted when OPEN", Response.Status.CONFLICT);
         }
         if (game.tournament != null) {
-            return Response.status(Response.Status.CONFLICT)
-                .entity("Cannot delete tournament games").build();
+            throw new WebApplicationException("Cannot delete tournament games", Response.Status.CONFLICT);
         }
         game.delete();
         return Response.noContent().build();
@@ -217,31 +215,29 @@ public class GameController {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
         if (game.status != Status.OPEN) {
-            return Response.status(Response.Status.CONFLICT).entity("Game is not open").build();
+            throw new WebApplicationException("Game is not open", Response.Status.CONFLICT);
         }
 
         User user = User.findByUsername(identity.getPrincipal().getName());
         Deck deck = Deck.findById(command.deckId());
         if (deck == null || !deck.user.id.equals(user.id)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid deck").build();
+            throw new WebApplicationException("Invalid deck", Response.Status.BAD_REQUEST);
         }
 
         Registration existing = Registration.findByGameAndUser(game, user);
         if (existing == null && game.visibility == Visibility.PRIVATE) {
-            return Response.status(Response.Status.FORBIDDEN)
-                .entity("Must be invited to join a private game").build();
+            throw new WebApplicationException("Must be invited to join a private game", Response.Status.FORBIDDEN);
         }
 
         long registrationCount = Registration.countForGame(game.id);
         if (game.isFull(registrationCount)) {
-            return Response.status(Response.Status.CONFLICT).entity("Game is full").build();
+            throw new WebApplicationException("Game is full", Response.Status.CONFLICT);
         }
 
         boolean validFormat = DeckFormatValidity.findByDeckAndFormat(deck.id, game.gameFormat)
             .map(v -> v.valid).orElse(false);
         if (!validFormat) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Deck is not valid for " + game.gameFormat.getLabel()).build();
+            throw new WebApplicationException("Deck is not valid for " + game.gameFormat.getLabel(), Response.Status.BAD_REQUEST);
         }
 
         if (existing == null) {
@@ -285,11 +281,10 @@ public class GameController {
             return Response.status(Response.Status.FORBIDDEN).build();
         }
         if (game.status != Status.OPEN) {
-            return Response.status(Response.Status.CONFLICT).entity("Game is not open").build();
+            throw new WebApplicationException("Game is not open", Response.Status.CONFLICT);
         }
         if (Registration.countForGame(game.id) > 0) {
-            return Response.status(Response.Status.CONFLICT)
-                .entity("Cannot change format once players have registered with decks").build();
+            throw new WebApplicationException("Cannot change format once players have registered with decks", Response.Status.CONFLICT);
         }
         game.gameFormat = command.format();
         return Response.ok(new GameDto(game)).build();

@@ -41,8 +41,12 @@ public class TournamentController {
     // ─── Core CRUD ────────────────────────────────────────────────────────────
 
     @GET
-    public List<Tournament> list(@QueryParam("status") TournamentStatus status) {
+    public List<Tournament> list(
+            @QueryParam("status") TournamentStatus status,
+            @QueryParam("limit") @DefaultValue("100") int limit,
+            @QueryParam("offset") @DefaultValue("0") int offset) {
         boolean isAdmin = identity.hasRole("TOURNAMENT_ADMIN");
+        int clampedLimit = Math.min(limit, 500);
         if (status != null) {
             if (!isAdmin && !PLAYER_VISIBLE_STATUSES.contains(status)) {
                 return List.of();
@@ -50,9 +54,13 @@ public class TournamentController {
             return Tournament.findByStatus(status);
         }
         if (isAdmin) {
-            return Tournament.listAll();
+            return Tournament.<Tournament>findAll()
+                .range(offset, offset + clampedLimit - 1)
+                .list();
         }
-        return Tournament.find("status in ?1", PLAYER_VISIBLE_STATUSES).list();
+        return Tournament.<Tournament>find("status in ?1", PLAYER_VISIBLE_STATUSES)
+            .range(offset, offset + clampedLimit - 1)
+            .list();
     }
 
     @GET
@@ -191,25 +199,24 @@ public class TournamentController {
     public Response register(@PathParam("id") String id, RegisterForTournamentCommand command) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.REGISTRATION) {
-            return Response.status(Response.Status.CONFLICT).entity("Tournament is not open for registration").build();
+            throw new WebApplicationException("Tournament is not open for registration", Response.Status.CONFLICT);
         }
         OffsetDateTime now = OffsetDateTime.now();
         if (t.registrationStart != null && now.isBefore(t.registrationStart)) {
-            return Response.status(Response.Status.CONFLICT).entity("Registration has not started yet").build();
+            throw new WebApplicationException("Registration has not started yet", Response.Status.CONFLICT);
         }
         if (t.registrationEnd != null && now.isAfter(t.registrationEnd)) {
-            return Response.status(Response.Status.CONFLICT).entity("Registration has closed").build();
+            throw new WebApplicationException("Registration has closed", Response.Status.CONFLICT);
         }
 
         User me = currentUser();
         if (TournamentRegistration.findByTournamentAndUser(t, me) != null) {
-            return Response.status(Response.Status.CONFLICT).entity("Already registered for this tournament").build();
+            throw new WebApplicationException("Already registered for this tournament", Response.Status.CONFLICT);
         }
 
         int expectedDecks = t.format == TournamentFormat.SINGLE_DECK ? 1 : t.numberOfRounds;
         if (command.deckIds() == null || command.deckIds().size() != expectedDecks) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Expected " + expectedDecks + " deck(s) for " + t.format + " tournament").build();
+            throw new BadRequestException("Expected " + expectedDecks + " deck(s) for " + t.format + " tournament");
         }
 
         TournamentRegistration reg = new TournamentRegistration();
@@ -219,13 +226,12 @@ public class TournamentController {
         for (String deckId : command.deckIds()) {
             Deck deck = Deck.findById(deckId);
             if (deck == null || !deck.user.id.equals(me.id)) {
-                return Response.status(Response.Status.NOT_FOUND).entity("Deck " + deckId + " not found").build();
+                throw new WebApplicationException("Deck " + deckId + " not found", Response.Status.NOT_FOUND);
             }
             boolean valid = DeckFormatValidity.findByDeckAndFormat(deckId, t.gameFormat)
                 .map(v -> v.valid).orElse(false);
             if (!valid) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Deck '" + deck.name + "' is not valid for " + t.gameFormat).build();
+                throw new BadRequestException("Deck '" + deck.name + "' is not valid for " + t.gameFormat);
             }
             TournamentRegistration.DeckEntry entry = new TournamentRegistration.DeckEntry();
             entry.deck = deck.contents;
@@ -245,12 +251,12 @@ public class TournamentController {
     public Response unregister(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.REGISTRATION) {
-            return Response.status(Response.Status.CONFLICT).entity("Cannot leave tournament outside of registration period").build();
+            throw new WebApplicationException("Cannot leave tournament outside of registration period", Response.Status.CONFLICT);
         }
         User me = currentUser();
         TournamentRegistration reg = TournamentRegistration.findByTournamentAndUser(t, me);
         if (reg == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("Not registered for this tournament").build();
+            throw new NotFoundException("Not registered for this tournament");
         }
         reg.delete();
         return Response.noContent().build();

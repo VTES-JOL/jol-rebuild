@@ -91,8 +91,8 @@ public class UserControllerTest {
                 .statusCode(HttpStatus.SC_CREATED);
 
         given().auth().form("changePasswordUser", "password", formAuthConfig)
-                .contentType(MediaType.TEXT_PLAIN)
-                .body("newPassword")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new UserController.ChangePasswordCommand("password", "newPassword"))
                 .post("/user/change-password")
                 .then()
                 .statusCode(HttpStatus.SC_OK);
@@ -104,9 +104,18 @@ public class UserControllerTest {
                 .statusCode(HttpStatus.SC_OK)
                 .body("username", equalTo("changePasswordUser"));
 
+        // Wrong current password should be rejected
         given().auth().form("changePasswordUser", "newPassword", formAuthConfig)
-                .contentType(MediaType.TEXT_PLAIN)
-                .body("short")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new UserController.ChangePasswordCommand("wrongPassword", "anotherPassword"))
+                .post("/user/change-password")
+                .then()
+                .statusCode(HttpStatus.SC_FORBIDDEN);
+
+        // New password too short should be rejected
+        given().auth().form("changePasswordUser", "newPassword", formAuthConfig)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new UserController.ChangePasswordCommand("newPassword", "short"))
                 .post("/user/change-password")
                 .then()
                 .statusCode(HttpStatus.SC_BAD_REQUEST);

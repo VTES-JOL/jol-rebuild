@@ -21,6 +21,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
     const [editingName, setEditingName] = useState(false);
     const [nameValue, setNameValue] = useState(game.name);
     const [ownerError, setOwnerError] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     const fetchDetail = useCallback(() => gameApi.getGameDetail(game.id), [game.id]);
@@ -66,7 +67,6 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this game?')) return;
         try {
             await gameApi.deleteGame(game.id);
             onChanged?.();
@@ -120,9 +120,21 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                         </div>
                     )}
                     {isOwner && game.status === 'OPEN' && (
-                        <Button variant="ghost" size="sm" onClick={handleDelete} className="text-blood-soft hover:text-blood">
-                            Delete
-                        </Button>
+                        confirmDelete ? (
+                            <div className="flex items-center gap-1">
+                                <span className="text-xs text-blood-soft">Delete?</span>
+                                <Button variant="ghost" size="sm" onClick={() => { setConfirmDelete(false); handleDelete(); }} className="text-blood-soft hover:text-blood">
+                                    Yes
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(false)}>
+                                    No
+                                </Button>
+                            </div>
+                        ) : (
+                            <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(true)} className="text-blood-soft hover:text-blood">
+                                Delete
+                            </Button>
+                        )
                     )}
                     {game.status === 'ACTIVE' && (
                         <Button variant="primary" size="sm">

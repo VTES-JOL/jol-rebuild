@@ -27,11 +27,12 @@ interface Props {
     onSelect?: (tournament: Tournament) => void;
     onCreate?: () => void;
     loading?: boolean;
+    loadError?: string | null;
     isTournamentAdmin?: boolean;
 }
 
 export default function TournamentListPanel({
-    tournaments, selectedId = null, onSelect, onCreate, loading, isTournamentAdmin
+    tournaments, selectedId = null, onSelect, onCreate, loading, loadError, isTournamentAdmin
 }: Props) {
     const [nameFilter, setNameFilter] = useState('');
     const [tab, setTab] = useState<TournamentFilterTab>('All');
@@ -76,7 +77,11 @@ export default function TournamentListPanel({
                 />
             </div>
 
-            {tournaments.length === 0 && !loading ? (
+            {loadError ? (
+                <div className="m-3 text-sm text-blood bg-blood/5 border border-blood/20 rounded px-3 py-2" role="alert">
+                    {loadError}
+                </div>
+            ) : tournaments.length === 0 && !loading ? (
                 <EmptyState
                     icon={Trophy}
                     title="No tournaments found."

@@ -19,6 +19,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
     const [activeIndex, setActiveIndex] = useState(0);
     const [triggerIndex, setTriggerIndex] = useState<number | null>(null);
     const abortRef = useRef<AbortController | null>(null);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // The hook only ever sees the encoded draft. triggerIndex points into it.
     const handleInputChange = useCallback(async (encoded: string, cursorPos: number) => {
@@ -28,6 +29,7 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
         if (lastOpen === -1 || textUpToCursor.indexOf(']', lastOpen) !== -1) {
             setIsOpen(false);
             setSuggestions([]);
+            if (debounceTimer.current) clearTimeout(debounceTimer.current);
             return;
         }
 
@@ -36,28 +38,32 @@ export function useCardAutocomplete({ onComplete }: UseCardAutocompleteOptions) 
         if (query.length === 0) {
             setIsOpen(false);
             setSuggestions([]);
+            if (debounceTimer.current) clearTimeout(debounceTimer.current);
             return;
         }
 
         setTriggerIndex(lastOpen);
 
-        abortRef.current?.abort();
-        abortRef.current = new AbortController();
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(async () => {
+            abortRef.current?.abort();
+            abortRef.current = new AbortController();
 
-        try {
-            const res = await baseFetch(
-                `/api/cards/autocomplete?q=${encodeURIComponent(query)}`,
-                { signal: abortRef.current.signal }
-            );
-            if (!res.ok) return;
-            const data: CardSuggestion[] = await res.json();
-            const limited = data.slice(0, 5);
-            setSuggestions(limited);
-            setIsOpen(limited.length > 0);
-            setActiveIndex(0);
-        } catch (err) {
-            if ((err as Error).name !== 'AbortError') console.error(err);
-        }
+            try {
+                const res = await baseFetch(
+                    `/api/cards/autocomplete?q=${encodeURIComponent(query)}`,
+                    { signal: abortRef.current.signal }
+                );
+                if (!res.ok) return;
+                const data: CardSuggestion[] = await res.json();
+                const limited = data.slice(0, 5);
+                setSuggestions(limited);
+                setIsOpen(limited.length > 0);
+                setActiveIndex(0);
+            } catch (err) {
+                if ((err as Error).name !== 'AbortError') console.error(err);
+            }
+        }, 300);
     }, []);
 
     const confirmSelection = useCallback((

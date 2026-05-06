@@ -3,6 +3,7 @@ package net.deckserver.jol.ws;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.quarkus.websockets.next.*;
 import io.smallrye.common.annotation.Blocking;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import net.deckserver.jol.dto.ChatMessageDto;
@@ -15,6 +16,7 @@ import org.jboss.logging.Logger;
  * Connect:  ws://host/ws/lobby/{userName}
  */
 @WebSocket(path = "/ws/lobby")
+@RolesAllowed("USER")
 public class LobbyWebSocket {
 
     private static final Logger LOG = Logger.getLogger(LobbyWebSocket.class);

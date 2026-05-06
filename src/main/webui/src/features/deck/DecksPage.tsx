@@ -50,12 +50,17 @@ export default function DecksPage() {
         setDetailMap(new Map());
         setEntriesLoading(true);
 
+        let active = true;
+        const captured = selectedId;
+
         Promise.all([
-            deckApi.getContents(selectedId),
-            deckApi.validityAll(selectedId).catch(() => ({})),
+            deckApi.getContents(captured),
+            deckApi.validityAll(captured).catch(() => ({})),
         ]).then(async ([contents, validity]) => {
+                if (!active) return;
                 const raw     = extractKrcgCards(contents);
                 const details = await deckApi.cardDetails(raw.map(c => c.id));
+                if (!active) return;
                 const dmap    = new Map(details.map(d => [d.id, d]));
                 const loaded  = raw.map(c => enrichEntry(c, dmap.get(c.id)));
                 setDetailMap(dmap);
@@ -64,15 +69,14 @@ export default function DecksPage() {
                 entriesRef.current = loaded;
                 // Merge validity into the deck list entry so the editor status bar has it
                 if (Object.keys(validity).length > 0) {
-                    setDecks(ds => ds.map(d => d.id === selectedId ? {...d, formatValidity: validity} : d));
+                    setDecks(ds => ds.map(d => d.id === captured ? {...d, formatValidity: validity} : d));
                 }
             })
-            .catch(console.error)
-            .finally(() => setEntriesLoading(false));
-    }, [selectedId]);
+            .catch(e => { if (active) setOperationError(String(e)); })
+            .finally(() => { if (active) setEntriesLoading(false); });
 
-    useEffect(() => { entriesRef.current   = entries;   }, [entries]);
-    useEffect(() => { detailMapRef.current = detailMap; }, [detailMap]);
+        return () => { active = false; };
+    }, [selectedId]);
 
     // ── Auto-save on entries change ──────────────────────────────────────────
     useEffect(() => {
@@ -192,7 +196,6 @@ export default function DecksPage() {
 
     const handleDelete = useCallback(async () => {
         if (selectedId == null) return;
-        if (!window.confirm('Delete this deck? This cannot be undone.')) return;
         setOperationError(null);
         try {
             await deckApi.remove(selectedId);

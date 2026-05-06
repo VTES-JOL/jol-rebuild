@@ -26,11 +26,11 @@ export type ChatPanelViewProps = {
     enableReply?: boolean;
 };
 
-const STATUS_LABELS: Record<Status, { label: string; color: string }> = {
-    connecting: { label: 'Connecting…', color: '#d97706' },
-    connected: { label: 'Connected', color: '#16a34a' },
-    disconnected: { label: 'Reconnecting…', color: '#dc2626' },
-    error: { label: 'Connection error', color: '#dc2626' },
+const STATUS_LABELS: Record<Status, { label: string; dotClass: string }> = {
+    connecting: { label: 'Connecting…', dotClass: 'bg-amber-500 dark:bg-amber-400' },
+    connected: { label: 'Connected', dotClass: 'bg-green-600 dark:bg-green-400' },
+    disconnected: { label: 'Reconnecting…', dotClass: 'bg-red-600 dark:bg-red-400' },
+    error: { label: 'Connection error', dotClass: 'bg-red-600 dark:bg-red-400' },
 };
 
 export function ChatPanelView({
@@ -105,8 +105,7 @@ export function ChatPanelView({
             right={
                 <div className="flex items-center gap-2">
                     <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ background: statusInfo.color }}
+                        className={`h-2 w-2 rounded-full ${statusInfo.dotClass}`}
                         title={statusInfo.label}
                     />
                     <span className="text-ink-secondary">{statusInfo.label}</span>

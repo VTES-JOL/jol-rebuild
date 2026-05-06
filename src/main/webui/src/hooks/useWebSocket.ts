@@ -115,7 +115,9 @@ export function useWebSocket({
                 setStatus('disconnected');
                 const delay = currentDelayRef.current;
                 currentDelayRef.current = Math.min(delay * 2, maxReconnectDelay);
-                reconnectTimer.current = setTimeout(connect, delay);
+                // Add ±25% jitter to prevent thundering herd on server restart
+                const jitteredDelay = delay * (0.75 + Math.random() * 0.5);
+                reconnectTimer.current = setTimeout(connect, jitteredDelay);
             };
 
             ws.onerror = () => {

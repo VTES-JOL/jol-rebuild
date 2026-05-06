@@ -17,6 +17,7 @@ export default function TournamentsPage() {
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
     const [isNewlyCreated, setIsNewlyCreated] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     const isTournamentAdmin = user?.roles.includes('TOURNAMENT_ADMIN') ?? false;
     const [seatingRefreshKey, setSeatingRefreshKey] = useState(0);
@@ -27,6 +28,7 @@ export default function TournamentsPage() {
 
     const loadTournaments = async () => {
         setLoading(true);
+        setLoadError(null);
         try {
             const data = await tournamentApi.list();
             setTournaments(data);
@@ -35,7 +37,7 @@ export default function TournamentsPage() {
                 if (updated) setSelectedTournament(updated);
             }
         } catch (e) {
-            console.error('Failed to load tournaments', e);
+            setLoadError(String(e));
         } finally {
             setLoading(false);
         }
@@ -86,6 +88,7 @@ export default function TournamentsPage() {
                         onSelect={(t) => { setSelectedTournament(t); setIsNewlyCreated(false); }}
                         onCreate={handleCreate}
                         loading={loading}
+                        loadError={loadError}
                         isTournamentAdmin={isTournamentAdmin}
                     />
                 </div>
