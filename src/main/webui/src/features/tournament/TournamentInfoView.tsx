@@ -45,11 +45,16 @@ export default function TournamentInfoView({tournament, isTournamentAdmin, seati
 
     return (
         <div className="p-6 space-y-8 overflow-y-auto flex-1 h-full">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <TournamentBasicInfo tournament={tournament} />
-                <TournamentRulesSettings tournament={tournament} />
-            </div>
-            <TournamentRulesList tournament={tournament} />
+            {
+                tournament.status !== 'SEATING' &&
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <TournamentBasicInfo tournament={tournament} />
+                        <TournamentRulesSettings tournament={tournament} />
+                    </div>
+                    <TournamentRulesList tournament={tournament} />
+                </>
+            }
             <TournamentDates tournament={tournament} />
             <div className="pt-4 border-t border-line/30">
                 {renderContextualContent()}
