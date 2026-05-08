@@ -28,6 +28,10 @@ public enum Sect {
         return NONE;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public static Sect startsWith(String description) {
         for (Sect sect : Sect.values()) {
             if (sect.description.toLowerCase().startsWith(description.toLowerCase())) {

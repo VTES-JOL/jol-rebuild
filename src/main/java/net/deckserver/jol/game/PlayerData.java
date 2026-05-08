@@ -68,4 +68,16 @@ public class PlayerData {
     public void setName(String newPlayer) {
         this.name = newPlayer;
     }
+
+    public void setPool(int pool) { this.pool = pool; }
+    public void setOusted(boolean ousted) { this.ousted = ousted; }
+    public float getVictoryPoints() { return victoryPoints; }
+    public void setVictoryPoints(float victoryPoints) { this.victoryPoints = victoryPoints; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+    public String getChoice() { return choice; }
+    public void setChoice(String choice) { this.choice = choice; }
+    public PlayerData getPrey() { return prey; }
+    public PlayerData getPredator() { return predator; }
+    public Map<RegionType, RegionData> getRegions() { return regions; }
 }

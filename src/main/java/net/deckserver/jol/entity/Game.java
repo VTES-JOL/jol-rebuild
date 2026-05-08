@@ -41,6 +41,9 @@ public class Game extends PanacheEntityBase {
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
 
+    @Column(name = "game_state", columnDefinition = "TEXT")
+    public String gameState;
+
     @Override
     public void delete() {
         // Remove registrations from players as well when you clean up registrations

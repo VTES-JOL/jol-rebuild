@@ -77,6 +77,10 @@ public class RegionData {
         return cards.get(i);
     }
 
+    public String getId() { return id; }
+    public RegionType getType() { return type; }
+    public PlayerData getPlayer() { return player; }
+
     public int size() {
         int size = cards.size();
         for (CardData card: cards) {

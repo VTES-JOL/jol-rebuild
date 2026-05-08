@@ -18,6 +18,8 @@ import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.enums.Visibility;
 import net.deckserver.jol.services.ChatService;
+import net.deckserver.jol.services.GameInitService;
+import net.deckserver.jol.services.LobbyChatBroadcaster;
 import net.deckserver.jol.services.NameService;
 
 import java.net.URI;
@@ -38,7 +40,10 @@ public class GameController {
     ChatService chatService;
 
     @Inject
-    net.deckserver.jol.services.LobbyChatBroadcaster lobbyChatBroadcaster;
+    LobbyChatBroadcaster lobbyChatBroadcaster;
+
+    @Inject
+    GameInitService gameInitService;
 
     @POST
     @Transactional
@@ -246,6 +251,12 @@ public class GameController {
 
         Registration.register(game, user, deck);
         lobbyChatBroadcaster.broadcastLobbyUpdate(id);
+
+        long newCount = Registration.countForGame(game.id);
+        if (game.isFull(newCount)) {
+            gameInitService.initializeGame(game);
+        }
+
         return Response.ok().build();
     }
 

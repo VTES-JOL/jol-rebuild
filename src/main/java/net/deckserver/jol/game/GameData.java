@@ -140,6 +140,27 @@ public class GameData {
         return String.format("%s %s", currentPlayer.getName(), turn);
     }
 
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public String getTurn() { return turn; }
+    public Phase getPhase() { return phase; }
+    public String getNotes() { return notes; }
+    public boolean isOrderOfPlayReversed() { return orderOfPlayReversed; }
+    public String getTimeoutRequestor() { return timeoutRequestor; }
+    public Map<String, PlayerData> getPlayers() { return players; }
+    public Map<String, CardData> getCards() { return cards; }
+    public List<String> getPlayerOrder() { return playerOrder; }
+    public PlayerData getCurrentPlayer() { return currentPlayer; }
+    public PlayerData getEdge() { return edge; }
+
+    public void setPhase(Phase phase) { this.phase = phase; }
+    public void setCurrentPlayer(PlayerData currentPlayer) { this.currentPlayer = currentPlayer; }
+    public void setTurn(String turn) { this.turn = turn; }
+    public void setEdge(PlayerData edge) { this.edge = edge; }
+    public void setNotes(String notes) { this.notes = notes; }
+    public void setOrderOfPlayReversed(boolean orderOfPlayReversed) { this.orderOfPlayReversed = orderOfPlayReversed; }
+    public void setTimeoutRequestor(String timeoutRequestor) { this.timeoutRequestor = timeoutRequestor; }
+
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);
         playerData.setName(newPlayer);
