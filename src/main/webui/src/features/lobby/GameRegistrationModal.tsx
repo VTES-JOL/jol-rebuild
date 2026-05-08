@@ -5,7 +5,7 @@ import gameApi, {type GameDetail} from '@/features/game/api';
 import DeckSelector from './DeckSelector';
 
 interface Props {
-    gameId: number;
+    gameId: string;
     currentUsername: string;
     onClose: () => void;
     onChanged: () => void;
@@ -17,7 +17,7 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
     const [detail, setDetail] = useState<GameDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
+    const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
     const [inviteQuery, setInviteQuery] = useState('');
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [showSuggest, setShowSuggest] = useState(false);
@@ -264,7 +264,7 @@ export default function GameRegistrationModal({gameId, currentUsername, onClose,
                                 </div>
                                 {showSuggest && suggestPos && suggestions.length > 0 && createPortal(
                                     <ul
-                                        className="fixed z-[9999] rounded border border-line/60 bg-surface shadow-lg overflow-hidden"
+                                        className="fixed z-9999 rounded border border-line/60 bg-surface shadow-lg overflow-hidden"
                                         style={{top: suggestPos.top, left: suggestPos.left, width: suggestPos.width}}
                                     >
                                         {suggestions.map(name => (
