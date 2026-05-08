@@ -120,9 +120,9 @@ class GameServiceTest {
         }
 
         // Following prey pointers N times from any player must return to that player
-        PlayerData cursor = gd.getPlayer(playerNames.get(0));
+        PlayerData cursor = gd.getPlayer(playerNames.getFirst());
         for (int i = 0; i < playerNames.size(); i++) cursor = cursor.getPrey();
-        assertEquals(playerNames.get(0), cursor.getName(), "Prey pointers do not form a closed ring");
+        assertEquals(playerNames.getFirst(), cursor.getName(), "Prey pointers do not form a closed ring");
     }
 
     // ── COMMANDS: DECK / HAND ─────────────────────────────────────────────────
@@ -130,7 +130,7 @@ class GameServiceTest {
     @Test
     void drawCard_movesCardsFromLibraryToHand() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
 
         gameCommandService.execute(actor, new DrawCard(gameId, 2));
 
@@ -181,7 +181,7 @@ class GameServiceTest {
     @Test
     void setPool_updatesAmount() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
 
         gameCommandService.execute(actor, new SetPool(gameId, actor, 15));
 
@@ -191,7 +191,7 @@ class GameServiceTest {
     @Test
     void transferPool_movesBloodBetweenPoolAndCard() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
 
         gameCommandService.execute(actor, new TransferPool(gameId, actor, card.getId(), 3));
@@ -205,7 +205,7 @@ class GameServiceTest {
     @Test
     void lockCard_andUnlockCard_toggling() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
         String cardId = card.getId();
 
@@ -219,7 +219,7 @@ class GameServiceTest {
     @Test
     void unlockAll_unlocksCardsInPlayRegions() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
         String cardId = card.getId();
 
@@ -235,7 +235,7 @@ class GameServiceTest {
     @Test
     void addCounter_removeCounter_clampedAtZero() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
         String cardId = card.getId();
         // Anarch Convert: counters starts at 1 (capacity=1)
@@ -250,7 +250,7 @@ class GameServiceTest {
     @Test
     void influenceVampire_deductsPoolAndAddsToCard() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
 
         gameCommandService.execute(actor, new InfluenceVampire(gameId, card.getId(), 3));
@@ -262,7 +262,7 @@ class GameServiceTest {
     @Test
     void moveToReady_movesCardFromUncontrolled() {
         GameData gd = initGame();
-        String actor = playerNames.get(0);
+        String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
 
         gameCommandService.execute(actor, new MoveToReady(gameId, card.getId()));
@@ -289,7 +289,7 @@ class GameServiceTest {
 
     // ── PHASE-GATED VALIDATION ────────────────────────────────────────────────
     // Add tests here as phase enforcement is introduced in GameCommandService.
-    // Pattern: initGame(), advance to target phase, attempt command, assert outcome.
+    // Pattern: initGame(), advance to target phase, attempt command, assert an outcome.
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -300,7 +300,7 @@ class GameServiceTest {
     }
 
     private CardData getFirstUncontrolledCard(GameData gd, String playerName) {
-        return gd.getPlayer(playerName).getRegion(RegionType.UNCONTROLLED).getCards().get(0);
+        return gd.getPlayer(playerName).getRegion(RegionType.UNCONTROLLED).getCards().getFirst();
     }
 
     /** 12-crypt (Anarch Convert, capacity=1) / 60-library (Deflection). Valid for STANDARD. */

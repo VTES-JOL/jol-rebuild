@@ -41,6 +41,7 @@ public class Game extends PanacheEntityBase {
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Registration> registrations = new ArrayList<>();
 
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "game_state", columnDefinition = "TEXT")
     public String gameState;
 
