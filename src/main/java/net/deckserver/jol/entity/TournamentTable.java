@@ -15,7 +15,8 @@ public class TournamentTable extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.UUID)
     public String id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "tournament_id", nullable = false)
     public Tournament tournament;
 
     @OneToMany(mappedBy = "table", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -73,6 +73,12 @@ public class Tournament extends PanacheEntityBase {
     @Column(name = "updated_at")
     public Instant updatedAt;
 
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<TournamentTable> tables = new ArrayList<>();
+
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<TournamentRegistration> registrations = new ArrayList<>();
+
     public boolean canPublish() {
         return status == TournamentStatus.SETUP;
     }

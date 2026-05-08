@@ -1,1 +1,0 @@
-ALTER TABLE deck ALTER COLUMN comments TYPE TEXT;

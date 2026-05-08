@@ -1,1 +1,0 @@
-ALTER TABLE game ADD COLUMN IF NOT EXISTS game_state TEXT;

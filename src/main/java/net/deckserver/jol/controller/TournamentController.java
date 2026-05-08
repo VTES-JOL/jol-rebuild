@@ -9,14 +9,18 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.SeatingDto;
+import net.deckserver.jol.dto.TournamentDto;
 import net.deckserver.jol.dto.TournamentRegistrationDto;
+import net.deckserver.jol.dto.TournamentTableDto;
 import net.deckserver.jol.entity.*;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.TournamentFormat;
 import net.deckserver.jol.enums.TournamentStatus;
 import net.deckserver.jol.config.Config;
 import net.deckserver.jol.services.TournamentService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Path("/api/tournaments")
@@ -41,7 +45,7 @@ public class TournamentController {
     // ─── Core CRUD ────────────────────────────────────────────────────────────
 
     @GET
-    public List<Tournament> list(
+    public List<TournamentDto> list(
             @QueryParam("status") TournamentStatus status,
             @QueryParam("limit") @DefaultValue("100") int limit,
             @QueryParam("offset") @DefaultValue("0") int offset) {
@@ -51,65 +55,77 @@ public class TournamentController {
             if (!isAdmin && !PLAYER_VISIBLE_STATUSES.contains(status)) {
                 return List.of();
             }
-            return Tournament.findByStatus(status);
+            return Tournament.findByStatus(status).stream().map(TournamentDto::from).toList();
         }
         if (isAdmin) {
             return Tournament.<Tournament>findAll()
                 .range(offset, offset + clampedLimit - 1)
-                .list();
+                .list().stream().map(TournamentDto::from).toList();
         }
         return Tournament.<Tournament>find("status in ?1", PLAYER_VISIBLE_STATUSES)
             .range(offset, offset + clampedLimit - 1)
-            .list();
+            .list().stream().map(TournamentDto::from).toList();
     }
 
     @GET
     @Path("/{id}")
-    public Tournament get(@PathParam("id") String id) {
+    public TournamentDto get(@PathParam("id") String id) {
         Tournament tournament = Tournament.findById(id);
         if (tournament == null) throw new NotFoundException();
         if (!identity.hasRole("TOURNAMENT_ADMIN") && !PLAYER_VISIBLE_STATUSES.contains(tournament.status)) {
             throw new NotFoundException();
         }
-        return tournament;
+        return TournamentDto.from(tournament);
     }
 
     @POST
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament create(Tournament tournament) {
-        tournament.id = null;
+    public TournamentDto create(CreateTournamentCommand command) {
+        Tournament tournament = new Tournament();
+        tournament.name = command.name();
+        tournament.format = command.format() != null ? command.format() : TournamentFormat.SINGLE_DECK;
+        tournament.gameFormat = command.gameFormat() != null ? command.gameFormat() : GameFormat.STANDARD;
+        tournament.numberOfRounds = command.numberOfRounds() != null ? command.numberOfRounds() : 2;
+        tournament.finalRound = command.finalRound();
+        tournament.requiresId = command.requiresId();
+        tournament.registrationStart = command.registrationStart();
+        tournament.registrationEnd = command.registrationEnd();
+        tournament.playingStart = command.playingStart();
+        tournament.playingEnd = command.playingEnd();
+        tournament.rules = command.rules() != null ? command.rules() : new ArrayList<>();
+        tournament.conditions = command.conditions() != null ? command.conditions() : new ArrayList<>();
         tournament.status = TournamentStatus.SETUP;
         tournament.persist();
-        return tournament;
+        return TournamentDto.from(tournament);
     }
 
     @PUT
     @Path("/{id}")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament update(@PathParam("id") String id, Tournament updated) {
+    public TournamentDto update(@PathParam("id") String id, UpdateTournamentCommand command) {
         Tournament entity = Tournament.findById(id);
         if (entity == null) throw new NotFoundException();
         if (!entity.canPublish()) {
             throw new ForbiddenException("Can only edit tournaments in SETUP status");
         }
-        if (updated.numberOfRounds > config.tournament().maxRounds()) {
+        if (command.numberOfRounds() > config.tournament().maxRounds()) {
             throw new BadRequestException("Maximum number of rounds is " + config.tournament().maxRounds());
         }
-        entity.name = updated.name;
-        entity.registrationStart = updated.registrationStart;
-        entity.registrationEnd = updated.registrationEnd;
-        entity.playingStart = updated.playingStart;
-        entity.playingEnd = updated.playingEnd;
-        entity.format = updated.format;
-        entity.gameFormat = updated.gameFormat;
-        entity.numberOfRounds = updated.numberOfRounds;
-        entity.finalRound = updated.finalRound;
-        entity.requiresId = updated.requiresId;
-        entity.rules = updated.rules;
-        entity.conditions = updated.conditions;
-        return entity;
+        entity.name = command.name();
+        entity.registrationStart = command.registrationStart();
+        entity.registrationEnd = command.registrationEnd();
+        entity.playingStart = command.playingStart();
+        entity.playingEnd = command.playingEnd();
+        entity.format = command.format();
+        entity.gameFormat = command.gameFormat();
+        entity.numberOfRounds = command.numberOfRounds();
+        entity.finalRound = command.finalRound();
+        entity.requiresId = command.requiresId();
+        entity.rules = command.rules();
+        entity.conditions = command.conditions();
+        return TournamentDto.from(entity);
     }
 
     @DELETE
@@ -128,48 +144,48 @@ public class TournamentController {
     @Path("/{id}/publish")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament publish(@PathParam("id") String id) {
+    public TournamentDto publish(@PathParam("id") String id) {
         Tournament t = require(id);
         if (!t.canPublish()) {
             throw new BadRequestException("Tournament must be in SETUP status to publish");
         }
         t.status = TournamentStatus.REGISTRATION;
-        return t;
+        return TournamentDto.from(t);
     }
 
     @POST
     @Path("/{id}/unpublish")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament unpublish(@PathParam("id") String id) {
+    public TournamentDto unpublish(@PathParam("id") String id) {
         Tournament t = require(id);
         if (!t.canBeginSeating()) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to unpublish");
         }
         TournamentRegistration.delete("tournament.id = ?1", id);
         t.status = TournamentStatus.SETUP;
-        return t;
+        return TournamentDto.from(t);
     }
 
     @POST
     @Path("/{id}/seat")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament beginSeating(@PathParam("id") String id) {
+    public TournamentDto beginSeating(@PathParam("id") String id) {
         Tournament t = require(id);
         if (!t.canBeginSeating()) {
             throw new BadRequestException("Tournament must be in REGISTRATION status to begin seating");
         }
         t.originalNumberOfRounds = t.numberOfRounds;
         t.status = TournamentStatus.SEATING;
-        return t;
+        return TournamentDto.from(t);
     }
 
     @POST
     @Path("/{id}/activate")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament activate(@PathParam("id") String id) {
+    public TournamentDto activate(@PathParam("id") String id) {
         Tournament t = require(id);
         if (!t.canActivate()) {
             throw new BadRequestException("Tournament must be in SEATING status to activate");
@@ -177,7 +193,7 @@ public class TournamentController {
         User admin = currentUser();
         tournamentService.activate(t, admin);
         t.status = TournamentStatus.ACTIVE;
-        return t;
+        return TournamentDto.from(t);
     }
 
     // ─── Player Registration ──────────────────────────────────────────────────
@@ -221,6 +237,7 @@ public class TournamentController {
 
         TournamentRegistration reg = new TournamentRegistration();
         reg.tournament = t;
+        t.registrations.add(reg);
         reg.user = me;
 
         for (String deckId : command.deckIds()) {
@@ -283,8 +300,9 @@ public class TournamentController {
         }
         TournamentTable table = new TournamentTable();
         table.tournament = t;
+        t.tables.add(table);
         table.persist();
-        return Response.ok(table).build();
+        return Response.ok(TournamentTableDto.from(table)).build();
     }
 
     @DELETE
@@ -408,7 +426,7 @@ public class TournamentController {
     @Path("/{id}/extra-round")
     @Transactional
     @RolesAllowed("TOURNAMENT_ADMIN")
-    public Tournament addExtraRound(@PathParam("id") String id) {
+    public TournamentDto addExtraRound(@PathParam("id") String id) {
         Tournament t = require(id);
         if (t.status != TournamentStatus.SEATING) {
             throw new BadRequestException("Can only add rounds during SEATING status");
@@ -418,7 +436,7 @@ public class TournamentController {
             throw new BadRequestException("Maximum number of rounds (" + maxAllowed + ") already reached");
         }
         t.numberOfRounds++;
-        return t;
+        return TournamentDto.from(t);
     }
 
     // ─── Active Tournament ────────────────────────────────────────────────────
@@ -465,7 +483,36 @@ public class TournamentController {
     // ─── Command Records ──────────────────────────────────────────────────────
 
     @RegisterForReflection
-    public record CreateTournamentCommand(String name) {}
+    public record CreateTournamentCommand(
+        String name,
+        TournamentFormat format,
+        GameFormat gameFormat,
+        Integer numberOfRounds,
+        boolean finalRound,
+        boolean requiresId,
+        OffsetDateTime registrationStart,
+        OffsetDateTime registrationEnd,
+        OffsetDateTime playingStart,
+        OffsetDateTime playingEnd,
+        List<Tournament.Rule> rules,
+        List<Tournament.Condition> conditions
+    ) {}
+
+    @RegisterForReflection
+    public record UpdateTournamentCommand(
+        String name,
+        TournamentFormat format,
+        GameFormat gameFormat,
+        int numberOfRounds,
+        boolean finalRound,
+        boolean requiresId,
+        OffsetDateTime registrationStart,
+        OffsetDateTime registrationEnd,
+        OffsetDateTime playingStart,
+        OffsetDateTime playingEnd,
+        List<Tournament.Rule> rules,
+        List<Tournament.Condition> conditions
+    ) {}
 
     @RegisterForReflection
     public record RegisterForTournamentCommand(List<String> deckIds) {}

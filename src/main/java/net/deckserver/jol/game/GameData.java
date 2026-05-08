@@ -39,6 +39,8 @@ public class GameData {
         this.id = id;
     }
 
+    public GameData() {}
+
     public void addPlayer(PlayerData playerData) {
         this.players.put(playerData.getName(), playerData);
         this.playerOrder.add(playerData.getName());
