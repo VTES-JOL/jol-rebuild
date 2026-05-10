@@ -12,15 +12,30 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-    args: {id: '100001', crypt: false, faceDown: false},
+    args: {
+        id: '100001',
+        crypt: false,
+        faceDown: false,
+        locked: false
+    },
 };
 
 export const CryptCard: Story = {
-    args: {id: '200349', crypt: true, faceDown: false},
+    args: {
+        id: '200349',
+        crypt: true,
+        faceDown: false,
+        locked: false
+    },
 };
 
 export const Sized: Story = {
-    args: {id: '100266', crypt: false, faceDown: false},
+    args: {
+        id: '100266',
+        crypt: false,
+        faceDown: false,
+        locked: false
+    },
     decorators: [
         (Story) => (
             <div className="w-48">
@@ -31,9 +46,27 @@ export const Sized: Story = {
 };
 
 export const FaceDownCrypt: Story = {
-    args: {id: '200349', crypt: true, faceDown: true},
+    args: {
+        id: '200349',
+        crypt: true,
+        faceDown: true,
+        locked: false
+    },
 };
 
 export const FaceDownLibrary: Story = {
-    args: {id: '100266', crypt: false, faceDown: true},
+    args: {
+        id: '100266',
+        crypt: false,
+        faceDown: true,
+        locked: false
+    },
+};
+
+export const Locked: Story = {
+    args: {id: '100266', crypt: false, faceDown: false, locked: true},
+};
+
+export const LockedCrypt: Story = {
+    args: {id: '200349', crypt: true, faceDown: false, locked: true},
 };
