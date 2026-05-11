@@ -56,7 +56,7 @@ public class GameInitService {
         }
 
         gameData.updatePredatorMapping();
-        gameData.setCurrentPlayer(gameData.getPlayer(gameData.getPlayerOrder().get(0)));
+        gameData.setCurrentPlayer(gameData.getPlayer(gameData.getPlayerOrder().getFirst()));
         gameData.setPhase(Phase.UNLOCK);
         gameData.setTurn("1.1");
 
@@ -135,7 +135,7 @@ public class GameInitService {
 
     private CardType libraryCardType(LibraryCard card) {
         if (card.types().isEmpty()) return CardType.NONE;
-        String primary = card.types().get(0);
+        String primary = card.types().getFirst();
         return switch (primary) {
             case "Master"            -> CardType.MASTER;
             case "Action"            -> CardType.ACTION;
