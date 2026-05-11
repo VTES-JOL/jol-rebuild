@@ -1,10 +1,10 @@
 import type {DragEndEvent, DragStartEvent} from '@dnd-kit/core';
-import {DndContext, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
+import {DndContext, DragOverlay, PointerSensor, useDraggable, useDroppable, useSensor, useSensors} from '@dnd-kit/core';
 import {rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
 import type {CSSProperties} from 'react';
-import {useCallback, useRef, useState} from 'react';
+import {useState} from 'react';
 import type {CardData} from './CardStack.tsx';
 import {CardStack} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
@@ -54,8 +54,9 @@ type DropTargetData = StackDragData | {type: 'empty-slot'; index: number};
 
 // ── Draggable card item ────────────────────────────────────────────────────────
 
-const OFFSET_X_PCT = 0.09;
-const OFFSET_Y_PCT = 0.17;
+const CARD_WIDTH = 96;
+const OFFSET_X = Math.round(CARD_WIDTH * 0.09); // 9px
+const OFFSET_Y = Math.round(CARD_WIDTH * 0.17); // 16px
 const MAX_VISIBLE = 3;
 
 function DraggableCardItem({
@@ -105,28 +106,13 @@ function DraggableCardStack({
     onCardClick?: (cardIndex: number) => void;
     activeDragId: string | null;
 }) {
-    const [cardWidth, setCardWidth] = useState(0);
-    const roRef = useRef<ResizeObserver | null>(null);
-    const containerRef = useCallback((el: HTMLDivElement | null) => {
-        roRef.current?.disconnect();
-        roRef.current = null;
-        if (!el) return;
-        setCardWidth(el.offsetWidth);
-        const ro = new ResizeObserver(([entry]) => setCardWidth(entry.contentRect.width));
-        ro.observe(el);
-        roRef.current = ro;
-    }, []);
-
     if (cards.length === 0) return null;
     const n = cards.length;
     const depth = Math.min(n - 1, MAX_VISIBLE);
-    const ox = cardWidth * OFFSET_X_PCT;
-    const oy = cardWidth * OFFSET_Y_PCT;
     return (
         <div
-            ref={containerRef}
             className="relative"
-            style={{paddingTop: `${depth * oy}px`}}
+            style={{paddingTop: `${depth * OFFSET_Y}px`}}
         >
             <DraggableCardItem
                 stackIndex={stackIndex}
@@ -148,9 +134,9 @@ function DraggableCardStack({
                         activeDragId={activeDragId}
                         style={{
                             position: 'absolute',
-                            top: `${(depth - vi) * oy}px`,
-                            left: `${vi * ox}px`,
-                            right: `${-(vi * ox)}px`,
+                            top: `${(depth - vi) * OFFSET_Y}px`,
+                            left: `${vi * OFFSET_X}px`,
+                            right: `${-(vi * OFFSET_X)}px`,
                             zIndex: n - i,
                         }}
                         onClick={() => onCardClick?.(i)}
@@ -258,6 +244,7 @@ export function FieldRegion({
     onReorder,
     onCardMove,
 }: FieldRegionProps) {
+    const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
     const count = stacks.reduce((sum, s) => sum + s.length, 0);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
 
@@ -319,11 +306,12 @@ export function FieldRegion({
 
     return (
         <DndContext
+            sensors={sensors}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDragCancel={() => setActiveDrag(null)}
         >
-            <fieldset className="rounded-lg border border-surface/40 px-3 pb-3">
+            <fieldset className="w-fit rounded-lg border border-surface border-2 px-3 pb-3">
                 <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
                     <span>{name}</span>
                     <span className="font-medium text-ink-secondary">{count}</span>
@@ -338,7 +326,7 @@ export function FieldRegion({
                         <div
                             className="grid gap-x-8 gap-y-10"
                             style={{
-                                gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                                gridTemplateColumns: `repeat(${columns}, ${CARD_WIDTH}px)`,
                                 ...(rows ? {gridTemplateRows: `repeat(${rows}, auto)`} : {}),
                             }}
                         >

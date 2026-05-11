@@ -7,7 +7,7 @@ import type {CardData} from '../features/game/CardStack.tsx';
 const meta = {
     title: 'Game/FieldRegion',
     component: FieldRegion,
-    parameters: {layout: 'centered'},
+    parameters: {layout: 'padded'},
     tags: ['autodocs'],
     args: {
         onCardClick: fn(),
@@ -19,31 +19,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const wrap = (Story: React.ComponentType) => (
-    <div className="w-96">
-        <Story/>
-    </div>
-);
-
-const crypt1: CardData = {id: '200349', crypt: true};
-const lib1: CardData = {id: '100266', crypt: false};
-const lib2: CardData = {id: '100001', crypt: false};
+const crypt1: CardData = {id: '200422', crypt: true};
+const crypt2: CardData = {id: '200053', crypt: true};
+const lib1: CardData = {id: '102113', crypt: false};
+const lib2: CardData = {id: '100037', crypt: false};
 const lib3: CardData = {id: '100001', crypt: false};
+const lib4: CardData = {id: '102165', crypt: false};
+const lib5: CardData = {id: '100588', crypt: false};
 
 const stack1 = [crypt1, lib1];
-const stack2 = [lib2, lib3, lib1];
+const stack2 = [crypt2, lib1, lib3];
 const stack3 = [{...lib2, faceDown: true}];
 const stack4 = [{...crypt1, locked: true}, lib3];
-const stack5 = [lib1, lib2];
+const stack5 = [lib4];
+const stack6 = [lib5];
 
 export const Empty: Story = {
     args: {name: 'Influence Pool', stacks: [], columns: 3},
-    decorators: [wrap],
 };
 
 export const SingleStack: Story = {
     args: {name: 'Torpor', stacks: [stack1, stack2, stack3], columns: 3},
-    decorators: [wrap],
 };
 
 export const Grid3Columns: Story = {
@@ -52,7 +48,14 @@ export const Grid3Columns: Story = {
         stacks: [stack1, stack2, stack3, stack4, stack5],
         columns: 3,
     },
-    decorators: [wrap],
+};
+
+export const Grid5Columns: Story = {
+    args: {
+        name: 'Ready Region',
+        stacks: [stack1, stack2, stack3, stack4, stack5],
+        columns: 5,
+    },
 };
 
 export const CompactGrid: Story = {
@@ -62,12 +65,11 @@ export const CompactGrid: Story = {
         columns: 4,
         compact: true,
     },
-    decorators: [wrap],
 };
 
 export const WithDragDrop: Story = {
     render: (args) => {
-        const [stacks, setStacks] = useState([stack1, stack2, stack3, stack4, stack5]);
+        const [stacks, setStacks] = useState([stack1, stack2, stack6, stack5]);
 
         function handleReorder(from: number, to: number) {
             setStacks(prev => {
@@ -87,10 +89,17 @@ export const WithDragDrop: Story = {
             });
         }
 
+        function handleCardClick(stackIndex: number, cardIndex: number) {
+            setStacks(prev => prev.map((stack, si) =>
+                si !== stackIndex ? stack : stack.map((card, ci) =>
+                    ci !== cardIndex ? card : {...card, locked: !card.locked}
+                )
+            ));
+        }
+
         return (
-            <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove}/>
+            <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove} onCardClick={handleCardClick}/>
         );
     },
-    args: {name: 'Ready', columns: 3},
-    decorators: [wrap]
+    args: {name: 'Ready', stacks: [], columns: 5},
 };
