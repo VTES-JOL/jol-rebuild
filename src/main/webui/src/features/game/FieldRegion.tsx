@@ -1,10 +1,10 @@
-import type {DragEndEvent, DragStartEvent} from '@dnd-kit/core';
+import type {DragEndEvent, DragOverEvent, DragStartEvent} from '@dnd-kit/core';
 import {DndContext, DragOverlay, PointerSensor, useDraggable, useDroppable, useSensor, useSensors} from '@dnd-kit/core';
-import {rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortable';
+import {arrayMove, rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
 import type {CSSProperties} from 'react';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import type {CardData} from './CardStack.tsx';
 import {CardStack} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
@@ -248,7 +248,10 @@ export function FieldRegion({
     const count = stacks.reduce((sum, s) => sum + s.length, 0);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
 
-    const stackIds = stacks.map((_, i) => `stack-${i}`);
+    // Stable IDs: "stack-{originalIndex}". Reordered live during drag so DOM
+    // positions always match the visual preview — eliminating post-drop animation glitches.
+    const [sortedIds, setSortedIds] = useState(() => stacks.map((_, i) => `stack-${i}`));
+    useEffect(() => { setSortedIds(stacks.map((_, i) => `stack-${i}`)); }, [stacks]);
 
     const totalSlots = rows != null
         ? rows * columns
@@ -257,6 +260,19 @@ export function FieldRegion({
 
     function handleDragStart(event: DragStartEvent) {
         setActiveDrag(event.active.data.current as DragData);
+    }
+
+    function handleDragOver(event: DragOverEvent) {
+        const {active, over} = event;
+        if (!over || active.id === over.id) return;
+        const drag = active.data.current as DragData;
+        const drop = over.data.current as DropTargetData;
+        if (drag.type !== 'stack' || drop.type !== 'stack') return;
+        setSortedIds(prev => {
+            const from = prev.indexOf(String(active.id));
+            const to   = prev.indexOf(String(over.id));
+            return from === -1 || to === -1 ? prev : arrayMove(prev, from, to);
+        });
     }
 
     function handleDragEnd(event: DragEndEvent) {
@@ -268,17 +284,18 @@ export function FieldRegion({
         const drop = over.data.current as DropTargetData;
 
         if (drag.type === 'stack') {
-            const from = drag.stackIndex;
-            if (drop.type === 'stack') {
-                if (from !== drop.stackIndex) onReorder?.(from, drop.stackIndex);
-            } else if (drop.type === 'empty-slot') {
-                onReorder?.(from, stacks.length - 1);
-            }
+            const originalIdx = +String(active.id).slice(6);
+            const finalPos    = sortedIds.indexOf(String(active.id));
+            if (originalIdx !== finalPos) onReorder?.(originalIdx, finalPos);
         } else if (drag.type === 'card' && drop.type === 'stack') {
-            if (drag.stackIndex !== drop.stackIndex) {
-                onCardMove?.(drag.stackIndex, drag.cardIndex, drop.stackIndex);
-            }
+            const targetIdx = +String(over.id).slice(6);
+            if (drag.stackIndex !== targetIdx) onCardMove?.(drag.stackIndex, drag.cardIndex, targetIdx);
         }
+    }
+
+    function handleDragCancel() {
+        setActiveDrag(null);
+        setSortedIds(stacks.map((_, i) => `stack-${i}`));
     }
 
     const activeDragType = activeDrag?.type ?? null;
@@ -308,8 +325,9 @@ export function FieldRegion({
         <DndContext
             sensors={sensors}
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
-            onDragCancel={() => setActiveDrag(null)}
+            onDragCancel={handleDragCancel}
         >
             <fieldset className="w-fit rounded-lg border border-surface border-2 px-3 pb-3">
                 <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
@@ -322,7 +340,7 @@ export function FieldRegion({
                         onClick={() => onCardClick?.(0, 0)}
                     />
                 ) : (
-                    <SortableContext items={stackIds} strategy={rectSortingStrategy}>
+                    <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
                         <div
                             className="grid gap-x-8 gap-y-10"
                             style={{
@@ -330,17 +348,21 @@ export function FieldRegion({
                                 ...(rows ? {gridTemplateRows: `repeat(${rows}, auto)`} : {}),
                             }}
                         >
-                            {stacks.map((stack, i) => (
-                                <SortableStackSlot
-                                    key={`stack-${i}`}
-                                    id={`stack-${i}`}
-                                    stack={stack}
-                                    stackIndex={i}
-                                    activeDragId={activeDragId}
-                                    activeDragType={activeDragType}
-                                    onCardClick={cardIndex => onCardClick?.(i, cardIndex)}
-                                />
-                            ))}
+                            {sortedIds.map(id => {
+                                const originalIdx = +id.slice(6);
+                                const stack = stacks[originalIdx];
+                                return (
+                                    <SortableStackSlot
+                                        key={id}
+                                        id={id}
+                                        stack={stack}
+                                        stackIndex={originalIdx}
+                                        activeDragId={activeDragId}
+                                        activeDragType={activeDragType}
+                                        onCardClick={cardIndex => onCardClick?.(originalIdx, cardIndex)}
+                                    />
+                                );
+                            })}
                             {Array.from({length: emptySlotCount}, (_, i) => (
                                 <EmptySlot key={`empty-${i}`} index={stacks.length + i} />
                             ))}
@@ -348,7 +370,7 @@ export function FieldRegion({
                     </SortableContext>
                 )}
             </fieldset>
-            <DragOverlay>
+            <DragOverlay dropAnimation={null}>
                 {renderOverlay()}
             </DragOverlay>
         </DndContext>
