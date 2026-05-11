@@ -7,7 +7,10 @@ import jakarta.transaction.Transactional;
 import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
-import net.deckserver.jol.game.*;
+import net.deckserver.jol.game.CardData;
+import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.PlayerData;
+import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
 import org.jboss.logging.Logger;
 

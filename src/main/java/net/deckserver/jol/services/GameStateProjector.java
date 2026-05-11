@@ -1,14 +1,20 @@
 package net.deckserver.jol.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import net.deckserver.jol.dto.*;
+import net.deckserver.jol.dto.CardStateDto;
+import net.deckserver.jol.dto.GameStateDto;
+import net.deckserver.jol.dto.PlayerStateDto;
+import net.deckserver.jol.dto.RegionStateDto;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Transforms a GameData aggregate into a per-player view applying visibility rules

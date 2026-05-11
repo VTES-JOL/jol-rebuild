@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.SeatingDto;
 import net.deckserver.jol.dto.TournamentDto;
 import net.deckserver.jol.dto.TournamentRegistrationDto;
@@ -16,7 +17,6 @@ import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.TournamentFormat;
 import net.deckserver.jol.enums.TournamentStatus;
-import net.deckserver.jol.config.Config;
 import net.deckserver.jol.services.TournamentService;
 
 import java.time.OffsetDateTime;
