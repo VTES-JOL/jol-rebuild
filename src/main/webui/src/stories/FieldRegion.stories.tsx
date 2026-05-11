@@ -42,7 +42,7 @@ export const Empty: Story = {
 };
 
 export const SingleStack: Story = {
-    args: {name: 'Torpor', stacks: [stack1], columns: 3},
+    args: {name: 'Torpor', stacks: [stack1, stack2, stack3], columns: 3},
     decorators: [wrap],
 };
 
@@ -88,10 +88,9 @@ export const WithDragDrop: Story = {
         }
 
         return (
-            <div className="w-96">
-                <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove}/>
-            </div>
+            <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove}/>
         );
     },
-    args: {name: 'Playing Field', columns: 3},
+    args: {name: 'Ready', columns: 3},
+    decorators: [wrap]
 };

@@ -4,7 +4,7 @@ import {rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortab
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
 import type {CSSProperties} from 'react';
-import {useState} from 'react';
+import {useCallback, useRef, useState} from 'react';
 import type {CardData} from './CardStack.tsx';
 import {CardStack} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
@@ -50,30 +50,30 @@ function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => 
 type StackDragData = {type: 'stack'; stackIndex: number};
 type CardDragData = {type: 'card'; stackIndex: number; cardIndex: number};
 type DragData = StackDragData | CardDragData;
+type DropTargetData = StackDragData | {type: 'empty-slot'; index: number};
 
 // ── Draggable card item ────────────────────────────────────────────────────────
 
-const OFFSET_X = 12;
-const OFFSET_Y = 18;
+const OFFSET_X_PCT = 0.09;
+const OFFSET_Y_PCT = 0.17;
 const MAX_VISIBLE = 3;
 
 function DraggableCardItem({
     card,
-    id,
     stackIndex,
     cardIndex,
+    activeDragId,
     style,
-    isActive,
     onClick,
 }: {
     card: CardData;
-    id: string;
     stackIndex: number;
     cardIndex: number;
+    activeDragId: string | null;
     style: CSSProperties;
-    isActive: boolean;
     onClick?: () => void;
 }) {
+    const id = `card-${stackIndex}-${cardIndex}`;
     const {attributes, listeners, setNodeRef} = useDraggable({
         id,
         data: {type: 'card', stackIndex, cardIndex} satisfies CardDragData,
@@ -82,7 +82,7 @@ function DraggableCardItem({
         <div
             ref={setNodeRef}
             style={style}
-            className={`cursor-grab active:cursor-grabbing${isActive ? ' opacity-30' : ''}`}
+            className={`cursor-grab active:cursor-grabbing${activeDragId === id ? ' opacity-30' : ''}`}
             {...attributes}
             {...listeners}
             onClick={onClick}
@@ -105,20 +105,34 @@ function DraggableCardStack({
     onCardClick?: (cardIndex: number) => void;
     activeDragId: string | null;
 }) {
+    const [cardWidth, setCardWidth] = useState(0);
+    const roRef = useRef<ResizeObserver | null>(null);
+    const containerRef = useCallback((el: HTMLDivElement | null) => {
+        roRef.current?.disconnect();
+        roRef.current = null;
+        if (!el) return;
+        setCardWidth(el.offsetWidth);
+        const ro = new ResizeObserver(([entry]) => setCardWidth(entry.contentRect.width));
+        ro.observe(el);
+        roRef.current = ro;
+    }, []);
+
     if (cards.length === 0) return null;
     const n = cards.length;
     const depth = Math.min(n - 1, MAX_VISIBLE);
+    const ox = cardWidth * OFFSET_X_PCT;
+    const oy = cardWidth * OFFSET_Y_PCT;
     return (
         <div
+            ref={containerRef}
             className="relative"
-            style={{paddingTop: `${depth * OFFSET_Y}px`}}
+            style={{paddingTop: `${depth * oy}px`}}
         >
             <DraggableCardItem
-                id={`card-${stackIndex}-0`}
                 stackIndex={stackIndex}
                 cardIndex={0}
                 card={cards[0]}
-                isActive={activeDragId === `card-${stackIndex}-0`}
+                activeDragId={activeDragId}
                 style={{position: 'relative', zIndex: n}}
                 onClick={() => onCardClick?.(0)}
             />
@@ -128,16 +142,15 @@ function DraggableCardStack({
                 return (
                     <DraggableCardItem
                         key={i}
-                        id={`card-${stackIndex}-${i}`}
                         stackIndex={stackIndex}
                         cardIndex={i}
                         card={card}
-                        isActive={activeDragId === `card-${stackIndex}-${i}`}
+                        activeDragId={activeDragId}
                         style={{
                             position: 'absolute',
-                            top: `${(depth - vi) * OFFSET_Y}px`,
-                            left: `${vi * OFFSET_X}px`,
-                            right: `${-(vi * OFFSET_X)}px`,
+                            top: `${(depth - vi) * oy}px`,
+                            left: `${vi * ox}px`,
+                            right: `${-(vi * ox)}px`,
                             zIndex: n - i,
                         }}
                         onClick={() => onCardClick?.(i)}
@@ -183,9 +196,9 @@ function SortableStackSlot({
             style={style}
             className={[
                 'flex flex-col gap-1 rounded-lg',
-                isDragging ? 'opacity-30' : '',
-                isCardTarget ? 'ring-2 ring-arcane/50' : '',
-            ].join(' ')}
+                isDragging && 'opacity-30',
+                isCardTarget && 'ring-2 ring-arcane/50',
+            ].filter(Boolean).join(' ')}
         >
             <div
                 className="flex justify-center text-ink-muted/40 hover:text-ink-muted/70 transition-colors cursor-grab active:cursor-grabbing"
@@ -216,8 +229,8 @@ function EmptySlot({index}: {index: number}) {
             ref={setNodeRef}
             className={[
                 'aspect-5/7 rounded-lg border border-dashed border-surface/30 transition-colors',
-                isOver ? 'border-arcane/50 bg-arcane/5' : '',
-            ].join(' ')}
+                isOver && 'border-arcane/50 bg-arcane/5',
+            ].filter(Boolean).join(' ')}
         />
     );
 }
@@ -265,24 +278,18 @@ export function FieldRegion({
         if (!over) return;
 
         const drag = active.data.current as DragData;
-        const overId = over.id.toString();
+        const drop = over.data.current as DropTargetData;
 
         if (drag.type === 'stack') {
             const from = drag.stackIndex;
-            let to: number;
-            if (overId.startsWith('stack-')) {
-                to = parseInt(overId.slice('stack-'.length));
-            } else if (overId.startsWith('empty-')) {
-                to = stacks.length - 1;
-            } else {
-                return;
+            if (drop.type === 'stack') {
+                if (from !== drop.stackIndex) onReorder?.(from, drop.stackIndex);
+            } else if (drop.type === 'empty-slot') {
+                onReorder?.(from, stacks.length - 1);
             }
-            if (from !== to) onReorder?.(from, to);
-        } else if (drag.type === 'card') {
-            if (!overId.startsWith('stack-')) return;
-            const toStack = parseInt(overId.slice('stack-'.length));
-            if (drag.stackIndex !== toStack) {
-                onCardMove?.(drag.stackIndex, drag.cardIndex, toStack);
+        } else if (drag.type === 'card' && drop.type === 'stack') {
+            if (drag.stackIndex !== drop.stackIndex) {
+                onCardMove?.(drag.stackIndex, drag.cardIndex, drop.stackIndex);
             }
         }
     }
@@ -292,7 +299,7 @@ export function FieldRegion({
         ? `card-${activeDrag.stackIndex}-${activeDrag.cardIndex}`
         : null;
 
-    const overlayNode = (() => {
+    function renderOverlay() {
         if (!activeDrag) return null;
         if (activeDrag.type === 'stack') {
             const stack = stacks[activeDrag.stackIndex];
@@ -308,7 +315,7 @@ export function FieldRegion({
                 <FieldCard {...card} />
             </div>
         ) : null;
-    })();
+    }
 
     return (
         <DndContext
@@ -354,7 +361,7 @@ export function FieldRegion({
                 )}
             </fieldset>
             <DragOverlay>
-                {overlayNode}
+                {renderOverlay()}
             </DragOverlay>
         </DndContext>
     );
