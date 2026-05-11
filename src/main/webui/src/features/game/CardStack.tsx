@@ -14,17 +14,16 @@ type Props = {
 
 const OFFSET_X = 12;
 const OFFSET_Y = 30;
+const MAX_VISIBLE = 3;
 
 export function CardStack({cards, onCardClick}: Props) {
     if (cards.length === 0) return null;
     const n = cards.length;
+    const depth = Math.min(n - 1, MAX_VISIBLE);
     return (
         <div
             className="relative"
-            style={{
-                paddingTop: `${(n - 1) * OFFSET_Y}px`,
-                paddingRight: `${(n - 1) * OFFSET_X}px`,
-            }}
+            style={{paddingTop: `${depth * OFFSET_Y}px`}}
         >
             <div
                 className="relative cursor-pointer"
@@ -35,14 +34,15 @@ export function CardStack({cards, onCardClick}: Props) {
             </div>
             {cards.slice(1).map((card, sliceIndex) => {
                 const i = sliceIndex + 1;
+                const vi = Math.min(i, MAX_VISIBLE);
                 return (
                     <div
                         key={i}
                         className="absolute cursor-pointer"
                         style={{
-                            top: `${(n - 1 - i) * OFFSET_Y}px`,
-                            left: `${i * OFFSET_X}px`,
-                            right: `${(n - 1 - i) * OFFSET_X}px`,
+                            top: `${(depth - vi) * OFFSET_Y}px`,
+                            left: `${vi * OFFSET_X}px`,
+                            right: `${-(vi * OFFSET_X)}px`,
                             zIndex: n - i,
                         }}
                         onClick={() => onCardClick?.(i)}

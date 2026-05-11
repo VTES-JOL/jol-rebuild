@@ -12,6 +12,7 @@ const meta = {
     args: {
         onCardClick: fn(),
         onReorder: fn(),
+        onCardMove: fn(),
     },
 } satisfies Meta<typeof FieldRegion>;
 
@@ -66,7 +67,8 @@ export const CompactGrid: Story = {
 
 export const WithDragDrop: Story = {
     render: (args) => {
-        const [stacks, setStacks] = useState([stack1, stack2, stack3, stack4]);
+        const [stacks, setStacks] = useState([stack1, stack2, stack3, stack4, stack5]);
+
         function handleReorder(from: number, to: number) {
             setStacks(prev => {
                 const next = [...prev];
@@ -75,9 +77,19 @@ export const WithDragDrop: Story = {
                 return next;
             });
         }
+
+        function handleCardMove(fromStack: number, fromCard: number, toStack: number) {
+            setStacks(prev => {
+                const next = prev.map(s => [...s]);
+                const [card] = next[fromStack].splice(fromCard, 1);
+                next[toStack].push(card);
+                return next.filter(s => s.length > 0);
+            });
+        }
+
         return (
             <div className="w-96">
-                <FieldRegion {...args} stacks={stacks} onReorder={handleReorder}/>
+                <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove}/>
             </div>
         );
     },
