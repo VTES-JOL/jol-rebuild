@@ -35,7 +35,7 @@ const stack5 = [lib4];
 const stack6 = [lib5];
 
 export const Empty: Story = {
-    args: {name: 'Influence Pool', stacks: [], columns: 3},
+    args: {name: 'Ash Heap', stacks: [], columns: 1},
 };
 
 export const SingleStack: Story = {
@@ -102,4 +102,95 @@ export const WithDragDrop: Story = {
         );
     },
     args: {name: 'Ready', stacks: [], columns: 5},
+};
+
+export const ResizableColumns: Story = {
+    render: (args) => {
+        const [cols, setCols] = useState(3);
+        return (
+            <FieldRegion
+                {...args}
+                columns={cols}
+                resizable
+                minColumns={1}
+                maxColumns={7}
+                onColumnsChange={setCols}
+            />
+        );
+    },
+    args: {
+        name: 'Resizable Region',
+        stacks: [stack1, stack2, stack3, stack4, stack5, stack6],
+        columns: 3,
+    },
+};
+
+export const ResizableColsAndRows: Story = {
+    render: (args) => {
+        const [cols, setCols] = useState(3);
+        const [rows, setRows] = useState(2);
+        return (
+            <div>
+                <p className="mb-2 text-xs text-ink-muted">Columns: {cols} | Rows: {rows}</p>
+                <FieldRegion
+                    {...args}
+                    columns={cols}
+                    rows={rows}
+                    resizable
+                    minColumns={1}
+                    maxColumns={7}
+                    minRows={1}
+                    maxRows={5}
+                    onColumnsChange={setCols}
+                    onRowsChange={setRows}
+                />
+            </div>
+        );
+    },
+    args: {
+        name: 'Ready Region',
+        stacks: [stack1, stack2, stack3, stack4, stack5, stack6],
+        columns: 3,
+        rows: 2,
+    },
+};
+
+export const ResizableWithDragDrop: Story = {
+    render: (args) => {
+        const [stacks, setStacks] = useState([stack1, stack2, stack6, stack5, stack3, stack4]);
+        const [cols, setCols] = useState(3);
+
+        function handleReorder(from: number, to: number) {
+            setStacks(prev => {
+                const next = [...prev];
+                const [moved] = next.splice(from, 1);
+                next.splice(to, 0, moved);
+                return next;
+            });
+        }
+
+        function handleCardMove(fromStack: number, fromCard: number, toStack: number) {
+            setStacks(prev => {
+                const next = prev.map(s => [...s]);
+                const [card] = next[fromStack].splice(fromCard, 1);
+                next[toStack].push(card);
+                return next.filter(s => s.length > 0);
+            });
+        }
+
+        return (
+            <FieldRegion
+                {...args}
+                stacks={stacks}
+                columns={cols}
+                resizable
+                minColumns={1}
+                maxColumns={7}
+                onColumnsChange={setCols}
+                onReorder={handleReorder}
+                onCardMove={handleCardMove}
+            />
+        );
+    },
+    args: {name: 'Ready', stacks: [], columns: 3},
 };

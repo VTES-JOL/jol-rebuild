@@ -3,15 +3,21 @@ import {DndContext, DragOverlay, PointerSensor, useDraggable, useDroppable, useS
 import {arrayMove, rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {CSSProperties} from 'react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
-import {CARD_WIDTH, CardStack, OFFSET_X, OFFSET_Y} from './CardStack.tsx';
+import {useResizeDrag} from '../../hooks/useResizeDrag.ts';
+import {CARD_WIDTH, CardStack} from './CardStack.tsx';
 import type {CardData} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
 
+const COL_GAP = 32;
+const ROW_GAP = 40;
+const COL_UNIT = CARD_WIDTH + COL_GAP;
+const ROW_UNIT = Math.round(CARD_WIDTH * 7 / 5) + ROW_GAP;
+
 // ── Compact stack ─────────────────────────────────────────────────────────────
 
-const COMPACT_OFFSET = 4;
+const COMPACT_OFFSET = 7;
 const MAX_GHOST_LAYERS = 3;
 
 function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => void}) {
@@ -29,7 +35,7 @@ function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => 
             {Array.from({length: ghostCount}, (_, gi) => (
                 <div
                     key={gi}
-                    className="absolute bottom-0 aspect-5/7 rounded-lg bg-panel/80 border border-surface/30 shadow-sm"
+                    className="absolute bottom-0 aspect-5/7 rounded-lg bg-panel border border-ink-muted/30 shadow-md"
                     style={{
                         left: 0,
                         right: `${ghostCount * COMPACT_OFFSET}px`,
@@ -204,6 +210,21 @@ function EmptySlot({index}: {index: number}) {
     );
 }
 
+// ── Resize handle ─────────────────────────────────────────────────────────────
+
+function ResizeHandle({axis, isDragging, onPointerDown}: {
+    axis: 'x' | 'y';
+    isDragging: boolean;
+    onPointerDown: (e: React.PointerEvent) => void;
+}) {
+    const base = 'absolute rounded-full transition-colors touch-none select-none';
+    const color = isDragging ? 'bg-arcane/80' : 'bg-arcane/25 hover:bg-arcane/60';
+    const pos = axis === 'x'
+        ? 'right-0 top-1/2 -translate-y-1/2 translate-x-1 w-1.5 h-8 cursor-ew-resize'
+        : 'bottom-0 left-1/2 -translate-x-1/2 translate-y-1 h-1.5 w-8 cursor-ns-resize';
+    return <div className={`${base} ${color} ${pos}`} onPointerDown={onPointerDown} />;
+}
+
 // ── FieldRegion ───────────────────────────────────────────────────────────────
 
 type FieldRegionProps = {
@@ -212,6 +233,13 @@ type FieldRegionProps = {
     columns: number;
     rows?: number;
     compact?: boolean;
+    resizable?: boolean;
+    minColumns?: number;
+    maxColumns?: number;
+    minRows?: number;
+    maxRows?: number;
+    onColumnsChange?: (cols: number) => void;
+    onRowsChange?: (rows: number) => void;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
     onReorder?: (from: number, to: number) => void;
     onCardMove?: (fromStack: number, fromCard: number, toStack: number) => void;
@@ -223,6 +251,13 @@ export function FieldRegion({
     columns,
     rows,
     compact = false,
+    resizable = false,
+    minColumns = 1,
+    maxColumns = 12,
+    minRows = 1,
+    maxRows = 8,
+    onColumnsChange,
+    onRowsChange,
     onCardClick,
     onReorder,
     onCardMove,
@@ -231,6 +266,26 @@ export function FieldRegion({
     const count = useMemo(() => stacks.reduce((sum, s) => sum + s.length, 0), [stacks]);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
     const [suppressTransition, setSuppressTransition] = useState(false);
+
+    const [localColumns, setLocalColumns] = useState(columns);
+    const [localRows, setLocalRows] = useState<number | undefined>(rows);
+    useEffect(() => { setLocalColumns(columns); }, [columns]);
+    useEffect(() => { setLocalRows(rows); }, [rows]);
+
+    const displayColumns = resizable ? localColumns : columns;
+    const displayRows    = resizable ? localRows    : rows;
+    const effectiveRows  = (displayRows ?? Math.ceil(stacks.length / displayColumns)) || 1;
+
+    const colResize = useResizeDrag({
+        startCount: localColumns, unitPx: COL_UNIT,
+        min: minColumns, max: maxColumns,
+        axis: 'x', onCountChange: setLocalColumns, onCommit: onColumnsChange,
+    });
+    const rowResize = useResizeDrag({
+        startCount: effectiveRows, unitPx: ROW_UNIT,
+        min: minRows, max: maxRows,
+        axis: 'y', onCountChange: setLocalRows, onCommit: onRowsChange,
+    });
 
     // Keep suppressTransition true for one rAF after drag ends so cards render
     // in their final positions before transitions are re-enabled.
@@ -247,8 +302,11 @@ export function FieldRegion({
     useEffect(() => { setSortedIds(stacks.map((_, i) => stackId(i))); }, [stacks]);
 
     const totalSlots = useMemo(
-        () => rows != null ? rows * columns : Math.ceil(stacks.length / columns) * columns,
-        [rows, columns, stacks.length],
+        () => Math.max(
+            displayColumns,
+            displayRows != null ? displayRows * displayColumns : Math.ceil(stacks.length / displayColumns) * displayColumns,
+        ),
+        [displayRows, displayColumns, stacks.length],
     );
     const emptySlotCount = useMemo(() => Math.max(0, totalSlots - stacks.length), [totalSlots, stacks.length]);
 
@@ -322,7 +380,7 @@ export function FieldRegion({
 
     if (compact) {
         return (
-            <fieldset className="w-fit rounded-lg border border-surface border-2 px-3 pb-3">
+            <fieldset className="relative w-fit rounded-lg border-2 border-ink-muted/40 px-3 pb-3">
                 {legend}
                 <CompactCardStack cards={stacks.flat()} onClick={() => onCardClick?.(0, 0)} />
             </fieldset>
@@ -337,14 +395,14 @@ export function FieldRegion({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            <fieldset className="w-fit rounded-lg border border-surface border-2 px-3 pb-3">
+            <fieldset className="relative w-fit rounded-lg border-2 border-ink-muted/40 px-3 pb-3">
                 {legend}
                 <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
                     <div
                         className="grid gap-x-8 gap-y-10"
                         style={{
-                            gridTemplateColumns: `repeat(${columns}, ${CARD_WIDTH}px)`,
-                            ...(rows ? {gridTemplateRows: `repeat(${rows}, auto)`} : {}),
+                            gridTemplateColumns: `repeat(${displayColumns}, ${CARD_WIDTH}px)`,
+                            ...(displayRows ? {gridTemplateRows: `repeat(${displayRows}, auto)`} : {}),
                         }}
                     >
                         {sortedIds.map(id => {
@@ -368,6 +426,12 @@ export function FieldRegion({
                         ))}
                     </div>
                 </SortableContext>
+                {resizable && (
+                    <>
+                        <ResizeHandle axis="x" isDragging={colResize.isDragging} onPointerDown={colResize.handlePointerDown} />
+                        <ResizeHandle axis="y" isDragging={rowResize.isDragging} onPointerDown={rowResize.handlePointerDown} />
+                    </>
+                )}
             </fieldset>
             <DragOverlay dropAnimation={null}>
                 {renderOverlay()}
