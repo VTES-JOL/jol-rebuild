@@ -64,6 +64,7 @@ function DraggableCardItem({
     stackIndex,
     cardIndex,
     activeDragId,
+    suppressTransition,
     style,
     onClick,
 }: {
@@ -71,6 +72,7 @@ function DraggableCardItem({
     stackIndex: number;
     cardIndex: number;
     activeDragId: string | null;
+    suppressTransition: boolean;
     style: CSSProperties;
     onClick?: () => void;
 }) {
@@ -88,7 +90,7 @@ function DraggableCardItem({
             {...listeners}
             onClick={onClick}
         >
-            <FieldCard {...card} />
+            <FieldCard {...card} suppressTransition={suppressTransition} />
         </div>
     );
 }
@@ -100,11 +102,13 @@ function DraggableCardStack({
     stackIndex,
     onCardClick,
     activeDragId,
+    suppressTransition,
 }: {
     cards: CardData[];
     stackIndex: number;
     onCardClick?: (cardIndex: number) => void;
     activeDragId: string | null;
+    suppressTransition: boolean;
 }) {
     if (cards.length === 0) return null;
     const n = cards.length;
@@ -119,6 +123,7 @@ function DraggableCardStack({
                 cardIndex={0}
                 card={cards[0]}
                 activeDragId={activeDragId}
+                suppressTransition={suppressTransition}
                 style={{position: 'relative', zIndex: n}}
                 onClick={() => onCardClick?.(0)}
             />
@@ -132,6 +137,7 @@ function DraggableCardStack({
                         cardIndex={i}
                         card={card}
                         activeDragId={activeDragId}
+                        suppressTransition={suppressTransition}
                         style={{
                             position: 'absolute',
                             top: `${(depth - vi) * OFFSET_Y}px`,
@@ -155,6 +161,7 @@ function SortableStackSlot({
     stackIndex,
     activeDragId,
     activeDragType,
+    suppressTransition,
     onCardClick,
 }: {
     id: string;
@@ -162,16 +169,16 @@ function SortableStackSlot({
     stackIndex: number;
     activeDragId: string | null;
     activeDragType: 'stack' | 'card' | null;
+    suppressTransition: boolean;
     onCardClick?: (cardIndex: number) => void;
 }) {
-    const {attributes, listeners, setNodeRef, transform, transition, isDragging, isOver} = useSortable({
+    const {attributes, listeners, setNodeRef, transform, isDragging, isOver} = useSortable({
         id,
         data: {type: 'stack', stackIndex} satisfies StackDragData,
     });
 
     const style: CSSProperties = {
         transform: CSS.Transform.toString(transform),
-        transition,
     };
 
     const isCardTarget = isOver && activeDragType === 'card';
@@ -198,6 +205,7 @@ function SortableStackSlot({
                 stackIndex={stackIndex}
                 onCardClick={onCardClick}
                 activeDragId={activeDragId}
+                suppressTransition={suppressTransition}
             />
         </div>
     );
@@ -247,6 +255,16 @@ export function FieldRegion({
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
     const count = stacks.reduce((sum, s) => sum + s.length, 0);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
+    const [suppressTransition, setSuppressTransition] = useState(false);
+
+    // Keep suppressTransition true for one rAF after drag ends so cards render
+    // in their final positions before transitions are re-enabled.
+    useEffect(() => {
+        if (activeDrag !== null) return;
+        if (!suppressTransition) return;
+        const id = requestAnimationFrame(() => setSuppressTransition(false));
+        return () => cancelAnimationFrame(id);
+    }, [activeDrag, suppressTransition]);
 
     // Stable IDs: "stack-{originalIndex}". Reordered live during drag so DOM
     // positions always match the visual preview — eliminating post-drop animation glitches.
@@ -260,6 +278,7 @@ export function FieldRegion({
 
     function handleDragStart(event: DragStartEvent) {
         setActiveDrag(event.active.data.current as DragData);
+        setSuppressTransition(true);
     }
 
     function handleDragOver(event: DragOverEvent) {
@@ -316,7 +335,7 @@ export function FieldRegion({
         const card = stacks[activeDrag.stackIndex]?.[activeDrag.cardIndex];
         return card ? (
             <div className="w-24 opacity-80 pointer-events-none">
-                <FieldCard {...card} />
+                <FieldCard {...card} suppressTransition />
             </div>
         ) : null;
     }
@@ -359,6 +378,7 @@ export function FieldRegion({
                                         stackIndex={originalIdx}
                                         activeDragId={activeDragId}
                                         activeDragType={activeDragType}
+                                        suppressTransition={suppressTransition}
                                         onCardClick={cardIndex => onCardClick?.(originalIdx, cardIndex)}
                                     />
                                 );
