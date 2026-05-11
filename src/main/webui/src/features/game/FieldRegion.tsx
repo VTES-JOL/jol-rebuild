@@ -4,9 +4,9 @@ import {arrayMove, rectSortingStrategy, SortableContext, useSortable} from '@dnd
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
 import type {CSSProperties} from 'react';
-import {useEffect, useState} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+import {CARD_WIDTH, CardStack, OFFSET_X, OFFSET_Y} from './CardStack.tsx';
 import type {CardData} from './CardStack.tsx';
-import {CardStack} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
 
 // ── Compact stack ─────────────────────────────────────────────────────────────
@@ -52,12 +52,12 @@ type CardDragData = {type: 'card'; stackIndex: number; cardIndex: number};
 type DragData = StackDragData | CardDragData;
 type DropTargetData = StackDragData | {type: 'empty-slot'; index: number};
 
-// ── Draggable card item ────────────────────────────────────────────────────────
+// ── ID helpers ────────────────────────────────────────────────────────────────
 
-const CARD_WIDTH = 96;
-const OFFSET_X = Math.round(CARD_WIDTH * 0.09); // 9px
-const OFFSET_Y = Math.round(CARD_WIDTH * 0.17); // 16px
-const MAX_VISIBLE = 3;
+const stackId = (index: number) => `stack-${index}`;
+const idToIndex = (id: string) => parseInt(id.slice(6), 10);
+
+// ── Draggable card item ────────────────────────────────────────────────────────
 
 function DraggableCardItem({
     card,
@@ -110,46 +110,21 @@ function DraggableCardStack({
     activeDragId: string | null;
     suppressTransition: boolean;
 }) {
-    if (cards.length === 0) return null;
-    const n = cards.length;
-    const depth = Math.min(n - 1, MAX_VISIBLE);
     return (
-        <div
-            className="relative"
-            style={{paddingTop: `${depth * OFFSET_Y}px`}}
-        >
-            <DraggableCardItem
-                stackIndex={stackIndex}
-                cardIndex={0}
-                card={cards[0]}
-                activeDragId={activeDragId}
-                suppressTransition={suppressTransition}
-                style={{position: 'relative', zIndex: n}}
-                onClick={() => onCardClick?.(0)}
-            />
-            {cards.slice(1).map((card, sliceIndex) => {
-                const i = sliceIndex + 1;
-                const vi = Math.min(i, MAX_VISIBLE);
-                return (
-                    <DraggableCardItem
-                        key={i}
-                        stackIndex={stackIndex}
-                        cardIndex={i}
-                        card={card}
-                        activeDragId={activeDragId}
-                        suppressTransition={suppressTransition}
-                        style={{
-                            position: 'absolute',
-                            top: `${(depth - vi) * OFFSET_Y}px`,
-                            left: `${vi * OFFSET_X}px`,
-                            right: `${-(vi * OFFSET_X)}px`,
-                            zIndex: n - i,
-                        }}
-                        onClick={() => onCardClick?.(i)}
-                    />
-                );
-            })}
-        </div>
+        <CardStack
+            cards={cards}
+            renderCard={(card, i, style) => (
+                <DraggableCardItem
+                    card={card}
+                    stackIndex={stackIndex}
+                    cardIndex={i}
+                    activeDragId={activeDragId}
+                    suppressTransition={suppressTransition}
+                    style={style}
+                    onClick={() => onCardClick?.(i)}
+                />
+            )}
+        />
     );
 }
 
@@ -177,10 +152,7 @@ function SortableStackSlot({
         data: {type: 'stack', stackIndex} satisfies StackDragData,
     });
 
-    const style: CSSProperties = {
-        transform: CSS.Transform.toString(transform),
-    };
-
+    const style: CSSProperties = {transform: CSS.Transform.toString(transform)};
     const isCardTarget = isOver && activeDragType === 'card';
 
     return (
@@ -253,7 +225,7 @@ export function FieldRegion({
     onCardMove,
 }: FieldRegionProps) {
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
-    const count = stacks.reduce((sum, s) => sum + s.length, 0);
+    const count = useMemo(() => stacks.reduce((sum, s) => sum + s.length, 0), [stacks]);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
     const [suppressTransition, setSuppressTransition] = useState(false);
 
@@ -268,20 +240,21 @@ export function FieldRegion({
 
     // Stable IDs: "stack-{originalIndex}". Reordered live during drag so DOM
     // positions always match the visual preview — eliminating post-drop animation glitches.
-    const [sortedIds, setSortedIds] = useState(() => stacks.map((_, i) => `stack-${i}`));
-    useEffect(() => { setSortedIds(stacks.map((_, i) => `stack-${i}`)); }, [stacks]);
+    const [sortedIds, setSortedIds] = useState(() => stacks.map((_, i) => stackId(i)));
+    useEffect(() => { setSortedIds(stacks.map((_, i) => stackId(i))); }, [stacks]);
 
-    const totalSlots = rows != null
-        ? rows * columns
-        : Math.ceil(stacks.length / columns) * columns;
-    const emptySlotCount = Math.max(0, totalSlots - stacks.length);
+    const totalSlots = useMemo(
+        () => rows != null ? rows * columns : Math.ceil(stacks.length / columns) * columns,
+        [rows, columns, stacks.length],
+    );
+    const emptySlotCount = useMemo(() => Math.max(0, totalSlots - stacks.length), [totalSlots, stacks.length]);
 
-    function handleDragStart(event: DragStartEvent) {
+    const handleDragStart = useCallback((event: DragStartEvent) => {
         setActiveDrag(event.active.data.current as DragData);
         setSuppressTransition(true);
-    }
+    }, []);
 
-    function handleDragOver(event: DragOverEvent) {
+    const handleDragOver = useCallback((event: DragOverEvent) => {
         const {active, over} = event;
         if (!over || active.id === over.id) return;
         const drag = active.data.current as DragData;
@@ -292,30 +265,28 @@ export function FieldRegion({
             const to   = prev.indexOf(String(over.id));
             return from === -1 || to === -1 ? prev : arrayMove(prev, from, to);
         });
-    }
+    }, []);
 
-    function handleDragEnd(event: DragEndEvent) {
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
         const {active, over} = event;
         setActiveDrag(null);
         if (!over) return;
-
         const drag = active.data.current as DragData;
         const drop = over.data.current as DropTargetData;
-
         if (drag.type === 'stack') {
-            const originalIdx = +String(active.id).slice(6);
+            const originalIdx = idToIndex(String(active.id));
             const finalPos    = sortedIds.indexOf(String(active.id));
             if (originalIdx !== finalPos) onReorder?.(originalIdx, finalPos);
         } else if (drag.type === 'card' && drop.type === 'stack') {
-            const targetIdx = +String(over.id).slice(6);
+            const targetIdx = idToIndex(String(over.id));
             if (drag.stackIndex !== targetIdx) onCardMove?.(drag.stackIndex, drag.cardIndex, targetIdx);
         }
-    }
+    }, [sortedIds, onReorder, onCardMove]);
 
-    function handleDragCancel() {
+    const handleDragCancel = useCallback(() => {
         setActiveDrag(null);
-        setSortedIds(stacks.map((_, i) => `stack-${i}`));
-    }
+        setSortedIds(stacks.map((_, i) => stackId(i)));
+    }, [stacks]);
 
     const activeDragType = activeDrag?.type ?? null;
     const activeDragId = activeDrag?.type === 'card'
@@ -325,10 +296,9 @@ export function FieldRegion({
     function renderOverlay() {
         if (!activeDrag) return null;
         if (activeDrag.type === 'stack') {
-            const stack = stacks[activeDrag.stackIndex];
             return (
                 <div className="w-32 opacity-80 pointer-events-none">
-                    {compact ? <CompactCardStack cards={stack} /> : <CardStack cards={stack} />}
+                    <CardStack cards={stacks[activeDrag.stackIndex]} />
                 </div>
             );
         }
@@ -340,6 +310,22 @@ export function FieldRegion({
         ) : null;
     }
 
+    const legend = (
+        <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
+            <span>{name}</span>
+            <span className="font-medium text-ink-secondary">{count}</span>
+        </legend>
+    );
+
+    if (compact) {
+        return (
+            <fieldset className="w-fit rounded-lg border border-surface border-2 px-3 pb-3">
+                {legend}
+                <CompactCardStack cards={stacks.flat()} onClick={() => onCardClick?.(0, 0)} />
+            </fieldset>
+        );
+    }
+
     return (
         <DndContext
             sensors={sensors}
@@ -349,46 +335,36 @@ export function FieldRegion({
             onDragCancel={handleDragCancel}
         >
             <fieldset className="w-fit rounded-lg border border-surface border-2 px-3 pb-3">
-                <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
-                    <span>{name}</span>
-                    <span className="font-medium text-ink-secondary">{count}</span>
-                </legend>
-                {compact ? (
-                    <CompactCardStack
-                        cards={stacks.flat()}
-                        onClick={() => onCardClick?.(0, 0)}
-                    />
-                ) : (
-                    <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
-                        <div
-                            className="grid gap-x-8 gap-y-10"
-                            style={{
-                                gridTemplateColumns: `repeat(${columns}, ${CARD_WIDTH}px)`,
-                                ...(rows ? {gridTemplateRows: `repeat(${rows}, auto)`} : {}),
-                            }}
-                        >
-                            {sortedIds.map(id => {
-                                const originalIdx = +id.slice(6);
-                                const stack = stacks[originalIdx];
-                                return (
-                                    <SortableStackSlot
-                                        key={id}
-                                        id={id}
-                                        stack={stack}
-                                        stackIndex={originalIdx}
-                                        activeDragId={activeDragId}
-                                        activeDragType={activeDragType}
-                                        suppressTransition={suppressTransition}
-                                        onCardClick={cardIndex => onCardClick?.(originalIdx, cardIndex)}
-                                    />
-                                );
-                            })}
-                            {Array.from({length: emptySlotCount}, (_, i) => (
-                                <EmptySlot key={`empty-${i}`} index={stacks.length + i} />
-                            ))}
-                        </div>
-                    </SortableContext>
-                )}
+                {legend}
+                <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
+                    <div
+                        className="grid gap-x-8 gap-y-10"
+                        style={{
+                            gridTemplateColumns: `repeat(${columns}, ${CARD_WIDTH}px)`,
+                            ...(rows ? {gridTemplateRows: `repeat(${rows}, auto)`} : {}),
+                        }}
+                    >
+                        {sortedIds.map(id => {
+                            const originalIdx = idToIndex(id);
+                            const stack = stacks[originalIdx];
+                            return (
+                                <SortableStackSlot
+                                    key={id}
+                                    id={id}
+                                    stack={stack}
+                                    stackIndex={originalIdx}
+                                    activeDragId={activeDragId}
+                                    activeDragType={activeDragType}
+                                    suppressTransition={suppressTransition}
+                                    onCardClick={cardIndex => onCardClick?.(originalIdx, cardIndex)}
+                                />
+                            );
+                        })}
+                        {Array.from({length: emptySlotCount}, (_, i) => (
+                            <EmptySlot key={`empty-${i}`} index={stacks.length + i} />
+                        ))}
+                    </div>
+                </SortableContext>
             </fieldset>
             <DragOverlay dropAnimation={null}>
                 {renderOverlay()}
