@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, GripVertical, PlusCircle, Users, X} from 'lucide-react';
-import {DndContext, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
 import type {DragEndEvent, Modifier} from '@dnd-kit/core';
+import {DndContext, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
 import Button from '@/shared/components/Button';
 import Spinner from '@/shared/components/Spinner';
 import type {Seat, SeatingDto, Tournament, UnseatedPlayer} from './types';

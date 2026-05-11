@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
-import {CardStack} from '../features/game/CardStack.tsx';
 import type {CardData} from '../features/game/CardStack.tsx';
+import {CardStack} from '../features/game/CardStack.tsx';
 
 const meta = {
     title: 'Game/CardStack',
