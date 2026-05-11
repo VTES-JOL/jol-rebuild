@@ -191,13 +191,16 @@ function EmptySlot({index}: {index: number}) {
         data: {type: 'empty-slot', index},
     });
     return (
-        <div
-            ref={setNodeRef}
-            className={[
-                'aspect-5/7 rounded-lg border border-dashed border-surface/30 transition-colors',
-                isOver && 'border-arcane/50 bg-arcane/5',
-            ].filter(Boolean).join(' ')}
-        />
+        <div className="flex flex-col gap-1">
+            <div className="h-3.5" />
+            <div
+                ref={setNodeRef}
+                className={[
+                    'aspect-5/7 rounded-lg border border-dashed border-ink-muted/40 transition-colors',
+                    isOver && 'border-arcane/50 bg-arcane/5',
+                ].filter(Boolean).join(' ')}
+            />
+        </div>
     );
 }
 
