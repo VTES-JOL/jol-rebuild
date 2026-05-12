@@ -3,12 +3,14 @@ import {DndContext, DragOverlay, PointerSensor, useDraggable, useDroppable, useS
 import {arrayMove, rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
-import {useCallback, useEffect, useMemo, useState} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import type {CSSProperties} from 'react';
 import {CARD_WIDTH, CardStack} from './CardStack.tsx';
 import type {CardData} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
 
+
+const GAP = 32; // matches gap-x-8 on the grid
 
 // ── Compact stack ─────────────────────────────────────────────────────────────
 
@@ -233,6 +235,25 @@ export function FieldRegion({
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
     const [suppressTransition, setSuppressTransition] = useState(false);
 
+    // Measure the parent container to compute how many columns actually fit.
+    // `columns` acts as the maximum; fewer are used when space is constrained.
+    const fieldsetRef = useRef<HTMLFieldSetElement>(null);
+    const [effectiveCols, setEffectiveCols] = useState(columns);
+    useLayoutEffect(() => {
+        const fieldset = fieldsetRef.current;
+        const parent = fieldset?.parentElement;
+        if (!fieldset || !parent) return;
+        const measure = (parentWidth: number) => {
+            const cardW = parseFloat(getComputedStyle(fieldset).getPropertyValue('--card-w')) || CARD_WIDTH;
+            const fit = Math.max(1, Math.floor((parentWidth + GAP) / (cardW + GAP)));
+            setEffectiveCols(Math.min(columns, fit));
+        };
+        const ro = new ResizeObserver(([entry]) => measure(entry.contentRect.width));
+        ro.observe(parent);
+        measure(parent.getBoundingClientRect().width);
+        return () => ro.disconnect();
+    }, [columns]);
+
     // Keep suppressTransition true for one rAF after drag ends so cards render
     // in their final positions before transitions are re-enabled.
     useEffect(() => {
@@ -248,8 +269,8 @@ export function FieldRegion({
     useEffect(() => { setSortedIds(stacks.map((_, i) => stackId(i))); }, [stacks]);
 
     const emptySlotCount = useMemo(
-        () => Math.max(1, Math.ceil(stacks.length / columns)) * columns - stacks.length,
-        [columns, stacks.length],
+        () => Math.max(1, Math.ceil(stacks.length / effectiveCols)) * effectiveCols - stacks.length,
+        [effectiveCols, stacks.length],
     );
 
     const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -337,12 +358,12 @@ export function FieldRegion({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            <fieldset className="relative w-fit rounded-lg border-2 border-ink-muted/40 px-3 pb-3">
+            <fieldset ref={fieldsetRef} className="relative w-fit rounded-lg border-2 border-ink-muted/40 px-3 pb-3">
                 {legend}
                 <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
                     <div
-                        className="grid gap-x-8 gap-y-10"
-                        style={{gridTemplateColumns: `repeat(${columns}, var(--card-w, ${CARD_WIDTH}px))`}}
+                        className="grid gap-x-8 gap-y-2"
+                        style={{gridTemplateColumns: `repeat(${effectiveCols}, var(--card-w, ${CARD_WIDTH}px))`}}
                     >
                         {sortedIds.map(id => {
                             const originalIdx = idToIndex(id);

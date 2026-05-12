@@ -1,4 +1,3 @@
-import type {CSSProperties} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
 import {FieldRegion} from './FieldRegion.tsx';
 
@@ -65,7 +64,6 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
                     ? 'bg-arcane/5 border-arcane/40'
                     : 'bg-panel/50 border-line/75',
             ].join(' ')}
-            style={{'--card-w': 'clamp(72px, 9.4vw, 96px)'} as CSSProperties}
         >
 
             {/* Player info — fixed left column */}

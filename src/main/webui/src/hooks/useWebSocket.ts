@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import type {GameState} from '@/features/game/types.ts';
 
 export interface ReactionDto   { emoji: string; senders: string[] }
 export interface ReplySnapshot { id: string; sender: string; content: string }
@@ -36,7 +37,12 @@ interface LobbyUpdateMsg {
     gameId: string;
 }
 
-export type ChatMessage = ChatMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | LobbyUpdateMsg;
+export interface GameStateMsg {
+    type: 'GAME_STATE' | 'GAME_SNAPSHOT';
+    state: GameState;
+}
+
+export type ChatMessage = ChatMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | LobbyUpdateMsg | GameStateMsg;
 
 // ─── Outbound messages (client → server) ─────────────────────────────────────
 
