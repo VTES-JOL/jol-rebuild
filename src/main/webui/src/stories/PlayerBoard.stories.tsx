@@ -1,6 +1,7 @@
+import React from 'react';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
-import {PlayerBoard} from '../features/game/PlayerBoard.tsx';
+import {BleedConnector, PlayerBoard} from '../features/game/PlayerBoard.tsx';
 import type {GameState} from '../features/game/types.ts';
 import playerViewData from './fixtures/game-player-view.json';
 import spectatorViewData from './fixtures/game-spectator-view.json';
@@ -62,17 +63,19 @@ export const SpectatorView: Story = {
 export const AllPlayers: Story = {
     render: (args) => (
         <Wrapper>
-            <div className="flex flex-col gap-2">
-                {playerGame.playerOrder.map(name => {
+            <div className="flex flex-col">
+                {playerGame.playerOrder.map((name, i) => {
                     const player = playerGame.players.find(p => p.name === name)!;
                     return (
-                        <PlayerBoard
-                            key={name}
-                            {...args}
-                            player={player}
-                            cards={playerGame.cards}
-                            isCurrentPlayer={playerGame.currentPlayer === name}
-                        />
+                        <React.Fragment key={name}>
+                            {i > 0 && <BleedConnector />}
+                            <PlayerBoard
+                                {...args}
+                                player={player}
+                                cards={playerGame.cards}
+                                isCurrentPlayer={playerGame.currentPlayer === name}
+                            />
+                        </React.Fragment>
                     );
                 })}
             </div>
