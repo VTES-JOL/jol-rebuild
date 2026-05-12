@@ -13,6 +13,10 @@ import jakarta.ws.rs.core.Response;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.dto.GameDetailDto;
 import net.deckserver.jol.dto.GameDto;
+import net.deckserver.jol.dto.GameStateDto;
+import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.services.GameStateProjector;
+import net.deckserver.jol.services.GameStateStore;
 import net.deckserver.jol.entity.*;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Status;
@@ -44,6 +48,12 @@ public class GameController {
 
     @Inject
     GameInitService gameInitService;
+
+    @Inject
+    GameStateStore gameStateStore;
+
+    @Inject
+    GameStateProjector gameStateProjector;
 
     @POST
     @Transactional
@@ -106,6 +116,20 @@ public class GameController {
         Game game = Game.findById(id);
         if (game == null) throw new NotFoundException();
         return new GameDto(game);
+    }
+
+    @GET
+    @Path("/{id}/state")
+    @RolesAllowed("USER")
+    public GameStateDto getState(@PathParam("id") String id) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+        GameData data = gameStateStore.get(id);
+        if (data == null) {
+            throw new WebApplicationException("Game is not active", Response.Status.CONFLICT);
+        }
+        String viewer = identity.getPrincipal().getName();
+        return gameStateProjector.project(data, viewer);
     }
 
     @GET

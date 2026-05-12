@@ -78,19 +78,13 @@ public class GameStateProjector {
         dto.id = region.getId();
         dto.type = region.getType();
         dto.count = region.size();
+        dto.visible = region.getType().isVisible(region.getOwner(), viewer);
 
-        boolean visible = region.getType().isVisible(region.getOwner(), viewer);
-        dto.visible = visible;
-
-        if (visible) {
-            List<String> ids = new ArrayList<>();
-            for (CardData card : region.getCards()) {
-                ids.add(card.getId());
-            }
-            dto.cardIds = ids;
-        } else {
-            dto.cardIds = List.of();
+        List<String> ids = new ArrayList<>();
+        for (CardData card : region.getCards()) {
+            ids.add(card.getId());
         }
+        dto.cardIds = ids;
         return dto;
     }
 
@@ -100,11 +94,28 @@ public class GameStateProjector {
             RegionData region = card.getRegion();
             if (region == null) continue;
             boolean visible = region.getType().isVisible(region.getOwner(), viewer);
-            if (visible) {
-                result.put(card.getId(), toCardStateDto(card));
-            }
+            result.put(card.getId(), visible ? toCardStateDto(card) : toCardStub(card));
         }
         return result;
+    }
+
+    private CardStateDto toCardStub(CardData card) {
+        CardStateDto dto = new CardStateDto();
+        dto.id = card.getId();
+        dto.regionId = card.getRegion() != null ? card.getRegion().getId() : null;
+        dto.ownerName = card.getOwnerName();
+        dto.parentId = card.getParent() != null ? card.getParent().getId() : null;
+        dto.locked = card.isLocked();
+        dto.counters = card.getCounters();
+        dto.notes = card.getNotes();
+        if (!card.getCards().isEmpty()) {
+            List<String> childIds = new ArrayList<>();
+            for (CardData child : card.getCards()) {
+                childIds.add(child.getId());
+            }
+            dto.childCardIds = childIds;
+        }
+        return dto;
     }
 
     private CardStateDto toCardStateDto(CardData card) {
