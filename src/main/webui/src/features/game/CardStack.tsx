@@ -6,9 +6,12 @@ import type {CardData} from './types.ts';
 export type {CardData};
 
 export const CARD_WIDTH = 96;
-export const OFFSET_X = Math.round(CARD_WIDTH * 0.09);
-export const OFFSET_Y = Math.round(CARD_WIDTH * 0.17);
 export const MAX_VISIBLE = 3;
+
+const OFFSET_X_RATIO = 0.09;
+const OFFSET_Y_RATIO = 0.17;
+// Falls back to CARD_WIDTH so the stack renders correctly before --card-w is set.
+const CARD_VAR = `var(--card-w, ${CARD_WIDTH}px)`;
 
 type Props = {
     cards: CardData[];
@@ -24,11 +27,13 @@ export function CardStack({cards, onCardClick, renderCard}: Props) {
     function itemStyle(i: number): CSSProperties {
         if (i === 0) return {position: 'relative', zIndex: n};
         const vi = Math.min(i, MAX_VISIBLE);
+        const xPct = (vi * OFFSET_X_RATIO * 100).toFixed(1);
+        const yMult = ((depth - vi) * OFFSET_Y_RATIO).toFixed(3);
         return {
             position: 'absolute',
-            top: `${(depth - vi) * OFFSET_Y}px`,
-            left: `${vi * OFFSET_X}px`,
-            right: `${-(vi * OFFSET_X)}px`,
+            top: `calc(${CARD_VAR} * ${yMult})`,
+            left: `${xPct}%`,
+            right: `-${xPct}%`,
             zIndex: n - i,
         };
     }
@@ -44,7 +49,7 @@ export function CardStack({cards, onCardClick, renderCard}: Props) {
     }
 
     return (
-        <div className="relative" style={{paddingTop: `${depth * OFFSET_Y}px`}}>
+        <div className="relative" style={{paddingTop: `calc(${CARD_VAR} * ${(depth * OFFSET_Y_RATIO).toFixed(3)})`}}>
             {renderItem(cards[0], 0)}
             {cards.slice(1).map((card, sliceIndex) => {
                 const i = sliceIndex + 1;

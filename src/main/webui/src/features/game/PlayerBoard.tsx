@@ -1,3 +1,4 @@
+import type {CSSProperties} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
 import {FieldRegion} from './FieldRegion.tsx';
 
@@ -57,12 +58,15 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
     const rfg          = r['REMOVED_FROM_GAME'];
 
     return (
-        <div className={[
-            'flex flex-wrap items-start gap-x-3 gap-y-1 rounded-lg border px-3 py-2',
-            isCurrentPlayer
-                ? 'bg-arcane/5 border-arcane/40'
-                : 'bg-panel/50 border-line/75',
-        ].join(' ')}>
+        <div
+            className={[
+                'flex flex-wrap items-start gap-x-3 gap-y-1 rounded-lg border px-3 py-2',
+                isCurrentPlayer
+                    ? 'bg-arcane/5 border-arcane/40'
+                    : 'bg-panel/50 border-line/75',
+            ].join(' ')}
+            style={{'--card-w': 'clamp(72px, 9.4vw, 96px)'} as CSSProperties}
+        >
 
             {/* Player info — fixed left column */}
             <div className="flex flex-col gap-0.5 w-20 shrink-0 pt-1">

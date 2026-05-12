@@ -104,61 +104,34 @@ export const WithDragDrop: Story = {
     args: {name: 'Ready', stacks: [], columns: 5},
 };
 
-export const ResizableColumns: Story = {
+export const ColumnPicker: Story = {
     render: (args) => {
         const [cols, setCols] = useState(3);
-        return (
-            <FieldRegion
-                {...args}
-                columns={cols}
-                resizable
-                minColumns={1}
-                maxColumns={7}
-                onColumnsChange={setCols}
-            />
-        );
-    },
-    args: {
-        name: 'Resizable Region',
-        stacks: [stack1, stack2, stack3, stack4, stack5, stack6],
-        columns: 3,
-    },
-};
-
-export const ResizableColsAndRows: Story = {
-    render: (args) => {
-        const [cols, setCols] = useState(3);
-        const [rows, setRows] = useState(2);
         return (
             <div>
-                <p className="mb-2 text-xs text-ink-muted">Columns: {cols} | Rows: {rows}</p>
-                <FieldRegion
-                    {...args}
-                    columns={cols}
-                    rows={rows}
-                    resizable
-                    minColumns={1}
-                    maxColumns={7}
-                    minRows={1}
-                    maxRows={5}
-                    onColumnsChange={setCols}
-                    onRowsChange={setRows}
-                />
+                <div className="mb-2 flex gap-1">
+                    {[1, 2, 3, 4, 5].map(n => (
+                        <button
+                            key={n}
+                            className={`rounded px-2 py-0.5 text-xs ${cols === n ? 'bg-arcane text-white' : 'bg-panel border border-line text-ink-muted'}`}
+                            onClick={() => setCols(n)}
+                        >{n}</button>
+                    ))}
+                </div>
+                <FieldRegion {...args} columns={cols} />
             </div>
         );
     },
     args: {
-        name: 'Ready Region',
+        name: 'Region',
         stacks: [stack1, stack2, stack3, stack4, stack5, stack6],
         columns: 3,
-        rows: 2,
     },
 };
 
-export const ResizableWithDragDrop: Story = {
+export const DragDropWithColumns: Story = {
     render: (args) => {
         const [stacks, setStacks] = useState([stack1, stack2, stack6, stack5, stack3, stack4]);
-        const [cols, setCols] = useState(3);
 
         function handleReorder(from: number, to: number) {
             setStacks(prev => {
@@ -182,11 +155,6 @@ export const ResizableWithDragDrop: Story = {
             <FieldRegion
                 {...args}
                 stacks={stacks}
-                columns={cols}
-                resizable
-                minColumns={1}
-                maxColumns={7}
-                onColumnsChange={setCols}
                 onReorder={handleReorder}
                 onCardMove={handleCardMove}
             />
