@@ -27,6 +27,7 @@ function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => 
         <div
             className="relative cursor-pointer"
             style={{
+                width: `${CARD_WIDTH + ghostCount * COMPACT_OFFSET}px`,
                 paddingTop: `${ghostCount * COMPACT_OFFSET}px`,
                 paddingRight: `${ghostCount * COMPACT_OFFSET}px`,
             }}

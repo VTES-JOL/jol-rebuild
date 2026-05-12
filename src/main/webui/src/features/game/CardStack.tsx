@@ -2,12 +2,8 @@ import {Fragment} from 'react';
 import type {CSSProperties, ReactNode} from 'react';
 import {FieldCard} from './FieldCard.tsx';
 
-export type CardData = {
-    id: string;
-    crypt: boolean;
-    faceDown?: boolean;
-    locked?: boolean;
-};
+import type {CardData} from './types.ts';
+export type {CardData};
 
 export const CARD_WIDTH = 96;
 export const OFFSET_X = Math.round(CARD_WIDTH * 0.09);
