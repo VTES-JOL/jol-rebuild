@@ -123,7 +123,7 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
             </div>
 
             {/* Deck stacks and collapsed regions — full-width row on small screens, pinned right on md+ */}
-            <div className="flex flex-row flex-wrap gap-1 pt-1 w-full justify-end md:w-auto md:shrink-0 md:justify-start">
+            <div className="flex flex-row flex-wrap gap-1 pt-1 w-full justify-end lg:w-auto lg:shrink-0 lg:justify-start">
                 {hand && (
                     <FieldRegion
                         name="Hand"
