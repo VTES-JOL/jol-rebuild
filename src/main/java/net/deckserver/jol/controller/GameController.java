@@ -356,7 +356,7 @@ public class GameController {
     }
 
     @RegisterForReflection
-    public record GameCreateCommand(@NotBlank @Size(max = 255) String name, Visibility visibility, GameFormat format) {
+    public record GameCreateCommand(@Size(max = 255) String name, Visibility visibility, GameFormat format) {
         public GameCreateCommand(String name) {
             this(name, Visibility.PUBLIC, GameFormat.STANDARD);
         }
