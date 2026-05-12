@@ -1,6 +1,7 @@
 package net.deckserver.jol.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import net.deckserver.jol.dto.SeatingDto;
 import net.deckserver.jol.dto.SeatingDto.RoundDto;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class TournamentService {
+
+    @Inject
+    GameInitService gameInitService;
 
     /**
      * Creates games and registers players for every table in the tournament.
@@ -68,6 +72,7 @@ public class TournamentService {
                 ttg.persist();
 
                 registerPlayersForGame(game, roundSeats, roundsPlayed);
+                gameInitService.initializeGame(game, false);
             }
         }
     }

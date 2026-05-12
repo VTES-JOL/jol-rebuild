@@ -20,6 +20,7 @@ import net.deckserver.jol.model.krcg.KrcgDeck;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @ApplicationScoped
@@ -41,9 +42,18 @@ public class GameInitService {
 
     @Transactional
     public GameData initializeGame(Game game) {
-        List<Registration> registrations = Registration.getRegistrations(game);
+        return initializeGame(game, true);
+    }
+
+    @Transactional
+    public GameData initializeGame(Game game, boolean randomizePlayerOrder) {
+        List<Registration> registrations = new ArrayList<>(Registration.getRegistrations(game));
         if (registrations.isEmpty()) {
             throw new IllegalStateException("No registered players for game " + game.id);
+        }
+
+        if (randomizePlayerOrder) {
+            Collections.shuffle(registrations);
         }
 
         GameData gameData = new GameData(game.id, game.name);
