@@ -10,7 +10,8 @@ import type {CardData} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
 
 
-const GAP = 32; // matches gap-x-8 on the grid
+const GAP_WIDE = 32; // matches gap-x-8
+const GAP_NARROW = 4;  // matches gap-x-1
 
 // ── Compact stack ─────────────────────────────────────────────────────────────
 
@@ -216,6 +217,7 @@ type FieldRegionProps = {
     stacks: CardData[][];
     columns: number;
     compact?: boolean;
+    narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
     onReorder?: (from: number, to: number) => void;
     onCardMove?: (fromStack: number, fromCard: number, toStack: number) => void;
@@ -226,6 +228,7 @@ export function FieldRegion({
     stacks,
     columns,
     compact = false,
+    narrowGap = false,
     onCardClick,
     onReorder,
     onCardMove,
@@ -234,6 +237,7 @@ export function FieldRegion({
     const count = useMemo(() => stacks.reduce((sum, s) => sum + s.length, 0), [stacks]);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
     const [suppressTransition, setSuppressTransition] = useState(false);
+    const gap = narrowGap ? GAP_NARROW : GAP_WIDE;
 
     // Measure the parent container to compute how many columns actually fit.
     // `columns` acts as the maximum; fewer are used when space is constrained.
@@ -245,14 +249,14 @@ export function FieldRegion({
         if (!fieldset || !parent) return;
         const measure = (parentWidth: number) => {
             const cardW = parseFloat(getComputedStyle(fieldset).getPropertyValue('--card-w')) || CARD_WIDTH;
-            const fit = Math.max(1, Math.floor((parentWidth + GAP) / (cardW + GAP)));
+            const fit = Math.max(1, Math.floor((parentWidth + gap) / (cardW + gap)));
             setEffectiveCols(Math.min(columns, fit));
         };
         const ro = new ResizeObserver(([entry]) => measure(entry.contentRect.width));
         ro.observe(parent);
         measure(parent.getBoundingClientRect().width);
         return () => ro.disconnect();
-    }, [columns]);
+    }, [columns, gap]);
 
     // Keep suppressTransition true for one rAF after drag ends so cards render
     // in their final positions before transitions are re-enabled.
@@ -362,7 +366,7 @@ export function FieldRegion({
                 {legend}
                 <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
                     <div
-                        className="grid gap-x-8 gap-y-2"
+                        className={`grid ${narrowGap ? 'gap-x-1' : 'gap-x-8'} gap-y-2`}
                         style={{gridTemplateColumns: `repeat(${effectiveCols}, var(--card-w, ${CARD_WIDTH}px))`}}
                     >
                         {sortedIds.map(id => {

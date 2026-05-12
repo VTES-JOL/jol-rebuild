@@ -102,6 +102,7 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
                         name="Uncontrolled"
                         stacks={regionToStacks(uncontrolled, cards)}
                         columns={4}
+                        narrowGap={true}
                         onCardClick={(si, ci) => onCardClick?.('UNCONTROLLED', si, ci)}
                     />
                 )}

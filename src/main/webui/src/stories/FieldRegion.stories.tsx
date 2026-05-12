@@ -47,6 +47,7 @@ export const Grid3Columns: Story = {
         name: 'Uncontrolled Region',
         stacks: [stack1, stack2, stack3, stack4, stack5],
         columns: 3,
+        narrowGap: true,
     },
 };
 
