@@ -15,6 +15,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = DiscardCard.class,       name = "DISCARD_CARD"),
     @JsonSubTypes.Type(value = PlayCard.class,          name = "PLAY_CARD"),
     @JsonSubTypes.Type(value = MoveCard.class,          name = "MOVE_CARD"),
+    @JsonSubTypes.Type(value = AttachCard.class,        name = "ATTACH_CARD"),
     @JsonSubTypes.Type(value = LockCard.class,          name = "LOCK_CARD"),
     @JsonSubTypes.Type(value = UnlockCard.class,        name = "UNLOCK_CARD"),
     @JsonSubTypes.Type(value = UnlockAll.class,         name = "UNLOCK_ALL"),
@@ -41,7 +42,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
             DrawCard, ShuffleLibrary, ShuffleCrypt,
-            DiscardCard, PlayCard, MoveCard,
+            DiscardCard, PlayCard, MoveCard, AttachCard,
             LockCard, UnlockCard, UnlockAll,
             AddCounter, RemoveCounter, SetCardNotes,
             SetPool, TransferPool, GainEdge,

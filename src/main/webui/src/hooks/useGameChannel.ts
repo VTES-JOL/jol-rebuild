@@ -46,7 +46,7 @@ export function useGameChannel({url, username}: UseGameChannelOptions) {
     }, [wsSend, username]);
 
     const sendCommand = useCallback((cmd: GameCommand) => {
-        wsSend(cmd);
+        wsSend({type: 'GAME_COMMAND', command: cmd});
     }, [wsSend]);
 
     return {messages, gameState, status, send, react, sendCommand};

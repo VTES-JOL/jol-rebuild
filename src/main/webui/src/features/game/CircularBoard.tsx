@@ -2,15 +2,18 @@ import type {CSSProperties} from 'react';
 import {useState} from 'react';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import {PlayerColumn} from './PlayerColumn.tsx';
+import type {GameCommand} from './gameCommands.ts';
 
 export type CircularBoardProps = {
     orderedPlayers: PlayerState[];
     cards: Record<string, CardData>;
     currentUser: string;
     gameState: GameState;
+    gameId?: string;
+    onCommand?: (cmd: GameCommand) => void;
 };
 
-export function CircularBoard({orderedPlayers, cards, currentUser, gameState}: CircularBoardProps) {
+export function CircularBoard({orderedPlayers, cards, currentUser, gameState, gameId, onCommand}: CircularBoardProps) {
     const initialFocus =
         orderedPlayers.find(p => p.name === currentUser)?.name ??
         gameState.currentPlayer ??
@@ -67,6 +70,8 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState}: C
                             cards={cards}
                             role="predator"
                             isCurrentUser={predator.name === currentUser}
+                            gameId={gameId}
+                            onCommand={onCommand}
                         />
                     ) : (
                         <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
@@ -83,6 +88,8 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState}: C
                             role="focused"
                             isFocused
                             isCurrentUser={focused.name === currentUser}
+                            gameId={gameId}
+                            onCommand={onCommand}
                         />
                     )}
                 </div>
@@ -94,6 +101,8 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState}: C
                             cards={cards}
                             role="prey"
                             isCurrentUser={prey.name === currentUser}
+                            gameId={gameId}
+                            onCommand={onCommand}
                         />
                     ) : (
                         <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">

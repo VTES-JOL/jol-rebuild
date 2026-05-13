@@ -57,10 +57,17 @@ public class LobbyWebSocket {
     }
 
     @OnError
-    public void onError(Throwable error) {
-        LOG.errorf(error, "Lobby WS error for session %s", connection.id());
+    public void onError(Throwable error, WebSocketConnection errorConnection) {
+        String sessionId = "<unavailable>";
         try {
-            connection.sendTextAndAwait(ChatMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
+            sessionId = errorConnection.id();
+        } catch (Exception ignored) {
+            // The connection context may already be inactive while handling errors.
+        }
+
+        LOG.errorf(error, "Lobby WS error for session %s", sessionId);
+        try {
+            errorConnection.sendTextAndAwait(ChatMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
         } catch (Exception ignored) {}
     }
 

@@ -7,7 +7,8 @@ export type ShuffleLibraryCommand = { type: 'SHUFFLE_LIBRARY'; gameId: string };
 export type ShuffleCryptCommand   = { type: 'SHUFFLE_CRYPT';   gameId: string };
 export type DiscardCardCommand    = { type: 'DISCARD_CARD';    gameId: string; cardId: string };
 export type PlayCardCommand       = { type: 'PLAY_CARD';       gameId: string; cardId: string };
-export type MoveCardCommand       = { type: 'MOVE_CARD';       gameId: string; cardId: string; targetRegionId: string; top: boolean };
+export type MoveCardCommand       = { type: 'MOVE_CARD';       gameId: string; cardId: string; targetRegionId: string; position: number };
+export type AttachCardCommand     = { type: 'ATTACH_CARD';     gameId: string; cardId: string; targetCardId: string };
 export type LockCardCommand       = { type: 'LOCK_CARD';       gameId: string; cardId: string };
 export type UnlockCardCommand     = { type: 'UNLOCK_CARD';     gameId: string; cardId: string };
 export type UnlockAllCommand      = { type: 'UNLOCK_ALL';      gameId: string };
@@ -34,7 +35,7 @@ export type SetGameNotesCommand   = { type: 'SET_GAME_NOTES';  gameId: string; n
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
     | DrawCardCommand | ShuffleLibraryCommand | ShuffleCryptCommand
-    | DiscardCardCommand | PlayCardCommand | MoveCardCommand
+    | DiscardCardCommand | PlayCardCommand | MoveCardCommand | AttachCardCommand
     | LockCardCommand | UnlockCardCommand | UnlockAllCommand
     | AddCounterCommand | RemoveCounterCommand | SetCardNotesCommand
     | SetPoolCommand | TransferPoolCommand | GainEdgeCommand
@@ -43,6 +44,10 @@ export type GameCommand =
     | ContestCardCommand | UncontestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand;
 
-export function moveCard(gameId: string, cardId: string, targetRegionId: string, top = false): MoveCardCommand {
-    return {type: 'MOVE_CARD', gameId, cardId, targetRegionId, top};
+export function moveCard(gameId: string, cardId: string, targetRegionId: string, position = -1): MoveCardCommand {
+    return {type: 'MOVE_CARD', gameId, cardId, targetRegionId, position};
+}
+
+export function attachCard(gameId: string, cardId: string, targetCardId: string): AttachCardCommand {
+    return {type: 'ATTACH_CARD', gameId, cardId, targetCardId};
 }

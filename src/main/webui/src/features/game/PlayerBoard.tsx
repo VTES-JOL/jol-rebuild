@@ -1,11 +1,15 @@
-import type {CardData, PlayerState, RegionType} from './types.ts';
+import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
 import {FieldRegion} from './FieldRegion.tsx';
 import {regionToStacks, RegionBadge} from './gameUtils.tsx';
+import type {GameCommand} from './gameCommands.ts';
+import {attachCard, moveCard} from './gameCommands.ts';
 
 type PlayerBoardProps = {
     player: PlayerState;
     cards: Record<string, CardData>;
     isCurrentPlayer?: boolean;
+    gameId?: string;
+    onCommand?: (cmd: GameCommand) => void;
     onCardClick?: (regionType: RegionType, stackIndex: number, cardIndex: number) => void;
 };
 
@@ -21,7 +25,31 @@ export function BleedConnector() {
     );
 }
 
-export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: PlayerBoardProps) {
+function fieldRegionCallbacks(
+    region: RegionState,
+    stacks: CardData[][],
+    gameId: string | undefined,
+    onCommand: ((cmd: GameCommand) => void) | undefined,
+) {
+    if (!gameId || !onCommand) return {};
+    return {
+        onReorder: (from: number, to: number) => {
+            const cardId = stacks[from]?.[0]?.id;
+            if (cardId) onCommand(moveCard(gameId, cardId, region.id, to));
+        },
+        onCardMove: (fromStack: number, fromCard: number, toStack: number) => {
+            const cardId = stacks[fromStack]?.[fromCard]?.id;
+            const targetId = stacks[toStack]?.[0]?.id;
+            if (cardId && targetId) onCommand(attachCard(gameId, cardId, targetId));
+        },
+        onCardToNewStack: (fromStack: number, fromCard: number) => {
+            const cardId = stacks[fromStack]?.[fromCard]?.id;
+            if (cardId) onCommand(moveCard(gameId, cardId, region.id));
+        },
+    };
+}
+
+export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, onCardClick}: PlayerBoardProps) {
     const r = player.regions;
 
     const ready        = r['READY'];
@@ -33,6 +61,11 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
     const crypt        = r['CRYPT'];
     const research     = r['RESEARCH'];
     const rfg          = r['REMOVED_FROM_GAME'];
+
+    const readyStacks       = ready        ? regionToStacks(ready, cards)           : [];
+    const torporStacks      = torpor       ? regionToStacks(torpor, cards)          : [];
+    const researchStacks    = research     ? regionToStacks(research, cards)        : [];
+    const uncontrolledStacks = uncontrolled ? regionToStacks(uncontrolled, cards)   : [];
 
     return (
         <div
@@ -70,26 +103,29 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
                 {ready && (
                     <FieldRegion
                         name="Ready"
-                        stacks={regionToStacks(ready, cards)}
+                        stacks={readyStacks}
                         columns={5}
                         onCardClick={(si, ci) => onCardClick?.('READY', si, ci)}
+                        {...fieldRegionCallbacks(ready, readyStacks, gameId, onCommand)}
                     />
                 )}
                 {torpor && torpor.count > 0 && (
                     <FieldRegion
                         name="Torpor"
-                        stacks={regionToStacks(torpor, cards)}
+                        stacks={torporStacks}
                         columns={4}
                         onCardClick={(si, ci) => onCardClick?.('TORPOR', si, ci)}
+                        {...fieldRegionCallbacks(torpor, torporStacks, gameId, onCommand)}
                     />
                 )}
                 {research && research.count > 0 && (
                     <FieldRegion
                         name="Research"
-                        stacks={regionToStacks(research, cards)}
+                        stacks={researchStacks}
                         columns={4}
                         narrowGap={true}
                         onCardClick={(si, ci) => onCardClick?.('RESEARCH', si, ci)}
+                        {...fieldRegionCallbacks(research, researchStacks, gameId, onCommand)}
                     />
                 )}
             </div>
@@ -101,10 +137,11 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
                     <div className="flex justify-end lg:justify-start">
                         <FieldRegion
                             name="Uncontrolled"
-                            stacks={regionToStacks(uncontrolled, cards)}
+                            stacks={uncontrolledStacks}
                             columns={4}
                             narrowGap={true}
                             onCardClick={(si, ci) => onCardClick?.('UNCONTROLLED', si, ci)}
+                            {...fieldRegionCallbacks(uncontrolled, uncontrolledStacks, gameId, onCommand)}
                         />
                     </div>
                 )}

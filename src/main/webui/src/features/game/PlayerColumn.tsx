@@ -1,6 +1,8 @@
-import type {CardData, PlayerState} from './types.ts';
+import type {CardData, PlayerState, RegionState} from './types.ts';
 import {FieldRegion} from './FieldRegion.tsx';
 import {regionToStacks, RegionBadge} from './gameUtils.tsx';
+import type {GameCommand} from './gameCommands.ts';
+import {attachCard, moveCard} from './gameCommands.ts';
 
 export type PlayerColumnRole = 'predator' | 'focused' | 'prey';
 
@@ -10,9 +12,35 @@ type PlayerColumnProps = {
     role: PlayerColumnRole;
     isFocused?: boolean;
     isCurrentUser?: boolean;
+    gameId?: string;
+    onCommand?: (cmd: GameCommand) => void;
 };
 
-export function PlayerColumn({player, cards, role, isFocused, isCurrentUser}: PlayerColumnProps) {
+function fieldRegionCallbacks(
+    region: RegionState,
+    stacks: CardData[][],
+    gameId: string | undefined,
+    onCommand: ((cmd: GameCommand) => void) | undefined,
+) {
+    if (!gameId || !onCommand) return {};
+    return {
+        onReorder: (from: number, to: number) => {
+            const cardId = stacks[from]?.[0]?.id;
+            if (cardId) onCommand(moveCard(gameId, cardId, region.id, to));
+        },
+        onCardMove: (fromStack: number, fromCard: number, toStack: number) => {
+            const cardId = stacks[fromStack]?.[fromCard]?.id;
+            const targetId = stacks[toStack]?.[0]?.id;
+            if (cardId && targetId) onCommand(attachCard(gameId, cardId, targetId));
+        },
+        onCardToNewStack: (fromStack: number, fromCard: number) => {
+            const cardId = stacks[fromStack]?.[fromCard]?.id;
+            if (cardId) onCommand(moveCard(gameId, cardId, region.id));
+        },
+    };
+}
+
+export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gameId, onCommand}: PlayerColumnProps) {
     const r = player.regions;
 
     const ready        = r['READY'];
@@ -24,6 +52,11 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser}: Pl
     const crypt        = r['CRYPT'];
     const research     = r['RESEARCH'];
     const rfg          = r['REMOVED_FROM_GAME'];
+
+    const readyStacks        = ready        ? regionToStacks(ready, cards)        : [];
+    const torporStacks       = torpor       ? regionToStacks(torpor, cards)       : [];
+    const researchStacks     = research     ? regionToStacks(research, cards)     : [];
+    const uncontrolledStacks = uncontrolled ? regionToStacks(uncontrolled, cards) : [];
 
     const hasBottom =
         !!hand || !!library || !!crypt ||
@@ -62,24 +95,27 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser}: Pl
             {ready && (
                 <FieldRegion
                     name="Ready"
-                    stacks={regionToStacks(ready, cards)}
+                    stacks={readyStacks}
                     columns={4}
                     minRows={2}
+                    {...fieldRegionCallbacks(ready, readyStacks, gameId, onCommand)}
                 />
             )}
             {torpor && torpor.count > 0 && (
                 <FieldRegion
                     name="Torpor"
-                    stacks={regionToStacks(torpor, cards)}
+                    stacks={torporStacks}
                     columns={4}
+                    {...fieldRegionCallbacks(torpor, torporStacks, gameId, onCommand)}
                 />
             )}
             {research && research.count > 0 && (
                 <FieldRegion
                     name="Research"
-                    stacks={regionToStacks(research, cards)}
+                    stacks={researchStacks}
                     columns={4}
                     narrowGap
+                    {...fieldRegionCallbacks(research, researchStacks, gameId, onCommand)}
                 />
             )}
 
@@ -89,9 +125,10 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser}: Pl
                     {uncontrolled && uncontrolled.count > 0 && (
                         <FieldRegion
                             name="Uncontrolled"
-                            stacks={regionToStacks(uncontrolled, cards)}
+                            stacks={uncontrolledStacks}
                             columns={4}
                             narrowGap
+                            {...fieldRegionCallbacks(uncontrolled, uncontrolledStacks, gameId, onCommand)}
                         />
                     )}
                     <div className="flex flex-row flex-wrap gap-1">

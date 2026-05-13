@@ -1,5 +1,5 @@
 import type {DragEndEvent, DragOverEvent, DragStartEvent} from '@dnd-kit/core';
-import {DndContext, DragOverlay, PointerSensor, useDroppable, useSensor, useSensors} from '@dnd-kit/core';
+import {DndContext, DragOverlay, PointerSensor, useDraggable, useDroppable, useSensor, useSensors} from '@dnd-kit/core';
 import {arrayMove, SortableContext, useSortable, verticalListSortingStrategy} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {useCallback, useEffect, useMemo, useState} from 'react';
@@ -11,8 +11,9 @@ type TextBoardProps = {
     orderedPlayers: PlayerState[];
     cards: Record<string, CardData>;
     currentUser: string;
-    onCardReorder?: (playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) => void;
+    onCardReorder?: (playerName: string, regionType: RegionType, cardId: string, toIndex: number) => void;
     onCardMove?: (playerName: string, cardId: string, fromRegionType: RegionType, toRegionType: RegionType) => void;
+    onCardAttach?: (playerName: string, cardId: string, targetCardId: string) => void;
 };
 
 const REGION_ORDER: RegionType[] = [
@@ -78,12 +79,11 @@ function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: b
     );
 }
 
-function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag}: {
-    id: string; card: CardData; isHidden: boolean; isChild?: boolean; isCrossRegionDrag: boolean;
+function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAttachTarget}: {
+    id: string; card: CardData; isHidden: boolean; isChild?: boolean;
+    isCrossRegionDrag: boolean; isAttachTarget: boolean;
 }) {
     const {attributes, listeners, setNodeRef, transform, transition, isDragging, isOver} = useSortable({id});
-    // During a cross-region drag: suppress sortable transforms (prevents the card from shifting
-    // away under the pointer) and instead highlight the card if it's the direct drop target.
     const style = isCrossRegionDrag
         ? undefined
         : {transform: CSS.Transform.toString(transform), transition};
@@ -95,6 +95,7 @@ function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag}: {
                 'cursor-grab active:cursor-grabbing',
                 isDragging && 'opacity-30',
                 isCrossRegionDrag && isOver && 'ring-1 ring-arcane/60 rounded-sm bg-arcane/5',
+                isAttachTarget && isOver && 'ring-2 ring-gold/60 rounded-sm bg-gold/5',
             ].filter(Boolean).join(' ')}
             {...attributes}
             {...listeners}
@@ -104,18 +105,38 @@ function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag}: {
     );
 }
 
+// Children use useDraggable (drag-source only, not a sortable drop target)
+// so they don't interfere with the within-region sortable system.
+function DraggableChildRow({id, card, isHidden}: {id: string; card: CardData; isHidden: boolean}) {
+    const {attributes, listeners, setNodeRef, isDragging} = useDraggable({id});
+    return (
+        <div
+            ref={setNodeRef}
+            className={`cursor-grab active:cursor-grabbing${isDragging ? ' opacity-30' : ''}`}
+            {...attributes}
+            {...listeners}
+        >
+            <CardRow card={card} isHidden={isHidden} isChild />
+        </div>
+    );
+}
+
 function RegionSection({
-    region, cards, sortedIds, isDropTarget, activeDragFromRegion,
+    region, cards, sortedIds, isDropTarget, activeDragFromRegion, activeDragCardId,
 }: {
     region: RegionState;
     cards: Record<string, CardData>;
     sortedIds: string[];
     isDropTarget: boolean;
     activeDragFromRegion: RegionType | null;
+    activeDragCardId: string | null;
 }) {
     const [collapsed, setCollapsed] = useState(!region.visible);
     const {setNodeRef} = useDroppable({id: `region-${region.type}`});
     const isCrossRegionDrag = activeDragFromRegion !== null && activeDragFromRegion !== region.type;
+
+    const activeCard = activeDragCardId ? cards[activeDragCardId] : null;
+    const activeIsLib = activeCard && !(activeCard.crypt || activeCard.minion);
 
     const regionCardSet = new Set(region.cardIds);
     const childSet = new Set(
@@ -141,6 +162,11 @@ function RegionSection({
             </button>
             {!collapsed && (
                 <SortableContext items={sortedIds} strategy={verticalListSortingStrategy}>
+                    {sortedIds.length === 0 && (
+                        <div className="h-8 flex items-center justify-center text-[11px] text-ink-muted/30 italic select-none">
+                            empty
+                        </div>
+                    )}
                     {sortedIds.map(id => {
                         const card = cards[id] ?? {id};
                         const hidden = !region.visible || !!card.faceDown;
@@ -150,11 +176,19 @@ function RegionSection({
                                 .filter(cid => regionCardSet.has(cid))
                                 .map(cid => cards[cid])
                                 .filter((c): c is CardData => c != null);
+                        const isMinion = !!(card.crypt || card.minion);
+                        const isAttachTarget = !!(activeIsLib && isMinion);
                         return (
                             <div key={id} className="border-b border-line/20 last:border-0">
-                                <SortableCardRow id={id} card={card} isHidden={hidden} isCrossRegionDrag={isCrossRegionDrag} />
+                                <SortableCardRow
+                                    id={id}
+                                    card={card}
+                                    isHidden={hidden}
+                                    isCrossRegionDrag={isCrossRegionDrag}
+                                    isAttachTarget={isAttachTarget}
+                                />
                                 {children.map(child => (
-                                    <CardRow key={child.id} card={child} isHidden={false} isChild />
+                                    <DraggableChildRow key={child.id} id={child.id} card={child} isHidden={false} />
                                 ))}
                             </div>
                         );
@@ -166,20 +200,21 @@ function RegionSection({
 }
 
 function PlayerColumn({
-    player, cards, isCurrentUser, onCardReorder, onCardMove,
+    player, cards, isCurrentUser, onCardReorder, onCardMove, onCardAttach,
 }: {
     player: PlayerState;
     cards: Record<string, CardData>;
     isCurrentUser: boolean;
     onCardReorder?: TextBoardProps['onCardReorder'];
     onCardMove?: TextBoardProps['onCardMove'];
+    onCardAttach?: TextBoardProps['onCardAttach'];
 }) {
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
 
     const regions = useMemo(
         () => REGION_ORDER
             .map(type => player.regions[type])
-            .filter((r): r is RegionState => r != null && r.cardIds.length > 0),
+            .filter((r): r is RegionState => r != null),
         [player.regions],
     );
 
@@ -245,6 +280,13 @@ function PlayerColumn({
 
         if (currentOverRegion !== fromRegionType) return;
 
+        // Don't show sortable preview when dragging a library card over a vampire (attach intent)
+        const activeCard = cards[activeId];
+        const overCard = !overId.startsWith('region-') ? cards[overId] : null;
+        if (activeCard && overCard
+            && !(activeCard.crypt || activeCard.minion)
+            && (overCard.crypt || overCard.minion)) return;
+
         setSortedIds(prev => {
             const ids = prev[fromRegionType] ?? [];
             const from = ids.indexOf(activeId);
@@ -252,7 +294,7 @@ function PlayerColumn({
             if (from === -1 || to === -1 || from === to) return prev;
             return {...prev, [fromRegionType]: arrayMove(ids, from, to)};
         });
-    }, [cardToRegion]);
+    }, [cardToRegion, cards]);
 
     const handleDragEnd = useCallback(({active, over}: DragEndEvent) => {
         const activeId = String(active.id);
@@ -273,19 +315,51 @@ function PlayerColumn({
 
         if (!toRegionType) return;
 
+        const overCardId = !overId.startsWith('region-') ? overId : null;
+        const activeCard = cards[activeId];
+        const overCard = overCardId ? cards[overCardId] : null;
+        const activeIsChild = !!activeCard?.parentId;
+        const activeIsLib = activeCard && !(activeCard.crypt || activeCard.minion);
+        const overIsMinion = !!(overCard?.crypt || overCard?.minion);
+
         if (fromRegionType !== toRegionType) {
-            onCardMove?.(player.name, activeId, fromRegionType, toRegionType);
-        } else {
-            const liveOrder = currentSortedIds[fromRegionType] ?? [];
-            const toIndex = liveOrder.indexOf(activeId);
-            const fromRegion = player.regions[fromRegionType];
-            if (!fromRegion) return;
-            const originalOrder = getTopLevel(fromRegion);
-            const fromIndex = originalOrder.indexOf(activeId);
-            if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
-            onCardReorder?.(player.name, fromRegionType, fromIndex, toIndex);
+            // Cross-region: if dropped on a specific card → attach; on region area → move
+            if (overCardId && overIsMinion) {
+                onCardAttach?.(player.name, activeId, overCardId);
+            } else {
+                onCardMove?.(player.name, activeId, fromRegionType, toRegionType);
+            }
+            return;
         }
-    }, [cardToRegion, sortedIds, resetSortedIds, player, getTopLevel, onCardReorder, onCardMove]);
+
+        // Same region from here
+        if (activeIsChild) {
+            // Child card: re-attach to a vampire or detach to region
+            if (overCardId && overIsMinion && overCardId !== activeId) {
+                onCardAttach?.(player.name, activeId, overCardId);
+            } else {
+                // Detach: become top-level in same region
+                onCardMove?.(player.name, activeId, fromRegionType, fromRegionType);
+            }
+            return;
+        }
+
+        if (activeIsLib && overCardId && overIsMinion) {
+            // Library card dropped directly on a vampire in the same region → attach
+            onCardAttach?.(player.name, activeId, overCardId);
+            return;
+        }
+
+        // Regular within-region reorder
+        const liveOrder = currentSortedIds[fromRegionType] ?? [];
+        const toIndex = liveOrder.indexOf(activeId);
+        const fromRegion = player.regions[fromRegionType];
+        if (!fromRegion) return;
+        const originalOrder = getTopLevel(fromRegion);
+        const fromIndex = originalOrder.indexOf(activeId);
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+        onCardReorder?.(player.name, fromRegionType, activeId, toIndex);
+    }, [cardToRegion, cards, sortedIds, resetSortedIds, player, getTopLevel, onCardReorder, onCardMove, onCardAttach]);
 
     const handleDragCancel = useCallback(() => {
         setActiveCardId(null);
@@ -329,6 +403,7 @@ function PlayerColumn({
                         cards={cards}
                         sortedIds={sortedIds[region.type] ?? getTopLevel(region)}
                         activeDragFromRegion={activeDragFromRegion}
+                        activeDragCardId={activeCardId}
                         isDropTarget={
                             activeDragFromRegion !== null &&
                             activeDragFromRegion !== region.type &&
@@ -348,7 +423,7 @@ function PlayerColumn({
     );
 }
 
-export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, onCardMove}: TextBoardProps) {
+export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, onCardMove, onCardAttach}: TextBoardProps) {
     return (
         <div className="flex gap-2 h-full min-h-0 overflow-x-auto">
             {orderedPlayers.map(player => (
@@ -359,6 +434,7 @@ export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, on
                     isCurrentUser={player.name === currentUser}
                     onCardReorder={onCardReorder}
                     onCardMove={onCardMove}
+                    onCardAttach={onCardAttach}
                 />
             ))}
         </div>

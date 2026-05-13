@@ -50,18 +50,22 @@ public class RegionData {
     }
 
     public void addCard(CardData card, boolean top) {
-        // Remove from parent first, if it exists
+        addCard(card, top ? 0 : -1);
+    }
+
+    /** position=0 → front, negative → append, N≥1 → insert at index N. */
+    public void addCard(CardData card, int position) {
         if (card.getParent() != null) {
             card.getParent().remove(card);
-        }
-        // Remove from region if it exists
-        if (card.getRegion() != null) {
+        } else if (card.getRegion() != null) {
             card.getRegion().removeCard(card);
         }
-        if (top) {
+        if (position == 0) {
             cards.addFirst(card);
-        } else {
+        } else if (position < 0 || position >= cards.size()) {
             cards.add(card);
+        } else {
+            cards.add(position, card);
         }
         card.setParent(null);
         card.setRegion(this);

@@ -8,7 +8,8 @@ import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {PlayerState, RegionType} from './types.ts';
-import {moveCard} from './gameCommands.ts';
+import {attachCard, moveCard} from './gameCommands.ts';
+import type {GameCommand} from './gameCommands.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
 export default function GamePage() {
@@ -40,6 +41,22 @@ export default function GamePage() {
         sendCommand(moveCard(gameId, cardId, toRegion.id));
     }, [gameId, gameState, sendCommand]);
 
+    const handleCardReorder = useCallback((playerName: string, regionType: RegionType, cardId: string, toIndex: number) => {
+        if (!gameState) return;
+        const player = gameState.players.find(p => p.name === playerName);
+        const region = player?.regions[regionType];
+        if (!region) return;
+        sendCommand(moveCard(gameId, cardId, region.id, toIndex));
+    }, [gameId, gameState, sendCommand]);
+
+    const handleCardAttach = useCallback((_playerName: string, cardId: string, targetCardId: string) => {
+        sendCommand(attachCard(gameId, cardId, targetCardId));
+    }, [gameId, sendCommand]);
+
+    const handleCommand = useCallback((cmd: GameCommand) => {
+        sendCommand(cmd);
+    }, [sendCommand]);
+
     const [boardLayout, setBoardLayout] = useState<'linear' | 'circular' | 'text'>('linear');
 
     const NEXT_LAYOUT = {linear: 'circular', circular: 'text', text: 'linear'} as const;
@@ -65,6 +82,8 @@ export default function GamePage() {
                                 cards={gameState.cards}
                                 currentUser={user?.username ?? ''}
                                 gameState={gameState}
+                                gameId={gameId}
+                                onCommand={handleCommand}
                             />
                         </div>
                     ) : boardLayout === 'text' && gameState ? (
@@ -74,6 +93,8 @@ export default function GamePage() {
                                 cards={gameState.cards}
                                 currentUser={user?.username ?? ''}
                                 onCardMove={handleCardMove}
+                                onCardReorder={handleCardReorder}
+                                onCardAttach={handleCardAttach}
                             />
                         </div>
                     ) : (
@@ -89,6 +110,8 @@ export default function GamePage() {
                                             player={player}
                                             cards={gameState.cards}
                                             isCurrentPlayer={player.name === user?.username}
+                                            gameId={gameId}
+                                            onCommand={handleCommand}
                                         />
                                     ))}
                                 </div>

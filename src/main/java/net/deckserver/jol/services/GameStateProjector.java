@@ -83,6 +83,9 @@ public class GameStateProjector {
         List<String> ids = new ArrayList<>();
         for (CardData card : region.getCards()) {
             ids.add(card.getId());
+            for (CardData child : card.getCards()) {
+                ids.add(child.getId());
+            }
         }
         dto.cardIds = ids;
         return dto;

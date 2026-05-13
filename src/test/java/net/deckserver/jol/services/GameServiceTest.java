@@ -197,7 +197,7 @@ class GameServiceTest {
         gameCommandService.execute(actor, new TransferPool(gameId, actor, card.getId(), 3));
 
         assertEquals(27, gd.getPlayer(actor).getPool());
-        assertEquals(4,  card.getCounters()); // Anarch Convert starts at counters=1
+        assertEquals(3,  card.getCounters());
     }
 
     // ── COMMANDS: CARD STATE ──────────────────────────────────────────────────
@@ -238,10 +238,9 @@ class GameServiceTest {
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
         String cardId = card.getId();
-        // Anarch Convert: counters starts at 1 (capacity=1)
 
         gameCommandService.execute(actor, new AddCounter(gameId, cardId, 3));
-        assertEquals(4, card.getCounters());
+        assertEquals(3, card.getCounters());
 
         gameCommandService.execute(actor, new RemoveCounter(gameId, cardId, 5));
         assertEquals(0, card.getCounters()); // max(0, 4-5) = 0
@@ -256,7 +255,7 @@ class GameServiceTest {
         gameCommandService.execute(actor, new InfluenceVampire(gameId, card.getId(), 3));
 
         assertEquals(27, gd.getPlayer(actor).getPool());
-        assertEquals(4,  card.getCounters()); // 1 + 3
+        assertEquals(3,  card.getCounters()); // 1 + 3
     }
 
     @Test

@@ -79,10 +79,17 @@ public class GameWebSocket {
     }
 
     @OnError
-    public void onError(Throwable error) {
-        LOG.errorf(error, "Game WS error for session %s", connection.id());
+    public void onError(Throwable error, WebSocketConnection errorConnection) {
+        String sessionId = "<unavailable>";
         try {
-            sendSafely(GameMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
+            sessionId = errorConnection.id();
+        } catch (Exception ignored) {
+            // The connection context may already be inactive while handling errors.
+        }
+
+        LOG.errorf(error, "Game WS error for session %s", sessionId);
+        try {
+            sendSafely(errorConnection, GameMessageDto.error("Connection error: " + error.getClass().getSimpleName()));
         } catch (Exception ignored) {}
     }
 
@@ -132,16 +139,23 @@ public class GameWebSocket {
     }
 
     private boolean sendSafely(Object payload) {
-        if (!connection.isOpen()) {
-            LOG.debugf("Skipping send to closed Game WS session %s", connection.id());
-            return false;
-        }
+        return sendSafely(connection, payload);
+    }
 
+    private boolean sendSafely(WebSocketConnection targetConnection, Object payload) {
+        String sessionId = "<unavailable>";
         try {
-            connection.sendTextAndAwait(payload);
+            sessionId = targetConnection.id();
+
+            if (!targetConnection.isOpen()) {
+                LOG.debugf("Skipping send to closed Game WS session %s", sessionId);
+                return false;
+            }
+
+            targetConnection.sendTextAndAwait(payload);
             return true;
         } catch (RuntimeException e) {
-            LOG.debugf(e, "Failed to send to Game WS session %s; connection may have closed", connection.id());
+            LOG.debugf(e, "Failed to send to Game WS session %s; connection may have closed", sessionId);
             return false;
         }
     }

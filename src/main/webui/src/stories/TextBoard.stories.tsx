@@ -3,7 +3,7 @@ import {fn} from 'storybook/test';
 import {useState} from 'react';
 import {arrayMove} from '@dnd-kit/sortable';
 import {TextBoard} from '../features/game/TextBoard.tsx';
-import type {GameState, RegionType} from '../features/game/types.ts';
+import type {CardData, GameState, RegionType} from '../features/game/types.ts';
 import playerViewData from './fixtures/game-player-view.json';
 
 const playerGame = playerViewData as unknown as GameState;
@@ -20,6 +20,7 @@ const meta = {
     args: {
         onCardReorder: fn(),
         onCardMove: fn(),
+        onCardAttach: fn(),
     },
 } satisfies Meta<typeof TextBoard>;
 
@@ -54,7 +55,7 @@ export const WithDragDrop: Story = {
     render: (args) => {
         const [players, setPlayers] = useState(allPlayers);
 
-        function handleCardReorder(playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) {
+        function handleCardReorder(playerName: string, regionType: RegionType, cardId: string, toIndex: number) {
             setPlayers(prev => prev.map(p => {
                 if (p.name !== playerName) return p;
                 const region = p.regions[regionType];
@@ -69,6 +70,7 @@ export const WithDragDrop: Story = {
                     })
                 );
                 const topLevel = region.cardIds.filter(id => !childIds.has(id));
+                const fromIndex = topLevel.indexOf(cardId);
                 const reorderedTopLevel = arrayMove(topLevel, fromIndex, toIndex);
 
                 // Reconstruct full cardIds with children following their parents
@@ -91,14 +93,89 @@ export const WithDragDrop: Story = {
                 const fromRegion = p.regions[fromRegionType];
                 const toRegion = p.regions[toRegionType];
                 if (!fromRegion || !toRegion) return p;
-                const newFromIds = fromRegion.cardIds.filter(id => id !== cardId);
-                const newToIds = [...toRegion.cardIds, cardId];
+                // Remove card (and its children if top-level) from source region
+                const card = args.cards[cardId];
+                const childrenToMove = (card?.childCardIds ?? []).filter(cid => fromRegion.cardIds.includes(cid));
+                const removeIds = new Set([cardId, ...childrenToMove]);
+                const newFromIds = fromRegion.cardIds.filter(id => !removeIds.has(id));
+                // Attach as top-level (strip parentId) in destination region
+                const newToIds = fromRegionType === toRegionType
+                    ? [...fromRegion.cardIds.filter(id => !removeIds.has(id)), cardId]
+                    : [...toRegion.cardIds, cardId];
                 return {
                     ...p,
                     regions: {
                         ...p.regions,
                         [fromRegionType]: {...fromRegion, cardIds: newFromIds, count: newFromIds.length},
-                        [toRegionType]: {...toRegion, cardIds: newToIds, count: newToIds.length},
+                        ...(fromRegionType !== toRegionType && {
+                            [toRegionType]: {...toRegion, cardIds: newToIds, count: newToIds.length},
+                        }),
+                    },
+                };
+            }));
+        }
+
+        function handleCardAttach(playerName: string, cardId: string, targetCardId: string) {
+            setPlayers(prev => prev.map(p => {
+                if (p.name !== playerName) return p;
+                // Find which region has the card being attached
+                let sourceRegionType: RegionType | undefined;
+                for (const [type, region] of Object.entries(p.regions) as [RegionType, typeof p.regions[RegionType]][]) {
+                    if (region?.cardIds.includes(cardId)) { sourceRegionType = type; break; }
+                }
+                // Find which region has the target card
+                let targetRegionType: RegionType | undefined;
+                for (const [type, region] of Object.entries(p.regions) as [RegionType, typeof p.regions[RegionType]][]) {
+                    if (region?.cardIds.includes(targetCardId)) { targetRegionType = type; break; }
+                }
+                if (!sourceRegionType || !targetRegionType) return p;
+
+                const sourceRegion = p.regions[sourceRegionType]!;
+                const targetRegion = p.regions[targetRegionType]!;
+
+                // Remove cardId from source (and from any existing parent's children)
+                const newSourceIds = sourceRegion.cardIds.filter(id => id !== cardId);
+                // Insert cardId after targetCardId in target region
+                const targetIdx = targetRegion.cardIds.indexOf(targetCardId);
+                const baseIds = sourceRegionType === targetRegionType
+                    ? newSourceIds
+                    : targetRegion.cardIds;
+                const insertAfter = baseIds.indexOf(targetCardId);
+                const newTargetIds = [
+                    ...baseIds.slice(0, insertAfter + 1),
+                    cardId,
+                    ...baseIds.slice(insertAfter + 1),
+                ];
+
+                // Update the cards map to reflect parentId
+                const updatedCards: Record<string, CardData> = {
+                    ...args.cards,
+                    [cardId]: {...args.cards[cardId], parentId: targetCardId},
+                    [targetCardId]: {
+                        ...args.cards[targetCardId],
+                        childCardIds: [...(args.cards[targetCardId]?.childCardIds ?? []).filter(id => id !== cardId), cardId],
+                    },
+                };
+                // Note: story can't update args.cards (it's read-only from meta), so the attach
+                // is reflected only in region.cardIds ordering; the cards map itself is static.
+                void updatedCards; // acknowledge we can't use this in story state
+                void targetIdx;
+
+                if (sourceRegionType === targetRegionType) {
+                    return {
+                        ...p,
+                        regions: {
+                            ...p.regions,
+                            [targetRegionType]: {...targetRegion, cardIds: newTargetIds, count: newTargetIds.length},
+                        },
+                    };
+                }
+                return {
+                    ...p,
+                    regions: {
+                        ...p.regions,
+                        [sourceRegionType]: {...sourceRegion, cardIds: newSourceIds, count: newSourceIds.length},
+                        [targetRegionType]: {...targetRegion, cardIds: newTargetIds, count: newTargetIds.length},
                     },
                 };
             }));
@@ -110,6 +187,7 @@ export const WithDragDrop: Story = {
                 orderedPlayers={players}
                 onCardReorder={handleCardReorder}
                 onCardMove={handleCardMove}
+                onCardAttach={handleCardAttach}
             />
         );
     },

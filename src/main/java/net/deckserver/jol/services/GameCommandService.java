@@ -57,6 +57,7 @@ public class GameCommandService {
             case DiscardCard c      -> handleDiscardCard(game, c);
             case PlayCard c         -> handlePlayCard(game, c);
             case MoveCard c         -> handleMoveCard(game, c);
+            case AttachCard c       -> handleAttachCard(game, c);
             case LockCard c         -> handleLockCard(game, c);
             case UnlockCard c       -> handleUnlockCard(game, c);
             case UnlockAll c        -> handleUnlockAll(game, c);
@@ -184,7 +185,14 @@ public class GameCommandService {
         if (card == null) return;
         RegionData target = findRegionById(game, cmd.targetRegionId());
         if (target == null) return;
-        target.addCard(card, cmd.top());
+        target.addCard(card, cmd.position());
+    }
+
+    private void handleAttachCard(GameData game, AttachCard cmd) {
+        CardData card = game.getCard(cmd.cardId());
+        CardData target = game.getCard(cmd.targetCardId());
+        if (card == null || target == null) return;
+        target.add(card, false);
     }
 
     // ── Card state ────────────────────────────────────────────────────────────
