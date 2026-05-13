@@ -5,6 +5,7 @@ import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
 import {PlayerBoard} from './PlayerBoard.tsx';
 import {CircularBoard} from './CircularBoard.tsx';
+import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {PlayerState} from './types.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
@@ -30,7 +31,10 @@ export default function GamePage() {
             .filter(Boolean) as PlayerState[])
         : [];
 
-    const [boardLayout, setBoardLayout] = useState<'linear' | 'circular'>('linear');
+    const [boardLayout, setBoardLayout] = useState<'linear' | 'circular' | 'text'>('linear');
+
+    const NEXT_LAYOUT = {linear: 'circular', circular: 'text', text: 'linear'} as const;
+    const NEXT_LABEL  = {linear: 'Table view', circular: 'Text view', text: 'Strip view'};
 
     return (
         <GameLayout>
@@ -40,9 +44,9 @@ export default function GamePage() {
                     <div className="flex justify-end pb-2 shrink-0">
                         <button
                             className="text-xs text-ink-muted hover:text-ink border border-line/50 rounded px-2 py-1 transition-colors"
-                            onClick={() => setBoardLayout(l => l === 'linear' ? 'circular' : 'linear')}
+                            onClick={() => setBoardLayout(l => NEXT_LAYOUT[l])}
                         >
-                            {boardLayout === 'linear' ? 'Table view' : 'Strip view'}
+                            {NEXT_LABEL[boardLayout]}
                         </button>
                     </div>
                     {boardLayout === 'circular' && gameState ? (
@@ -52,6 +56,14 @@ export default function GamePage() {
                                 cards={gameState.cards}
                                 currentUser={user?.username ?? ''}
                                 gameState={gameState}
+                            />
+                        </div>
+                    ) : boardLayout === 'text' && gameState ? (
+                        <div className="flex-1 min-h-0 overflow-hidden">
+                            <TextBoard
+                                orderedPlayers={orderedPlayers}
+                                cards={gameState.cards}
+                                currentUser={user?.username ?? ''}
                             />
                         </div>
                     ) : (
