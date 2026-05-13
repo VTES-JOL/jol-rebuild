@@ -40,23 +40,17 @@ function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: b
     const name = card.name ?? 'Unknown';
 
     let counterDisplay: string | null = null;
-    if (isCryptCard) {
-        if (card.counters !== undefined && card.capacity !== undefined) {
-            counterDisplay = `${card.counters}/${card.capacity}`;
-        } else if (card.capacity !== undefined) {
-            counterDisplay = `${card.capacity}`;
-        } else if (card.counters !== undefined) {
-            counterDisplay = `${card.counters}`;
-        }
-    } else if (card.counters && card.counters > 0) {
-        counterDisplay = `${card.counters}`;
+    if (card.counters !== undefined) {
+        counterDisplay = isCryptCard && card.capacity !== undefined
+            ? `${card.counters}/${card.capacity}`
+            : `${card.counters}`;
     }
 
     return (
         <div className={`py-1.5${isChild ? ' pl-5' : ''}`}>
             <div className="flex items-center gap-1.5 min-w-0">
                 {isChild && <span className="text-sm text-ink-muted/40 shrink-0">└</span>}
-                <span className="font-mono text-base truncate flex-1 text-ink-secondary leading-snug">
+                <span className="font-mono truncate flex-1 text-ink-secondary leading-snug">
                     {name}
                 </span>
                 {!isChild && card.locked && (

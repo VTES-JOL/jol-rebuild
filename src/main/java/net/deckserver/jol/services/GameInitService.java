@@ -127,7 +127,6 @@ public class GameInitService {
         if (template instanceof CryptCard c) {
             card.setType(c.type() == CryptType.IMBUED ? CardType.IMBUED : CardType.VAMPIRE);
             card.setCapacity(c.capacity());
-            card.setCounters(c.capacity());
             card.setAdvanced(c.advanced());
             card.setMinion(true);
             card.setUnique(true);
