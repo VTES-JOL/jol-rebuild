@@ -3,6 +3,7 @@ import type {ChatMessage, ChatMsg} from '@/hooks/useWebSocket.ts';
 import {useWebSocket} from '@/hooks/useWebSocket.ts';
 import {applyOptimisticReaction} from '@/shared/utils/reactionUtils.ts';
 import type {GameState} from '@/features/game/types.ts';
+import type {GameCommand} from '@/features/game/gameCommands.ts';
 
 interface UseGameChannelOptions {
     url: string | null;
@@ -44,5 +45,9 @@ export function useGameChannel({url, username}: UseGameChannelOptions) {
         wsSend({type: 'REACTION', id: messageId, emoji});
     }, [wsSend, username]);
 
-    return {messages, gameState, status, send, react};
+    const sendCommand = useCallback((cmd: GameCommand) => {
+        wsSend(cmd);
+    }, [wsSend]);
+
+    return {messages, gameState, status, send, react, sendCommand};
 }

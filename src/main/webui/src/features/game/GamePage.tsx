@@ -1,5 +1,5 @@
 import type {CSSProperties} from 'react';
-import {useState} from 'react';
+import {useCallback, useState} from 'react';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
@@ -7,7 +7,8 @@ import {PlayerBoard} from './PlayerBoard.tsx';
 import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
-import type {PlayerState} from './types.ts';
+import type {PlayerState, RegionType} from './types.ts';
+import {moveCard} from './gameCommands.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
 export default function GamePage() {
@@ -20,7 +21,7 @@ export default function GamePage() {
         ? `${protocol}//${window.location.host}/ws/game/${encodeURIComponent(gameId)}`
         : null;
 
-    const {messages, gameState, status, send, react} = useGameChannel({
+    const {messages, gameState, status, send, react, sendCommand} = useGameChannel({
         url: wsUrl,
         username: user?.username ?? '',
     });
@@ -30,6 +31,14 @@ export default function GamePage() {
             .map(name => gameState.players.find(p => p.name === name))
             .filter(Boolean) as PlayerState[])
         : [];
+
+    const handleCardMove = useCallback((playerName: string, cardId: string, _from: RegionType, toRegionType: RegionType) => {
+        if (!gameState) return;
+        const player = gameState.players.find(p => p.name === playerName);
+        const toRegion = player?.regions[toRegionType];
+        if (!toRegion) return;
+        sendCommand(moveCard(gameId, cardId, toRegion.id));
+    }, [gameId, gameState, sendCommand]);
 
     const [boardLayout, setBoardLayout] = useState<'linear' | 'circular' | 'text'>('linear');
 
@@ -64,6 +73,7 @@ export default function GamePage() {
                                 orderedPlayers={orderedPlayers}
                                 cards={gameState.cards}
                                 currentUser={user?.username ?? ''}
+                                onCardMove={handleCardMove}
                             />
                         </div>
                     ) : (

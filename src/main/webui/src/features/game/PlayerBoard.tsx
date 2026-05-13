@@ -1,5 +1,6 @@
-import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
+import type {CardData, PlayerState, RegionType} from './types.ts';
 import {FieldRegion} from './FieldRegion.tsx';
+import {regionToStacks, RegionBadge} from './gameUtils.tsx';
 
 type PlayerBoardProps = {
     player: PlayerState;
@@ -8,20 +9,6 @@ type PlayerBoardProps = {
     onCardClick?: (regionType: RegionType, stackIndex: number, cardIndex: number) => void;
 };
 
-function regionToStacks(region: RegionState, cards: Record<string, CardData>, forceFaceDown = false): CardData[][] {
-    const hidden = forceFaceDown || !region.visible;
-    const cryptRegion = region.type === 'CRYPT' || region.type === 'UNCONTROLLED';
-    return region.cardIds.map(id => {
-        const card = cards[id] ?? {id};
-        return [{
-            ...card,
-            faceDown: hidden || !!card.faceDown,
-            crypt: card.crypt ?? (hidden && cryptRegion),
-        }];
-    });
-}
-
-/** Rendered between two PlayerBoard rows to show the bleed direction (top player bleeds bottom player). */
 export function BleedConnector() {
     return (
         <div className="flex items-center gap-1.5 pl-[3.25rem] py-0.5 select-none" aria-hidden>
@@ -30,15 +17,6 @@ export function BleedConnector() {
                 <span className="text-[9px] leading-none">▼</span>
             </div>
             <span className="text-[9px] text-ink-muted/30 leading-none tracking-wide">bleeds</span>
-        </div>
-    );
-}
-
-function RegionBadge({label, count}: {label: string; count: number}) {
-    return (
-        <div className="flex items-center gap-1 rounded px-2 py-0.5 text-xs bg-panel border border-line/75 text-ink-muted">
-            <span>{label}</span>
-            <span className="font-medium text-ink-secondary">{count}</span>
         </div>
     );
 }

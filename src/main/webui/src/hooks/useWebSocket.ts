@@ -65,7 +65,7 @@ interface UseWebSocketOptions {
 
 interface UseWebSocketReturn {
     status: Status;
-    send: (msg: OutboundMessage) => void;
+    send: (msg: object) => void;
 }
 
 export function useWebSocket({
@@ -144,7 +144,7 @@ export function useWebSocket({
         };
     }, [url, reconnectDelay, maxReconnectDelay]);
 
-    const send = useCallback((msg: OutboundMessage) => {
+    const send = useCallback((msg: object) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify(msg));
         } else {
