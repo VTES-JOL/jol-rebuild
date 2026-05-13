@@ -1,11 +1,11 @@
 import type {CSSProperties} from 'react';
-import AppLayout from '@/shared/layout/AppLayout.tsx';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
 import {PlayerBoard} from './PlayerBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {PlayerState} from './types.ts';
+import GameLayout from "@/shared/layout/GameLayout.tsx";
 
 export default function GamePage() {
     const {user, loading} = useAuthContext();
@@ -29,9 +29,7 @@ export default function GamePage() {
         : [];
 
     return (
-        <AppLayout>
-            <div className="flex flex-col gap-4 h-full min-h-0">
-
+        <GameLayout>
                 {/* Board — scrollable, ~62% of height */}
                 <div
                     className="flex-5 min-h-0 overflow-y-auto"
@@ -71,7 +69,6 @@ export default function GamePage() {
                         />
                     </div>
                 )}
-            </div>
-        </AppLayout>
+        </GameLayout>
     );
 }
