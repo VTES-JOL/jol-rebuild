@@ -87,7 +87,7 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
                 )}
             </div>
 
-            {/* Visible active regions — grow to fill available width */}
+            {/* Active field regions — grow to fill; on small screens: ready then torpor/research */}
             <div className="flex gap-3 items-start flex-wrap flex-1 min-w-0">
                 {ready && (
                     <FieldRegion
@@ -97,72 +97,83 @@ export function PlayerBoard({player, cards, isCurrentPlayer, onCardClick}: Playe
                         onCardClick={(si, ci) => onCardClick?.('READY', si, ci)}
                     />
                 )}
-                {uncontrolled && (
-                    <FieldRegion
-                        name="Uncontrolled"
-                        stacks={regionToStacks(uncontrolled, cards)}
-                        columns={4}
-                        narrowGap={true}
-                        onCardClick={(si, ci) => onCardClick?.('UNCONTROLLED', si, ci)}
-                    />
-                )}
                 {torpor && torpor.count > 0 && (
                     <FieldRegion
                         name="Torpor"
                         stacks={regionToStacks(torpor, cards)}
-                        columns={2}
+                        columns={4}
                         onCardClick={(si, ci) => onCardClick?.('TORPOR', si, ci)}
                     />
                 )}
-                {ashHeap?.visible && ashHeap.count > 0 && (
+                {research && research.count > 0 && (
                     <FieldRegion
-                        name="Ash Heap"
-                        stacks={regionToStacks(ashHeap, cards)}
-                        columns={1}
-                        compact
-                        onCardClick={(si, ci) => onCardClick?.('ASH_HEAP', si, ci)}
+                        name="Research"
+                        stacks={regionToStacks(research, cards)}
+                        columns={4}
+                        narrowGap={true}
+                        onCardClick={(si, ci) => onCardClick?.('RESEARCH', si, ci)}
                     />
                 )}
             </div>
 
-            {/* Deck stacks and collapsed regions — full-width row on small screens, pinned right on md+ */}
-            <div className="flex flex-row flex-wrap gap-1 pt-1 w-full justify-end lg:w-auto lg:shrink-0 lg:justify-start">
-                {hand && (
-                    <FieldRegion
-                        name="Hand"
-                        stacks={regionToStacks(hand, cards, true)}
-                        columns={1}
-                        compact
-                        onCardClick={(si, ci) => onCardClick?.('HAND', si, ci)}
-                    />
+            {/* Right column — full width on small (wraps below active), auto on large (pins right).
+                Order: uncontrolled on top, then deck stacks. */}
+            <div className="flex flex-col gap-1 pt-1 w-full lg:w-auto lg:shrink-0">
+                {uncontrolled && (
+                    <div className="flex justify-end lg:justify-start">
+                        <FieldRegion
+                            name="Uncontrolled"
+                            stacks={regionToStacks(uncontrolled, cards)}
+                            columns={4}
+                            narrowGap={true}
+                            onCardClick={(si, ci) => onCardClick?.('UNCONTROLLED', si, ci)}
+                        />
+                    </div>
                 )}
-                {library && (
-                    <FieldRegion
-                        name="Library"
-                        stacks={regionToStacks(library, cards)}
-                        columns={1}
-                        compact
-                        onCardClick={(si, ci) => onCardClick?.('LIBRARY', si, ci)}
-                    />
-                )}
-                {crypt && (
-                    <FieldRegion
-                        name="Crypt"
-                        stacks={regionToStacks(crypt, cards)}
-                        columns={1}
-                        compact
-                        onCardClick={(si, ci) => onCardClick?.('CRYPT', si, ci)}
-                    />
-                )}
-                {ashHeap && !ashHeap.visible && ashHeap.count > 0 && (
-                    <RegionBadge label="Ash Heap" count={ashHeap.count} />
-                )}
-                {research && research.count > 0 && (
-                    <RegionBadge label="Research" count={research.count} />
-                )}
-                {rfg && rfg.count > 0 && (
-                    <RegionBadge label="RFG" count={rfg.count} />
-                )}
+                <div className="flex flex-row flex-wrap gap-1 justify-end lg:justify-start">
+                    {hand && (
+                        <FieldRegion
+                            name="Hand"
+                            stacks={regionToStacks(hand, cards, true)}
+                            columns={1}
+                            compact
+                            onCardClick={(si, ci) => onCardClick?.('HAND', si, ci)}
+                        />
+                    )}
+                    {library && (
+                        <FieldRegion
+                            name="Library"
+                            stacks={regionToStacks(library, cards)}
+                            columns={1}
+                            compact
+                            onCardClick={(si, ci) => onCardClick?.('LIBRARY', si, ci)}
+                        />
+                    )}
+                    {crypt && (
+                        <FieldRegion
+                            name="Crypt"
+                            stacks={regionToStacks(crypt, cards)}
+                            columns={1}
+                            compact
+                            onCardClick={(si, ci) => onCardClick?.('CRYPT', si, ci)}
+                        />
+                    )}
+                    {ashHeap?.visible && ashHeap.count > 0 && (
+                        <FieldRegion
+                            name="Ash Heap"
+                            stacks={regionToStacks(ashHeap, cards)}
+                            columns={1}
+                            compact
+                            onCardClick={(si, ci) => onCardClick?.('ASH_HEAP', si, ci)}
+                        />
+                    )}
+                    {ashHeap && !ashHeap.visible && ashHeap.count > 0 && (
+                        <RegionBadge label="Ash Heap" count={ashHeap.count} />
+                    )}
+                    {rfg && rfg.count > 0 && (
+                        <RegionBadge label="RFG" count={rfg.count} />
+                    )}
+                </div>
             </div>
         </div>
     );

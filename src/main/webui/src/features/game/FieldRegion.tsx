@@ -15,7 +15,7 @@ const GAP_NARROW = 4;  // matches gap-x-1
 
 // ── Compact stack ─────────────────────────────────────────────────────────────
 
-const COMPACT_OFFSET = 7;
+const COMPACT_OFFSET = 3;
 const MAX_GHOST_LAYERS = 3;
 
 function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => void}) {
@@ -248,7 +248,16 @@ export function FieldRegion({
         const parent = fieldset?.parentElement;
         if (!fieldset || !parent) return;
         const measure = (parentWidth: number) => {
-            const cardW = parseFloat(getComputedStyle(fieldset).getPropertyValue('--card-w')) || CARD_WIDTH;
+            const raw = getComputedStyle(fieldset).getPropertyValue('--card-w').trim();
+            let cardW = parseFloat(raw);
+            if (isNaN(cardW)) {
+                // --card-w contains a complex expression (e.g. clamp()); resolve it via a temp element.
+                const el = document.createElement('div');
+                el.style.cssText = `position:absolute;visibility:hidden;width:var(--card-w,${CARD_WIDTH}px)`;
+                fieldset.appendChild(el);
+                cardW = el.getBoundingClientRect().width || CARD_WIDTH;
+                fieldset.removeChild(el);
+            }
             const fit = Math.max(1, Math.floor((parentWidth + gap) / (cardW + gap)));
             setEffectiveCols(Math.min(columns, fit));
         };
@@ -347,7 +356,7 @@ export function FieldRegion({
 
     if (compact) {
         return (
-            <fieldset className="relative w-fit rounded-lg border-2 border-ink-muted/40 px-3 pb-3">
+            <fieldset className="relative w-fit rounded-lg border border-ink-muted/25 px-3 pb-3">
                 {legend}
                 <CompactCardStack cards={stacks.flat()} onClick={() => onCardClick?.(0, 0)} />
             </fieldset>
@@ -362,7 +371,7 @@ export function FieldRegion({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            <fieldset ref={fieldsetRef} className="relative w-fit rounded-lg border-2 border-ink-muted/40 px-3 pb-3">
+            <fieldset ref={fieldsetRef} className="relative w-fit rounded-lg border border-ink-muted/25 px-3 pb-3">
                 {legend}
                 <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
                     <div
