@@ -30,10 +30,10 @@ export default function GamePage() {
 
     return (
         <GameLayout>
-            <div className="flex flex-row gap-4 h-full min-h-0 px-4 pb-4">
-                {/* Board — left 3/4 */}
+            <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
+                {/* Board — scrollable; full width on ≤md, left 3/4 on lg+ */}
                 <div
-                    className="flex-[3] min-w-0 overflow-y-auto"
+                    className="flex-1 lg:flex-[3] min-w-0 min-h-0 overflow-y-auto"
                     style={{'--card-w': 'clamp(60px, 5.5vw, 72px)'} as CSSProperties}
                 >
                     {gameState ? (
@@ -54,9 +54,9 @@ export default function GamePage() {
                     )}
                 </div>
 
-                {/* Chat panel — right 1/4 */}
+                {/* Chat — fixed height at bottom on ≤md, right 1/4 on lg+ */}
                 {user && (
-                    <div className="flex-1 min-w-0 min-h-0">
+                    <div className="h-60 shrink-0 lg:h-auto lg:flex-1 min-w-0 min-h-0">
                         <ChatPanel
                             title="Game chat"
                             messages={messages}
