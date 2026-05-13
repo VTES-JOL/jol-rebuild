@@ -13,6 +13,7 @@ const meta = {
         onCardClick: fn(),
         onReorder: fn(),
         onCardMove: fn(),
+        onCardToNewStack: fn(),
     },
 } satisfies Meta<typeof FieldRegion>;
 
@@ -90,6 +91,14 @@ export const WithDragDrop: Story = {
             });
         }
 
+        function handleCardToNewStack(fromStack: number, fromCard: number) {
+            setStacks(prev => {
+                const next = prev.map(s => [...s]);
+                const [card] = next[fromStack].splice(fromCard, 1);
+                return [...next.filter(s => s.length > 0), [card]];
+            });
+        }
+
         function handleCardClick(stackIndex: number, cardIndex: number) {
             setStacks(prev => prev.map((stack, si) =>
                 si !== stackIndex ? stack : stack.map((card, ci) =>
@@ -99,7 +108,7 @@ export const WithDragDrop: Story = {
         }
 
         return (
-            <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove} onCardClick={handleCardClick}/>
+            <FieldRegion {...args} stacks={stacks} onReorder={handleReorder} onCardMove={handleCardMove} onCardToNewStack={handleCardToNewStack} onCardClick={handleCardClick}/>
         );
     },
     args: {name: 'Ready', stacks: [], columns: 5},
@@ -152,12 +161,21 @@ export const DragDropWithColumns: Story = {
             });
         }
 
+        function handleCardToNewStack(fromStack: number, fromCard: number) {
+            setStacks(prev => {
+                const next = prev.map(s => [...s]);
+                const [card] = next[fromStack].splice(fromCard, 1);
+                return [...next.filter(s => s.length > 0), [card]];
+            });
+        }
+
         return (
             <FieldRegion
                 {...args}
                 stacks={stacks}
                 onReorder={handleReorder}
                 onCardMove={handleCardMove}
+                onCardToNewStack={handleCardToNewStack}
             />
         );
     },

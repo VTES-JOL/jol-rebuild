@@ -191,11 +191,12 @@ function SortableStackSlot({
 
 // ── Empty slot ────────────────────────────────────────────────────────────────
 
-function EmptySlot({index}: {index: number}) {
+function EmptySlot({index, activeDragType}: {index: number; activeDragType: 'stack' | 'card' | null}) {
     const {setNodeRef, isOver} = useDroppable({
         id: `empty-${index}`,
         data: {type: 'empty-slot', index},
     });
+    const isCardTarget = isOver && activeDragType === 'card';
     return (
         <div className="flex flex-col gap-1">
             <div className="h-3.5" />
@@ -203,7 +204,7 @@ function EmptySlot({index}: {index: number}) {
                 ref={setNodeRef}
                 className={[
                     'aspect-5/7 rounded-lg border border-dashed border-ink-muted/40 transition-colors',
-                    isOver && 'border-arcane/50 bg-arcane/5',
+                    isCardTarget && 'border-arcane/50 bg-arcane/5',
                 ].filter(Boolean).join(' ')}
             />
         </div>
@@ -223,6 +224,7 @@ type FieldRegionProps = {
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
     onReorder?: (from: number, to: number) => void;
     onCardMove?: (fromStack: number, fromCard: number, toStack: number) => void;
+    onCardToNewStack?: (fromStack: number, fromCard: number) => void;
 };
 
 export function FieldRegion({
@@ -235,6 +237,7 @@ export function FieldRegion({
     onCardClick,
     onReorder,
     onCardMove,
+    onCardToNewStack,
 }: FieldRegionProps) {
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
     const count = useMemo(() => stacks.reduce((sum, s) => sum + s.length, 0), [stacks]);
@@ -317,9 +320,13 @@ export function FieldRegion({
             const originalIdx = idToIndex(String(active.id));
             const finalPos    = sortedIds.indexOf(String(active.id));
             if (originalIdx !== finalPos) onReorder?.(originalIdx, finalPos);
-        } else if (drag.type === 'card' && drop.type === 'stack') {
-            const targetIdx = idToIndex(String(over.id));
-            if (drag.stackIndex !== targetIdx) onCardMove?.(drag.stackIndex, drag.cardIndex, targetIdx);
+        } else if (drag.type === 'card') {
+            if (drop.type === 'stack') {
+                const targetIdx = idToIndex(String(over.id));
+                if (drag.stackIndex !== targetIdx) onCardMove?.(drag.stackIndex, drag.cardIndex, targetIdx);
+            } else if (drop.type === 'empty-slot') {
+                onCardToNewStack?.(drag.stackIndex, drag.cardIndex);
+            }
         }
     }, [sortedIds, onReorder, onCardMove]);
 
@@ -384,6 +391,9 @@ export function FieldRegion({
                         {sortedIds.map(id => {
                             const originalIdx = idToIndex(id);
                             const stack = stacks[originalIdx];
+                            // Guard: sortedIds lags one render behind stacks when a
+                            // stack is removed (useEffect syncs after render).
+                            if (!stack) return null;
                             return (
                                 <SortableStackSlot
                                     key={id}
@@ -398,7 +408,7 @@ export function FieldRegion({
                             );
                         })}
                         {Array.from({length: emptySlotCount}, (_, i) => (
-                            <EmptySlot key={`empty-${i}`} index={stacks.length + i} />
+                            <EmptySlot key={`empty-${i}`} index={stacks.length + i} activeDragType={activeDragType} />
                         ))}
                     </div>
                 </SortableContext>
