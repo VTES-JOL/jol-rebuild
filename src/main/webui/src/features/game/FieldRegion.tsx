@@ -216,6 +216,8 @@ type FieldRegionProps = {
     name: string;
     stacks: CardData[][];
     columns: number;
+    /** Minimum number of rows of empty slots to show (default 1). */
+    minRows?: number;
     compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
@@ -227,6 +229,7 @@ export function FieldRegion({
     name,
     stacks,
     columns,
+    minRows = 1,
     compact = false,
     narrowGap = false,
     onCardClick,
@@ -282,8 +285,8 @@ export function FieldRegion({
     useEffect(() => { setSortedIds(stacks.map((_, i) => stackId(i))); }, [stacks]);
 
     const emptySlotCount = useMemo(
-        () => Math.max(1, Math.ceil(stacks.length / effectiveCols)) * effectiveCols - stacks.length,
-        [effectiveCols, stacks.length],
+        () => Math.max(minRows, Math.ceil(stacks.length / effectiveCols)) * effectiveCols - stacks.length,
+        [effectiveCols, stacks.length, minRows],
     );
 
     const handleDragStart = useCallback((event: DragStartEvent) => {

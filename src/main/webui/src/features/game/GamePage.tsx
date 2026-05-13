@@ -1,8 +1,10 @@
 import type {CSSProperties} from 'react';
+import {useState} from 'react';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
 import {PlayerBoard} from './PlayerBoard.tsx';
+import {CircularBoard} from './CircularBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {PlayerState} from './types.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
@@ -28,28 +30,51 @@ export default function GamePage() {
             .filter(Boolean) as PlayerState[])
         : [];
 
+    const [boardLayout, setBoardLayout] = useState<'linear' | 'circular'>('linear');
+
     return (
         <GameLayout>
             <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
-                {/* Board — scrollable; full width on ≤md, left 3/4 on lg+ */}
-                <div
-                    className="flex-1 lg:flex-[3] min-w-0 min-h-0 overflow-y-auto"
-                    style={{'--card-w': 'clamp(60px, 5.5vw, 72px)'} as CSSProperties}
-                >
-                    {gameState ? (
-                        <div className="flex flex-col gap-1.5">
-                            {orderedPlayers.map(player => (
-                                <PlayerBoard
-                                    key={player.name}
-                                    player={player}
-                                    cards={gameState.cards}
-                                    isCurrentPlayer={player.name === user?.username}
-                                />
-                            ))}
+                {/* Board — full width on ≤md, left 3/4 on lg+ */}
+                <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">
+                    <div className="flex justify-end pb-2 shrink-0">
+                        <button
+                            className="text-xs text-ink-muted hover:text-ink border border-line/50 rounded px-2 py-1 transition-colors"
+                            onClick={() => setBoardLayout(l => l === 'linear' ? 'circular' : 'linear')}
+                        >
+                            {boardLayout === 'linear' ? 'Table view' : 'Strip view'}
+                        </button>
+                    </div>
+                    {boardLayout === 'circular' && gameState ? (
+                        <div className="flex-1 min-h-0 overflow-hidden">
+                            <CircularBoard
+                                orderedPlayers={orderedPlayers}
+                                cards={gameState.cards}
+                                currentUser={user?.username ?? ''}
+                                gameState={gameState}
+                            />
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-32 text-ink-muted text-sm">
-                            {loading ? 'Loading…' : 'Waiting for game state…'}
+                        <div className="flex-1 min-h-0 overflow-y-auto">
+                            {gameState ? (
+                                <div
+                                    className="flex flex-col gap-1.5"
+                                    style={{'--card-w': 'clamp(60px, 5.5vw, 72px)'} as CSSProperties}
+                                >
+                                    {orderedPlayers.map(player => (
+                                        <PlayerBoard
+                                            key={player.name}
+                                            player={player}
+                                            cards={gameState.cards}
+                                            isCurrentPlayer={player.name === user?.username}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-center h-32 text-ink-muted text-sm">
+                                    {loading ? 'Loading…' : 'Waiting for game state…'}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
