@@ -17,7 +17,7 @@ Each format defines its own deck validation rules and player limits:
 - **PRIVATE** — only visible to the owner and invited players
 
 ## Game Lifecycle
-Games are created in `OPEN` status and transition to `ACTIVE` when play begins.
+Games are created in `OPEN` status and transition to `ACTIVE` automatically when the last registration fills the game to capacity. No manual start action is required.
 
 - A game can only be **deleted** by its owner while it is `OPEN`
 - Format can only be changed by the owner while the game is `OPEN` and **no players have registered with decks**
