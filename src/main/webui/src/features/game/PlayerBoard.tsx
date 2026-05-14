@@ -1,5 +1,7 @@
+import {useMemo} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
-import {FieldRegion} from './FieldRegion.tsx';
+import {FieldRegionDndGroup} from './FieldRegion.tsx';
+import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {regionToStacks, RegionBadge} from './gameUtils.tsx';
 import type {GameCommand} from './gameCommands.ts';
 import {attachCard, moveCard} from './gameCommands.ts';
@@ -25,7 +27,7 @@ export function BleedConnector() {
     );
 }
 
-function fieldRegionCallbacks(
+function fieldRegionCbs(
     region: RegionState,
     stacks: CardData[][],
     gameId: string | undefined,
@@ -62,10 +64,89 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
     const research     = r['RESEARCH'];
     const rfg          = r['REMOVED_FROM_GAME'];
 
-    const readyStacks       = ready        ? regionToStacks(ready, cards)           : [];
-    const torporStacks      = torpor       ? regionToStacks(torpor, cards)          : [];
-    const researchStacks    = research     ? regionToStacks(research, cards)        : [];
-    const uncontrolledStacks = uncontrolled ? regionToStacks(uncontrolled, cards)   : [];
+    const readyStacks        = useMemo(() => ready        ? regionToStacks(ready, cards)        : [], [ready, cards]);
+    const torporStacks       = useMemo(() => torpor       ? regionToStacks(torpor, cards)       : [], [torpor, cards]);
+    const researchStacks     = useMemo(() => research     ? regionToStacks(research, cards)     : [], [research, cards]);
+    const uncontrolledStacks = useMemo(() => uncontrolled ? regionToStacks(uncontrolled, cards) : [], [uncontrolled, cards]);
+    const handStacks         = useMemo(() => hand         ? regionToStacks(hand, cards, true)   : [], [hand, cards]);
+    const libraryStacks      = useMemo(() => library      ? regionToStacks(library, cards)      : [], [library, cards]);
+    const cryptStacks        = useMemo(() => crypt        ? regionToStacks(crypt, cards)        : [], [crypt, cards]);
+    const ashHeapStacks      = useMemo(() => ashHeap      ? regionToStacks(ashHeap, cards)      : [], [ashHeap, cards]);
+
+    // All regions share ONE DndContext so compact→active cross-region drags work.
+    const allRegions = useMemo<FieldRegionConfig[]>(() => {
+        const regions: FieldRegionConfig[] = [];
+        if (ready) regions.push({
+            regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 5,
+            onCardClick: (si, ci) => onCardClick?.('READY', si, ci),
+            ...fieldRegionCbs(ready, readyStacks, gameId, onCommand),
+        });
+        if (torpor && torpor.count > 0) regions.push({
+            regionKey: 'TORPOR', name: 'Torpor', stacks: torporStacks, columns: 4,
+            onCardClick: (si, ci) => onCardClick?.('TORPOR', si, ci),
+            ...fieldRegionCbs(torpor, torporStacks, gameId, onCommand),
+        });
+        if (research && research.count > 0) regions.push({
+            regionKey: 'RESEARCH', name: 'Research', stacks: researchStacks, columns: 4, narrowGap: true,
+            onCardClick: (si, ci) => onCardClick?.('RESEARCH', si, ci),
+            ...fieldRegionCbs(research, researchStacks, gameId, onCommand),
+        });
+        if (uncontrolled) regions.push({
+            regionKey: 'UNCONTROLLED', name: 'Uncontrolled', stacks: uncontrolledStacks, columns: 4, narrowGap: true,
+            onCardClick: (si, ci) => onCardClick?.('UNCONTROLLED', si, ci),
+            ...fieldRegionCbs(uncontrolled, uncontrolledStacks, gameId, onCommand),
+        });
+        if (hand) regions.push({
+            regionKey: 'HAND', name: 'Hand', stacks: handStacks, columns: 1, compact: true,
+            onCardClick: (si, ci) => onCardClick?.('HAND', si, ci),
+        });
+        if (library) regions.push({
+            regionKey: 'LIBRARY', name: 'Library', stacks: libraryStacks, columns: 1, compact: true,
+            onCardClick: (si, ci) => onCardClick?.('LIBRARY', si, ci),
+        });
+        if (crypt) regions.push({
+            regionKey: 'CRYPT', name: 'Crypt', stacks: cryptStacks, columns: 1, compact: true,
+            onCardClick: (si, ci) => onCardClick?.('CRYPT', si, ci),
+        });
+        if (ashHeap?.visible && ashHeap.count > 0) regions.push({
+            regionKey: 'ASH_HEAP', name: 'Ash Heap', stacks: ashHeapStacks, columns: 1, compact: true,
+            onCardClick: (si, ci) => onCardClick?.('ASH_HEAP', si, ci),
+        });
+        return regions;
+    }, [ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap,
+        readyStacks, torporStacks, researchStacks, uncontrolledStacks,
+        handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+        gameId, onCommand, onCardClick]);
+
+    const handleCrossRegionMove = (fromKey: string, fromStackIdx: number, toKey: string) => {
+        if (!gameId || !onCommand) return;
+        const toRegion = player.regions[toKey as RegionType];
+        const allStacks = {READY: readyStacks, TORPOR: torporStacks, RESEARCH: researchStacks, UNCONTROLLED: uncontrolledStacks, HAND: handStacks, LIBRARY: libraryStacks, CRYPT: cryptStacks, ASH_HEAP: ashHeapStacks};
+        const cardId = allStacks[fromKey as keyof typeof allStacks]?.[fromStackIdx]?.[0]?.id;
+        if (cardId && toRegion) onCommand(moveCard(gameId, cardId, toRegion.id));
+    };
+
+    const handleCrossCardMove = (fromKey: string, fromStackIdx: number, fromCardIdx: number, toKey: string, toStackIdx: number | null | 'top') => {
+        if (!gameId || !onCommand) return;
+        const allStacks = {READY: readyStacks, TORPOR: torporStacks, RESEARCH: researchStacks, UNCONTROLLED: uncontrolledStacks, HAND: handStacks, LIBRARY: libraryStacks, CRYPT: cryptStacks, ASH_HEAP: ashHeapStacks};
+        const cardId = allStacks[fromKey as keyof typeof allStacks]?.[fromStackIdx]?.[fromCardIdx]?.id;
+        if (!cardId) return;
+
+        if (typeof toStackIdx === 'number') {
+            const targetCard = allStacks[toKey as keyof typeof allStacks]?.[toStackIdx]?.[0];
+            if (targetCard) {
+                const targetIsMinion = cards[targetCard.id]?.crypt || cards[targetCard.id]?.minion;
+                const draggedIsLib = !cards[cardId]?.crypt && !cards[cardId]?.minion;
+                if (draggedIsLib && targetIsMinion) {
+                    onCommand(attachCard(gameId, cardId, targetCard.id));
+                    return;
+                }
+            }
+        }
+
+        const toRegion = player.regions[toKey as RegionType];
+        if (toRegion) onCommand(moveCard(gameId, cardId, toRegion.id, toStackIdx === 'top' ? 0 : -1));
+    };
 
     return (
         <div
@@ -76,7 +157,6 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
                     : 'bg-panel/50 border-line/75',
             ].join(' ')}
         >
-
             {/* Player info — fixed left column */}
             <div className="flex flex-col gap-0.5 w-20 shrink-0 pt-1">
                 {player.predator && (
@@ -98,98 +178,40 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
                 )}
             </div>
 
-            {/* Active field regions — grow to fill; on small screens: ready then torpor/research */}
-            <div className="flex gap-3 items-start flex-wrap flex-1 min-w-0">
-                {ready && (
-                    <FieldRegion
-                        name="Ready"
-                        stacks={readyStacks}
-                        columns={5}
-                        onCardClick={(si, ci) => onCardClick?.('READY', si, ci)}
-                        {...fieldRegionCallbacks(ready, readyStacks, gameId, onCommand)}
-                    />
-                )}
-                {torpor && torpor.count > 0 && (
-                    <FieldRegion
-                        name="Torpor"
-                        stacks={torporStacks}
-                        columns={4}
-                        onCardClick={(si, ci) => onCardClick?.('TORPOR', si, ci)}
-                        {...fieldRegionCallbacks(torpor, torporStacks, gameId, onCommand)}
-                    />
-                )}
-                {research && research.count > 0 && (
-                    <FieldRegion
-                        name="Research"
-                        stacks={researchStacks}
-                        columns={4}
-                        narrowGap={true}
-                        onCardClick={(si, ci) => onCardClick?.('RESEARCH', si, ci)}
-                        {...fieldRegionCallbacks(research, researchStacks, gameId, onCommand)}
-                    />
-                )}
-            </div>
+            {/* All regions share ONE DndContext so compact→active cross-region DnD works */}
+            <FieldRegionDndGroup
+                regions={allRegions}
+                onCrossRegionMove={handleCrossRegionMove}
+                onCrossCardMove={handleCrossCardMove}
+            >
+                {renderRegion => (
+                    <>
+                        {/* Active field regions */}
+                        <div className="flex gap-3 items-start flex-wrap flex-1 min-w-0">
+                            {ready && renderRegion('READY')}
+                            {torpor && torpor.count > 0 && renderRegion('TORPOR')}
+                            {research && research.count > 0 && renderRegion('RESEARCH')}
+                            {uncontrolled && renderRegion('UNCONTROLLED')}
+                        </div>
 
-            {/* Right column — full width on small (wraps below active), auto on large (pins right).
-                Order: uncontrolled on top, then deck stacks. */}
-            <div className="flex flex-col gap-1 pt-1 w-full lg:w-auto lg:shrink-0">
-                {uncontrolled && (
-                    <div className="flex justify-end lg:justify-start">
-                        <FieldRegion
-                            name="Uncontrolled"
-                            stacks={uncontrolledStacks}
-                            columns={4}
-                            narrowGap={true}
-                            onCardClick={(si, ci) => onCardClick?.('UNCONTROLLED', si, ci)}
-                            {...fieldRegionCallbacks(uncontrolled, uncontrolledStacks, gameId, onCommand)}
-                        />
-                    </div>
+                        {/* Right column — compact region stacks */}
+                        <div className="flex flex-col gap-1 pt-1 w-full lg:w-auto lg:shrink-0">
+                            <div className="flex flex-row flex-wrap gap-1 justify-end lg:justify-start">
+                                {hand && renderRegion('HAND')}
+                                {library && renderRegion('LIBRARY')}
+                                {crypt && renderRegion('CRYPT')}
+                                {ashHeap?.visible && ashHeap.count > 0 && renderRegion('ASH_HEAP')}
+                                {ashHeap && !ashHeap.visible && ashHeap.count > 0 && (
+                                    <RegionBadge label="Ash Heap" count={ashHeap.count} />
+                                )}
+                                {rfg && rfg.count > 0 && (
+                                    <RegionBadge label="RFG" count={rfg.count} />
+                                )}
+                            </div>
+                        </div>
+                    </>
                 )}
-                <div className="flex flex-row flex-wrap gap-1 justify-end lg:justify-start">
-                    {hand && (
-                        <FieldRegion
-                            name="Hand"
-                            stacks={regionToStacks(hand, cards, true)}
-                            columns={1}
-                            compact
-                            onCardClick={(si, ci) => onCardClick?.('HAND', si, ci)}
-                        />
-                    )}
-                    {library && (
-                        <FieldRegion
-                            name="Library"
-                            stacks={regionToStacks(library, cards)}
-                            columns={1}
-                            compact
-                            onCardClick={(si, ci) => onCardClick?.('LIBRARY', si, ci)}
-                        />
-                    )}
-                    {crypt && (
-                        <FieldRegion
-                            name="Crypt"
-                            stacks={regionToStacks(crypt, cards)}
-                            columns={1}
-                            compact
-                            onCardClick={(si, ci) => onCardClick?.('CRYPT', si, ci)}
-                        />
-                    )}
-                    {ashHeap?.visible && ashHeap.count > 0 && (
-                        <FieldRegion
-                            name="Ash Heap"
-                            stacks={regionToStacks(ashHeap, cards)}
-                            columns={1}
-                            compact
-                            onCardClick={(si, ci) => onCardClick?.('ASH_HEAP', si, ci)}
-                        />
-                    )}
-                    {ashHeap && !ashHeap.visible && ashHeap.count > 0 && (
-                        <RegionBadge label="Ash Heap" count={ashHeap.count} />
-                    )}
-                    {rfg && rfg.count > 0 && (
-                        <RegionBadge label="RFG" count={rfg.count} />
-                    )}
-                </div>
-            </div>
+            </FieldRegionDndGroup>
         </div>
     );
 }
