@@ -21,6 +21,8 @@ const REGION_ORDER: RegionType[] = [
     'LIBRARY', 'CRYPT', 'ASH_HEAP', 'REMOVED_FROM_GAME',
 ];
 
+const HIDE_WHEN_EMPTY = new Set<RegionType>(['TORPOR', 'RESEARCH', 'REMOVED_FROM_GAME']);
+
 const REGION_LABELS: Record<RegionType, string> = {
     READY: 'Ready',
     UNCONTROLLED: 'Uncontrolled',
@@ -214,7 +216,7 @@ function PlayerColumn({
     const regions = useMemo(
         () => REGION_ORDER
             .map(type => player.regions[type])
-            .filter((r): r is RegionState => r != null),
+            .filter((r): r is RegionState => r != null && (!HIDE_WHEN_EMPTY.has(r.type) || r.cardIds.length > 0)),
         [player.regions],
     );
 

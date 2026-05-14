@@ -1,5 +1,5 @@
 import type {CSSProperties} from 'react';
-import {useCallback, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
@@ -40,6 +40,23 @@ export default function GamePage() {
             .map(name => gameState.players.find(p => p.name === name))
             .filter(Boolean) as PlayerState[])
         : [];
+
+    const prevCardIdsRef = useRef<Set<string>>(new Set());
+    useEffect(() => {
+        if (!gameState) return;
+        const prev = prevCardIdsRef.current;
+        const next = new Set<string>();
+        for (const card of Object.values(gameState.cards)) {
+            if (card.cardId) {
+                next.add(card.cardId);
+                if (!prev.has(card.cardId)) {
+                    const img = new Image();
+                    img.src = `https://static.deckserver.net/images/${card.cardId}`;
+                }
+            }
+        }
+        prevCardIdsRef.current = next;
+    }, [gameState?.cards]);
 
     const handleCardMove = useCallback((playerName: string, cardId: string, _from: RegionType, toRegionType: RegionType) => {
         if (!gameState) return;

@@ -19,7 +19,7 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
             !suppressTransition && 'transition-transform duration-200',
             locked && 'rotate-90',
         ].filter(Boolean).join(' ')}>
-            <img src={src} alt={alt} loading="lazy" className="w-full h-full object-cover" />
+            <img src={src} alt={alt} className="w-full h-full object-cover" />
         </div>
     );
 });
