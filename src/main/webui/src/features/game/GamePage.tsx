@@ -12,6 +12,14 @@ import type {GameCommand} from './gameCommands.ts';
 import {attachCard, moveCard} from './gameCommands.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
+type BoardLayout = 'linear' | 'circular' | 'text';
+
+const LAYOUT_LABELS: Record<BoardLayout, string> = {
+    linear: 'Strip',
+    circular: 'Table',
+    text: 'Text',
+};
+
 export default function GamePage() {
     const {user, loading} = useAuthContext();
     const {gameId} = useParams();
@@ -22,7 +30,7 @@ export default function GamePage() {
         ? `${protocol}//${window.location.host}/ws/game/${encodeURIComponent(gameId)}`
         : null;
 
-    const {messages, gameState, status, send, react, sendCommand} = useGameChannel({
+    const {messages, gameState, status, send, react, sendCommand, commandError, clearCommandError} = useGameChannel({
         url: wsUrl,
         username: user?.username ?? '',
     });
@@ -54,27 +62,83 @@ export default function GamePage() {
     }, [gameId, sendCommand]);
 
     const handleCommand = useCallback((cmd: GameCommand) => {
+        clearCommandError();
         sendCommand(cmd);
-    }, [sendCommand]);
+    }, [sendCommand, clearCommandError]);
 
-    const [boardLayout, setBoardLayout] = useState<'linear' | 'circular' | 'text'>('linear');
+    const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
 
-    const NEXT_LAYOUT = {linear: 'circular', circular: 'text', text: 'linear'} as const;
-    const NEXT_LABEL  = {linear: 'Table view', circular: 'Text view', text: 'Strip view'};
+    const isConnected = status === 'connected';
 
     return (
         <GameLayout>
             <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
                 {/* Board — full width on ≤md, left 3/4 on lg+ */}
                 <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">
-                    <div className="flex justify-end pb-2 shrink-0">
-                        <button
-                            className="text-xs text-ink-muted hover:text-ink border border-line/50 rounded px-2 py-1 transition-colors"
-                            onClick={() => setBoardLayout(l => NEXT_LAYOUT[l])}
-                        >
-                            {NEXT_LABEL[boardLayout]}
-                        </button>
+
+                    {/* Top bar: turn/phase info + layout selector */}
+                    <div className="flex items-center justify-between pb-2 shrink-0 gap-2 min-w-0">
+                        <div className="flex items-center gap-2 text-xs min-w-0 overflow-hidden">
+                            {gameState && (
+                                <>
+                                    <span className="text-ink-muted">Turn {gameState.turn}</span>
+                                    <span className="text-ink-muted/40">·</span>
+                                    <span className="text-ink-muted">{gameState.phase}</span>
+                                    {gameState.currentPlayer && (
+                                        <>
+                                            <span className="text-ink-muted/40">·</span>
+                                            <span className="text-ink font-medium truncate">▶ {gameState.currentPlayer}</span>
+                                        </>
+                                    )}
+                                    {gameState.edgeHolder && (
+                                        <>
+                                            <span className="text-ink-muted/40">·</span>
+                                            <span className="text-ink-muted truncate">Edge: {gameState.edgeHolder}</span>
+                                        </>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5 shrink-0">
+                            {(['linear', 'circular', 'text'] as const).map(l => (
+                                <button
+                                    key={l}
+                                    className={[
+                                        'text-xs px-2 py-0.5 rounded transition-colors',
+                                        boardLayout === l
+                                            ? 'bg-arcane/20 text-ink'
+                                            : 'text-ink-muted hover:text-ink',
+                                    ].join(' ')}
+                                    onClick={() => setBoardLayout(l)}
+                                >
+                                    {LAYOUT_LABELS[l]}
+                                </button>
+                            ))}
+                        </div>
                     </div>
+
+                    {/* Connection status banner */}
+                    {!isConnected && (
+                        <div className="shrink-0 mb-1.5 flex items-center gap-2 rounded border border-gold/30 bg-gold/5 px-3 py-1.5 text-xs text-gold">
+                            <span className="animate-pulse">●</span>
+                            <span>{status === 'connecting' ? 'Connecting…' : 'Connection lost — reconnecting…'}</span>
+                        </div>
+                    )}
+
+                    {/* Command error banner */}
+                    {commandError && (
+                        <div className="shrink-0 mb-1.5 flex items-center gap-2 rounded border border-blood/30 bg-blood/5 px-3 py-1.5 text-xs text-blood">
+                            <span className="flex-1">{commandError}</span>
+                            <button
+                                className="text-blood/60 hover:text-blood transition-colors leading-none"
+                                onClick={clearCommandError}
+                                aria-label="Dismiss"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
+
                     {boardLayout === 'circular' && gameState ? (
                         <div className="flex-1 min-h-0 overflow-hidden">
                             <CircularBoard

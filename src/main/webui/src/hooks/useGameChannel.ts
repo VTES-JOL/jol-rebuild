@@ -13,6 +13,7 @@ interface UseGameChannelOptions {
 export function useGameChannel({url, username}: UseGameChannelOptions) {
     const [messages, setMessages] = useState<ChatMsg[]>([]);
     const [gameState, setGameState] = useState<GameState | null>(null);
+    const [commandError, setCommandError] = useState<string | null>(null);
 
     const handleMessage = useCallback((msg: ChatMessage) => {
         switch (msg.type) {
@@ -30,6 +31,9 @@ export function useGameChannel({url, username}: UseGameChannelOptions) {
             case 'GAME_STATE':
             case 'GAME_SNAPSHOT':
                 setGameState(msg.state);
+                break;
+            case 'ERROR':
+                setCommandError(msg.error);
                 break;
         }
     }, []);
@@ -49,5 +53,7 @@ export function useGameChannel({url, username}: UseGameChannelOptions) {
         wsSend({type: 'GAME_COMMAND', command: cmd});
     }, [wsSend]);
 
-    return {messages, gameState, status, send, react, sendCommand};
+    const clearCommandError = useCallback(() => setCommandError(null), []);
+
+    return {messages, gameState, status, send, react, sendCommand, commandError, clearCommandError};
 }

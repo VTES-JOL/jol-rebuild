@@ -1,10 +1,11 @@
 import {useMemo} from 'react';
-import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
+import type {CardData, PlayerState, RegionState} from './types.ts';
 import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
-import {RegionBadge, regionToStacks} from './gameUtils.tsx';
+import {RegionBadge} from './gameUtils.tsx';
 import type {GameCommand} from './gameCommands.ts';
 import {attachCard, moveCard} from './gameCommands.ts';
+import {usePlayerRegions} from './usePlayerRegions.ts';
 
 export type PlayerColumnRole = 'predator' | 'focused' | 'prey';
 
@@ -43,26 +44,12 @@ function fieldRegionCbs(
 }
 
 export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gameId, onCommand}: PlayerColumnProps) {
-    const r = player.regions;
-
-    const ready        = r['READY'];
-    const uncontrolled = r['UNCONTROLLED'];
-    const torpor       = r['TORPOR'];
-    const hand         = r['HAND'];
-    const ashHeap      = r['ASH_HEAP'];
-    const library      = r['LIBRARY'];
-    const crypt        = r['CRYPT'];
-    const research     = r['RESEARCH'];
-    const rfg          = r['REMOVED_FROM_GAME'];
-
-    const readyStacks        = useMemo(() => ready        ? regionToStacks(ready, cards)        : [], [ready, cards]);
-    const torporStacks       = useMemo(() => torpor       ? regionToStacks(torpor, cards)       : [], [torpor, cards]);
-    const researchStacks     = useMemo(() => research     ? regionToStacks(research, cards)     : [], [research, cards]);
-    const uncontrolledStacks = useMemo(() => uncontrolled ? regionToStacks(uncontrolled, cards) : [], [uncontrolled, cards]);
-    const handStacks         = useMemo(() => hand         ? regionToStacks(hand, cards, true)   : [], [hand, cards]);
-    const libraryStacks      = useMemo(() => library      ? regionToStacks(library, cards)      : [], [library, cards]);
-    const cryptStacks        = useMemo(() => crypt        ? regionToStacks(crypt, cards)        : [], [crypt, cards]);
-    const ashHeapStacks      = useMemo(() => ashHeap      ? regionToStacks(ashHeap, cards)      : [], [ashHeap, cards]);
+    const {
+        ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap, rfg,
+        readyStacks, torporStacks, researchStacks, uncontrolledStacks,
+        handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+        handleCrossRegionMove, handleCrossCardMove,
+    } = usePlayerRegions(player, cards, gameId, onCommand);
 
     // All regions share ONE DndContext so compact→active cross-region drags work.
     const allRegions = useMemo<FieldRegionConfig[]>(() => {
@@ -92,7 +79,7 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
         if (crypt) regions.push({
             regionKey: 'CRYPT', name: 'Crypt', stacks: cryptStacks, columns: 1, compact: true,
         });
-        if (ashHeap?.visible && ashHeap.count > 0) regions.push({
+        if (ashHeap?.visible) regions.push({
             regionKey: 'ASH_HEAP', name: 'Ash Heap', stacks: ashHeapStacks, columns: 1, compact: true,
         });
         return regions;
@@ -101,39 +88,8 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
         handStacks, libraryStacks, cryptStacks, ashHeapStacks,
         gameId, onCommand]);
 
-    const handleCrossRegionMove = (fromKey: string, fromStackIdx: number, toKey: string) => {
-        if (!gameId || !onCommand) return;
-        const toRegion = player.regions[toKey as RegionType];
-        const allStacks = {READY: readyStacks, TORPOR: torporStacks, RESEARCH: researchStacks, UNCONTROLLED: uncontrolledStacks, HAND: handStacks, LIBRARY: libraryStacks, CRYPT: cryptStacks, ASH_HEAP: ashHeapStacks};
-        const cardId = allStacks[fromKey as keyof typeof allStacks]?.[fromStackIdx]?.[0]?.id;
-        if (cardId && toRegion) onCommand(moveCard(gameId, cardId, toRegion.id));
-    };
-
-    const handleCrossCardMove = (fromKey: string, fromStackIdx: number, fromCardIdx: number, toKey: string, toStackIdx: number | null | 'top') => {
-        if (!gameId || !onCommand) return;
-        const allStacks = {READY: readyStacks, TORPOR: torporStacks, RESEARCH: researchStacks, UNCONTROLLED: uncontrolledStacks, HAND: handStacks, LIBRARY: libraryStacks, CRYPT: cryptStacks, ASH_HEAP: ashHeapStacks};
-        const cardId = allStacks[fromKey as keyof typeof allStacks]?.[fromStackIdx]?.[fromCardIdx]?.id;
-        if (!cardId) return;
-
-        if (typeof toStackIdx === 'number') {
-            const targetCard = allStacks[toKey as keyof typeof allStacks]?.[toStackIdx]?.[0];
-            if (targetCard) {
-                const targetIsMinion = cards[targetCard.id]?.crypt || cards[targetCard.id]?.minion;
-                const draggedIsLib = !cards[cardId]?.crypt && !cards[cardId]?.minion;
-                if (draggedIsLib && targetIsMinion) {
-                    onCommand(attachCard(gameId, cardId, targetCard.id));
-                    return;
-                }
-            }
-        }
-
-        const toRegion = player.regions[toKey as RegionType];
-        if (toRegion) onCommand(moveCard(gameId, cardId, toRegion.id, toStackIdx === 'top' ? 0 : -1));
-    };
-
     const hasBottom =
-        !!hand || !!library || !!crypt ||
-        (ashHeap && ashHeap.count > 0) ||
+        !!hand || !!library || !!crypt || !!ashHeap ||
         (rfg && rfg.count > 0);
 
     return (
@@ -186,8 +142,8 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
                                     {hand && renderRegion('HAND')}
                                     {library && renderRegion('LIBRARY')}
                                     {crypt && renderRegion('CRYPT')}
-                                    {ashHeap?.visible && ashHeap.count > 0 && renderRegion('ASH_HEAP')}
-                                    {ashHeap && !ashHeap.visible && ashHeap.count > 0 && (
+                                    {ashHeap?.visible && renderRegion('ASH_HEAP')}
+                                    {ashHeap && !ashHeap.visible && (
                                         <RegionBadge label="Ash Heap" count={ashHeap.count} />
                                     )}
                                     {rfg && rfg.count > 0 && (
