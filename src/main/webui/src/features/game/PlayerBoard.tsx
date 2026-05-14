@@ -1,8 +1,8 @@
 import {useMemo} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
-import {FieldRegionDndGroup} from './FieldRegion.tsx';
 import type {FieldRegionConfig} from './FieldRegion.tsx';
-import {regionToStacks, RegionBadge} from './gameUtils.tsx';
+import {FieldRegionDndGroup} from './FieldRegion.tsx';
+import {RegionBadge, regionToStacks} from './gameUtils.tsx';
 import type {GameCommand} from './gameCommands.ts';
 import {attachCard, moveCard} from './gameCommands.ts';
 

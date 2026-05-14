@@ -8,8 +8,8 @@ import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {PlayerState, RegionType} from './types.ts';
-import {attachCard, moveCard} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
+import {attachCard, moveCard} from './gameCommands.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
 export default function GamePage() {

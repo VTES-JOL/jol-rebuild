@@ -3,10 +3,10 @@ import {DndContext, DragOverlay, PointerSensor, useDraggable, useDroppable, useS
 import {arrayMove, rectSortingStrategy, SortableContext, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
-import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import type {CSSProperties, ReactNode} from 'react';
-import {CARD_WIDTH, CardStack} from './CardStack.tsx';
+import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import type {CardData} from './CardStack.tsx';
+import {CARD_WIDTH, CardStack} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
 
 

@@ -1,8 +1,9 @@
-import {Fragment} from 'react';
 import type {CSSProperties, ReactNode} from 'react';
+import {Fragment} from 'react';
 import {FieldCard} from './FieldCard.tsx';
 
 import type {CardData} from './types.ts';
+
 export type {CardData};
 
 export const CARD_WIDTH = 96;
