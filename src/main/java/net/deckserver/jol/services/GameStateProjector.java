@@ -80,14 +80,18 @@ public class GameStateProjector {
         dto.count = region.size();
         dto.visible = region.getType().isVisible(region.getOwner(), viewer);
 
-        List<String> ids = new ArrayList<>();
-        for (CardData card : region.getCards()) {
-            ids.add(card.getId());
-            for (CardData child : card.getCards()) {
-                ids.add(child.getId());
+        if (dto.visible) {
+            List<String> ids = new ArrayList<>();
+            for (CardData card : region.getCards()) {
+                ids.add(card.getId());
+                for (CardData child : card.getCards()) {
+                    ids.add(child.getId());
+                }
             }
+            dto.cardIds = ids;
+        } else {
+            dto.cardIds = List.of();
         }
-        dto.cardIds = ids;
         return dto;
     }
 
