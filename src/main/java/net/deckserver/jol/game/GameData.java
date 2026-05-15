@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.game.command.CardRef;
 
 import java.util.*;
 
@@ -64,6 +65,21 @@ public class GameData {
     @JsonIgnore
     public CardData getCard(String id) {
         return this.cards.get(id);
+    }
+
+    @JsonIgnore
+    public CardData getCardByRef(CardRef ref) {
+        if (ref == null) return null;
+        PlayerData player = getPlayer(ref.playerName());
+        if (player == null) return null;
+        RegionData region = player.getRegion(ref.regionType());
+        if (region == null || ref.position() < 0 || ref.position() >= region.getCards().size()) return null;
+        CardData parent = region.getCard(ref.position());
+        if (parent == null) return null;
+        if (ref.childIndex() < 0) return parent;
+        java.util.List<CardData> children = parent.getCards();
+        if (ref.childIndex() >= children.size()) return null;
+        return children.get(ref.childIndex());
     }
 
     @JsonIgnore

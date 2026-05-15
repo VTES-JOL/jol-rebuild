@@ -4,7 +4,7 @@ import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
 import {RegionBadge} from './gameUtils.tsx';
 import type {GameCommand} from './gameCommands.ts';
-import {attachCard, moveCard} from './gameCommands.ts';
+import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
 type PlayerBoardProps = {
@@ -29,25 +29,25 @@ export function BleedConnector() {
 }
 
 function fieldRegionCbs(
+    player: PlayerState,
     region: RegionState,
-    stacks: CardData[][],
     gameId: string | undefined,
     onCommand: ((cmd: GameCommand) => void) | undefined,
 ) {
     if (!gameId || !onCommand) return {};
     return {
         onReorder: (from: number, to: number) => {
-            const cardId = stacks[from]?.[0]?.id;
-            if (cardId) onCommand(moveCard(gameId, cardId, region.id, to));
+            const ref = cardRef(player.name, region.type, from);
+            onCommand(moveCard(gameId, ref, player.name, region.type, to));
         },
         onCardMove: (fromStack: number, fromCard: number, toStack: number) => {
-            const cardId = stacks[fromStack]?.[fromCard]?.id;
-            const targetId = stacks[toStack]?.[0]?.id;
-            if (cardId && targetId) onCommand(attachCard(gameId, cardId, targetId));
+            const ref = cardRef(player.name, region.type, fromStack, fromCard === 0 ? -1 : fromCard - 1);
+            const targetRef = cardRef(player.name, region.type, toStack);
+            onCommand(attachCard(gameId, ref, targetRef));
         },
         onCardToNewStack: (fromStack: number, fromCard: number) => {
-            const cardId = stacks[fromStack]?.[fromCard]?.id;
-            if (cardId) onCommand(moveCard(gameId, cardId, region.id));
+            const ref = cardRef(player.name, region.type, fromStack, fromCard === 0 ? -1 : fromCard - 1);
+            onCommand(moveCard(gameId, ref, player.name, region.type));
         },
     };
 }
@@ -66,22 +66,22 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
         if (ready) regions.push({
             regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 5,
             onCardClick: (si, ci) => onCardClick?.('READY', si, ci),
-            ...fieldRegionCbs(ready, readyStacks, gameId, onCommand),
+            ...fieldRegionCbs(player, ready, gameId, onCommand),
         });
         if (torpor && torpor.count > 0) regions.push({
             regionKey: 'TORPOR', name: 'Torpor', stacks: torporStacks, columns: 4,
             onCardClick: (si, ci) => onCardClick?.('TORPOR', si, ci),
-            ...fieldRegionCbs(torpor, torporStacks, gameId, onCommand),
+            ...fieldRegionCbs(player, torpor, gameId, onCommand),
         });
         if (research && research.count > 0) regions.push({
             regionKey: 'RESEARCH', name: 'Research', stacks: researchStacks, columns: 4, narrowGap: true,
             onCardClick: (si, ci) => onCardClick?.('RESEARCH', si, ci),
-            ...fieldRegionCbs(research, researchStacks, gameId, onCommand),
+            ...fieldRegionCbs(player, research, gameId, onCommand),
         });
         if (uncontrolled) regions.push({
             regionKey: 'UNCONTROLLED', name: 'Uncontrolled', stacks: uncontrolledStacks, columns: 4, narrowGap: true,
             onCardClick: (si, ci) => onCardClick?.('UNCONTROLLED', si, ci),
-            ...fieldRegionCbs(uncontrolled, uncontrolledStacks, gameId, onCommand),
+            ...fieldRegionCbs(player, uncontrolled, gameId, onCommand),
         });
         if (hand) regions.push({
             regionKey: 'HAND', name: 'Hand', stacks: handStacks, columns: 1, compact: true,

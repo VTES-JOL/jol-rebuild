@@ -160,7 +160,7 @@ public class GameCommandService {
     // ── Hand / play ───────────────────────────────────────────────────────────
 
     private void handleDiscardCard(GameData game, DiscardCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -168,29 +168,32 @@ public class GameCommandService {
     }
 
     private void handlePlayCard(GameData game, PlayCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
-        if (cmd.targetRegionId() == null) {
-            handleDiscardCard(game, new DiscardCard(cmd.gameId(), cmd.cardId()));
+        if (cmd.targetPlayerName() == null || cmd.targetRegionType() == null) {
+            PlayerData owner = card.getOwner();
+            if (owner != null) owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
             return;
         }
-        RegionData target = findRegionById(game, cmd.targetRegionId());
-        if (target != null) {
-            target.addCard(card, false);
-        }
+        PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
+        if (targetPlayer == null) return;
+        RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
+        if (target != null) target.addCard(card, false);
     }
 
     private void handleMoveCard(GameData game, MoveCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
-        RegionData target = findRegionById(game, cmd.targetRegionId());
+        PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
+        if (targetPlayer == null) return;
+        RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
         if (target == null) return;
         target.addCard(card, cmd.position());
     }
 
     private void handleAttachCard(GameData game, AttachCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
-        CardData target = game.getCard(cmd.targetCardId());
+        CardData card = game.getCardByRef(cmd.ref());
+        CardData target = game.getCardByRef(cmd.targetRef());
         if (card == null || target == null) return;
         target.add(card, false);
     }
@@ -198,12 +201,12 @@ public class GameCommandService {
     // ── Card state ────────────────────────────────────────────────────────────
 
     private void handleLockCard(GameData game, LockCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setLocked(true);
     }
 
     private void handleUnlockCard(GameData game, UnlockCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setLocked(false);
     }
 
@@ -212,17 +215,17 @@ public class GameCommandService {
     }
 
     private void handleAddCounter(GameData game, AddCounter cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setCounters(card.getCounters() + cmd.amount());
     }
 
     private void handleRemoveCounter(GameData game, RemoveCounter cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setCounters(Math.max(0, card.getCounters() - cmd.amount()));
     }
 
     private void handleSetCardNotes(GameData game, SetCardNotes cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setNotes(cmd.notes());
     }
 
@@ -235,7 +238,7 @@ public class GameCommandService {
 
     private void handleTransferPool(GameData game, TransferPool cmd) {
         PlayerData player = game.getPlayer(cmd.playerName());
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (player == null || card == null) return;
         int amount = cmd.amount();
         // positive = pool → card, negative = card → pool
@@ -253,7 +256,7 @@ public class GameCommandService {
     // ── Influence / crypt ─────────────────────────────────────────────────────
 
     private void handleInfluenceVampire(GameData game, InfluenceVampire cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -263,7 +266,7 @@ public class GameCommandService {
     }
 
     private void handleMoveToReady(GameData game, MoveToReady cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -271,7 +274,7 @@ public class GameCommandService {
     }
 
     private void handleMoveToCrypt(GameData game, MoveToCrypt cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -282,7 +285,7 @@ public class GameCommandService {
     // ── Minion state ──────────────────────────────────────────────────────────
 
     private void handleMoveToTorpor(GameData game, MoveToTorpor cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -290,7 +293,7 @@ public class GameCommandService {
     }
 
     private void handleRescueFromTorpor(GameData game, RescueFromTorpor cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -298,7 +301,7 @@ public class GameCommandService {
     }
 
     private void handleBurnMinion(GameData game, BurnMinion cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return;
         PlayerData owner = card.getOwner();
         if (owner == null) return;
@@ -308,17 +311,17 @@ public class GameCommandService {
     // ── Contesting / title ────────────────────────────────────────────────────
 
     private void handleContestCard(GameData game, ContestCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setContested(true);
     }
 
     private void handleUncontestCard(GameData game, UncontestCard cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setContested(false);
     }
 
     private void handleSetTitle(GameData game, SetTitle cmd) {
-        CardData card = game.getCard(cmd.cardId());
+        CardData card = game.getCardByRef(cmd.ref());
         if (card != null) card.setTitle(cmd.title());
     }
 
@@ -371,17 +374,6 @@ public class GameCommandService {
                 }
             }
         }
-    }
-
-    private RegionData findRegionById(GameData game, String regionId) {
-        for (PlayerData player : game.getPlayers().values()) {
-            for (RegionData region : player.getRegions().values()) {
-                if (regionId.equals(region.getId())) {
-                    return region;
-                }
-            }
-        }
-        return null;
     }
 
     private void persistSnapshot(String gameId, GameData gameData) {

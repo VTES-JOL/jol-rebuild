@@ -36,12 +36,21 @@ export type CardData = {
     childCardIds?: string[];
 };
 
+export type CardSlot = {
+    index: number;
+    counters: number;
+    locked: boolean;
+    childCount: number;
+};
+
 export type RegionState = {
     id: string;
     type: RegionType;
     count: number;
     visible: boolean;
     cardIds: string[];
+    /** Positional slot data for hidden regions (e.g. UNCONTROLLED) — counters without UUID. */
+    slots?: CardSlot[];
 };
 
 export type PlayerState = {

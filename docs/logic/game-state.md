@@ -79,9 +79,14 @@ Each player has exactly one instance of every region type. Region IDs are format
 | `REMOVED_FROM_GAME` | ✓             | ✓              | Cards removed from play                   |
 | `RESEARCH`          | ✓             | ✗              | Research Area (face-down to others)       |
 
-Cards within a hidden region are transmitted as **stubs** — only `id`, `regionId`, `ownerName`, `parentId`, `locked`, `counters`, and `notes` are included. Full card details are omitted.
+**Visibility and UUID privacy:**
+- Cards in regions visible to the viewer are transmitted in full.
+- Cards in regions hidden to the viewer are **omitted entirely** from the card map — no UUID is sent to non-owners.
+- The card's **owner** still receives a stub for their own hidden cards (e.g. hand, library), which carries `id`, `regionId`, `ownerName`, `parentId`, `locked`, `counters`, `notes`, and `childCardIds`.
+- For the `UNCONTROLLED` region specifically, non-owning viewers receive **positional slot data** (`slots`) on the `RegionState` in place of card UUIDs. Each slot has `{index, counters, locked, childCount}`, allowing opponents to observe blood counter amounts on face-down vampires (as per the VTES influence rules) without learning the card's identity.
+- `RegionState.cardIds` is populated only when the region is visible to the viewer; otherwise it is an empty list.
 
-Cards in `LIBRARY` and `CRYPT` are hidden even to their owner; `regionId` and count are sent but not `cardId` or name.
+Cards in `LIBRARY` and `CRYPT` are hidden even to their owner; count is always sent but `cardIds` is always empty.
 
 `PLAYABLE_REGIONS` (from which cards can be played): `HAND`, `RESEARCH`.  
 `IN_PLAY_REGIONS` (on the board): `READY`, `TORPOR`.
@@ -91,7 +96,7 @@ Cards in `LIBRARY` and `CRYPT` are hidden even to their owner; `regionId` and co
 ## Card State
 Every card instance has a unique UUID (`id`). The card template reference is `cardId` (matching the CSV registry).
 
-### Always transmitted
+### Transmitted in owner stubs (hidden regions, owner only)
 | Field        | Description                                              |
 |--------------|----------------------------------------------------------|
 | `id`         | Unique instance UUID                                     |
@@ -102,6 +107,8 @@ Every card instance has a unique UUID (`id`). The card template reference is `ca
 | `locked`     | Whether the card is tapped/locked                        |
 | `counters`   | Counter value on the card                                |
 | `notes`      | Freeform card notes                                      |
+
+Non-owning viewers receive **no entry** in the card map for cards in hidden regions. They may receive positional slot data on the `RegionState` instead (see UNCONTROLLED above).
 
 ### Transmitted only when visible to the viewer
 | Field          | Description                                           |
@@ -132,6 +139,34 @@ Commands are sent via WebSocket as `GAME_COMMAND` messages. Each command carries
 
 Commands are executed under a per-game lock, so concurrent commands for the same game are serialized.
 
+### Card addressing — `CardRef`
+
+Card-referencing commands do **not** use card UUIDs. Instead they use a `CardRef`, a position-based address that does not reveal any hidden card identity information.
+
+```json
+{
+  "playerName": "alice",
+  "regionType": "UNCONTROLLED",
+  "position": 2,
+  "childIndex": -1
+}
+```
+
+| Field        | Description                                                                 |
+|--------------|-----------------------------------------------------------------------------|
+| `playerName` | The player who owns the region                                              |
+| `regionType` | One of the `RegionType` enum values (e.g. `READY`, `HAND`, `UNCONTROLLED`) |
+| `position`   | Zero-based index of the card in the region's top-level card list            |
+| `childIndex` | `-1` for a top-level card; `≥0` for an attached child at that index         |
+
+**Rationale:** Using UUIDs in commands would allow correlation between a hidden stub UUID (visible in one state broadcast) and the card's revealed identity when it later enters a visible region. Position-based addressing prevents this tracking.
+
+**Race condition note:** Positions are resolved at command-execution time. In the rare case that another command has changed card order since the client observed the state, the command silently no-ops (position out of range returns null).
+
+### Target region
+
+Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the target as `(targetPlayerName, targetRegionType)` rather than a region string ID.
+
 ### Turn / phase
 | Command        | Description                                                  |
 |----------------|--------------------------------------------------------------|
@@ -139,48 +174,48 @@ Commands are executed under a per-game lock, so concurrent commands for the same
 | `NextTurn`     | Advance to the next non-ousted player's turn directly        |
 
 ### Deck operations
-| Command          | Description                                                |
-|------------------|------------------------------------------------------------|
-| `DrawCard`       | Draw `count` cards from library to hand                    |
-| `ShuffleLibrary` | Shuffle the actor's library                                |
-| `ShuffleCrypt`   | Shuffle the actor's crypt                                  |
-| `DiscardCard`    | Move a card from hand to ash heap                          |
+| Command          | Fields (besides `gameId`)        | Description                                                |
+|------------------|----------------------------------|------------------------------------------------------------|
+| `DrawCard`       | `count`                          | Draw `count` cards from library to hand                    |
+| `ShuffleLibrary` | —                                | Shuffle the actor's library                                |
+| `ShuffleCrypt`   | —                                | Shuffle the actor's crypt                                  |
+| `DiscardCard`    | `ref: CardRef`                   | Move a card from hand to ash heap                          |
 
 ### Card movement
-| Command             | Description                                                   |
-|---------------------|---------------------------------------------------------------|
-| `PlayCard`          | Move a card to a target region; discards if no target given   |
-| `MoveCard`          | Move a card to any region at a given position                 |
-| `AttachCard`        | Attach a card to another card (e.g., retainer to vampire)     |
-| `MoveToReady`       | Move a card to the owner's Ready region                       |
-| `MoveToCrypt`       | Move a card to the owner's Crypt (bottom)                     |
-| `MoveToTorpor`      | Move a minion to Torpor                                       |
-| `RescueFromTorpor`  | Move a minion from Torpor to Ready                            |
-| `BurnMinion`        | Remove a minion from play entirely (to ash heap)              |
-| `InfluenceVampire`  | Move a vampire from Uncontrolled to Ready                     |
+| Command             | Fields (besides `gameId`)                                   | Description                                                   |
+|---------------------|-------------------------------------------------------------|---------------------------------------------------------------|
+| `PlayCard`          | `ref`, `targetPlayerName`, `targetRegionType`               | Move a card to a target region; discards if no target given   |
+| `MoveCard`          | `ref`, `targetPlayerName`, `targetRegionType`, `position`   | Move a card to any region at a given position                 |
+| `AttachCard`        | `ref`, `targetRef`                                          | Attach a card to another card (e.g., retainer to vampire)     |
+| `MoveToReady`       | `ref`                                                       | Move a card to the owner's Ready region                       |
+| `MoveToCrypt`       | `ref`                                                       | Move a card to the owner's Crypt (bottom)                     |
+| `MoveToTorpor`      | `ref`                                                       | Move a minion to Torpor                                       |
+| `RescueFromTorpor`  | `ref`                                                       | Move a minion from Torpor to Ready                            |
+| `BurnMinion`        | `ref`                                                       | Remove a minion from play entirely (to ash heap)              |
+| `InfluenceVampire`  | `ref`, `amount`                                             | Transfer blood from the owner's pool to an uncontrolled vampire |
 
 ### Card state
-| Command          | Description                                               |
-|------------------|-----------------------------------------------------------|
-| `LockCard`       | Lock (tap) a card                                         |
-| `UnlockCard`     | Unlock (untap) a card                                     |
-| `UnlockAll`      | Unlock all cards for a player                             |
-| `AddCounter`     | Increment a card's counter                                |
-| `RemoveCounter`  | Decrement a card's counter                                |
-| `SetCardNotes`   | Set freeform notes on a card                              |
-| `ContestCard`    | Mark a card as contested                                  |
-| `UncontestCard`  | Clear the contested flag                                  |
-| `SetTitle`       | Set or clear a vampire's title                            |
+| Command          | Fields (besides `gameId`)  | Description                                               |
+|------------------|----------------------------|-----------------------------------------------------------|
+| `LockCard`       | `ref`                      | Lock (tap) a card                                         |
+| `UnlockCard`     | `ref`                      | Unlock (untap) a card                                     |
+| `UnlockAll`      | `playerName`               | Unlock all cards for a player                             |
+| `AddCounter`     | `ref`, `amount`            | Increment a card's counter                                |
+| `RemoveCounter`  | `ref`, `amount`            | Decrement a card's counter                                |
+| `SetCardNotes`   | `ref`, `notes`             | Set freeform notes on a card                              |
+| `ContestCard`    | `ref`                      | Mark a card as contested                                  |
+| `UncontestCard`  | `ref`                      | Clear the contested flag                                  |
+| `SetTitle`       | `ref`, `title`             | Set or clear a vampire's title                            |
 
 ### Player state
-| Command         | Description                                                |
-|-----------------|------------------------------------------------------------|
-| `SetPool`       | Set a player's pool to an absolute value                   |
-| `TransferPool`  | Transfer pool between players                              |
-| `GainEdge`      | Award the edge to a player                                 |
-| `OustPlayer`    | Mark a player as ousted                                    |
-| `SetChoice`     | Set a player's choice flag                                 |
-| `ReverseOrder`  | Toggle the order-of-play reversal flag                     |
+| Command         | Fields (besides `gameId`)            | Description                                                |
+|-----------------|--------------------------------------|------------------------------------------------------------|
+| `SetPool`       | `playerName`, `amount`               | Set a player's pool to an absolute value                   |
+| `TransferPool`  | `playerName`, `ref`, `amount`        | Transfer blood between a player's pool and a card          |
+| `GainEdge`      | `playerName`                         | Award the edge to a player                                 |
+| `OustPlayer`    | `playerName`                         | Mark a player as ousted                                    |
+| `SetChoice`     | `choice`                             | Set a player's choice flag                                 |
+| `ReverseOrder`  | —                                    | Toggle the order-of-play reversal flag                     |
 
 ### Game state
 | Command         | Description                       |

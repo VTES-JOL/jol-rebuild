@@ -130,8 +130,8 @@ public class GameStateControllerTest {
                 .then().statusCode(HttpStatus.SC_OK)
                 .body("players.find { it.name == 'alice' }.regions.HAND.visible", equalTo(false))
                 .body("players.find { it.name == 'alice' }.regions.HAND.count", equalTo(1))
-                // card IDs are still present so commands can reference them by position
-                .body("players.find { it.name == 'alice' }.regions.HAND.cardIds", hasItem(handCardId));
+                // cardIds must be empty for hidden regions — no UUID leakage to opponents
+                .body("players.find { it.name == 'alice' }.regions.HAND.cardIds", empty());
     }
 
     @Test
@@ -142,7 +142,8 @@ public class GameStateControllerTest {
                 .then().statusCode(HttpStatus.SC_OK)
                 .body("players.find { it.name == 'alice' }.regions.LIBRARY.visible", equalTo(false))
                 .body("players.find { it.name == 'alice' }.regions.LIBRARY.count", equalTo(1))
-                .body("players.find { it.name == 'alice' }.regions.LIBRARY.cardIds", hasItem(libraryCardId));
+                // cardIds must be empty for hidden regions
+                .body("players.find { it.name == 'alice' }.regions.LIBRARY.cardIds", empty());
     }
 
     @Test
@@ -193,21 +194,20 @@ public class GameStateControllerTest {
 
     @Test
     @TestSecurity(user = "bob", roles = {"USER"})
-    void hiddenHandCardReturnedAsStubForOpponent() {
-        // Alice's HAND is hidden to bob — stub only
+    void hiddenHandCardAbsentFromOpponentCardMap() {
+        // Alice's HAND is hidden to bob — no UUID transmitted to opponents
         given().get("/api/games/" + gameId + "/state")
                 .then().statusCode(HttpStatus.SC_OK)
-                .body("cards." + handCardId + ".id",        equalTo(handCardId))
-                .body("cards." + handCardId + ".ownerName", equalTo("alice"))
-                .body("cards." + handCardId + ".name",      nullValue())
-                .body("cards." + handCardId + ".cardId",    nullValue());
+                .body("cards." + handCardId, nullValue());
     }
 
     @Test
-    @TestSecurity(user = "bob", roles = {"USER"})
-    void stubIncludesLockedAndCounters() {
+    @TestSecurity(user = "alice", roles = {"USER"})
+    void ownerStubIncludesLockedAndCounters() {
+        // Owner sees stubs for their own hidden cards (library, crypt)
         given().get("/api/games/" + gameId + "/state")
                 .then().statusCode(HttpStatus.SC_OK)
+                .body("cards." + libraryCardId + ".id",      equalTo(libraryCardId))
                 .body("cards." + libraryCardId + ".locked",   equalTo(false))
                 .body("cards." + libraryCardId + ".counters", equalTo(0));
     }

@@ -11,9 +11,9 @@ type TextBoardProps = {
     orderedPlayers: PlayerState[];
     cards: Record<string, CardData>;
     currentUser: string;
-    onCardReorder?: (playerName: string, regionType: RegionType, cardId: string, toIndex: number) => void;
-    onCardMove?: (playerName: string, cardId: string, fromRegionType: RegionType, toRegionType: RegionType) => void;
-    onCardAttach?: (playerName: string, cardId: string, targetCardId: string) => void;
+    onCardReorder?: (playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) => void;
+    onCardMove?: (playerName: string, fromRegion: RegionType, fromIndex: number, toRegion: RegionType, childIdx?: number) => void;
+    onCardAttach?: (playerName: string, fromRegion: RegionType, fromTopIdx: number, fromChildIdx: number | null, toRegion: RegionType, toTopIdx: number) => void;
 };
 
 const REGION_ORDER: RegionType[] = [
@@ -34,6 +34,35 @@ const REGION_LABELS: Record<RegionType, string> = {
     ASH_HEAP: 'Ash Heap',
     REMOVED_FROM_GAME: 'Removed',
 };
+
+// ── Position-based ID scheme ──────────────────────────────────────────────────
+// Top-level card at position p: "${regionType}:${p}"
+// Child card at parent p, child index c: "${regionType}:${p}:child:${c}"
+// RegionType names have no colons, so ":" is an unambiguous separator.
+
+const topPosId = (rt: RegionType, p: number) => `${rt}:${p}`;
+const childPosId = (rt: RegionType, p: number, c: number) => `${rt}:${p}:child:${c}`;
+
+type ParsedPosId = {regionType: RegionType; topIdx: number; childIdx?: number};
+
+function parsePosId(id: string): ParsedPosId | null {
+    const parts = id.split(':');
+    if (parts.length === 2) return {regionType: parts[0] as RegionType, topIdx: parseInt(parts[1], 10)};
+    if (parts.length === 4 && parts[2] === 'child') return {regionType: parts[0] as RegionType, topIdx: parseInt(parts[1], 10), childIdx: parseInt(parts[3], 10)};
+    return null;
+}
+
+// Returns the UUIDs of top-level (non-child) cards in a visible region.
+function regionTopUuids(region: RegionState, cards: Record<string, CardData>): string[] {
+    const cardSet = new Set(region.cardIds);
+    const childSet = new Set(region.cardIds.filter(id => {
+        const p = cards[id]?.parentId;
+        return p != null && cardSet.has(p);
+    }));
+    return region.cardIds.filter(id => !childSet.has(id));
+}
+
+// ── CardRow ───────────────────────────────────────────────────────────────────
 
 function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: boolean; isChild?: boolean}) {
     if (isHidden) {
@@ -81,6 +110,8 @@ function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: b
     );
 }
 
+// ── SortableCardRow ───────────────────────────────────────────────────────────
+
 function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAttachTarget}: {
     id: string; card: CardData; isHidden: boolean; isChild?: boolean;
     isCrossRegionDrag: boolean; isAttachTarget: boolean;
@@ -107,8 +138,7 @@ function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAtta
     );
 }
 
-// Children use useDraggable (drag-source only, not a sortable drop target)
-// so they don't interfere with the within-region sortable system.
+// Children are drag-source only — not sortable targets.
 function DraggableChildRow({id, card, isHidden}: {id: string; card: CardData; isHidden: boolean}) {
     const {attributes, listeners, setNodeRef, isDragging} = useDraggable({id});
     return (
@@ -123,30 +153,25 @@ function DraggableChildRow({id, card, isHidden}: {id: string; card: CardData; is
     );
 }
 
+// ── RegionSection ─────────────────────────────────────────────────────────────
+
 function RegionSection({
-    region, cards, sortedIds, isDropTarget, activeDragFromRegion, activeDragCardId,
+    region, resolveCard, childCountAt, sortedIds, isDropTarget, activeDragFromRegion, activeDragPosId,
 }: {
     region: RegionState;
-    cards: Record<string, CardData>;
+    resolveCard: (posId: string) => CardData;
+    childCountAt: (topIdx: number) => number;
     sortedIds: string[];
     isDropTarget: boolean;
     activeDragFromRegion: RegionType | null;
-    activeDragCardId: string | null;
+    activeDragPosId: string | null;
 }) {
     const [collapsed, setCollapsed] = useState(!region.visible);
     const {setNodeRef} = useDroppable({id: `region-${region.type}`});
     const isCrossRegionDrag = activeDragFromRegion !== null && activeDragFromRegion !== region.type;
 
-    const activeCard = activeDragCardId ? cards[activeDragCardId] : null;
-    const activeIsLib = activeCard && !(activeCard.crypt || activeCard.minion);
-
-    const regionCardSet = new Set(region.cardIds);
-    const childSet = new Set(
-        region.cardIds.filter(id => {
-            const parentId = cards[id]?.parentId;
-            return parentId != null && regionCardSet.has(parentId);
-        })
-    );
+    const activeDragCard = activeDragPosId ? resolveCard(activeDragPosId) : null;
+    const activeIsLib = activeDragCard && !(activeDragCard.crypt || activeDragCard.minion);
 
     return (
         <div
@@ -169,29 +194,34 @@ function RegionSection({
                             empty
                         </div>
                     )}
-                    {sortedIds.map(id => {
-                        const card = cards[id] ?? {id};
+                    {sortedIds.map(posId => {
+                        const parsed = parsePosId(posId);
+                        const topIdx = parsed?.topIdx ?? 0;
+                        const card = resolveCard(posId);
                         const hidden = !region.visible || !!card.faceDown;
-                        const children = hidden || childSet.has(id)
-                            ? []
-                            : (card.childCardIds ?? [])
-                                .filter(cid => regionCardSet.has(cid))
-                                .map(cid => cards[cid])
-                                .filter((c): c is CardData => c != null);
+                        const childCount = hidden ? 0 : childCountAt(topIdx);
                         const isMinion = !!(card.crypt || card.minion);
                         const isAttachTarget = !!(activeIsLib && isMinion);
                         return (
-                            <div key={id} className="border-b border-line/20 last:border-0">
+                            <div key={posId} className="border-b border-line/20 last:border-0">
                                 <SortableCardRow
-                                    id={id}
+                                    id={posId}
                                     card={card}
                                     isHidden={hidden}
                                     isCrossRegionDrag={isCrossRegionDrag}
                                     isAttachTarget={isAttachTarget}
                                 />
-                                {children.map(child => (
-                                    <DraggableChildRow key={child.id} id={child.id} card={child} isHidden={false} />
-                                ))}
+                                {Array.from({length: childCount}, (_, c) => {
+                                    const cPosId = childPosId(region.type, topIdx, c);
+                                    return (
+                                        <DraggableChildRow
+                                            key={cPosId}
+                                            id={cPosId}
+                                            card={resolveCard(cPosId)}
+                                            isHidden={false}
+                                        />
+                                    );
+                                })}
                             </div>
                         );
                     })}
@@ -200,6 +230,8 @@ function RegionSection({
         </div>
     );
 }
+
+// ── PlayerColumn ──────────────────────────────────────────────────────────────
 
 function PlayerColumn({
     player, cards, isCurrentUser, onCardReorder, onCardMove, onCardAttach,
@@ -216,19 +248,60 @@ function PlayerColumn({
     const regions = useMemo(
         () => REGION_ORDER
             .map(type => player.regions[type])
-            .filter((r): r is RegionState => r != null && (!HIDE_WHEN_EMPTY.has(r.type) || r.cardIds.length > 0)),
+            .filter((r): r is RegionState => r != null && (!HIDE_WHEN_EMPTY.has(r.type) || r.count > 0)),
         [player.regions],
     );
 
+    // Resolve card data by position ID without using UUIDs as external identifiers.
+    const resolveCard = useCallback((posId: string): CardData => {
+        const parsed = parsePosId(posId);
+        if (!parsed) return {id: posId, faceDown: true};
+
+        const region = player.regions[parsed.regionType];
+        if (!region) return {id: posId, faceDown: true};
+
+        if (!region.visible) {
+            if (parsed.childIdx !== undefined) return {id: posId, faceDown: true};
+            const slot = region.slots?.[parsed.topIdx];
+            if (slot) return {id: posId, faceDown: true, crypt: true, counters: slot.counters, locked: slot.locked};
+            const isCryptType = parsed.regionType === 'CRYPT' || parsed.regionType === 'UNCONTROLLED';
+            return {id: posId, faceDown: true, crypt: isCryptType};
+        }
+
+        const topUuids = regionTopUuids(region, cards);
+        if (parsed.childIdx === undefined) {
+            const uuid = topUuids[parsed.topIdx];
+            return uuid ? (cards[uuid] ?? {id: posId}) : {id: posId, faceDown: true};
+        }
+        const parentUuid = topUuids[parsed.topIdx];
+        if (!parentUuid) return {id: posId, faceDown: true};
+        const parent = cards[parentUuid];
+        if (!parent) return {id: posId, faceDown: true};
+        const cardSet = new Set(region.cardIds);
+        const childUuids = (parent.childCardIds ?? []).filter(cid => cardSet.has(cid));
+        const childUuid = childUuids[parsed.childIdx];
+        return childUuid ? (cards[childUuid] ?? {id: posId, faceDown: true}) : {id: posId, faceDown: true};
+    }, [player.regions, cards]);
+
+    const childCountAt = useCallback((regionType: RegionType, topIdx: number): number => {
+        const region = player.regions[regionType];
+        if (!region || !region.visible) return region?.slots?.[topIdx]?.childCount ?? 0;
+        const topUuids = regionTopUuids(region, cards);
+        const parentUuid = topUuids[topIdx];
+        if (!parentUuid) return 0;
+        const parent = cards[parentUuid];
+        if (!parent) return 0;
+        const cardSet = new Set(region.cardIds);
+        return (parent.childCardIds ?? []).filter(cid => cardSet.has(cid)).length;
+    }, [player.regions, cards]);
+
     const getTopLevel = useCallback((region: RegionState): string[] => {
-        const regionCardSet = new Set(region.cardIds);
-        const childIds = new Set(
-            region.cardIds.filter(id => {
-                const parentId = cards[id]?.parentId;
-                return parentId != null && regionCardSet.has(parentId);
-            })
-        );
-        return region.cardIds.filter(id => !childIds.has(id));
+        if (!region.visible) {
+            const count = region.slots?.length ?? region.count;
+            return Array.from({length: count}, (_, i) => topPosId(region.type, i));
+        }
+        const topUuids = regionTopUuids(region, cards);
+        return topUuids.map((_, i) => topPosId(region.type, i));
     }, [cards]);
 
     const [sortedIds, setSortedIds] = useState<Partial<Record<RegionType, string[]>>>(() =>
@@ -239,17 +312,7 @@ function PlayerColumn({
         setSortedIds(Object.fromEntries(regions.map(r => [r.type, getTopLevel(r)])));
     }, [regions, getTopLevel]);
 
-    const cardToRegion = useMemo(() => {
-        const map = new Map<string, RegionType>();
-        for (const region of Object.values(player.regions)) {
-            if (region) {
-                for (const id of region.cardIds) map.set(id, region.type);
-            }
-        }
-        return map;
-    }, [player.regions]);
-
-    const [activeCardId, setActiveCardId] = useState<string | null>(null);
+    const [activePosId, setActivePosId] = useState<string | null>(null);
     const [activeDragFromRegion, setActiveDragFromRegion] = useState<RegionType | null>(null);
     const [dragOverRegion, setDragOverRegion] = useState<RegionType | null>(null);
 
@@ -259,32 +322,27 @@ function PlayerColumn({
 
     const handleDragStart = useCallback(({active}: DragStartEvent) => {
         const id = String(active.id);
-        setActiveCardId(id);
-        setActiveDragFromRegion(cardToRegion.get(id) ?? null);
-    }, [cardToRegion]);
+        setActivePosId(id);
+        setActiveDragFromRegion(parsePosId(id)?.regionType ?? null);
+    }, []);
 
     const handleDragOver = useCallback(({active, over}: DragOverEvent) => {
         const activeId = String(active.id);
         const overId = over ? String(over.id) : null;
-        const fromRegionType = cardToRegion.get(activeId);
+        const fromRegionType = parsePosId(activeId)?.regionType;
         if (!fromRegionType) return;
 
-        if (!overId) {
-            setDragOverRegion(null);
-            return;
-        }
+        if (!overId) { setDragOverRegion(null); return; }
 
         const currentOverRegion: RegionType | null = overId.startsWith('region-')
             ? overId.slice('region-'.length) as RegionType
-            : cardToRegion.get(overId) ?? null;
-
+            : parsePosId(overId)?.regionType ?? null;
         setDragOverRegion(currentOverRegion);
-
         if (currentOverRegion !== fromRegionType) return;
 
-        // Don't show sortable preview when dragging a library card over a vampire (attach intent)
-        const activeCard = cards[activeId];
-        const overCard = !overId.startsWith('region-') ? cards[overId] : null;
+        // Suppress sort preview when dragging a library card over a vampire (attach intent).
+        const activeCard = resolveCard(activeId);
+        const overCard = !overId.startsWith('region-') ? resolveCard(overId) : null;
         if (activeCard && overCard
             && !(activeCard.crypt || activeCard.minion)
             && (overCard.crypt || overCard.minion)) return;
@@ -296,81 +354,76 @@ function PlayerColumn({
             if (from === -1 || to === -1 || from === to) return prev;
             return {...prev, [fromRegionType]: arrayMove(ids, from, to)};
         });
-    }, [cardToRegion, cards]);
+    }, [resolveCard]);
 
     const handleDragEnd = useCallback(({active, over}: DragEndEvent) => {
         const activeId = String(active.id);
-        const fromRegionType = cardToRegion.get(activeId);
+        const activeParsed = parsePosId(activeId);
+        const fromRegionType = activeParsed?.regionType;
         const currentSortedIds = sortedIds;
 
-        setActiveCardId(null);
+        setActivePosId(null);
         setActiveDragFromRegion(null);
         setDragOverRegion(null);
         resetSortedIds();
 
-        if (!over || !fromRegionType) return;
+        if (!over || !fromRegionType || !activeParsed) return;
         const overId = String(over.id);
 
         const toRegionType: RegionType | null = overId.startsWith('region-')
             ? overId.slice('region-'.length) as RegionType
-            : cardToRegion.get(overId) ?? null;
-
+            : parsePosId(overId)?.regionType ?? null;
         if (!toRegionType) return;
 
-        const overCardId = !overId.startsWith('region-') ? overId : null;
-        const activeCard = cards[activeId];
-        const overCard = overCardId ? cards[overCardId] : null;
-        const activeIsChild = !!activeCard?.parentId;
+        const overPosId = !overId.startsWith('region-') ? overId : null;
+        const overParsed = overPosId ? parsePosId(overPosId) : null;
+        const activeCard = resolveCard(activeId);
+        const overCard = overPosId ? resolveCard(overPosId) : null;
+        const activeIsChild = activeParsed.childIdx !== undefined;
         const activeIsLib = activeCard && !(activeCard.crypt || activeCard.minion);
         const overIsMinion = !!(overCard?.crypt || overCard?.minion);
 
         if (fromRegionType !== toRegionType) {
-            // Cross-region: if dropped on a specific card → attach; on region area → move
-            if (overCardId && overIsMinion) {
-                onCardAttach?.(player.name, activeId, overCardId);
+            if (overParsed && overParsed.childIdx === undefined && overIsMinion) {
+                onCardAttach?.(player.name, fromRegionType, activeParsed.topIdx, activeParsed.childIdx ?? null, toRegionType, overParsed.topIdx);
             } else {
-                onCardMove?.(player.name, activeId, fromRegionType, toRegionType);
+                onCardMove?.(player.name, fromRegionType, activeParsed.topIdx, toRegionType, activeParsed.childIdx);
             }
             return;
         }
 
-        // Same region from here
+        // Same region
         if (activeIsChild) {
-            // Child card: re-attach to a vampire or detach to region
-            if (overCardId && overIsMinion && overCardId !== activeId) {
-                onCardAttach?.(player.name, activeId, overCardId);
+            if (overParsed && overParsed.childIdx === undefined && overIsMinion && overParsed.topIdx !== activeParsed.topIdx) {
+                onCardAttach?.(player.name, fromRegionType, activeParsed.topIdx, activeParsed.childIdx!, toRegionType, overParsed.topIdx);
             } else {
                 // Detach: become top-level in same region
-                onCardMove?.(player.name, activeId, fromRegionType, fromRegionType);
+                onCardMove?.(player.name, fromRegionType, activeParsed.topIdx, fromRegionType, activeParsed.childIdx);
             }
             return;
         }
 
-        if (activeIsLib && overCardId && overIsMinion) {
-            // Library card dropped directly on a vampire in the same region → attach
-            onCardAttach?.(player.name, activeId, overCardId);
+        if (activeIsLib && overParsed && overParsed.childIdx === undefined && overIsMinion) {
+            onCardAttach?.(player.name, fromRegionType, activeParsed.topIdx, null, toRegionType, overParsed.topIdx);
             return;
         }
 
-        // Regular within-region reorder
+        // Within-region reorder
         const liveOrder = currentSortedIds[fromRegionType] ?? [];
         const toIndex = liveOrder.indexOf(activeId);
-        const fromRegion = player.regions[fromRegionType];
-        if (!fromRegion) return;
-        const originalOrder = getTopLevel(fromRegion);
-        const fromIndex = originalOrder.indexOf(activeId);
-        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
-        onCardReorder?.(player.name, fromRegionType, activeId, toIndex);
-    }, [cardToRegion, cards, sortedIds, resetSortedIds, player, getTopLevel, onCardReorder, onCardMove, onCardAttach]);
+        const fromIndex = activeParsed.topIdx;
+        if (toIndex === -1 || fromIndex === toIndex) return;
+        onCardReorder?.(player.name, fromRegionType, fromIndex, toIndex);
+    }, [sortedIds, resetSortedIds, player.name, resolveCard, onCardReorder, onCardMove, onCardAttach]);
 
     const handleDragCancel = useCallback(() => {
-        setActiveCardId(null);
+        setActivePosId(null);
         setActiveDragFromRegion(null);
         setDragOverRegion(null);
         resetSortedIds();
     }, [resetSortedIds]);
 
-    const activeCard = activeCardId ? cards[activeCardId] : null;
+    const activeCard = activePosId ? resolveCard(activePosId) : null;
 
     return (
         <DndContext
@@ -402,10 +455,11 @@ function PlayerColumn({
                     <RegionSection
                         key={region.id}
                         region={region}
-                        cards={cards}
+                        resolveCard={resolveCard}
+                        childCountAt={topIdx => childCountAt(region.type, topIdx)}
                         sortedIds={sortedIds[region.type] ?? getTopLevel(region)}
                         activeDragFromRegion={activeDragFromRegion}
-                        activeDragCardId={activeCardId}
+                        activeDragPosId={activePosId}
                         isDropTarget={
                             activeDragFromRegion !== null &&
                             activeDragFromRegion !== region.type &&
@@ -417,13 +471,15 @@ function PlayerColumn({
             <DragOverlay dropAnimation={null}>
                 {activeCard && (
                     <div className="bg-panel border border-arcane/40 rounded px-2 py-1 text-xs font-mono text-ink-secondary shadow-lg pointer-events-none whitespace-nowrap">
-                        {activeCard.name ?? activeCardId}
+                        {activeCard.name ?? 'hidden'}
                     </div>
                 )}
             </DragOverlay>
         </DndContext>
     );
 }
+
+// ── TextBoard ─────────────────────────────────────────────────────────────────
 
 export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, onCardMove, onCardAttach}: TextBoardProps) {
     return (

@@ -1,6 +1,7 @@
 package net.deckserver.jol.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import net.deckserver.jol.dto.CardSlotDto;
 import net.deckserver.jol.dto.CardStateDto;
 import net.deckserver.jol.dto.GameStateDto;
 import net.deckserver.jol.dto.PlayerStateDto;
@@ -78,17 +79,43 @@ public class GameStateProjector {
         dto.id = region.getId();
         dto.type = region.getType();
         dto.count = region.size();
-        dto.visible = region.getType().isVisible(region.getOwner(), viewer);
+        boolean visible = region.getType().isVisible(region.getOwner(), viewer);
+        dto.visible = visible;
 
-        List<String> ids = new ArrayList<>();
-        for (CardData card : region.getCards()) {
-            ids.add(card.getId());
-            for (CardData child : card.getCards()) {
-                ids.add(child.getId());
+        if (visible) {
+            List<String> ids = new ArrayList<>();
+            for (CardData card : region.getCards()) {
+                ids.add(card.getId());
+                for (CardData child : card.getCards()) {
+                    ids.add(child.getId());
+                }
+            }
+            dto.cardIds = ids;
+        } else {
+            // No UUIDs transmitted for hidden regions — identity is never leaked.
+            dto.cardIds = List.of();
+            // Expose positional slot data for UNCONTROLLED so all players can see
+            // blood counter amounts on face-down vampires without learning card identity.
+            if (region.getType() == RegionType.UNCONTROLLED) {
+                dto.slots = buildSlots(region);
             }
         }
-        dto.cardIds = ids;
         return dto;
+    }
+
+    private List<CardSlotDto> buildSlots(RegionData region) {
+        List<CardSlotDto> slots = new ArrayList<>();
+        List<CardData> cards = region.getCards();
+        for (int i = 0; i < cards.size(); i++) {
+            CardData card = cards.get(i);
+            CardSlotDto slot = new CardSlotDto();
+            slot.index = i;
+            slot.counters = card.getCounters();
+            slot.locked = card.isLocked();
+            slot.childCount = card.getCards().size();
+            slots.add(slot);
+        }
+        return slots;
     }
 
     private Map<String, CardStateDto> buildCardMap(GameData game, String viewer) {
@@ -96,29 +123,12 @@ public class GameStateProjector {
         for (CardData card : game.getCards().values()) {
             RegionData region = card.getRegion();
             if (region == null) continue;
-            boolean visible = region.getType().isVisible(region.getOwner(), viewer);
-            result.put(card.getId(), visible ? toCardStateDto(card) : toCardStub(card));
+            if (region.getType().isVisible(region.getOwner(), viewer)) {
+                result.put(card.getId(), toCardStateDto(card));
+            }
+            // Hidden regions: no UUID entry — position-based CardRef is used for interaction
         }
         return result;
-    }
-
-    private CardStateDto toCardStub(CardData card) {
-        CardStateDto dto = new CardStateDto();
-        dto.id = card.getId();
-        dto.regionId = card.getRegion() != null ? card.getRegion().getId() : null;
-        dto.ownerName = card.getOwnerName();
-        dto.parentId = card.getParent() != null ? card.getParent().getId() : null;
-        dto.locked = card.isLocked();
-        dto.counters = card.getCounters();
-        dto.notes = card.getNotes();
-        if (!card.getCards().isEmpty()) {
-            List<String> childIds = new ArrayList<>();
-            for (CardData child : card.getCards()) {
-                childIds.add(child.getId());
-            }
-            dto.childCardIds = childIds;
-        }
-        return dto;
     }
 
     private CardStateDto toCardStateDto(CardData card) {

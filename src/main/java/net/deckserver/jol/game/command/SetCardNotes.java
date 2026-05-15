@@ -3,4 +3,4 @@ package net.deckserver.jol.game.command;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
 @RegisterForReflection
-public record SetCardNotes(String gameId, String cardId, String notes) implements GameCommand {}
+public record SetCardNotes(String gameId, CardRef ref, String notes) implements GameCommand {}

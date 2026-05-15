@@ -1,32 +1,41 @@
 /** TypeScript mirror of the Java GameCommand sealed interface. */
 
+import type {RegionType} from './types.ts';
+
+/** Position-based card address. childIndex=-1 means the top-level card; >=0 is an attached child. */
+export type CardRef = { playerName: string; regionType: RegionType; position: number; childIndex: number };
+
+export function cardRef(playerName: string, regionType: RegionType, position: number, childIndex = -1): CardRef {
+    return {playerName, regionType, position, childIndex};
+}
+
 export type AdvancePhaseCommand   = { type: 'ADVANCE_PHASE';   gameId: string };
 export type NextTurnCommand       = { type: 'NEXT_TURN';       gameId: string };
 export type DrawCardCommand       = { type: 'DRAW_CARD';       gameId: string };
 export type ShuffleLibraryCommand = { type: 'SHUFFLE_LIBRARY'; gameId: string };
 export type ShuffleCryptCommand   = { type: 'SHUFFLE_CRYPT';   gameId: string };
-export type DiscardCardCommand    = { type: 'DISCARD_CARD';    gameId: string; cardId: string };
-export type PlayCardCommand       = { type: 'PLAY_CARD';       gameId: string; cardId: string };
-export type MoveCardCommand       = { type: 'MOVE_CARD';       gameId: string; cardId: string; targetRegionId: string; position: number };
-export type AttachCardCommand     = { type: 'ATTACH_CARD';     gameId: string; cardId: string; targetCardId: string };
-export type LockCardCommand       = { type: 'LOCK_CARD';       gameId: string; cardId: string };
-export type UnlockCardCommand     = { type: 'UNLOCK_CARD';     gameId: string; cardId: string };
+export type DiscardCardCommand    = { type: 'DISCARD_CARD';    gameId: string; ref: CardRef };
+export type PlayCardCommand       = { type: 'PLAY_CARD';       gameId: string; ref: CardRef; targetPlayerName: string; targetRegionType: RegionType };
+export type MoveCardCommand       = { type: 'MOVE_CARD';       gameId: string; ref: CardRef; targetPlayerName: string; targetRegionType: RegionType; position: number };
+export type AttachCardCommand     = { type: 'ATTACH_CARD';     gameId: string; ref: CardRef; targetRef: CardRef };
+export type LockCardCommand       = { type: 'LOCK_CARD';       gameId: string; ref: CardRef };
+export type UnlockCardCommand     = { type: 'UNLOCK_CARD';     gameId: string; ref: CardRef };
 export type UnlockAllCommand      = { type: 'UNLOCK_ALL';      gameId: string };
-export type AddCounterCommand     = { type: 'ADD_COUNTER';     gameId: string; cardId: string };
-export type RemoveCounterCommand  = { type: 'REMOVE_COUNTER';  gameId: string; cardId: string };
-export type SetCardNotesCommand   = { type: 'SET_CARD_NOTES';  gameId: string; cardId: string; notes: string };
+export type AddCounterCommand     = { type: 'ADD_COUNTER';     gameId: string; ref: CardRef };
+export type RemoveCounterCommand  = { type: 'REMOVE_COUNTER';  gameId: string; ref: CardRef };
+export type SetCardNotesCommand   = { type: 'SET_CARD_NOTES';  gameId: string; ref: CardRef; notes: string };
 export type SetPoolCommand        = { type: 'SET_POOL';        gameId: string; playerName: string; amount: number };
-export type TransferPoolCommand   = { type: 'TRANSFER_POOL';   gameId: string; fromPlayer: string; toPlayer: string; amount: number };
+export type TransferPoolCommand   = { type: 'TRANSFER_POOL';   gameId: string; playerName: string; ref: CardRef; amount: number };
 export type GainEdgeCommand       = { type: 'GAIN_EDGE';       gameId: string };
-export type InfluenceVampireCommand  = { type: 'INFLUENCE_VAMPIRE';   gameId: string; cardId: string };
-export type MoveToReadyCommand    = { type: 'MOVE_TO_READY';   gameId: string; cardId: string };
-export type MoveToCryptCommand    = { type: 'MOVE_TO_CRYPT';   gameId: string; cardId: string };
-export type MoveToTorporCommand   = { type: 'MOVE_TO_TORPOR';  gameId: string; cardId: string };
-export type RescueFromTorporCommand = { type: 'RESCUE_FROM_TORPOR'; gameId: string; cardId: string };
-export type BurnMinionCommand     = { type: 'BURN_MINION';     gameId: string; cardId: string };
-export type ContestCardCommand    = { type: 'CONTEST_CARD';    gameId: string; cardId: string };
-export type UncontestCardCommand  = { type: 'UNCONTEST_CARD';  gameId: string; cardId: string };
-export type SetTitleCommand       = { type: 'SET_TITLE';       gameId: string; cardId: string; title: string };
+export type InfluenceVampireCommand  = { type: 'INFLUENCE_VAMPIRE';   gameId: string; ref: CardRef; amount: number };
+export type MoveToReadyCommand    = { type: 'MOVE_TO_READY';   gameId: string; ref: CardRef };
+export type MoveToCryptCommand    = { type: 'MOVE_TO_CRYPT';   gameId: string; ref: CardRef };
+export type MoveToTorporCommand   = { type: 'MOVE_TO_TORPOR';  gameId: string; ref: CardRef };
+export type RescueFromTorporCommand = { type: 'RESCUE_FROM_TORPOR'; gameId: string; ref: CardRef };
+export type BurnMinionCommand     = { type: 'BURN_MINION';     gameId: string; ref: CardRef };
+export type ContestCardCommand    = { type: 'CONTEST_CARD';    gameId: string; ref: CardRef };
+export type UncontestCardCommand  = { type: 'UNCONTEST_CARD';  gameId: string; ref: CardRef };
+export type SetTitleCommand       = { type: 'SET_TITLE';       gameId: string; ref: CardRef; title: string };
 export type OustPlayerCommand     = { type: 'OUST_PLAYER';     gameId: string; playerName: string };
 export type SetChoiceCommand      = { type: 'SET_CHOICE';      gameId: string; choice: string };
 export type ReverseOrderCommand   = { type: 'REVERSE_ORDER';   gameId: string };
@@ -44,10 +53,10 @@ export type GameCommand =
     | ContestCardCommand | UncontestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand;
 
-export function moveCard(gameId: string, cardId: string, targetRegionId: string, position = -1): MoveCardCommand {
-    return {type: 'MOVE_CARD', gameId, cardId, targetRegionId, position};
+export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
+    return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
 }
 
-export function attachCard(gameId: string, cardId: string, targetCardId: string): AttachCardCommand {
-    return {type: 'ATTACH_CARD', gameId, cardId, targetCardId};
+export function attachCard(gameId: string, ref: CardRef, targetRef: CardRef): AttachCardCommand {
+    return {type: 'ATTACH_CARD', gameId, ref, targetRef};
 }

@@ -12,6 +12,7 @@ Below is the detailed documentation for the logical constraints each domain mode
 - [Game lobby](docs/logic/game-lobby.md)
 - [Tournament lobby](docs/logic/tournament-lobby.md)
 - [Game State](docs/logic/game-state.md)
+- [Board Layouts](docs/logic/board-layouts.md)
 
 ## Commands
 

@@ -9,8 +9,9 @@ import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {PlayerState, RegionType} from './types.ts';
 import type {GameCommand} from './gameCommands.ts';
-import {attachCard, moveCard} from './gameCommands.ts';
+import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
+
 
 type BoardLayout = 'linear' | 'circular' | 'text';
 
@@ -58,24 +59,23 @@ export default function GamePage() {
         prevCardIdsRef.current = next;
     }, [gameState?.cards]);
 
-    const handleCardMove = useCallback((playerName: string, cardId: string, _from: RegionType, toRegionType: RegionType) => {
-        if (!gameState) return;
-        const player = gameState.players.find(p => p.name === playerName);
-        const toRegion = player?.regions[toRegionType];
-        if (!toRegion) return;
-        sendCommand(moveCard(gameId, cardId, toRegion.id));
-    }, [gameId, gameState, sendCommand]);
+    const handleCardMove = useCallback((playerName: string, fromRegion: RegionType, fromIndex: number, toRegion: RegionType, childIdx?: number) => {
+        const ref = childIdx !== undefined
+            ? cardRef(playerName, fromRegion, fromIndex, childIdx)
+            : cardRef(playerName, fromRegion, fromIndex);
+        sendCommand(moveCard(gameId, ref, playerName, toRegion));
+    }, [gameId, sendCommand]);
 
-    const handleCardReorder = useCallback((playerName: string, regionType: RegionType, cardId: string, toIndex: number) => {
-        if (!gameState) return;
-        const player = gameState.players.find(p => p.name === playerName);
-        const region = player?.regions[regionType];
-        if (!region) return;
-        sendCommand(moveCard(gameId, cardId, region.id, toIndex));
-    }, [gameId, gameState, sendCommand]);
+    const handleCardReorder = useCallback((playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) => {
+        sendCommand(moveCard(gameId, cardRef(playerName, regionType, fromIndex), playerName, regionType, toIndex));
+    }, [gameId, sendCommand]);
 
-    const handleCardAttach = useCallback((_playerName: string, cardId: string, targetCardId: string) => {
-        sendCommand(attachCard(gameId, cardId, targetCardId));
+    const handleCardAttach = useCallback((playerName: string, fromRegion: RegionType, fromTopIdx: number, fromChildIdx: number | null, toRegion: RegionType, toTopIdx: number) => {
+        const ref = fromChildIdx !== null
+            ? cardRef(playerName, fromRegion, fromTopIdx, fromChildIdx)
+            : cardRef(playerName, fromRegion, fromTopIdx);
+        const targetRef = cardRef(playerName, toRegion, toTopIdx);
+        sendCommand(attachCard(gameId, ref, targetRef));
     }, [gameId, sendCommand]);
 
     const handleCommand = useCallback((cmd: GameCommand) => {

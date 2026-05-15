@@ -13,4 +13,10 @@ public class RegionStateDto {
     public boolean visible;
     /** Card IDs — empty list when region is not visible to this viewer. */
     public List<String> cardIds;
+    /**
+     * Positional slot data for hidden regions where state is still partially observable
+     * (e.g. UNCONTROLLED: opponents can see blood counter amounts without knowing card identity).
+     * Null when not applicable.
+     */
+    public List<CardSlotDto> slots;
 }

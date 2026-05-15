@@ -11,6 +11,7 @@ import net.deckserver.jol.enums.*;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
+import net.deckserver.jol.game.command.CardRef;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.model.krcg.*;
 import org.junit.jupiter.api.AfterEach;
@@ -193,8 +194,9 @@ class GameServiceTest {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
+        CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
 
-        gameCommandService.execute(actor, new TransferPool(gameId, actor, card.getId(), 3));
+        gameCommandService.execute(actor, new TransferPool(gameId, actor, ref, 3));
 
         assertEquals(27, gd.getPlayer(actor).getPool());
         assertEquals(3,  card.getCounters());
@@ -207,12 +209,12 @@ class GameServiceTest {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
-        String cardId = card.getId();
+        CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
 
-        gameCommandService.execute(actor, new LockCard(gameId, cardId));
+        gameCommandService.execute(actor, new LockCard(gameId, ref));
         assertTrue(card.isLocked());
 
-        gameCommandService.execute(actor, new UnlockCard(gameId, cardId));
+        gameCommandService.execute(actor, new UnlockCard(gameId, ref));
         assertFalse(card.isLocked());
     }
 
@@ -221,11 +223,10 @@ class GameServiceTest {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
-        String cardId = card.getId();
 
         // Move card to READY (IN_PLAY_REGIONS), then lock it
-        gameCommandService.execute(actor, new MoveToReady(gameId, cardId));
-        gameCommandService.execute(actor, new LockCard(gameId, cardId));
+        gameCommandService.execute(actor, new MoveToReady(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
+        gameCommandService.execute(actor, new LockCard(gameId, CardRef.of(actor, RegionType.READY, 0)));
         assertTrue(card.isLocked());
 
         gameCommandService.execute(actor, new UnlockAll(gameId, actor));
@@ -237,12 +238,12 @@ class GameServiceTest {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
-        String cardId = card.getId();
+        CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
 
-        gameCommandService.execute(actor, new AddCounter(gameId, cardId, 3));
+        gameCommandService.execute(actor, new AddCounter(gameId, ref, 3));
         assertEquals(3, card.getCounters());
 
-        gameCommandService.execute(actor, new RemoveCounter(gameId, cardId, 5));
+        gameCommandService.execute(actor, new RemoveCounter(gameId, ref, 5));
         assertEquals(0, card.getCounters()); // max(0, 4-5) = 0
     }
 
@@ -251,11 +252,12 @@ class GameServiceTest {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
+        CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
 
-        gameCommandService.execute(actor, new InfluenceVampire(gameId, card.getId(), 3));
+        gameCommandService.execute(actor, new InfluenceVampire(gameId, ref, 3));
 
         assertEquals(27, gd.getPlayer(actor).getPool());
-        assertEquals(3,  card.getCounters()); // 1 + 3
+        assertEquals(3,  card.getCounters());
     }
 
     @Test
@@ -264,7 +266,7 @@ class GameServiceTest {
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
 
-        gameCommandService.execute(actor, new MoveToReady(gameId, card.getId()));
+        gameCommandService.execute(actor, new MoveToReady(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
 
         PlayerData player = gd.getPlayer(actor);
         assertTrue(player.getRegion(RegionType.READY).getCards().contains(card));
