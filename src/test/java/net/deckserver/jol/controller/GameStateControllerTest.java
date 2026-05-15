@@ -178,18 +178,15 @@ public class GameStateControllerTest {
                 .body("cards." + readyCardId + ".cardId", equalTo("ready-001"));
     }
 
-    // ── Card map: stub for hidden cards ───────────────────────────────────────
+    // ── Card map: hidden cards absent ─────────────────────────────────────────
 
     @Test
     @TestSecurity(user = "alice", roles = {"USER"})
-    void hiddenLibraryCardReturnedAsStub() {
-        // Library is hidden to owner — should be a stub (no name/cardId)
+    void hiddenLibraryCardAbsentFromOwnerCardMap() {
+        // Library has ownerVisibility=false — not included in cards map even for the owner
         given().get("/api/games/" + gameId + "/state")
                 .then().statusCode(HttpStatus.SC_OK)
-                .body("cards." + libraryCardId + ".id",        equalTo(libraryCardId))
-                .body("cards." + libraryCardId + ".ownerName", equalTo("alice"))
-                .body("cards." + libraryCardId + ".name",      nullValue())
-                .body("cards." + libraryCardId + ".cardId",    nullValue());
+                .body("cards." + libraryCardId, nullValue());
     }
 
     @Test
@@ -199,17 +196,6 @@ public class GameStateControllerTest {
         given().get("/api/games/" + gameId + "/state")
                 .then().statusCode(HttpStatus.SC_OK)
                 .body("cards." + handCardId, nullValue());
-    }
-
-    @Test
-    @TestSecurity(user = "alice", roles = {"USER"})
-    void ownerStubIncludesLockedAndCounters() {
-        // Owner sees stubs for their own hidden cards (library, crypt)
-        given().get("/api/games/" + gameId + "/state")
-                .then().statusCode(HttpStatus.SC_OK)
-                .body("cards." + libraryCardId + ".id",      equalTo(libraryCardId))
-                .body("cards." + libraryCardId + ".locked",   equalTo(false))
-                .body("cards." + libraryCardId + ".counters", equalTo(0));
     }
 
     // ── Security ──────────────────────────────────────────────────────────────
