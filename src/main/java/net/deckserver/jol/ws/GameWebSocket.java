@@ -131,8 +131,12 @@ public class GameWebSocket {
             return;
         }
         try {
-            GameData updatedGame = commandService.execute(userName(), incoming.command);
-            broadcaster.broadcastState(gameId, updatedGame);
+            GameCommandService.CommandResult result = commandService.execute(userName(), incoming.command);
+            if (result.logMessage() != null) {
+                ChatMessageDto log = chatService.save(gameId, userName(), result.logMessage(), null);
+                connection.broadcast().sendTextAndAwait(log);
+            }
+            broadcaster.broadcastState(gameId, result.game());
         } catch (IllegalStateException e) {
             sendSafely(GameMessageDto.error(e.getMessage()));
         }

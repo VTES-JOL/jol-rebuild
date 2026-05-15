@@ -67,7 +67,7 @@ function regionTopUuids(region: RegionState, cards: Record<string, CardData>): s
 function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: boolean; isChild?: boolean}) {
     if (isHidden) {
         return (
-            <div className={`font-mono text-base text-ink-muted/40 py-1.5 flex items-center gap-1${isChild ? ' pl-5' : ''}`}>
+            <div className={`font-mono text-ink-muted/40 py-1.5 flex items-center gap-1${isChild ? ' pl-5' : ''}`}>
                 {isChild && <span className="text-sm text-ink-muted/30 shrink-0">└</span>}
                 <span>***********</span>
             </div>
@@ -81,14 +81,14 @@ function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: b
     if (card.counters !== undefined) {
         counterDisplay = isCryptCard && card.capacity !== undefined
             ? `${card.counters}/${card.capacity}`
-            : `${card.counters}`;
+            : (card.counters > 0 ? `${card.counters}` : '');
     }
 
     return (
         <div className={`py-1.5${isChild ? ' pl-5' : ''}`}>
             <div className="flex items-center gap-1.5 min-w-0">
                 {isChild && <span className="text-sm text-ink-muted/40 shrink-0">└</span>}
-                <span className="font-mono truncate flex-1 text-ink-secondary leading-snug">
+                <span className="font-mono text-xs truncate flex-1 text-ink-secondary leading-snug">
                     {name}
                 </span>
                 {!isChild && card.locked && (

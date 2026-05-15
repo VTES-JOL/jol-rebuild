@@ -27,76 +27,80 @@ public class GameCommandService {
     @Inject
     ObjectMapper mapper;
 
+    public record CommandResult(GameData game, String logMessage) {}
+
     /**
      * Validates, applies the command to the in-memory game state, persists a snapshot,
-     * and returns the updated GameData. Synchronized on the GameData instance so
-     * concurrent commands for the same game are serialized.
+     * and returns the result including an optional chat log message.
+     * Synchronized on the GameData instance so concurrent commands for the same game are serialized.
      */
     @Transactional
-    public GameData execute(String actorUsername, GameCommand command) {
+    public CommandResult execute(String actorUsername, GameCommand command) {
         GameData game = store.get(command.gameId());
         if (game == null) {
             throw new IllegalStateException("Game not active: " + command.gameId());
         }
+        String logMessage;
         synchronized (game) {
-            applyCommand(game, command, actorUsername);
+            logMessage = applyCommand(game, command, actorUsername);
             persistSnapshot(command.gameId(), game);
         }
-        return game;
+        return new CommandResult(game, logMessage);
     }
 
     // ── Dispatch ─────────────────────────────────────────────────────────────
 
-    private void applyCommand(GameData game, GameCommand cmd, String actor) {
-        switch (cmd) {
-            case AdvancePhase c     -> handleAdvancePhase(game, c);
-            case NextTurn c         -> handleNextTurn(game, c);
+    private String applyCommand(GameData game, GameCommand cmd, String actor) {
+        return switch (cmd) {
+            case AdvancePhase c     -> handleAdvancePhase(game, c, actor);
+            case NextTurn c         -> handleNextTurn(game, c, actor);
             case DrawCard c         -> handleDrawCard(game, c, actor);
             case ShuffleLibrary c   -> handleShuffleLibrary(game, actor);
             case ShuffleCrypt c     -> handleShuffleCrypt(game, actor);
-            case DiscardCard c      -> handleDiscardCard(game, c);
-            case PlayCard c         -> handlePlayCard(game, c);
-            case MoveCard c         -> handleMoveCard(game, c);
-            case AttachCard c       -> handleAttachCard(game, c);
-            case LockCard c         -> handleLockCard(game, c);
-            case UnlockCard c       -> handleUnlockCard(game, c);
-            case UnlockAll c        -> handleUnlockAll(game, c);
-            case AddCounter c       -> handleAddCounter(game, c);
-            case RemoveCounter c    -> handleRemoveCounter(game, c);
-            case SetCardNotes c     -> handleSetCardNotes(game, c);
-            case SetPool c          -> handleSetPool(game, c);
-            case TransferPool c     -> handleTransferPool(game, c);
-            case GainEdge c         -> handleGainEdge(game, c);
-            case InfluenceVampire c -> handleInfluenceVampire(game, c);
-            case MoveToReady c      -> handleMoveToReady(game, c);
-            case MoveToCrypt c      -> handleMoveToCrypt(game, c);
-            case MoveToTorpor c     -> handleMoveToTorpor(game, c);
-            case RescueFromTorpor c -> handleRescueFromTorpor(game, c);
-            case BurnMinion c       -> handleBurnMinion(game, c);
-            case ContestCard c      -> handleContestCard(game, c);
-            case UncontestCard c    -> handleUncontestCard(game, c);
-            case SetTitle c         -> handleSetTitle(game, c);
-            case OustPlayer c       -> handleOustPlayer(game, c);
-            case SetChoice c        -> handleSetChoice(game, c);
-            case ReverseOrder c     -> handleReverseOrder(game, c);
-            case SetGameNotes c     -> handleSetGameNotes(game, c);
-        }
+            case DiscardCard c      -> handleDiscardCard(game, c, actor);
+            case PlayCard c         -> handlePlayCard(game, c, actor);
+            case MoveCard c         -> handleMoveCard(game, c, actor);
+            case AttachCard c       -> handleAttachCard(game, c, actor);
+            case LockCard c         -> { handleLockCard(game, c); yield null; }
+            case UnlockCard c       -> { handleUnlockCard(game, c); yield null; }
+            case UnlockAll c        -> { handleUnlockAll(game, c); yield null; }
+            case AddCounter c       -> handleAddCounter(game, c, actor);
+            case RemoveCounter c    -> handleRemoveCounter(game, c, actor);
+            case SetCardNotes c     -> { handleSetCardNotes(game, c); yield null; }
+            case SetPool c          -> handleSetPool(game, c, actor);
+            case TransferPool c     -> handleTransferPool(game, c, actor);
+            case GainEdge c         -> handleGainEdge(game, c, actor);
+            case InfluenceVampire c -> handleInfluenceVampire(game, c, actor);
+            case MoveToReady c      -> handleMoveToReady(game, c, actor);
+            case MoveToCrypt c      -> handleMoveToCrypt(game, c, actor);
+            case MoveToTorpor c     -> handleMoveToTorpor(game, c, actor);
+            case RescueFromTorpor c -> handleRescueFromTorpor(game, c, actor);
+            case BurnMinion c       -> handleBurnMinion(game, c, actor);
+            case ContestCard c      -> handleContestCard(game, c, actor);
+            case UncontestCard c    -> handleUncontestCard(game, c, actor);
+            case SetTitle c         -> handleSetTitle(game, c, actor);
+            case OustPlayer c       -> handleOustPlayer(game, c, actor);
+            case SetChoice c        -> { handleSetChoice(game, c); yield null; }
+            case ReverseOrder c     -> handleReverseOrder(game, c, actor);
+            case SetGameNotes c     -> { handleSetGameNotes(game, c); yield null; }
+        };
     }
 
     // ── Turn / phase ──────────────────────────────────────────────────────────
 
-    private void handleAdvancePhase(GameData game, AdvancePhase cmd) {
+    private String handleAdvancePhase(GameData game, AdvancePhase cmd, String actor) {
         Phase[] phases = Phase.values();
         int current = game.getPhase() != null ? game.getPhase().ordinal() : 0;
         int next = (current + 1) % phases.length;
         if (next == 0) {
-            handleNextTurn(game, new NextTurn(cmd.gameId()));
+            return handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
         } else {
             game.setPhase(phases[next]);
+            return actor + " advanced to " + phases[next].getDescription() + " phase";
         }
     }
 
-    private void handleNextTurn(GameData game, NextTurn cmd) {
+    private String handleNextTurn(GameData game, NextTurn cmd, String actor) {
         List<String> order = game.getPlayerOrder();
         String currentName = game.getCurrentPlayerName();
         int currentIndex = currentName != null ? order.indexOf(currentName) : -1;
@@ -129,13 +133,16 @@ public class GameCommandService {
         if (nextPlayer != null) {
             unlockPlayerCards(game, nextPlayer.getName());
         }
+
+        String nextPlayerName = nextPlayer != null ? nextPlayer.getName() : "unknown";
+        return "Turn " + major + "." + minor + " — " + nextPlayerName + " begins their turn";
     }
 
     // ── Deck operations ───────────────────────────────────────────────────────
 
-    private void handleDrawCard(GameData game, DrawCard cmd, String actor) {
+    private String handleDrawCard(GameData game, DrawCard cmd, String actor) {
         PlayerData player = game.getPlayer(actor);
-        if (player == null) return;
+        if (player == null) return null;
         RegionData library = player.getRegion(RegionType.LIBRARY);
         RegionData hand = player.getRegion(RegionType.HAND);
         int toDraw = Math.min(cmd.count(), library.getCards().size());
@@ -143,59 +150,71 @@ public class GameCommandService {
             if (library.getCards().isEmpty()) break;
             hand.addCard(library.getFirstCard(), false);
         }
+        return actor + " drew " + toDraw + " card(s)";
     }
 
-    private void handleShuffleLibrary(GameData game, String actor) {
+    private String handleShuffleLibrary(GameData game, String actor) {
         PlayerData player = game.getPlayer(actor);
-        if (player == null) return;
+        if (player == null) return null;
         player.getRegion(RegionType.LIBRARY).shuffle(0);
+        return actor + " shuffled their library";
     }
 
-    private void handleShuffleCrypt(GameData game, String actor) {
+    private String handleShuffleCrypt(GameData game, String actor) {
         PlayerData player = game.getPlayer(actor);
-        if (player == null) return;
+        if (player == null) return null;
         player.getRegion(RegionType.CRYPT).shuffle(0);
+        return actor + " shuffled their crypt";
     }
 
     // ── Hand / play ───────────────────────────────────────────────────────────
 
-    private void handleDiscardCard(GameData game, DiscardCard cmd) {
+    private String handleDiscardCard(GameData game, DiscardCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
+        return actor + " discarded " + name;
     }
 
-    private void handlePlayCard(GameData game, PlayCard cmd) {
+    private String handlePlayCard(GameData game, PlayCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         if (cmd.targetPlayerName() == null || cmd.targetRegionType() == null) {
             PlayerData owner = card.getOwner();
             if (owner != null) owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
-            return;
+            return actor + " played " + name;
         }
         PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
-        if (targetPlayer == null) return;
+        if (targetPlayer == null) return null;
         RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
         if (target != null) target.addCard(card, false);
+        return actor + " played " + name;
     }
 
-    private void handleMoveCard(GameData game, MoveCard cmd) {
+    private String handleMoveCard(GameData game, MoveCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
-        if (targetPlayer == null) return;
+        if (targetPlayer == null) return null;
         RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
-        if (target == null) return;
+        if (target == null) return null;
         target.addCard(card, cmd.position());
+        return actor + " moved " + name + " to " + cmd.targetPlayerName() + "'s " + cmd.targetRegionType().description();
     }
 
-    private void handleAttachCard(GameData game, AttachCard cmd) {
+    private String handleAttachCard(GameData game, AttachCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         CardData target = game.getCardByRef(cmd.targetRef());
-        if (card == null || target == null) return;
+        if (card == null || target == null) return null;
+        String cardName = card.getName();
+        String targetName = target.getName();
         target.add(card, false);
+        return actor + " attached " + cardName + " to " + targetName;
     }
 
     // ── Card state ────────────────────────────────────────────────────────────
@@ -214,14 +233,18 @@ public class GameCommandService {
         unlockPlayerCards(game, cmd.playerName());
     }
 
-    private void handleAddCounter(GameData game, AddCounter cmd) {
+    private String handleAddCounter(GameData game, AddCounter cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card != null) card.setCounters(card.getCounters() + cmd.amount());
+        if (card == null) return null;
+        card.setCounters(card.getCounters() + cmd.amount());
+        return actor + " added " + cmd.amount() + " counter(s) to " + card.getName();
     }
 
-    private void handleRemoveCounter(GameData game, RemoveCounter cmd) {
+    private String handleRemoveCounter(GameData game, RemoveCounter cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card != null) card.setCounters(Math.max(0, card.getCounters() - cmd.amount()));
+        if (card == null) return null;
+        card.setCounters(Math.max(0, card.getCounters() - cmd.amount()));
+        return actor + " removed " + cmd.amount() + " counter(s) from " + card.getName();
     }
 
     private void handleSetCardNotes(GameData game, SetCardNotes cmd) {
@@ -231,105 +254,129 @@ public class GameCommandService {
 
     // ── Pool / edge ───────────────────────────────────────────────────────────
 
-    private void handleSetPool(GameData game, SetPool cmd) {
+    private String handleSetPool(GameData game, SetPool cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
-        if (player != null) player.setPool(cmd.amount());
+        if (player == null) return null;
+        player.setPool(cmd.amount());
+        return actor + " set " + cmd.playerName() + "'s pool to " + cmd.amount();
     }
 
-    private void handleTransferPool(GameData game, TransferPool cmd) {
+    private String handleTransferPool(GameData game, TransferPool cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
         CardData card = game.getCardByRef(cmd.ref());
-        if (player == null || card == null) return;
+        if (player == null || card == null) return null;
         int amount = cmd.amount();
         // positive = pool → card, negative = card → pool
-        int poolDelta = -amount;
-        int cardDelta = amount;
-        player.setPool(Math.max(0, player.getPool() + poolDelta));
-        card.setCounters(Math.max(0, card.getCounters() + cardDelta));
+        player.setPool(Math.max(0, player.getPool() + (-amount)));
+        card.setCounters(Math.max(0, card.getCounters() + amount));
+        if (amount > 0) {
+            return actor + " transferred " + amount + " blood from pool to " + card.getName();
+        } else {
+            return actor + " transferred " + Math.abs(amount) + " blood from " + card.getName() + " to pool";
+        }
     }
 
-    private void handleGainEdge(GameData game, GainEdge cmd) {
+    private String handleGainEdge(GameData game, GainEdge cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
         game.setEdge(player);
+        return actor + " gained the Edge";
     }
 
     // ── Influence / crypt ─────────────────────────────────────────────────────
 
-    private void handleInfluenceVampire(GameData game, InfluenceVampire cmd) {
+    private String handleInfluenceVampire(GameData game, InfluenceVampire cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         int amount = Math.min(cmd.amount(), owner.getPool());
         owner.setPool(owner.getPool() - amount);
         card.setCounters(card.getCounters() + amount);
+        return actor + " influenced " + name + " with " + amount + " blood";
     }
 
-    private void handleMoveToReady(GameData game, MoveToReady cmd) {
+    private String handleMoveToReady(GameData game, MoveToReady cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         owner.getRegion(RegionType.READY).addCard(card, false);
+        return actor + " moved " + name + " to the Ready region";
     }
 
-    private void handleMoveToCrypt(GameData game, MoveToCrypt cmd) {
+    private String handleMoveToCrypt(GameData game, MoveToCrypt cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         card.setCounters(0);
         owner.getRegion(RegionType.CRYPT).addCard(card, false);
+        return actor + " returned " + name + " to the Crypt";
     }
 
     // ── Minion state ──────────────────────────────────────────────────────────
 
-    private void handleMoveToTorpor(GameData game, MoveToTorpor cmd) {
+    private String handleMoveToTorpor(GameData game, MoveToTorpor cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         owner.getRegion(RegionType.TORPOR).addCard(card, false);
+        return actor + " sent " + name + " to Torpor";
     }
 
-    private void handleRescueFromTorpor(GameData game, RescueFromTorpor cmd) {
+    private String handleRescueFromTorpor(GameData game, RescueFromTorpor cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         owner.getRegion(RegionType.READY).addCard(card, false);
+        return actor + " rescued " + name + " from Torpor";
     }
 
-    private void handleBurnMinion(GameData game, BurnMinion cmd) {
+    private String handleBurnMinion(GameData game, BurnMinion cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return;
+        if (card == null) return null;
+        String name = card.getName();
         PlayerData owner = card.getOwner();
-        if (owner == null) return;
+        if (owner == null) return null;
         owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
+        return actor + " burned " + name;
     }
 
     // ── Contesting / title ────────────────────────────────────────────────────
 
-    private void handleContestCard(GameData game, ContestCard cmd) {
+    private String handleContestCard(GameData game, ContestCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card != null) card.setContested(true);
+        if (card == null) return null;
+        card.setContested(true);
+        return actor + " contested " + card.getName();
     }
 
-    private void handleUncontestCard(GameData game, UncontestCard cmd) {
+    private String handleUncontestCard(GameData game, UncontestCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card != null) card.setContested(false);
+        if (card == null) return null;
+        card.setContested(false);
+        return actor + " uncontested " + card.getName();
     }
 
-    private void handleSetTitle(GameData game, SetTitle cmd) {
+    private String handleSetTitle(GameData game, SetTitle cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card != null) card.setTitle(cmd.title());
+        if (card == null) return null;
+        card.setTitle(cmd.title());
+        return actor + " set " + card.getName() + "'s title to " + cmd.title();
     }
 
     // ── Player ────────────────────────────────────────────────────────────────
 
-    private void handleOustPlayer(GameData game, OustPlayer cmd) {
+    private String handleOustPlayer(GameData game, OustPlayer cmd, String actor) {
         PlayerData ousted = game.getPlayer(cmd.playerName());
-        if (ousted == null) return;
+        if (ousted == null) return null;
         ousted.setOusted(true);
 
         // Award 1 VP to the predator (if any)
@@ -343,8 +390,10 @@ public class GameCommandService {
 
         // If the ousted player was the current player, advance the turn
         if (cmd.playerName().equals(game.getCurrentPlayerName())) {
-            handleNextTurn(game, new NextTurn(cmd.gameId()));
+            handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
         }
+
+        return actor + " ousted " + cmd.playerName();
     }
 
     private void handleSetChoice(GameData game, SetChoice cmd) {
@@ -352,8 +401,9 @@ public class GameCommandService {
         if (player != null) player.setChoice(cmd.choice());
     }
 
-    private void handleReverseOrder(GameData game, ReverseOrder cmd) {
+    private String handleReverseOrder(GameData game, ReverseOrder cmd, String actor) {
         game.setOrderOfPlayReversed(!game.isOrderOfPlayReversed());
+        return actor + " reversed the order of play";
     }
 
     private void handleSetGameNotes(GameData game, SetGameNotes cmd) {
