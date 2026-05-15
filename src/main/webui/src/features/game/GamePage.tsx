@@ -7,8 +7,9 @@ import {PlayerBoard} from './PlayerBoard.tsx';
 import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
-import type {PlayerState, RegionType} from './types.ts';
-import type {GameCommand} from './gameCommands.ts';
+import {CardContextMenu} from './CardContextMenu.tsx';
+import type {CardData, PlayerState, RegionType} from './types.ts';
+import type {CardRef, GameCommand} from './gameCommands.ts';
 import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
@@ -83,12 +84,28 @@ export default function GamePage() {
         sendCommand(cmd);
     }, [sendCommand, clearCommandError]);
 
+    const [contextMenu, setContextMenu] = useState<{card: CardData; ref: CardRef; x: number; y: number} | null>(null);
+
+    const handleCardContextMenu = useCallback((card: CardData, ref: CardRef, x: number, y: number) => {
+        setContextMenu({card, ref, x, y});
+    }, []);
+
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
 
     const isConnected = status === 'connected';
 
     return (
         <GameLayout>
+            {contextMenu && (
+                <CardContextMenu
+                    card={contextMenu.card}
+                    cardRef={contextMenu.ref}
+                    gameId={gameId}
+                    position={{x: contextMenu.x, y: contextMenu.y}}
+                    onCommand={handleCommand}
+                    onClose={() => setContextMenu(null)}
+                />
+            )}
             <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
                 {/* Board — full width on ≤md, left 3/4 on lg+ */}
                 <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">
@@ -193,6 +210,7 @@ export default function GamePage() {
                                             isCurrentPlayer={player.name === user?.username}
                                             gameId={gameId}
                                             onCommand={handleCommand}
+                                            onCardContextMenu={handleCardContextMenu}
                                         />
                                     ))}
                                 </div>
@@ -217,6 +235,7 @@ export default function GamePage() {
                             onReact={react}
                             enableReactions={false}
                             enableReply={false}
+                            enableAvatars={false}
                             placeholder="Chat with your opponents…"
                         />
                     </div>

@@ -24,6 +24,7 @@ export type ChatPanelViewProps = {
     placeholder?: string;
     enableReactions?: boolean;
     enableReply?: boolean;
+    enableAvatars?: boolean;
 };
 
 const STATUS_LABELS: Record<Status, { label: string; dotClass: string }> = {
@@ -44,6 +45,7 @@ export function ChatPanelView({
                                   placeholder = 'Type a message…',
                                   enableReactions = true,
                                   enableReply = true,
+                                  enableAvatars = true,
                               }: ChatPanelViewProps) {
     const { draft, displayValue, syncFromDisplay, syncFromEncoded, reset } = useChatInput();
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
@@ -139,6 +141,7 @@ export function ChatPanelView({
                                 disabled={!connected}
                                 enableReactions={enableReactions}
                                 enableReply={enableReply}
+                                enableAvatars={enableAvatars}
                             />
                         </div>
                     ))}

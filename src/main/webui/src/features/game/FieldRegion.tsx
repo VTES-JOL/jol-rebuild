@@ -18,7 +18,11 @@ const GAP_NARROW = 4;
 const COMPACT_OFFSET = 3;
 const MAX_GHOST_LAYERS = 3;
 
-function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => void}) {
+function CompactCardStack({cards, onClick, onContextMenu}: {
+    cards: CardData[];
+    onClick?: () => void;
+    onContextMenu?: (x: number, y: number) => void;
+}) {
     if (cards.length === 0) return null;
     const ghostCount = Math.min(cards.length - 1, MAX_GHOST_LAYERS);
     const offset = ghostCount * COMPACT_OFFSET;
@@ -31,6 +35,7 @@ function CompactCardStack({cards, onClick}: {cards: CardData[]; onClick?: () => 
                 paddingRight: `${offset}px`,
             }}
             onClick={onClick}
+            onContextMenu={onContextMenu ? e => { e.preventDefault(); onContextMenu(e.clientX, e.clientY); } : undefined}
         >
             {Array.from({length: ghostCount}, (_, gi) => (
                 <div
@@ -78,6 +83,7 @@ function DraggableCardItem({
     suppressTransition,
     style,
     onClick,
+    onContextMenu,
 }: {
     card: CardData;
     regionKey: string;
@@ -87,6 +93,7 @@ function DraggableCardItem({
     suppressTransition: boolean;
     style: CSSProperties;
     onClick?: () => void;
+    onContextMenu?: (x: number, y: number) => void;
 }) {
     const id = rCardId(regionKey, stackIndex, cardIndex);
     const {attributes, listeners, setNodeRef} = useDraggable({
@@ -101,6 +108,7 @@ function DraggableCardItem({
             {...attributes}
             {...listeners}
             onClick={onClick}
+            onContextMenu={onContextMenu ? e => { e.preventDefault(); onContextMenu(e.clientX, e.clientY); } : undefined}
         >
             <FieldCard {...card} suppressTransition={suppressTransition} />
         </div>
@@ -114,6 +122,7 @@ function DraggableCardStack({
     regionKey,
     stackIndex,
     onCardClick,
+    onCardContextMenu,
     activeDragId,
     suppressTransition,
 }: {
@@ -121,6 +130,7 @@ function DraggableCardStack({
     regionKey: string;
     stackIndex: number;
     onCardClick?: (cardIndex: number) => void;
+    onCardContextMenu?: (cardIndex: number, x: number, y: number) => void;
     activeDragId: string | null;
     suppressTransition: boolean;
 }) {
@@ -137,6 +147,7 @@ function DraggableCardStack({
                     suppressTransition={suppressTransition}
                     style={style}
                     onClick={() => onCardClick?.(i)}
+                    onContextMenu={(x, y) => onCardContextMenu?.(i, x, y)}
                 />
             )}
         />
@@ -154,6 +165,7 @@ function SortableStackSlot({
     activeDragType,
     suppressTransition,
     onCardClick,
+    onCardContextMenu,
 }: {
     id: string;
     regionKey: string;
@@ -163,6 +175,7 @@ function SortableStackSlot({
     activeDragType: 'stack' | 'card' | null;
     suppressTransition: boolean;
     onCardClick?: (cardIndex: number) => void;
+    onCardContextMenu?: (cardIndex: number, x: number, y: number) => void;
 }) {
     const {attributes, listeners, setNodeRef, transform, isDragging, isOver} = useSortable({
         id,
@@ -194,6 +207,7 @@ function SortableStackSlot({
                 regionKey={regionKey}
                 stackIndex={stackIndex}
                 onCardClick={onCardClick}
+                onCardContextMenu={onCardContextMenu}
                 activeDragId={activeDragId}
                 suppressTransition={suppressTransition}
             />
@@ -231,11 +245,12 @@ function EmptySlot({id, activeDragType, regionKey, index}: {
 // ── Draggable compact stack ───────────────────────────────────────────────────
 // Makes the top card of a compact pile draggable into another region.
 
-function DraggableCompactStack({cards, regionKey, isBeingDragged, onClick}: {
+function DraggableCompactStack({cards, regionKey, isBeingDragged, onClick, onContextMenu}: {
     cards: CardData[];
     regionKey: string;
     isBeingDragged: boolean;
     onClick?: () => void;
+    onContextMenu?: (x: number, y: number) => void;
 }) {
     const id = rCardId(regionKey, 0, 0);
     const {attributes, listeners, setNodeRef} = useDraggable({
@@ -249,7 +264,7 @@ function DraggableCompactStack({cards, regionKey, isBeingDragged, onClick}: {
             {...attributes}
             {...listeners}
         >
-            <CompactCardStack cards={cards} onClick={onClick} />
+            <CompactCardStack cards={cards} onClick={onClick} onContextMenu={onContextMenu} />
         </div>
     );
 }
@@ -293,6 +308,7 @@ type FieldRegionContentProps = {
     compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
+    onCardContextMenu?: (stackIndex: number, cardIndex: number, x: number, y: number) => void;
     activeDragId: string | null;
     activeDragType: 'stack' | 'card' | null;
     sortedIds: string[];
@@ -301,7 +317,7 @@ type FieldRegionContentProps = {
 
 function FieldRegionContent({
     regionKey, name, stacks, columns, minRows = 1, compact = false, narrowGap = false,
-    onCardClick, activeDragId, activeDragType, sortedIds, suppressTransition,
+    onCardClick, onCardContextMenu, activeDragId, activeDragType, sortedIds, suppressTransition,
 }: FieldRegionContentProps) {
     const gap = narrowGap ? GAP_NARROW : GAP_WIDE;
     const count = useMemo(() => stacks.reduce((sum, s) => sum + s.length, 0), [stacks]);
@@ -354,6 +370,7 @@ function FieldRegionContent({
                     regionKey={regionKey}
                     isBeingDragged={activeDragId === topCardId}
                     onClick={() => onCardClick?.(0, 0)}
+                    onContextMenu={(x, y) => onCardContextMenu?.(0, 0, x, y)}
                 />
             </DroppableCompactRegion>
         );
@@ -382,6 +399,7 @@ function FieldRegionContent({
                                 activeDragType={activeDragType}
                                 suppressTransition={suppressTransition}
                                 onCardClick={cardIndex => onCardClick?.(originalIdx, cardIndex)}
+                                onCardContextMenu={(ci, x, y) => onCardContextMenu?.(originalIdx, ci, x, y)}
                             />
                         );
                     })}
@@ -406,6 +424,7 @@ type FieldRegionProps = {
     compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
+    onCardContextMenu?: (stackIndex: number, cardIndex: number, x: number, y: number) => void;
     onReorder?: (from: number, to: number) => void;
     onCardMove?: (fromStack: number, fromCard: number, toStack: number) => void;
     onCardToNewStack?: (fromStack: number, fromCard: number) => void;
@@ -422,6 +441,7 @@ export function FieldRegion({
     compact = false,
     narrowGap = false,
     onCardClick,
+    onCardContextMenu,
     onReorder,
     onCardMove,
     onCardToNewStack,
@@ -524,6 +544,7 @@ export function FieldRegion({
                 compact={compact}
                 narrowGap={narrowGap}
                 onCardClick={onCardClick}
+                onCardContextMenu={onCardContextMenu}
                 activeDragId={activeDragId}
                 activeDragType={activeDragType}
                 sortedIds={sortedIds}
@@ -549,6 +570,7 @@ export type FieldRegionConfig = {
     compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
+    onCardContextMenu?: (stackIndex: number, cardIndex: number, x: number, y: number) => void;
     onReorder?: (from: number, to: number) => void;
     onCardMove?: (fromStack: number, fromCard: number, toStack: number) => void;
     onCardToNewStack?: (fromStack: number, fromCard: number) => void;
@@ -690,6 +712,7 @@ export function FieldRegionDndGroup({regions, onCrossRegionMove, onCrossCardMove
                 compact={r.compact}
                 narrowGap={r.narrowGap}
                 onCardClick={r.onCardClick}
+                onCardContextMenu={r.onCardContextMenu}
                 activeDragId={activeDragId}
                 activeDragType={activeDragType}
                 sortedIds={regionSortedIds[r.regionKey] ?? r.stacks.map((_, i) => rStackId(r.regionKey, i))}

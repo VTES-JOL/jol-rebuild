@@ -10,6 +10,7 @@ type BaseChatPanelProps = {
     placeholder?: string;
     enableReactions?: boolean;
     enableReply?: boolean;
+    enableAvatars?: boolean;
 };
 
 type LiveChatPanelProps = BaseChatPanelProps & {
@@ -32,6 +33,7 @@ function LiveChatPanel({
                            placeholder = 'Type a message…',
                            enableReactions = true,
                            enableReply = true,
+                           enableAvatars = true,
                        }: LiveChatPanelProps) {
     const { messages, status, send, react } = useChat({
         url,
@@ -49,6 +51,7 @@ function LiveChatPanel({
             placeholder={placeholder}
             enableReactions={enableReactions}
             enableReply={enableReply}
+            enableAvatars={enableAvatars}
         />
     );
 }
@@ -63,6 +66,7 @@ function ManualChatPanel({
                              placeholder = 'Type a message…',
                              enableReactions = true,
                              enableReply = true,
+                             enableAvatars = true,
                          }: ManualChatPanelProps) {
     return (
         <ChatPanelView
@@ -75,6 +79,7 @@ function ManualChatPanel({
             placeholder={placeholder}
             enableReactions={enableReactions}
             enableReply={enableReply}
+            enableAvatars={enableAvatars}
         />
     );
 }

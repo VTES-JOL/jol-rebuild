@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {ExternalLink, Globe, Info, Lock, Pencil} from 'lucide-react';
+import {Globe, Info, Lock, Pencil} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import Badge from '@/shared/components/Badge';
@@ -10,6 +10,7 @@ import {useAsyncState} from '@/hooks/useAsyncState';
 import GamePlayerList from './GamePlayerList';
 import GameRegistrationForm from './GameRegistrationForm';
 import GameInviteSection from './GameInviteSection';
+import {Link} from "react-router-dom";
 
 interface Props {
     game: GameDto;
@@ -138,7 +139,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                     )}
                     {game.status === 'ACTIVE' && (
                         <Button variant="primary" size="sm">
-                            Enter Game <ExternalLink className="ml-1.5 w-3 h-3" />
+                            Enter Game <Link className="ml-1.5 w-3 h-3" to={`/game/${game.id}`} />
                         </Button>
                     )}
                 </div>

@@ -26,6 +26,7 @@ interface MessageGroupViewProps {
     disabled: boolean;
     enableReactions: boolean;
     enableReply: boolean;
+    enableAvatars: boolean;
 }
 
 export const MessageGroupView = React.memo(function MessageGroupView({
@@ -38,10 +39,11 @@ export const MessageGroupView = React.memo(function MessageGroupView({
     disabled,
     enableReactions,
     enableReply,
+    enableAvatars,
 }: MessageGroupViewProps) {
     return (
         <div className="flex gap-2.5 mb-2.5">
-            <AvatarWithLine name={group.sender} showLine={showLine} />
+            {enableAvatars && <AvatarWithLine name={group.sender} showLine={showLine} />}
             <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2 mb-0.5">
                     <span className="text-sm font-medium" style={nameColorStyle(group.sender)}>
