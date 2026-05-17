@@ -1,18 +1,36 @@
+import type {ReactNode} from 'react';
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import type {CardData} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {
-    addCounter, burnMinion, contestCard, discardCard, lockCard,
-    moveToTorpor, removeCounter, rescueFromTorpor,
-    setCardNotes, setTitle, uncontestCard, unlockCard,
+    addCounter, burnMinion, contestCard, discardCard, influenceOff, influenceOn,
+    lockCard, moveToTorpor, removeCounter, rescueFromTorpor,
+    setCardNotes, setTitle, transferPoolOff, transferPoolOn,
+    uncontestCard, unlockCard,
 } from './gameCommands.ts';
 import Input from '@/shared/components/Input.tsx';
+
+function CounterBtn({children, onClick, disabled}: {
+    children: ReactNode;
+    onClick: () => void;
+    disabled?: boolean;
+}) {
+    return (
+        <button
+            className="w-6 h-6 flex items-center justify-center rounded text-sm text-ink hover:bg-hover transition-colors disabled:opacity-30 select-none"
+            disabled={disabled}
+            onClick={onClick}
+        >{children}</button>
+    );
+}
 
 type Props = {
     card: CardData;
     cardRef: CardRef;
     gameId: string;
+    currentUser: string;
+    playerPool: number;
     position: {x: number; y: number};
     onCommand: (cmd: GameCommand) => void;
     onClose: () => void;
@@ -27,16 +45,19 @@ const SEP = <hr className="border-line/40 my-1" />;
 const MENU_MAX_W = 280;
 const MENU_MAX_H = 440;
 
-export function CardContextMenu({card, cardRef, gameId, position, onCommand, onClose}: Props) {
+export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool, position, onCommand, onClose}: Props) {
     const menuRef = useRef<HTMLDivElement>(null);
     const [inlineForm, setInlineForm] = useState<InlineForm>(null);
     const [titleInput, setTitleInput] = useState(card.title ?? '');
     const [notesInput, setNotesInput] = useState(card.notes ?? '');
 
-    const rawLeft = position.x + 4;
-    const rawTop  = position.y + 4;
-    const left = Math.max(4, rawLeft + MENU_MAX_W  > window.innerWidth  - 4 ? position.x - MENU_MAX_W  - 4 : rawLeft);
-    const top  = Math.max(4, rawTop  + MENU_MAX_H  > window.innerHeight - 4 ? position.y - MENU_MAX_H  - 4 : rawTop);
+    const rawLeft    = position.x + 4;
+    const rawTop     = position.y + 4;
+    const nearBottom = rawTop  + MENU_MAX_H > window.innerHeight - 4;
+    const nearRight  = rawLeft + MENU_MAX_W > window.innerWidth  - 4;
+    const menuLeft   = Math.max(4, nearRight ? position.x - MENU_MAX_W - 4 : rawLeft);
+    const menuTop    = nearBottom ? undefined : Math.max(4, rawTop);
+    const menuBottom = nearBottom ? Math.max(4, window.innerHeight - position.y + 4) : undefined;
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -54,18 +75,21 @@ export function CardContextMenu({card, cardRef, gameId, position, onCommand, onC
     const fire = (cmd: GameCommand) => { onCommand(cmd); onClose(); };
 
     const region = cardRef.regionType;
+    const isSelf = cardRef.playerName === currentUser;
     const inPlay = region === 'READY' || region === 'TORPOR';
     const isCryptCard = card.type === 'VAMPIRE' || card.type === 'IMBUED' || card.crypt === true;
     const isMinion = card.minion === true || isCryptCard;
+    const inPlayOrUncontrolled = inPlay || region === 'UNCONTROLLED';
     const showLockUnlock = inPlay;
-    const showCounters = inPlay;
+    const showPoolTransfer = inPlayOrUncontrolled && isSelf;
+    const showCounters = inPlayOrUncontrolled;
     const showMoveToTorpor = region === 'READY' && isMinion;
     const showRescue = region === 'TORPOR';
-    const showDiscard = region === 'HAND';
+    const showDiscard = region === 'HAND' && isSelf;
     const showBurn = isMinion && inPlay;
     const showContest = card.unique === true && inPlay;
     const showTitle = isCryptCard && region === 'READY';
-    const showNotes = inPlay;
+    const showNotes = inPlay && isSelf;
     const hasZoneSection = showMoveToTorpor || showRescue || showDiscard || showBurn;
 
     const cardLabel = card.faceDown && !card.name ? '(hidden)' : (card.name ?? card.cardId ?? '—');
@@ -76,8 +100,8 @@ export function CardContextMenu({card, cardRef, gameId, position, onCommand, onC
     return createPortal(
         <div
             ref={menuRef}
-            style={{position: 'fixed', zIndex: 9999, top, left}}
-            className="min-w-[210px] max-w-[280px] rounded-lg border border-line/60 bg-surface/95 backdrop-blur-sm shadow-xl py-1"
+            style={{position: 'fixed', zIndex: 9999, left: menuLeft, top: menuTop, bottom: menuBottom}}
+            className="min-w-52.5 max-w-70 rounded-lg border border-line/60 bg-surface/95 backdrop-blur-sm shadow-xl py-1"
             onContextMenu={e => e.preventDefault()}
         >
             {/* Header */}
@@ -95,22 +119,62 @@ export function CardContextMenu({card, cardRef, gameId, position, onCommand, onC
                 <button className={ITEM} onClick={() => fire(lockCard(gameId, cardRef))}>Lock</button>
             ))}
 
-            {/* Counters */}
-            {showCounters && (
+            {/* Blood & pool counter controls */}
+            {(showCounters || showPoolTransfer) && (
                 <>
                     {SEP}
-                    <div className="flex items-center gap-2 px-3 py-1">
-                        <span className="text-sm text-ink-muted flex-1">Blood</span>
-                        <button
-                            className="w-6 h-6 flex items-center justify-center rounded text-sm text-ink hover:bg-hover transition-colors disabled:opacity-30"
-                            disabled={(card.counters ?? 0) === 0}
-                            onClick={() => onCommand(removeCounter(gameId, cardRef))}
-                        >−</button>
-                        <span className="text-sm font-mono text-ink w-5 text-center tabular-nums">{card.counters ?? 0}</span>
-                        <button
-                            className="w-6 h-6 flex items-center justify-center rounded text-sm text-ink hover:bg-hover transition-colors"
-                            onClick={() => onCommand(addCounter(gameId, cardRef))}
-                        >+</button>
+                    <div className="px-3 py-1 flex flex-col gap-0.5">
+                        {/* Blood row: direct counter adjustment — [−] current / capacity [+] */}
+                        {showCounters && (
+                            <div className="flex items-center gap-1">
+                                <span className="text-xs text-ink-muted w-8 shrink-0">Blood</span>
+                                <div className="flex items-center gap-1 ml-auto">
+                                    <CounterBtn
+                                        disabled={(card.counters ?? 0) === 0}
+                                        onClick={() => onCommand(removeCounter(gameId, cardRef))}
+                                    >−</CounterBtn>
+                                    <span className="text-sm font-mono text-ink tabular-nums min-w-[1.5ch] text-center">
+                                        {card.counters ?? 0}
+                                    </span>
+                                    {card.capacity != null && (
+                                        <>
+                                            <span className="text-xs text-ink-muted/60">/</span>
+                                            <span className="text-sm font-mono text-ink-muted tabular-nums min-w-[1.5ch]">
+                                                {card.capacity}
+                                            </span>
+                                        </>
+                                    )}
+                                    <CounterBtn onClick={() => onCommand(addCounter(gameId, cardRef))}>+</CounterBtn>
+                                </div>
+                            </div>
+                        )}
+                        {/* Pool row: pool↔card transfer — [←] pool [→] */}
+                        {showPoolTransfer && (
+                            <div className="flex items-center gap-1">
+                                <span className="text-xs text-ink-muted w-8 shrink-0">Pool</span>
+                                <div className="flex items-center gap-1 ml-auto">
+                                    <CounterBtn
+                                        disabled={(card.counters ?? 0) === 0}
+                                        onClick={() => onCommand(
+                                            region === 'UNCONTROLLED'
+                                                ? influenceOff(gameId, cardRef)
+                                                : transferPoolOff(gameId, cardRef.playerName, cardRef)
+                                        )}
+                                    >←</CounterBtn>
+                                    <span className="text-sm font-mono text-gold tabular-nums min-w-[1.5ch] text-center">
+                                        {playerPool}
+                                    </span>
+                                    <CounterBtn
+                                        disabled={playerPool === 0}
+                                        onClick={() => onCommand(
+                                            region === 'UNCONTROLLED'
+                                                ? influenceOn(gameId, cardRef)
+                                                : transferPoolOn(gameId, cardRef.playerName, cardRef)
+                                        )}
+                                    >→</CounterBtn>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </>
             )}
@@ -173,7 +237,7 @@ export function CardContextMenu({card, cardRef, gameId, position, onCommand, onC
                 ) : (
                     <button className={ITEM} onClick={() => setInlineForm('title')}>
                         <span className="flex-1">Set Title…</span>
-                        {card.title && <span className="text-ink-muted text-xs truncate max-w-[80px]">{card.title}</span>}
+                        {card.title && <span className="text-ink-muted text-xs truncate max-w-20">{card.title}</span>}
                     </button>
                 )
             )}
@@ -201,7 +265,7 @@ export function CardContextMenu({card, cardRef, gameId, position, onCommand, onC
             ) : showNotes ? (
                 <button className={ITEM} onClick={() => setInlineForm('notes')}>
                     <span className="flex-1">Set Notes…</span>
-                    {card.notes && <span className="text-ink-muted text-xs truncate max-w-[80px]">{card.notes}</span>}
+                    {card.notes && <span className="text-ink-muted text-xs truncate max-w-20">{card.notes}</span>}
                 </button>
             ) : null}
         </div>,

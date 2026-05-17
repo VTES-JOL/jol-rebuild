@@ -11,6 +11,7 @@ import {CardContextMenu} from './CardContextMenu.tsx';
 import type {CardData, PlayerState, RegionType} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {attachCard, cardRef, moveCard} from './gameCommands.ts';
+import {regionToStacks} from './gameUtils.tsx';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
 
@@ -84,10 +85,10 @@ export default function GamePage() {
         sendCommand(cmd);
     }, [sendCommand, clearCommandError]);
 
-    const [contextMenu, setContextMenu] = useState<{card: CardData; ref: CardRef; x: number; y: number} | null>(null);
+    const [contextMenu, setContextMenu] = useState<{ref: CardRef; x: number; y: number} | null>(null);
 
-    const handleCardContextMenu = useCallback((card: CardData, ref: CardRef, x: number, y: number) => {
-        setContextMenu({card, ref, x, y});
+    const handleCardContextMenu = useCallback((_card: CardData, ref: CardRef, x: number, y: number) => {
+        setContextMenu({ref, x, y});
     }, []);
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
@@ -96,16 +97,30 @@ export default function GamePage() {
 
     return (
         <GameLayout>
-            {contextMenu && (
-                <CardContextMenu
-                    card={contextMenu.card}
-                    cardRef={contextMenu.ref}
-                    gameId={gameId}
-                    position={{x: contextMenu.x, y: contextMenu.y}}
-                    onCommand={handleCommand}
-                    onClose={() => setContextMenu(null)}
-                />
-            )}
+            {contextMenu && gameState && (() => {
+                const {ref} = contextMenu;
+                const player = gameState.players.find(p => p.name === ref.playerName);
+                if (!player) return null;
+                const region = player.regions[ref.regionType];
+                if (!region) return null;
+                const stacks = regionToStacks(region, gameState.cards);
+                const stack = stacks[ref.position];
+                if (!stack) return null;
+                const liveCard = ref.childIndex === -1 ? stack[0] : stack[ref.childIndex + 1];
+                if (!liveCard) return null;
+                return (
+                    <CardContextMenu
+                        card={liveCard}
+                        cardRef={ref}
+                        gameId={gameId}
+                        currentUser={user?.username ?? ''}
+                        playerPool={player.pool}
+                        position={{x: contextMenu.x, y: contextMenu.y}}
+                        onCommand={handleCommand}
+                        onClose={() => setContextMenu(null)}
+                    />
+                );
+            })()}
             <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
                 {/* Board — full width on ≤md, left 3/4 on lg+ */}
                 <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">
@@ -182,6 +197,7 @@ export default function GamePage() {
                                 gameState={gameState}
                                 gameId={gameId}
                                 onCommand={handleCommand}
+                                onCardContextMenu={handleCardContextMenu}
                             />
                         </div>
                     ) : boardLayout === 'text' && gameState ? (
@@ -193,6 +209,7 @@ export default function GamePage() {
                                 onCardMove={handleCardMove}
                                 onCardReorder={handleCardReorder}
                                 onCardAttach={handleCardAttach}
+                                onCardContextMenu={handleCardContextMenu}
                             />
                         </div>
                     ) : (

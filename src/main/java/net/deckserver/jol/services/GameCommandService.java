@@ -237,14 +237,14 @@ public class GameCommandService {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
         card.setCounters(card.getCounters() + cmd.amount());
-        return actor + " added " + cmd.amount() + " counter(s) to " + card.getName();
+        return actor + " added " + cmd.amount() + " counter(s) to " + cardLabel(card, cmd.ref());
     }
 
     private String handleRemoveCounter(GameData game, RemoveCounter cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
         card.setCounters(Math.max(0, card.getCounters() - cmd.amount()));
-        return actor + " removed " + cmd.amount() + " counter(s) from " + card.getName();
+        return actor + " removed " + cmd.amount() + " counter(s) from " + cardLabel(card, cmd.ref());
     }
 
     private void handleSetCardNotes(GameData game, SetCardNotes cmd) {
@@ -269,10 +269,11 @@ public class GameCommandService {
         // positive = pool → card, negative = card → pool
         player.setPool(Math.max(0, player.getPool() + (-amount)));
         card.setCounters(Math.max(0, card.getCounters() + amount));
+        String label = cardLabel(card, cmd.ref());
         if (amount > 0) {
-            return actor + " transferred " + amount + " blood from pool to " + card.getName();
+            return actor + " transferred " + amount + " blood to " + label;
         } else {
-            return actor + " transferred " + Math.abs(amount) + " blood from " + card.getName() + " to pool";
+            return actor + " transferred " + Math.abs(amount) + " blood from " + label;
         }
     }
 
@@ -287,13 +288,17 @@ public class GameCommandService {
     private String handleInfluenceVampire(GameData game, InfluenceVampire cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
-        String name = card.getName();
         PlayerData owner = card.getOwner();
         if (owner == null) return null;
         int amount = Math.min(cmd.amount(), owner.getPool());
         owner.setPool(owner.getPool() - amount);
         card.setCounters(card.getCounters() + amount);
-        return actor + " influenced " + name + " with " + amount + " blood";
+        String label = cardLabel(card, cmd.ref());
+        if (cmd.amount() > 0) {
+            return actor + " transferred " + amount + " blood to " + label;
+        } else {
+            return actor + " transferred " + Math.abs(amount) + " blood from " + label;
+        }
     }
 
     private String handleMoveToReady(GameData game, MoveToReady cmd, String actor) {
@@ -411,6 +416,15 @@ public class GameCommandService {
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /** Returns a log-safe label for a card: generic "card #N in X's uncontrolled region" for hidden cards. */
+    private String cardLabel(CardData card, CardRef ref) {
+        if (card.getRegion() != null && card.getRegion().getType() == RegionType.UNCONTROLLED) {
+            String ownerName = card.getOwner() != null ? card.getOwner().getName() : "unknown";
+            return "card #" + (ref.position() + 1) + " in " + ownerName + "'s uncontrolled region";
+        }
+        return card.getName();
+    }
 
     private void unlockPlayerCards(GameData game, String playerName) {
         PlayerData player = game.getPlayer(playerName);

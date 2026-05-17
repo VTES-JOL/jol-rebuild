@@ -3,7 +3,7 @@ import type {CardData, PlayerState, RegionState} from './types.ts';
 import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
 import {RegionBadge} from './gameUtils.tsx';
-import type {GameCommand} from './gameCommands.ts';
+import type {CardRef, GameCommand} from './gameCommands.ts';
 import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
@@ -17,6 +17,7 @@ type PlayerColumnProps = {
     isCurrentUser?: boolean;
     gameId?: string;
     onCommand?: (cmd: GameCommand) => void;
+    onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
 };
 
 function fieldRegionCbs(
@@ -43,7 +44,7 @@ function fieldRegionCbs(
     };
 }
 
-export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gameId, onCommand}: PlayerColumnProps) {
+export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gameId, onCommand, onCardContextMenu}: PlayerColumnProps) {
     const {
         ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap, rfg,
         readyStacks, torporStacks, researchStacks, uncontrolledStacks,
@@ -56,37 +57,45 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
         const regions: FieldRegionConfig[] = [];
         if (ready) regions.push({
             regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 4, minRows: 2,
+            onCardContextMenu: (si, ci, x, y) => { const c = readyStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'READY', si, ci === 0 ? -1 : ci - 1), x, y); },
             ...fieldRegionCbs(player, ready, gameId, onCommand),
         });
         if (torpor && torpor.count > 0) regions.push({
             regionKey: 'TORPOR', name: 'Torpor', stacks: torporStacks, columns: 4,
+            onCardContextMenu: (si, ci, x, y) => { const c = torporStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'TORPOR', si, ci === 0 ? -1 : ci - 1), x, y); },
             ...fieldRegionCbs(player, torpor, gameId, onCommand),
         });
         if (research && research.count > 0) regions.push({
             regionKey: 'RESEARCH', name: 'Research', stacks: researchStacks, columns: 4, narrowGap: true,
+            onCardContextMenu: (si, ci, x, y) => { const c = researchStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'RESEARCH', si, ci === 0 ? -1 : ci - 1), x, y); },
             ...fieldRegionCbs(player, research, gameId, onCommand),
         });
         if (uncontrolled && uncontrolled.count > 0) regions.push({
             regionKey: 'UNCONTROLLED', name: 'Uncontrolled', stacks: uncontrolledStacks, columns: 4, narrowGap: true,
+            onCardContextMenu: (si, ci, x, y) => { const c = uncontrolledStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'UNCONTROLLED', si, ci === 0 ? -1 : ci - 1), x, y); },
             ...fieldRegionCbs(player, uncontrolled, gameId, onCommand),
         });
         if (hand) regions.push({
             regionKey: 'HAND', name: 'Hand', stacks: handStacks, columns: 1, compact: true,
+            onCardContextMenu: (si, ci, x, y) => { const c = handStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'HAND', si, ci === 0 ? -1 : ci - 1), x, y); },
         });
         if (library) regions.push({
             regionKey: 'LIBRARY', name: 'Library', stacks: libraryStacks, columns: 1, compact: true,
+            onCardContextMenu: (si, ci, x, y) => { const c = libraryStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'LIBRARY', si, ci === 0 ? -1 : ci - 1), x, y); },
         });
         if (crypt) regions.push({
             regionKey: 'CRYPT', name: 'Crypt', stacks: cryptStacks, columns: 1, compact: true,
+            onCardContextMenu: (si, ci, x, y) => { const c = cryptStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'CRYPT', si, ci === 0 ? -1 : ci - 1), x, y); },
         });
         if (ashHeap?.visible) regions.push({
             regionKey: 'ASH_HEAP', name: 'Ash Heap', stacks: ashHeapStacks, columns: 1, compact: true,
+            onCardContextMenu: (si, ci, x, y) => { const c = ashHeapStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'ASH_HEAP', si, ci === 0 ? -1 : ci - 1), x, y); },
         });
         return regions;
     }, [ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap,
         readyStacks, torporStacks, researchStacks, uncontrolledStacks,
         handStacks, libraryStacks, cryptStacks, ashHeapStacks,
-        gameId, onCommand]);
+        gameId, onCommand, onCardContextMenu]);
 
     const hasBottom =
         !!hand || !!library || !!crypt || !!ashHeap ||

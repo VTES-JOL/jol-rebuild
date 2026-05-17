@@ -2,7 +2,7 @@ import type {CSSProperties} from 'react';
 import {useState} from 'react';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import {PlayerColumn} from './PlayerColumn.tsx';
-import type {GameCommand} from './gameCommands.ts';
+import type {CardRef, GameCommand} from './gameCommands.ts';
 
 export type CircularBoardProps = {
     orderedPlayers: PlayerState[];
@@ -11,9 +11,10 @@ export type CircularBoardProps = {
     gameState: GameState;
     gameId?: string;
     onCommand?: (cmd: GameCommand) => void;
+    onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
 };
 
-export function CircularBoard({orderedPlayers, cards, currentUser, gameState, gameId, onCommand}: CircularBoardProps) {
+export function CircularBoard({orderedPlayers, cards, currentUser, gameState, gameId, onCommand, onCardContextMenu}: CircularBoardProps) {
     const initialFocus =
         orderedPlayers.find(p => p.name === currentUser)?.name ??
         gameState.currentPlayer ??
@@ -72,6 +73,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                             isCurrentUser={predator.name === currentUser}
                             gameId={gameId}
                             onCommand={onCommand}
+                            onCardContextMenu={onCardContextMenu}
                         />
                     ) : (
                         <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
@@ -90,6 +92,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                             isCurrentUser={focused.name === currentUser}
                             gameId={gameId}
                             onCommand={onCommand}
+                            onCardContextMenu={onCardContextMenu}
                         />
                     )}
                 </div>
@@ -103,6 +106,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                             isCurrentUser={prey.name === currentUser}
                             gameId={gameId}
                             onCommand={onCommand}
+                            onCardContextMenu={onCardContextMenu}
                         />
                     ) : (
                         <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">

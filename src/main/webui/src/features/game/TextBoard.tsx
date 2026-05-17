@@ -4,6 +4,8 @@ import {arrayMove, SortableContext, useSortable, verticalListSortingStrategy} fr
 import {CSS} from '@dnd-kit/utilities';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
+import type {CardRef} from './gameCommands.ts';
+import {cardRef} from './gameCommands.ts';
 import {DisciplineIcon} from '@/shared/components/DisciplineIcon.tsx';
 import {ClanIcon} from '@/shared/components/ClanIcon.tsx';
 
@@ -14,6 +16,7 @@ type TextBoardProps = {
     onCardReorder?: (playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) => void;
     onCardMove?: (playerName: string, fromRegion: RegionType, fromIndex: number, toRegion: RegionType, childIdx?: number) => void;
     onCardAttach?: (playerName: string, fromRegion: RegionType, fromTopIdx: number, fromChildIdx: number | null, toRegion: RegionType, toTopIdx: number) => void;
+    onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
 };
 
 const REGION_ORDER: RegionType[] = [
@@ -112,9 +115,10 @@ function CardRow({card, isHidden, isChild = false}: {card: CardData; isHidden: b
 
 // ── SortableCardRow ───────────────────────────────────────────────────────────
 
-function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAttachTarget}: {
+function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAttachTarget, onContextMenu}: {
     id: string; card: CardData; isHidden: boolean; isChild?: boolean;
     isCrossRegionDrag: boolean; isAttachTarget: boolean;
+    onContextMenu?: (x: number, y: number) => void;
 }) {
     const {attributes, listeners, setNodeRef, transform, transition, isDragging, isOver} = useSortable({id});
     const style = isCrossRegionDrag
@@ -132,6 +136,7 @@ function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAtta
             ].filter(Boolean).join(' ')}
             {...attributes}
             {...listeners}
+            onContextMenu={onContextMenu ? e => { e.preventDefault(); onContextMenu(e.clientX, e.clientY); } : undefined}
         >
             <CardRow card={card} isHidden={isHidden} isChild={isChild} />
         </div>
@@ -139,7 +144,7 @@ function SortableCardRow({id, card, isHidden, isChild, isCrossRegionDrag, isAtta
 }
 
 // Children are drag-source only — not sortable targets.
-function DraggableChildRow({id, card, isHidden}: {id: string; card: CardData; isHidden: boolean}) {
+function DraggableChildRow({id, card, isHidden, onContextMenu}: {id: string; card: CardData; isHidden: boolean; onContextMenu?: (x: number, y: number) => void}) {
     const {attributes, listeners, setNodeRef, isDragging} = useDraggable({id});
     return (
         <div
@@ -147,6 +152,7 @@ function DraggableChildRow({id, card, isHidden}: {id: string; card: CardData; is
             className={`cursor-grab active:cursor-grabbing${isDragging ? ' opacity-30' : ''}`}
             {...attributes}
             {...listeners}
+            onContextMenu={onContextMenu ? e => { e.preventDefault(); onContextMenu(e.clientX, e.clientY); } : undefined}
         >
             <CardRow card={card} isHidden={isHidden} isChild />
         </div>
@@ -156,7 +162,7 @@ function DraggableChildRow({id, card, isHidden}: {id: string; card: CardData; is
 // ── RegionSection ─────────────────────────────────────────────────────────────
 
 function RegionSection({
-    region, resolveCard, childCountAt, sortedIds, isDropTarget, activeDragFromRegion, activeDragPosId,
+    region, resolveCard, childCountAt, sortedIds, isDropTarget, activeDragFromRegion, activeDragPosId, onCardContextMenu,
 }: {
     region: RegionState;
     resolveCard: (posId: string) => CardData;
@@ -165,6 +171,7 @@ function RegionSection({
     isDropTarget: boolean;
     activeDragFromRegion: RegionType | null;
     activeDragPosId: string | null;
+    onCardContextMenu?: (posId: string, x: number, y: number) => void;
 }) {
     const [collapsed, setCollapsed] = useState(!region.visible);
     const {setNodeRef} = useDroppable({id: `region-${region.type}`});
@@ -210,6 +217,7 @@ function RegionSection({
                                     isHidden={hidden}
                                     isCrossRegionDrag={isCrossRegionDrag}
                                     isAttachTarget={isAttachTarget}
+                                    onContextMenu={(x, y) => onCardContextMenu?.(posId, x, y)}
                                 />
                                 {Array.from({length: childCount}, (_, c) => {
                                     const cPosId = childPosId(region.type, topIdx, c);
@@ -219,6 +227,7 @@ function RegionSection({
                                             id={cPosId}
                                             card={resolveCard(cPosId)}
                                             isHidden={false}
+                                            onContextMenu={(x, y) => onCardContextMenu?.(cPosId, x, y)}
                                         />
                                     );
                                 })}
@@ -234,7 +243,7 @@ function RegionSection({
 // ── PlayerColumn ──────────────────────────────────────────────────────────────
 
 function PlayerColumn({
-    player, cards, isCurrentUser, onCardReorder, onCardMove, onCardAttach,
+    player, cards, isCurrentUser, onCardReorder, onCardMove, onCardAttach, onCardContextMenu,
 }: {
     player: PlayerState;
     cards: Record<string, CardData>;
@@ -242,6 +251,7 @@ function PlayerColumn({
     onCardReorder?: TextBoardProps['onCardReorder'];
     onCardMove?: TextBoardProps['onCardMove'];
     onCardAttach?: TextBoardProps['onCardAttach'];
+    onCardContextMenu?: TextBoardProps['onCardContextMenu'];
 }) {
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
 
@@ -465,6 +475,14 @@ function PlayerColumn({
                             activeDragFromRegion !== region.type &&
                             dragOverRegion === region.type
                         }
+                        onCardContextMenu={(posId, x, y) => {
+                            if (!onCardContextMenu) return;
+                            const parsed = parsePosId(posId);
+                            if (!parsed) return;
+                            const card = resolveCard(posId);
+                            const ref = cardRef(player.name, parsed.regionType, parsed.topIdx, parsed.childIdx ?? -1);
+                            onCardContextMenu(card, ref, x, y);
+                        }}
                     />
                 ))}
             </div>
@@ -481,7 +499,7 @@ function PlayerColumn({
 
 // ── TextBoard ─────────────────────────────────────────────────────────────────
 
-export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, onCardMove, onCardAttach}: TextBoardProps) {
+export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, onCardMove, onCardAttach, onCardContextMenu}: TextBoardProps) {
     return (
         <div className="flex gap-2 h-full min-h-0 overflow-x-auto">
             {orderedPlayers.map(player => (
@@ -493,6 +511,7 @@ export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, on
                     onCardReorder={onCardReorder}
                     onCardMove={onCardMove}
                     onCardAttach={onCardAttach}
+                    onCardContextMenu={onCardContextMenu}
                 />
             ))}
         </div>

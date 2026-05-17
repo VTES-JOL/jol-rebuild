@@ -56,17 +56,22 @@ Each player occupies a horizontal row that wraps onto multiple lines at smaller 
 
 ### Interactions
 
-All active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) and compact regions share **one `DndContext`** per player row, enabling cross-region drag-and-drop.
+All active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) and compact regions share **one `DndContext`** per player row, enabling cross-region drag-and-drop within that player's board.
 
-| Gesture | Result |
-|---|---|
-| Drag a stack by its grip handle within the same region | Reorder (`moveCard` command, same region, new index) |
-| Drag a card (child card) within a stack to another stack slot | Attach card to target vampire (`attachCard` command) |
-| Drag a card out of a stack to an empty slot | Detach card into its own stack (`moveCard` command) |
-| Drag a stack from one region to another | Move top-level card to target region (`moveCard` command) |
-| Drag a card from an active region to a compact region | Move card to compact region (`moveCard` at position 0) |
+**Cross-player drag-and-drop is not supported.** Each `PlayerBoard` has its own isolated `DndContext`. Moving a card to another player's region must be done via a context menu command, not by dragging.
 
-HAND, LIBRARY, and CRYPT expose no DnD callbacks — they are read-only compact stacks in this layout.
+| Gesture | Drop target | Result |
+|---|---|---|
+| Drag stack (grip handle) | Stack in same region | Reorder (`MOVE_CARD`, same region, new index) |
+| Drag stack (grip handle) | Stack or empty slot in different region | Move top-level card to target region (`MOVE_CARD`) |
+| Drag child card | Stack slot in same region | Attach to target vampire (`ATTACH_CARD`) |
+| Drag child card | Empty slot in same region | Detach into own stack (`MOVE_CARD`, same region) |
+| Drag child card | Stack in different region: target is minion AND dragged is library | Attach to target vampire (`ATTACH_CARD`) |
+| Drag child card | Stack in different region (any other case) | Move to target region (`MOVE_CARD`) |
+| Drag child card | Empty slot in different region | Move to target region, append (`MOVE_CARD`) |
+| Drag any card | Compact region (HAND/LIBRARY/CRYPT/ASH_HEAP) droppable area | Move to that region, insert at top (`MOVE_CARD`, position 0) |
+
+HAND, LIBRARY, CRYPT, and ASH_HEAP have no within-region DnD callbacks (no reorder, no internal attach). They are valid drop targets from other regions but cards cannot be rearranged within them via DnD.
 
 ---
 
@@ -104,7 +109,7 @@ Each `PlayerColumn` is a full-height scrollable panel with:
 
 ### Interactions
 
-Same drag-and-drop model as Strip (one `DndContext` per `PlayerColumn`, shared across all regions). DnD commands are only wired for the focused player when `gameId` and `onCommand` are provided — predator and prey columns receive the same props but the user can only issue commands for cards they control (enforced server-side).
+Same drag-and-drop model as Strip (one `DndContext` per `PlayerColumn`, shared across all regions). The same cross-player limitation applies — DnD is isolated to a single column. DnD commands are only wired for the focused player when `gameId` and `onCommand` are provided — predator and prey columns receive the same props but the user can only issue commands for cards they control (enforced server-side).
 
 Navigation:
 - **◀ predator** button — shifts focus to `focused.predator`; disabled when no predator exists.
@@ -189,3 +194,42 @@ Strip and Circular boards wrap each player's regions in a single `FieldRegionDnd
 Active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) render cards as `CardStack` — a vertical fan with individual cards draggable out. The parent card (vampire) sits at index 0; attached library cards follow at indices 1+.
 
 Compact regions (HAND, LIBRARY, CRYPT, ASH_HEAP) render as `CompactCardStack` — a layered ghost-card pile showing at most 3 ghost layers. The top card is draggable into active regions.
+
+---
+
+## Card context menu
+
+**File**: `CardContextMenu.tsx`
+
+Right-clicking any card that renders a `CardStack` or `CompactCardStack` opens a floating context menu. The menu is mounted via a React portal on `document.body` and dismissed by pressing Escape or clicking outside it.
+
+The menu is opened via `onCardContextMenu` callbacks wired in `PlayerBoard` for every region. Counter and pool values in the open menu stay live — on each render the card is looked up fresh from `gameState.cards` using the stored card UUID, so increments and decrements are reflected immediately without closing the menu.
+
+### Items shown by condition
+
+| Item | Condition | Player |
+|---|---|---|
+| **Lock / Unlock** | Region is READY or TORPOR | Any |
+| **Blood counter row** (− / count / +) | Region is READY, TORPOR, or UNCONTROLLED | Any |
+| **Pool transfer row** (← / pool / →) | Region is READY, TORPOR, or UNCONTROLLED | Self |
+| **Discard** | Region is HAND | Self |
+| **Move to Torpor** | Region is READY AND card is a minion or crypt type | Any |
+| **Rescue from Torpor** | Region is TORPOR | Any |
+| **Burn Minion** (danger style) | Region is READY or TORPOR AND card is a minion | Any |
+| **Contest / Uncontest** | `card.unique === true` AND region is READY or TORPOR | Any |
+| **Set Title** | Card is a crypt type (VAMPIRE or IMBUED) AND region is READY | Any |
+| **Set Notes** | Region is READY or TORPOR | Self |
+
+### Counter and pool button logic
+
+- Blood `−` is disabled when `card.counters === 0`.
+- Pool `→` (pool → card) is disabled when `playerPool === 0`.
+- Pool `←` (card → pool) is disabled when `card.counters === 0`.
+- For **UNCONTROLLED** region: pool arrows dispatch `INFLUENCE_VAMPIRE` (amount ±1).
+- For **READY / TORPOR**: pool arrows dispatch `TRANSFER_POOL` (amount ±1).
+- Counter ± buttons dispatch `ADD_COUNTER` / `REMOVE_COUNTER` and do **not** close the menu, so rapid adjustments are possible.
+- All other items (move, burn, contest, etc.) close the menu immediately after dispatching.
+
+### Cross-player moves via context menu
+
+Cross-player card moves are not yet implemented in the context menu. The backend `MOVE_CARD` command supports targeting a different player's region, but there is currently no UI to select a target player or region. This is a known missing feature.

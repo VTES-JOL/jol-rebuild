@@ -112,3 +112,23 @@ export function setTitle(gameId: string, ref: CardRef, title: string): SetTitleC
 export function setCardNotes(gameId: string, ref: CardRef, notes: string): SetCardNotesCommand {
     return {type: 'SET_CARD_NOTES', gameId, ref, notes};
 }
+
+/** Move 1 blood from the controller's pool onto a card (READY / TORPOR). */
+export function transferPoolOn(gameId: string, playerName: string, ref: CardRef): TransferPoolCommand {
+    return {type: 'TRANSFER_POOL', gameId, playerName, ref, amount: 1};
+}
+
+/** Move 1 blood from a card back to the controller's pool (READY / TORPOR). */
+export function transferPoolOff(gameId: string, playerName: string, ref: CardRef): TransferPoolCommand {
+    return {type: 'TRANSFER_POOL', gameId, playerName, ref, amount: -1};
+}
+
+/** Move 1 blood from the owner's pool onto an uncontrolled vampire. */
+export function influenceOn(gameId: string, ref: CardRef): InfluenceVampireCommand {
+    return {type: 'INFLUENCE_VAMPIRE', gameId, ref, amount: 1};
+}
+
+/** Move 1 blood from an uncontrolled vampire back to the owner's pool. */
+export function influenceOff(gameId: string, ref: CardRef): InfluenceVampireCommand {
+    return {type: 'INFLUENCE_VAMPIRE', gameId, ref, amount: -1};
+}
