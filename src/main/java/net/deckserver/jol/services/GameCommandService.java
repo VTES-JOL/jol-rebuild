@@ -198,13 +198,13 @@ public class GameCommandService {
     private String handleMoveCard(GameData game, MoveCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
-        String name = card.getName();
+        String label = cardLabel(card, cmd.ref());
         PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
         if (targetPlayer == null) return null;
         RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
         if (target == null) return null;
         target.addCard(card, cmd.position());
-        return actor + " moved " + name + " to " + cmd.targetPlayerName() + "'s " + cmd.targetRegionType().description();
+        return actor + " moved " + label + " to " + cmd.targetPlayerName() + "'s " + cmd.targetRegionType().description();
     }
 
     private String handleAttachCard(GameData game, AttachCard cmd, String actor) {
@@ -417,11 +417,17 @@ public class GameCommandService {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    /** Returns a log-safe label for a card: generic "card #N in X's uncontrolled region" for hidden cards. */
+    /** Returns a log-safe label for a card: masks identity when the card is in a region hidden from opponents. */
     private String cardLabel(CardData card, CardRef ref) {
-        if (card.getRegion() != null && card.getRegion().getType() == RegionType.UNCONTROLLED) {
-            String ownerName = card.getOwner() != null ? card.getOwner().getName() : "unknown";
+        RegionData region = card.getRegion();
+        if (region == null) return card.getName();
+        RegionType type = region.getType();
+        String ownerName = card.getOwner() != null ? card.getOwner().getName() : "unknown";
+        if (type == RegionType.UNCONTROLLED) {
             return "card #" + (ref.position() + 1) + " in " + ownerName + "'s uncontrolled region";
+        }
+        if (RegionType.OTHER_HIDDEN_REGIONS.contains(type)) {
+            return "a card in " + ownerName + "'s " + type.description();
         }
         return card.getName();
     }

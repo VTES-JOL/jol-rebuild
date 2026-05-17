@@ -133,7 +133,7 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                                         disabled={(card.counters ?? 0) === 0}
                                         onClick={() => onCommand(removeCounter(gameId, cardRef))}
                                     >−</CounterBtn>
-                                    <span className="text-sm font-mono text-ink tabular-nums min-w-[1.5ch] text-center">
+                                    <span className="text-sm font-mono text-blood tabular-nums min-w-[1.5ch] text-center">
                                         {card.counters ?? 0}
                                     </span>
                                     {card.capacity != null && (
@@ -148,31 +148,34 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                                 </div>
                             </div>
                         )}
-                        {/* Pool row: pool↔card transfer — [←] pool [→] */}
+                        {/* Pool↔card transfer: blood [←] label [→] pool */}
                         {showPoolTransfer && (
-                            <div className="flex items-center gap-1">
-                                <span className="text-xs text-ink-muted w-8 shrink-0">Pool</span>
-                                <div className="flex items-center gap-1 ml-auto">
-                                    <CounterBtn
-                                        disabled={(card.counters ?? 0) === 0}
-                                        onClick={() => onCommand(
-                                            region === 'UNCONTROLLED'
-                                                ? influenceOff(gameId, cardRef)
-                                                : transferPoolOff(gameId, cardRef.playerName, cardRef)
-                                        )}
-                                    >←</CounterBtn>
-                                    <span className="text-sm font-mono text-gold tabular-nums min-w-[1.5ch] text-center">
-                                        {playerPool}
-                                    </span>
-                                    <CounterBtn
-                                        disabled={playerPool === 0}
-                                        onClick={() => onCommand(
-                                            region === 'UNCONTROLLED'
-                                                ? influenceOn(gameId, cardRef)
-                                                : transferPoolOn(gameId, cardRef.playerName, cardRef)
-                                        )}
-                                    >→</CounterBtn>
-                                </div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                                <span className="text-sm font-mono text-blood tabular-nums min-w-[1.5ch] text-center">
+                                    {card.counters ?? 0}
+                                </span>
+                                <CounterBtn
+                                    disabled={playerPool === 0}
+                                    onClick={() => onCommand(
+                                        region === 'UNCONTROLLED'
+                                            ? influenceOn(gameId, cardRef)
+                                            : transferPoolOn(gameId, cardRef.playerName, cardRef)
+                                    )}
+                                >←</CounterBtn>
+                                <span className="text-xs text-ink-muted flex-1 text-center">
+                                    {region === 'UNCONTROLLED' ? 'Influence' : 'Transfer'}
+                                </span>
+                                <CounterBtn
+                                    disabled={(card.counters ?? 0) === 0}
+                                    onClick={() => onCommand(
+                                        region === 'UNCONTROLLED'
+                                            ? influenceOff(gameId, cardRef)
+                                            : transferPoolOff(gameId, cardRef.playerName, cardRef)
+                                    )}
+                                >→</CounterBtn>
+                                <span className="text-sm font-mono text-gold tabular-nums min-w-[1.5ch] text-center">
+                                    {playerPool}
+                                </span>
                             </div>
                         )}
                     </div>
