@@ -249,6 +249,7 @@ export default function GamePage() {
                             enableReactions={false}
                             enableReply={false}
                             enableAvatars={false}
+                            enableDivider={false}
                             placeholder="Chat with your opponents…"
                         />
                     </div>

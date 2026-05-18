@@ -25,13 +25,14 @@ export type ChatPanelViewProps = {
     enableReactions?: boolean;
     enableReply?: boolean;
     enableAvatars?: boolean;
+    enableDivider?: boolean;
 };
 
 const STATUS_LABELS: Record<Status, { label: string; dotClass: string }> = {
-    connecting: { label: 'Connecting…', dotClass: 'bg-amber-500 dark:bg-amber-400' },
-    connected: { label: 'Connected', dotClass: 'bg-green-600 dark:bg-green-400' },
-    disconnected: { label: 'Reconnecting…', dotClass: 'bg-red-600 dark:bg-red-400' },
-    error: { label: 'Connection error', dotClass: 'bg-red-600 dark:bg-red-400' },
+    connecting: {label: 'Connecting…', dotClass: 'bg-amber-500 dark:bg-amber-400'},
+    connected: {label: 'Connected', dotClass: 'bg-green-600 dark:bg-green-400'},
+    disconnected: {label: 'Reconnecting…', dotClass: 'bg-red-600 dark:bg-red-400'},
+    error: {label: 'Connection error', dotClass: 'bg-red-600 dark:bg-red-400'},
 };
 
 export function ChatPanelView({
@@ -46,17 +47,18 @@ export function ChatPanelView({
                                   enableReactions = true,
                                   enableReply = true,
                                   enableAvatars = true,
+                                  enableDivider = true,
                               }: ChatPanelViewProps) {
-    const { draft, displayValue, syncFromDisplay, syncFromEncoded, reset } = useChatInput();
+    const {draft, displayValue, syncFromDisplay, syncFromEncoded, reset} = useChatInput();
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const { suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection } =
+    const {suggestions, isOpen, activeIndex, handleInputChange, handleKeyDown: acHandleKeyDown, confirmSelection} =
         useCardAutocomplete({
             onComplete: (newEncoded, newEncodedCursor) => {
-                const { newDisplayCursor } = syncFromEncoded(newEncoded, newEncodedCursor);
+                const {newDisplayCursor} = syncFromEncoded(newEncoded, newEncodedCursor);
                 requestAnimationFrame(() => {
                     if (inputRef.current) {
                         inputRef.current.focus();
@@ -69,7 +71,7 @@ export function ChatPanelView({
     const connected = status === 'connected';
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        bottomRef.current?.scrollIntoView({behavior: 'smooth'});
     }, [messages]);
 
     const handleSend = () => {
@@ -82,7 +84,7 @@ export function ChatPanelView({
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const selectionStart = inputRef.current?.selectionStart ?? displayValue.length;
-        const { encodedCursor } = syncFromDisplay(displayValue, selectionStart);
+        const {encodedCursor} = syncFromDisplay(displayValue, selectionStart);
 
         const consumed = acHandleKeyDown(e, draft, encodedCursor);
         if (consumed) return;
@@ -95,7 +97,7 @@ export function ChatPanelView({
     };
 
     const handleJumpTo = (id: string) => {
-        messageRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        messageRefs.current.get(id)?.scrollIntoView({behavior: 'smooth', block: 'center'});
     };
 
     const statusInfo = STATUS_LABELS[status];
@@ -117,7 +119,7 @@ export function ChatPanelView({
             <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex-1 min-h-0 overflow-y-auto py-2 px-3">
                     {messages.length === 0 && (
-                        <EmptyState icon={MessageSquare} title="No messages yet. Say hello!" />
+                        <EmptyState icon={MessageSquare} title="No messages yet. Say hello!"/>
                     )}
 
                     {groups.map((group, i) => (
@@ -130,7 +132,7 @@ export function ChatPanelView({
                                 }
                             }}
                         >
-                            {group.dividerTimestamp && <TimestampDivider label={group.dividerTimestamp} />}
+                            {group.dividerTimestamp && enableDivider && <TimestampDivider label={group.dividerTimestamp}/>}
                             <MessageGroupView
                                 group={group}
                                 showLine={i < groups.length - 1 && !groups[i + 1].dividerTimestamp}
@@ -142,11 +144,12 @@ export function ChatPanelView({
                                 enableReactions={enableReactions}
                                 enableReply={enableReply}
                                 enableAvatars={enableAvatars}
+                                enableDivider={true}
                             />
                         </div>
                     ))}
 
-                    <div ref={bottomRef} />
+                    <div ref={bottomRef}/>
                 </div>
 
                 {replyingTo && (
@@ -166,7 +169,7 @@ export function ChatPanelView({
                             activeIndex={activeIndex}
                             onSelect={card => {
                                 const selectionStart = inputRef.current?.selectionStart ?? displayValue.length;
-                                const { encodedCursor } = syncFromDisplay(displayValue, selectionStart);
+                                const {encodedCursor} = syncFromDisplay(displayValue, selectionStart);
                                 confirmSelection(card, draft, encodedCursor);
                             }}
                         />
@@ -177,7 +180,7 @@ export function ChatPanelView({
                             onChange={e => {
                                 const val = e.target.value;
                                 const selectionStart = e.target.selectionStart ?? 0;
-                                const { newEncoded, encodedCursor } = syncFromDisplay(val, selectionStart);
+                                const {newEncoded, encodedCursor} = syncFromDisplay(val, selectionStart);
                                 void handleInputChange(newEncoded, encodedCursor);
                             }}
                             onKeyDown={handleKeyDown}

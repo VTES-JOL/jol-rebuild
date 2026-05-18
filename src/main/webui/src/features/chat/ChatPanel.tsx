@@ -11,6 +11,7 @@ type BaseChatPanelProps = {
     enableReactions?: boolean;
     enableReply?: boolean;
     enableAvatars?: boolean;
+    enableDivider?: boolean;
 };
 
 type LiveChatPanelProps = BaseChatPanelProps & {
@@ -34,6 +35,7 @@ function LiveChatPanel({
                            enableReactions = true,
                            enableReply = true,
                            enableAvatars = true,
+                           enableDivider = true,
                        }: LiveChatPanelProps) {
     const { messages, status, send, react } = useChat({
         url,
@@ -52,6 +54,7 @@ function LiveChatPanel({
             enableReactions={enableReactions}
             enableReply={enableReply}
             enableAvatars={enableAvatars}
+            enableDivider={enableDivider}
         />
     );
 }
@@ -67,6 +70,7 @@ function ManualChatPanel({
                              enableReactions = true,
                              enableReply = true,
                              enableAvatars = true,
+                             enableDivider = true,
                          }: ManualChatPanelProps) {
     return (
         <ChatPanelView
@@ -80,6 +84,7 @@ function ManualChatPanel({
             enableReactions={enableReactions}
             enableReply={enableReply}
             enableAvatars={enableAvatars}
+            enableDivider={enableDivider}
         />
     );
 }

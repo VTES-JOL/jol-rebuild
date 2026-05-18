@@ -31,7 +31,7 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
     const allRegions = useMemo<FieldRegionConfig[]>(() => {
         const regions: FieldRegionConfig[] = [];
         if (ready) regions.push({
-            regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 4, minRows: 2,
+            regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 5, minRows: 2,
             onCardContextMenu: makeFieldContextMenuHandler(player.name, 'READY', readyStacks, onCardContextMenu),
             ...fieldRegionCbs(player, ready, gameId, onCommand),
         });
