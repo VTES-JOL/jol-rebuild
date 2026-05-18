@@ -1,10 +1,9 @@
 import {useMemo} from 'react';
-import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
-import type {CompactRegionConfig, FieldRegionConfig} from './FieldRegion.tsx';
+import type {CardData, PlayerState, RegionType} from './types.ts';
+import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
-import {RegionBadge} from './gameUtils.tsx';
+import {createCompactRegionConfigs, fieldRegionCbs, makeFieldContextMenuHandler, RegionBadge} from './gameUtils.tsx';
 import type {CardRef, GameCommand} from './gameCommands.ts';
-import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
 type PlayerBoardProps = {
@@ -29,30 +28,6 @@ export function BleedConnector() {
     );
 }
 
-function fieldRegionCbs(
-    player: PlayerState,
-    region: RegionState,
-    gameId: string | undefined,
-    onCommand: ((cmd: GameCommand) => void) | undefined,
-) {
-    if (!gameId || !onCommand) return {};
-    return {
-        onReorder: (from: number, to: number) => {
-            const ref = cardRef(player.name, region.type, from);
-            onCommand(moveCard(gameId, ref, player.name, region.type, to));
-        },
-        onCardMove: (fromStack: number, fromCard: number, toStack: number) => {
-            const ref = cardRef(player.name, region.type, fromStack, fromCard === 0 ? -1 : fromCard - 1);
-            const targetRef = cardRef(player.name, region.type, toStack);
-            onCommand(attachCard(gameId, ref, targetRef));
-        },
-        onCardToNewStack: (fromStack: number, fromCard: number) => {
-            const ref = cardRef(player.name, region.type, fromStack, fromCard === 0 ? -1 : fromCard - 1);
-            onCommand(moveCard(gameId, ref, player.name, region.type));
-        },
-    };
-}
-
 export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, onCardClick, onCardContextMenu}: PlayerBoardProps) {
     const {
         ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap, rfg,
@@ -67,25 +42,25 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
         if (ready) regions.push({
             regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 5,
             onCardClick: (si, ci) => onCardClick?.('READY', si, ci),
-            onCardContextMenu: (si, ci, x, y) => { const c = readyStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'READY', si, ci === 0 ? -1 : ci - 1), x, y); },
+            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'READY', readyStacks, onCardContextMenu),
             ...fieldRegionCbs(player, ready, gameId, onCommand),
         });
         if (torpor && torpor.count > 0) regions.push({
             regionKey: 'TORPOR', name: 'Torpor', stacks: torporStacks, columns: 4,
             onCardClick: (si, ci) => onCardClick?.('TORPOR', si, ci),
-            onCardContextMenu: (si, ci, x, y) => { const c = torporStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'TORPOR', si, ci === 0 ? -1 : ci - 1), x, y); },
+            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'TORPOR', torporStacks, onCardContextMenu),
             ...fieldRegionCbs(player, torpor, gameId, onCommand),
         });
         if (research && research.count > 0) regions.push({
             regionKey: 'RESEARCH', name: 'Research', stacks: researchStacks, columns: 4, narrowGap: true,
             onCardClick: (si, ci) => onCardClick?.('RESEARCH', si, ci),
-            onCardContextMenu: (si, ci, x, y) => { const c = researchStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'RESEARCH', si, ci === 0 ? -1 : ci - 1), x, y); },
+            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'RESEARCH', researchStacks, onCardContextMenu),
             ...fieldRegionCbs(player, research, gameId, onCommand),
         });
         if (uncontrolled) regions.push({
             regionKey: 'UNCONTROLLED', name: 'Uncontrolled', stacks: uncontrolledStacks, columns: 4, narrowGap: true,
             onCardClick: (si, ci) => onCardClick?.('UNCONTROLLED', si, ci),
-            onCardContextMenu: (si, ci, x, y) => { const c = uncontrolledStacks[si]?.[ci]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'UNCONTROLLED', si, ci === 0 ? -1 : ci - 1), x, y); },
+            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'UNCONTROLLED', uncontrolledStacks, onCardContextMenu),
             ...fieldRegionCbs(player, uncontrolled, gameId, onCommand),
         });
         return regions;
@@ -93,30 +68,12 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
         readyStacks, torporStacks, researchStacks, uncontrolledStacks,
         gameId, onCommand, onCardClick, onCardContextMenu, player]);
 
-    const allCompactRegions = useMemo<CompactRegionConfig[]>(() => {
-        const crs: CompactRegionConfig[] = [];
-        if (hand) crs.push({
-            regionKey: 'HAND', name: 'Hand', stacks: handStacks,
-            onClick: () => onCardClick?.('HAND', 0, 0),
-            onContextMenu: (x, y) => { const c = handStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'HAND', 0, -1), x, y); },
-        });
-        if (library) crs.push({
-            regionKey: 'LIBRARY', name: 'Library', stacks: libraryStacks,
-            onClick: () => onCardClick?.('LIBRARY', 0, 0),
-            onContextMenu: (x, y) => { const c = libraryStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'LIBRARY', 0, -1), x, y); },
-        });
-        if (crypt) crs.push({
-            regionKey: 'CRYPT', name: 'Crypt', stacks: cryptStacks,
-            onClick: () => onCardClick?.('CRYPT', 0, 0),
-            onContextMenu: (x, y) => { const c = cryptStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'CRYPT', 0, -1), x, y); },
-        });
-        if (ashHeap) crs.push({
-            regionKey: 'ASH_HEAP', name: 'Ash Heap', stacks: ashHeapStacks,
-            onClick: () => onCardClick?.('ASH_HEAP', 0, 0),
-            onContextMenu: (x, y) => { const c = ashHeapStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(player.name, 'ASH_HEAP', 0, -1), x, y); },
-        });
-        return crs;
-    }, [hand, library, crypt, ashHeap, handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+    const allCompactRegions = useMemo(() => createCompactRegionConfigs({
+        playerName: player.name,
+        hand, library, crypt, ashHeap,
+        handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+        onCardContextMenu, onCardClick,
+    }), [hand, library, crypt, ashHeap, handStacks, libraryStacks, cryptStacks, ashHeapStacks,
         onCardClick, onCardContextMenu, player.name]);
 
     return (

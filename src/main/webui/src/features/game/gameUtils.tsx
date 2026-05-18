@@ -1,4 +1,84 @@
-import type {CardData, RegionState} from './types.ts';
+import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
+import type {GameCommand, CardRef} from './gameCommands.ts';
+import {attachCard, cardRef, moveCard} from './gameCommands.ts';
+import type {CompactRegionConfig} from './FieldRegion.tsx';
+
+export function fieldRegionCbs(
+    player: PlayerState,
+    region: RegionState,
+    gameId: string | undefined,
+    onCommand: ((cmd: GameCommand) => void) | undefined,
+) {
+    if (!gameId || !onCommand) return {};
+    return {
+        onReorder: (from: number, to: number) => {
+            const ref = cardRef(player.name, region.type, from);
+            onCommand(moveCard(gameId, ref, player.name, region.type, to));
+        },
+        onCardMove: (fromStack: number, fromCard: number, toStack: number) => {
+            const ref = cardRef(player.name, region.type, fromStack, fromCard === 0 ? -1 : fromCard - 1);
+            const targetRef = cardRef(player.name, region.type, toStack);
+            onCommand(attachCard(gameId, ref, targetRef));
+        },
+        onCardToNewStack: (fromStack: number, fromCard: number) => {
+            const ref = cardRef(player.name, region.type, fromStack, fromCard === 0 ? -1 : fromCard - 1);
+            onCommand(moveCard(gameId, ref, player.name, region.type));
+        },
+    };
+}
+
+export function makeFieldContextMenuHandler(
+    playerName: string,
+    regionType: RegionType,
+    stacks: CardData[][],
+    onCardContextMenu: ((card: CardData, ref: CardRef, x: number, y: number) => void) | undefined,
+) {
+    return (si: number, ci: number, x: number, y: number) => {
+        const c = stacks[si]?.[ci];
+        if (c) onCardContextMenu?.(c, cardRef(playerName, regionType, si, ci === 0 ? -1 : ci - 1), x, y);
+    };
+}
+
+export function createCompactRegionConfigs({
+    playerName, hand, library, crypt, ashHeap,
+    handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+    onCardContextMenu, onCardClick,
+}: {
+    playerName: string;
+    hand: RegionState | undefined;
+    library: RegionState | undefined;
+    crypt: RegionState | undefined;
+    ashHeap: RegionState | undefined;
+    handStacks: CardData[][];
+    libraryStacks: CardData[][];
+    cryptStacks: CardData[][];
+    ashHeapStacks: CardData[][];
+    onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
+    onCardClick?: (regionType: RegionType, stackIndex: number, cardIndex: number) => void;
+}): CompactRegionConfig[] {
+    const crs: CompactRegionConfig[] = [];
+    if (hand) crs.push({
+        regionKey: 'HAND', name: 'Hand', stacks: handStacks,
+        onClick: onCardClick ? () => onCardClick('HAND', 0, 0) : undefined,
+        onContextMenu: (x, y) => { const c = handStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(playerName, 'HAND', 0, -1), x, y); },
+    });
+    if (library) crs.push({
+        regionKey: 'LIBRARY', name: 'Library', stacks: libraryStacks,
+        onClick: onCardClick ? () => onCardClick('LIBRARY', 0, 0) : undefined,
+        onContextMenu: (x, y) => { const c = libraryStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(playerName, 'LIBRARY', 0, -1), x, y); },
+    });
+    if (crypt) crs.push({
+        regionKey: 'CRYPT', name: 'Crypt', stacks: cryptStacks,
+        onClick: onCardClick ? () => onCardClick('CRYPT', 0, 0) : undefined,
+        onContextMenu: (x, y) => { const c = cryptStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(playerName, 'CRYPT', 0, -1), x, y); },
+    });
+    if (ashHeap?.visible) crs.push({
+        regionKey: 'ASH_HEAP', name: 'Ash Heap', stacks: ashHeapStacks,
+        onClick: onCardClick ? () => onCardClick('ASH_HEAP', 0, 0) : undefined,
+        onContextMenu: (x, y) => { const c = ashHeapStacks[0]?.[0]; if (c) onCardContextMenu?.(c, cardRef(playerName, 'ASH_HEAP', 0, -1), x, y); },
+    });
+    return crs;
+}
 
 export function regionToStacks(region: RegionState, cards: Record<string, CardData>, forceFaceDown = false): CardData[][] {
     const hidden = forceFaceDown || !region.visible;

@@ -4,8 +4,8 @@ import {arrayMove, SortableContext, useSortable, verticalListSortingStrategy} fr
 import {CSS} from '@dnd-kit/utilities';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
-import type {CardRef} from './gameCommands.ts';
-import {cardRef} from './gameCommands.ts';
+import type {CardRef, GameCommand} from './gameCommands.ts';
+import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import {DisciplineIcon} from '@/shared/components/DisciplineIcon.tsx';
 import {ClanIcon} from '@/shared/components/ClanIcon.tsx';
 
@@ -13,9 +13,8 @@ type TextBoardProps = {
     orderedPlayers: PlayerState[];
     cards: Record<string, CardData>;
     currentUser: string;
-    onCardReorder?: (playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) => void;
-    onCardMove?: (playerName: string, fromRegion: RegionType, fromIndex: number, toRegion: RegionType, childIdx?: number) => void;
-    onCardAttach?: (playerName: string, fromRegion: RegionType, fromTopIdx: number, fromChildIdx: number | null, toRegion: RegionType, toTopIdx: number) => void;
+    gameId?: string;
+    onCommand?: (cmd: GameCommand) => void;
     onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
 };
 
@@ -243,14 +242,13 @@ function RegionSection({
 // ── PlayerColumn ──────────────────────────────────────────────────────────────
 
 function PlayerColumn({
-    player, cards, isCurrentUser, onCardReorder, onCardMove, onCardAttach, onCardContextMenu,
+    player, cards, isCurrentUser, gameId, onCommand, onCardContextMenu,
 }: {
     player: PlayerState;
     cards: Record<string, CardData>;
     isCurrentUser: boolean;
-    onCardReorder?: TextBoardProps['onCardReorder'];
-    onCardMove?: TextBoardProps['onCardMove'];
-    onCardAttach?: TextBoardProps['onCardAttach'];
+    gameId?: string;
+    onCommand?: (cmd: GameCommand) => void;
     onCardContextMenu?: TextBoardProps['onCardContextMenu'];
 }) {
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
@@ -377,7 +375,7 @@ function PlayerColumn({
         setDragOverRegion(null);
         resetSortedIds();
 
-        if (!over || !fromRegionType || !activeParsed) return;
+        if (!over || !fromRegionType || !activeParsed || !gameId || !onCommand) return;
         const overId = String(over.id);
 
         const toRegionType: RegionType | null = overId.startsWith('region-')
@@ -393,11 +391,16 @@ function PlayerColumn({
         const activeIsLib = activeCard && !(activeCard.crypt || activeCard.minion);
         const overIsMinion = !!(overCard?.crypt || overCard?.minion);
 
+        const makeRef = (regionType: RegionType, topIdx: number, childIdx?: number) =>
+            childIdx !== undefined
+                ? cardRef(player.name, regionType, topIdx, childIdx)
+                : cardRef(player.name, regionType, topIdx);
+
         if (fromRegionType !== toRegionType) {
             if (overParsed && overParsed.childIdx === undefined && overIsMinion) {
-                onCardAttach?.(player.name, fromRegionType, activeParsed.topIdx, activeParsed.childIdx ?? null, toRegionType, overParsed.topIdx);
+                onCommand(attachCard(gameId, makeRef(fromRegionType, activeParsed.topIdx, activeParsed.childIdx), cardRef(player.name, toRegionType, overParsed.topIdx)));
             } else {
-                onCardMove?.(player.name, fromRegionType, activeParsed.topIdx, toRegionType, activeParsed.childIdx);
+                onCommand(moveCard(gameId, makeRef(fromRegionType, activeParsed.topIdx, activeParsed.childIdx), player.name, toRegionType));
             }
             return;
         }
@@ -405,16 +408,16 @@ function PlayerColumn({
         // Same region
         if (activeIsChild) {
             if (overParsed && overParsed.childIdx === undefined && overIsMinion && overParsed.topIdx !== activeParsed.topIdx) {
-                onCardAttach?.(player.name, fromRegionType, activeParsed.topIdx, activeParsed.childIdx!, toRegionType, overParsed.topIdx);
+                onCommand(attachCard(gameId, makeRef(fromRegionType, activeParsed.topIdx, activeParsed.childIdx!), cardRef(player.name, toRegionType, overParsed.topIdx)));
             } else {
                 // Detach: become top-level in same region
-                onCardMove?.(player.name, fromRegionType, activeParsed.topIdx, fromRegionType, activeParsed.childIdx);
+                onCommand(moveCard(gameId, makeRef(fromRegionType, activeParsed.topIdx, activeParsed.childIdx), player.name, fromRegionType));
             }
             return;
         }
 
         if (activeIsLib && overParsed && overParsed.childIdx === undefined && overIsMinion) {
-            onCardAttach?.(player.name, fromRegionType, activeParsed.topIdx, null, toRegionType, overParsed.topIdx);
+            onCommand(attachCard(gameId, cardRef(player.name, fromRegionType, activeParsed.topIdx), cardRef(player.name, toRegionType, overParsed.topIdx)));
             return;
         }
 
@@ -423,8 +426,8 @@ function PlayerColumn({
         const toIndex = liveOrder.indexOf(activeId);
         const fromIndex = activeParsed.topIdx;
         if (toIndex === -1 || fromIndex === toIndex) return;
-        onCardReorder?.(player.name, fromRegionType, fromIndex, toIndex);
-    }, [sortedIds, resetSortedIds, player.name, resolveCard, onCardReorder, onCardMove, onCardAttach]);
+        onCommand(moveCard(gameId, cardRef(player.name, fromRegionType, fromIndex), player.name, fromRegionType, toIndex));
+    }, [sortedIds, resetSortedIds, player.name, resolveCard, gameId, onCommand]);
 
     const handleDragCancel = useCallback(() => {
         setActivePosId(null);
@@ -499,7 +502,7 @@ function PlayerColumn({
 
 // ── TextBoard ─────────────────────────────────────────────────────────────────
 
-export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, onCardMove, onCardAttach, onCardContextMenu}: TextBoardProps) {
+export function TextBoard({orderedPlayers, cards, currentUser, gameId, onCommand, onCardContextMenu}: TextBoardProps) {
     return (
         <div className="flex gap-2 h-full min-h-0 overflow-x-auto">
             {orderedPlayers.map(player => (
@@ -508,9 +511,8 @@ export function TextBoard({orderedPlayers, cards, currentUser, onCardReorder, on
                     player={player}
                     cards={cards}
                     isCurrentUser={player.name === currentUser}
-                    onCardReorder={onCardReorder}
-                    onCardMove={onCardMove}
-                    onCardAttach={onCardAttach}
+                    gameId={gameId}
+                    onCommand={onCommand}
                     onCardContextMenu={onCardContextMenu}
                 />
             ))}

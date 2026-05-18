@@ -8,9 +8,8 @@ import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
-import type {CardData, PlayerState, RegionType} from './types.ts';
+import type {CardData, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
-import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import {regionToStacks} from './gameUtils.tsx';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 
@@ -60,25 +59,6 @@ export default function GamePage() {
         }
         prevCardIdsRef.current = next;
     }, [gameState?.cards]);
-
-    const handleCardMove = useCallback((playerName: string, fromRegion: RegionType, fromIndex: number, toRegion: RegionType, childIdx?: number) => {
-        const ref = childIdx !== undefined
-            ? cardRef(playerName, fromRegion, fromIndex, childIdx)
-            : cardRef(playerName, fromRegion, fromIndex);
-        sendCommand(moveCard(gameId, ref, playerName, toRegion));
-    }, [gameId, sendCommand]);
-
-    const handleCardReorder = useCallback((playerName: string, regionType: RegionType, fromIndex: number, toIndex: number) => {
-        sendCommand(moveCard(gameId, cardRef(playerName, regionType, fromIndex), playerName, regionType, toIndex));
-    }, [gameId, sendCommand]);
-
-    const handleCardAttach = useCallback((playerName: string, fromRegion: RegionType, fromTopIdx: number, fromChildIdx: number | null, toRegion: RegionType, toTopIdx: number) => {
-        const ref = fromChildIdx !== null
-            ? cardRef(playerName, fromRegion, fromTopIdx, fromChildIdx)
-            : cardRef(playerName, fromRegion, fromTopIdx);
-        const targetRef = cardRef(playerName, toRegion, toTopIdx);
-        sendCommand(attachCard(gameId, ref, targetRef));
-    }, [gameId, sendCommand]);
 
     const handleCommand = useCallback((cmd: GameCommand) => {
         clearCommandError();
@@ -206,9 +186,8 @@ export default function GamePage() {
                                 orderedPlayers={orderedPlayers}
                                 cards={gameState.cards}
                                 currentUser={user?.username ?? ''}
-                                onCardMove={handleCardMove}
-                                onCardReorder={handleCardReorder}
-                                onCardAttach={handleCardAttach}
+                                gameId={gameId}
+                                onCommand={handleCommand}
                                 onCardContextMenu={handleCardContextMenu}
                             />
                         </div>
