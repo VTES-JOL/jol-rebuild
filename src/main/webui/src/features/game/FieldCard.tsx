@@ -7,7 +7,7 @@ const CRYPT_BACK = 'https://static.deckserver.net/images/crypt.jpg';
 const LIBRARY_BACK = 'https://static.deckserver.net/images/library.jpg';
 
 export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceDown = false, locked = false, suppressTransition = false}: FieldCardProps) {
-    const isCrypt = type === 'VAMPIRE' || type === 'IMBUED' || crypt === true;
+    const isCrypt = type === 'Vampire' || type === 'Imbued' || crypt === true;
     const src = (faceDown || !cardId)
         ? (isCrypt ? CRYPT_BACK : LIBRARY_BACK)
         : `https://static.deckserver.net/images/${cardId}`;

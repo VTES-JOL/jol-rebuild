@@ -52,6 +52,7 @@ public class CardData {
     private boolean unique;
 
     private List<String> disciplines = new ArrayList<>();
+    private List<CardType> types = new ArrayList<>();
 
     public CardData() {
         this.id = UUID.randomUUID().toString();
@@ -302,5 +303,13 @@ public class CardData {
 
     public void setDisciplines(List<String> disciplines) {
         this.disciplines = disciplines;
+    }
+
+    public List<CardType> getTypes() {
+        return types;
+    }
+
+    public void setTypes(List<CardType> types) {
+        this.types = types;
     }
 }

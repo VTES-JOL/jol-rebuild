@@ -10,6 +10,8 @@ import {
     uncontestCard, unlockCard,
 } from './gameCommands.ts';
 import Input from '@/shared/components/Input.tsx';
+import {ClanIcon} from '@/shared/components/ClanIcon.tsx';
+import {TypeIcon} from '@/shared/components/TypeIcon.tsx';
 
 function CounterBtn({children, onClick, disabled}: {
     children: ReactNode;
@@ -77,7 +79,7 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const region = cardRef.regionType;
     const isSelf = cardRef.playerName === currentUser;
     const inPlay = region === 'READY' || region === 'TORPOR';
-    const isCryptCard = card.type === 'VAMPIRE' || card.type === 'IMBUED' || card.crypt === true;
+    const isCryptCard = card.type === 'Vampire' || card.type === 'Imbued' || card.crypt === true;
     const isMinion = card.minion === true || isCryptCard;
     const inPlayOrUncontrolled = inPlay || region === 'UNCONTROLLED';
     const showLockUnlock = inPlay;
@@ -93,9 +95,6 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const hasZoneSection = showMoveToTorpor || showRescue || showDiscard || showBurn;
 
     const cardLabel = card.faceDown && !card.name ? '(hidden)' : (card.name ?? card.cardId ?? '—');
-    const typeName = card.type
-        ? card.type.charAt(0) + card.type.slice(1).toLowerCase().replace('_', ' ')
-        : null;
 
     return createPortal(
         <div
@@ -107,9 +106,10 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
             {/* Header */}
             <div className="px-3 py-1.5 flex items-center gap-2 border-b border-line/40 mb-1">
                 <span className="text-sm font-medium text-ink truncate flex-1">{cardLabel}</span>
-                {typeName && (
-                    <span className="text-[10px] bg-arcane/15 text-arcane rounded px-1.5 py-0.5 shrink-0">{typeName}</span>
-                )}
+                {isCryptCard && card.clan && <ClanIcon clan={card.clan} size={18} />}
+                {!isCryptCard && (card.types ?? (card.type ? [card.type] : [])).map(t => (
+                    <TypeIcon key={t} type={t} size={18} />
+                ))}
             </div>
 
             {/* Lock / Unlock */}

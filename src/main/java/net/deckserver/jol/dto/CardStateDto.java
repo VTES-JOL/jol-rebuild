@@ -18,6 +18,7 @@ public class CardStateDto {
     public String cardId;
     public String name;
     public CardType type;
+    public List<CardType> types;
     public boolean locked;
     public boolean contested;
     public int counters;

@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
 import {useState} from 'react';
-import {FieldRegion} from '../features/game/FieldRegion.tsx';
+import {CompactRegion, FieldRegion} from '../features/game/FieldRegion.tsx';
 import type {CardData} from '../features/game/CardStack.tsx';
 
 const meta = {
@@ -61,12 +61,13 @@ export const Grid5Columns: Story = {
 };
 
 export const CompactGrid: Story = {
-    args: {
-        name: 'Library',
-        stacks: [stack1, stack2, stack3, stack4],
-        columns: 4,
-        compact: true,
-    },
+    render: () => (
+        <CompactRegion
+            name="Library"
+            stacks={[stack1, stack2, stack3, stack4]}
+        />
+    ),
+    args: {name: 'Library', stacks: [], columns: 1},
 };
 
 export const WithDragDrop: Story = {

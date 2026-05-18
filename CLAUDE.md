@@ -13,6 +13,7 @@ Below is the detailed documentation for the logical constraints each domain mode
 - [Tournament lobby](docs/logic/tournament-lobby.md)
 - [Game State](docs/logic/game-state.md)
 - [Board Layouts](docs/logic/board-layouts.md)
+- [Chat System](docs/logic/chat.md)
 
 ## Commands
 

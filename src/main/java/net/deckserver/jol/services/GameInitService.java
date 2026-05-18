@@ -22,6 +22,7 @@ import org.jboss.logging.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GameInitService {
@@ -135,17 +136,17 @@ public class GameInitService {
             c.disciplines().forEach(card::addDiscipline);
             if (c.title() != null) card.setTitle(c.title());
         } else if (template instanceof LibraryCard l) {
-            card.setType(libraryCardType(l));
+            List<CardType> types = l.types().stream().map(this::toCardType).collect(Collectors.toList());
+            card.setType(types.isEmpty() ? CardType.NONE : types.getFirst());
+            card.setTypes(types);
             card.setUnique(false);
         }
 
         return card;
     }
 
-    private CardType libraryCardType(LibraryCard card) {
-        if (card.types().isEmpty()) return CardType.NONE;
-        String primary = card.types().getFirst();
-        return switch (primary) {
+    private CardType toCardType(String typeName) {
+        return switch (typeName) {
             case "Master"            -> CardType.MASTER;
             case "Action"            -> CardType.ACTION;
             case "Action Modifier"   -> CardType.MODIFIER;

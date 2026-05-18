@@ -149,6 +149,7 @@ public class GameStateProjector {
         dto.cardId = card.getCardId();
         dto.name = card.getName();
         dto.type = card.getType();
+        dto.types = card.getTypes().isEmpty() ? null : card.getTypes();
         dto.locked = card.isLocked();
         dto.contested = card.isContested();
         dto.counters = card.getCounters();

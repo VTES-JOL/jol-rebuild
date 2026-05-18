@@ -296,6 +296,79 @@ function DroppableCompactRegion({regionKey, activeDragType, isDragSource, childr
     );
 }
 
+// ── CompactRegionConfig ───────────────────────────────────────────────────────
+
+export type CompactRegionConfig = {
+    regionKey: string;
+    name: string;
+    stacks: CardData[][];
+    onClick?: () => void;
+    onContextMenu?: (x: number, y: number) => void;
+};
+
+// ── CompactRegionContent ──────────────────────────────────────────────────────
+// Pure renderer for a compact pile region. Must be inside an ancestor DndContext.
+
+function CompactRegionContent({
+    regionKey, name, stacks, onClick, onContextMenu, activeDragId, activeDragType,
+}: CompactRegionConfig & {
+    activeDragId: string | null;
+    activeDragType: 'stack' | 'card' | null;
+}) {
+    const count = stacks.reduce((sum, s) => sum + s.length, 0);
+    const topCardId = rCardId(regionKey, 0, 0);
+    const isDragSource = activeDragId !== null && activeDragId.startsWith(regionKey + '//');
+    return (
+        <DroppableCompactRegion regionKey={regionKey} activeDragType={activeDragType} isDragSource={isDragSource}>
+            <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
+                <span>{name}</span>
+                <span className="font-medium text-ink-secondary">{count}</span>
+            </legend>
+            <DraggableCompactStack
+                cards={stacks.flat()}
+                regionKey={regionKey}
+                isBeingDragged={activeDragId === topCardId}
+                onClick={onClick}
+                onContextMenu={onContextMenu}
+            />
+        </DroppableCompactRegion>
+    );
+}
+
+// ── CompactRegion ─────────────────────────────────────────────────────────────
+// Standalone compact region with its own DndContext. For isolated use (e.g. Storybook).
+
+export function CompactRegion({name, stacks, onClick, onContextMenu}: Omit<CompactRegionConfig, 'regionKey'>) {
+    const regionKey = name.replace(/\s+/g, '_').toLowerCase();
+    const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
+    const [activeDragId, setActiveDragId] = useState<string | null>(null);
+    return (
+        <DndContext
+            sensors={sensors}
+            onDragStart={e => setActiveDragId(String(e.active.id))}
+            onDragEnd={() => setActiveDragId(null)}
+            onDragCancel={() => setActiveDragId(null)}
+        >
+            <CompactRegionContent
+                regionKey={regionKey}
+                name={name}
+                stacks={stacks}
+                onClick={onClick}
+                onContextMenu={onContextMenu}
+                activeDragId={activeDragId}
+                activeDragType={activeDragId ? 'card' : null}
+            />
+            <DragOverlay dropAnimation={null}>
+                {activeDragId && stacks.flat().length > 0 && (
+                    <div style={{width: `var(--card-w, ${CARD_WIDTH}px)`}} className="opacity-80 pointer-events-none">
+                        <FieldCard {...stacks.flat()[0]} suppressTransition />
+                    </div>
+                )}
+            </DragOverlay>
+        </DndContext>
+    );
+}
+
 // ── FieldRegionContent ────────────────────────────────────────────────────────
 // Pure renderer — no DndContext. Must be inside an ancestor DndContext.
 
@@ -305,7 +378,6 @@ type FieldRegionContentProps = {
     stacks: CardData[][];
     columns: number;
     minRows?: number;
-    compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
     onCardContextMenu?: (stackIndex: number, cardIndex: number, x: number, y: number) => void;
@@ -316,7 +388,7 @@ type FieldRegionContentProps = {
 };
 
 function FieldRegionContent({
-    regionKey, name, stacks, columns, minRows = 1, compact = false, narrowGap = false,
+    regionKey, name, stacks, columns, minRows = 1, narrowGap = false,
     onCardClick, onCardContextMenu, activeDragId, activeDragType, sortedIds, suppressTransition,
 }: FieldRegionContentProps) {
     const gap = narrowGap ? GAP_NARROW : GAP_WIDE;
@@ -352,33 +424,12 @@ function FieldRegionContent({
         [effectiveCols, stacks.length, minRows],
     );
 
-    const legend = (
-        <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
-            <span>{name}</span>
-            <span className="font-medium text-ink-secondary">{count}</span>
-        </legend>
-    );
-
-    if (compact) {
-        const topCardId = rCardId(regionKey, 0, 0);
-        const isDragSource = activeDragId !== null && activeDragId.startsWith(regionKey + '//');
-        return (
-            <DroppableCompactRegion regionKey={regionKey} activeDragType={activeDragType} isDragSource={isDragSource}>
-                {legend}
-                <DraggableCompactStack
-                    cards={stacks.flat()}
-                    regionKey={regionKey}
-                    isBeingDragged={activeDragId === topCardId}
-                    onClick={() => onCardClick?.(0, 0)}
-                    onContextMenu={(x, y) => onCardContextMenu?.(0, 0, x, y)}
-                />
-            </DroppableCompactRegion>
-        );
-    }
-
     return (
         <fieldset ref={fieldsetRef} className="relative w-fit rounded-lg border border-ink-muted/25 px-3 pb-3">
-            {legend}
+            <legend className="ml-2 flex items-center gap-2 px-1 text-xs text-ink-muted">
+                <span>{name}</span>
+                <span className="font-medium text-ink-secondary">{count}</span>
+            </legend>
             <SortableContext items={sortedIds} strategy={rectSortingStrategy}>
                 <div
                     className={`grid ${narrowGap ? 'gap-x-1' : 'gap-x-8'} gap-y-2`}
@@ -421,7 +472,6 @@ type FieldRegionProps = {
     stacks: CardData[][];
     columns: number;
     minRows?: number;
-    compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
     onCardContextMenu?: (stackIndex: number, cardIndex: number, x: number, y: number) => void;
@@ -431,14 +481,13 @@ type FieldRegionProps = {
 };
 
 // ── FieldRegion ───────────────────────────────────────────────────────────────
-// Standalone component: manages its own DndContext. Use this for compact/isolated regions.
+// Standalone component: manages its own DndContext. Use for isolated grid regions.
 
 export function FieldRegion({
     name,
     stacks,
     columns,
     minRows = 1,
-    compact = false,
     narrowGap = false,
     onCardClick,
     onCardContextMenu,
@@ -541,7 +590,6 @@ export function FieldRegion({
                 stacks={stacks}
                 columns={columns}
                 minRows={minRows}
-                compact={compact}
                 narrowGap={narrowGap}
                 onCardClick={onCardClick}
                 onCardContextMenu={onCardContextMenu}
@@ -567,7 +615,6 @@ export type FieldRegionConfig = {
     stacks: CardData[][];
     columns: number;
     minRows?: number;
-    compact?: boolean;
     narrowGap?: boolean;
     onCardClick?: (stackIndex: number, cardIndex: number) => void;
     onCardContextMenu?: (stackIndex: number, cardIndex: number, x: number, y: number) => void;
@@ -578,6 +625,7 @@ export type FieldRegionConfig = {
 
 type FieldRegionDndGroupProps = {
     regions: FieldRegionConfig[];
+    compactRegions?: CompactRegionConfig[];
     /** Called when a whole stack is dragged to a different region. */
     onCrossRegionMove?: (fromKey: string, fromStackIdx: number, toKey: string) => void;
     /**
@@ -589,14 +637,14 @@ type FieldRegionDndGroupProps = {
     onCrossCardMove?: (fromKey: string, fromStackIdx: number, fromCardIdx: number, toKey: string, toStackIdx: number | null | 'top') => void;
     /**
      * Render prop — receives a `renderRegion(key)` helper that returns the
-     * FieldRegionContent for the given regionKey. Use this to place regions in
-     * custom layout positions while keeping them in the same DndContext.
+     * content for the given regionKey (grid or compact). Use this to place
+     * regions in custom layout positions while keeping them in the same DndContext.
      * When omitted, regions are rendered in a flat sequence.
      */
     children?: (renderRegion: (regionKey: string) => ReactNode) => ReactNode;
 };
 
-export function FieldRegionDndGroup({regions, onCrossRegionMove, onCrossCardMove, children}: FieldRegionDndGroupProps) {
+export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove, onCrossCardMove, children}: FieldRegionDndGroupProps) {
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
     const [suppressTransition, setSuppressTransition] = useState(false);
@@ -609,15 +657,20 @@ export function FieldRegionDndGroup({regions, onCrossRegionMove, onCrossCardMove
     }, [activeDrag, suppressTransition]);
 
     const buildSortedIds = useCallback(
-        (rs: FieldRegionConfig[]) =>
-            Object.fromEntries(rs.map(r => [r.regionKey, r.stacks.map((_, i) => rStackId(r.regionKey, i))])),
+        (rs: FieldRegionConfig[], crs: CompactRegionConfig[]) =>
+            Object.fromEntries([
+                ...rs.map(r => [r.regionKey, r.stacks.map((_, i) => rStackId(r.regionKey, i))]),
+                ...crs.map(r => [r.regionKey, r.stacks.map((_, i) => rStackId(r.regionKey, i))]),
+            ]),
         [],
     );
-    const [regionSortedIds, setRegionSortedIds] = useState<Record<string, string[]>>(() => buildSortedIds(regions));
+    const [regionSortedIds, setRegionSortedIds] = useState<Record<string, string[]>>(
+        () => buildSortedIds(regions, compactRegions ?? []),
+    );
 
     const resetSortedIds = useCallback(() => {
-        setRegionSortedIds(buildSortedIds(regions));
-    }, [regions, buildSortedIds]);
+        setRegionSortedIds(buildSortedIds(regions, compactRegions ?? []));
+    }, [regions, compactRegions, buildSortedIds]);
 
     useEffect(() => { resetSortedIds(); }, [resetSortedIds]);
 
@@ -700,30 +753,48 @@ export function FieldRegionDndGroup({regions, onCrossRegionMove, onCrossCardMove
 
     const renderRegion = useCallback((regionKey: string): ReactNode => {
         const r = regions.find(x => x.regionKey === regionKey);
-        if (!r) return null;
-        return (
-            <FieldRegionContent
-                key={r.regionKey}
-                regionKey={r.regionKey}
-                name={r.name}
-                stacks={r.stacks}
-                columns={r.columns}
-                minRows={r.minRows}
-                compact={r.compact}
-                narrowGap={r.narrowGap}
-                onCardClick={r.onCardClick}
-                onCardContextMenu={r.onCardContextMenu}
-                activeDragId={activeDragId}
-                activeDragType={activeDragType}
-                sortedIds={regionSortedIds[r.regionKey] ?? r.stacks.map((_, i) => rStackId(r.regionKey, i))}
-                suppressTransition={suppressTransition}
-            />
-        );
-    }, [regions, regionSortedIds, activeDragId, activeDragType, suppressTransition]);
+        if (r) {
+            return (
+                <FieldRegionContent
+                    key={r.regionKey}
+                    regionKey={r.regionKey}
+                    name={r.name}
+                    stacks={r.stacks}
+                    columns={r.columns}
+                    minRows={r.minRows}
+                    narrowGap={r.narrowGap}
+                    onCardClick={r.onCardClick}
+                    onCardContextMenu={r.onCardContextMenu}
+                    activeDragId={activeDragId}
+                    activeDragType={activeDragType}
+                    sortedIds={regionSortedIds[r.regionKey] ?? r.stacks.map((_, i) => rStackId(r.regionKey, i))}
+                    suppressTransition={suppressTransition}
+                />
+            );
+        }
+        const cr = compactRegions?.find(x => x.regionKey === regionKey);
+        if (cr) {
+            return (
+                <CompactRegionContent
+                    key={cr.regionKey}
+                    regionKey={cr.regionKey}
+                    name={cr.name}
+                    stacks={cr.stacks}
+                    onClick={cr.onClick}
+                    onContextMenu={cr.onContextMenu}
+                    activeDragId={activeDragId}
+                    activeDragType={activeDragType}
+                />
+            );
+        }
+        return null;
+    }, [regions, compactRegions, regionSortedIds, activeDragId, activeDragType, suppressTransition]);
 
     function renderOverlay() {
         if (!activeDrag) return null;
-        const region = regions.find(r => r.regionKey === activeDrag.regionKey);
+        const region =
+            regions.find(r => r.regionKey === activeDrag.regionKey) ??
+            compactRegions?.find(r => r.regionKey === activeDrag.regionKey);
         if (!region) return null;
         if (activeDrag.type === 'stack') {
             return (
@@ -748,7 +819,10 @@ export function FieldRegionDndGroup({regions, onCrossRegionMove, onCrossCardMove
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            {children ? children(renderRegion) : regions.map(r => renderRegion(r.regionKey))}
+            {children ? children(renderRegion) : [
+                ...regions.map(r => renderRegion(r.regionKey)),
+                ...(compactRegions ?? []).map(r => renderRegion(r.regionKey)),
+            ]}
             <DragOverlay dropAnimation={null}>
                 {renderOverlay()}
             </DragOverlay>

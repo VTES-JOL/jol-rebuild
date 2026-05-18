@@ -10,3 +10,4 @@ This section documents the domain rules and constraints JOL enforces for each ar
 | [Tournament Lobby](./tournament-lobby.md) | Tournament setup, registration, seating, and activation |
 | [Game State](./game-state.md) | In-play game state: regions, cards, turns, phases, and commands |
 | [Board Layouts](./board-layouts.md) | Strip, Table, and Text board layouts: region visibility rules, layout structure, and interactions |
+| [Chat System](./chat.md) | Lobby and in-game chat: WebSocket protocols, threading, reactions, command log integration |

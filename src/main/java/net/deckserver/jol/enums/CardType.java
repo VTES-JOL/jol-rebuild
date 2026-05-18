@@ -1,5 +1,7 @@
 package net.deckserver.jol.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.EnumSet;
 
 /**
@@ -28,9 +30,15 @@ public enum CardType {
         this.label = label;
     }
 
-    public static CardType of(String label) {
+    @JsonValue
+    public String getLabel() {
+        return label;
+    }
+
+    @JsonCreator
+    public static CardType of(String value) {
         for (CardType type : EnumSet.allOf(CardType.class)) {
-            if (type.label.equalsIgnoreCase(label)) {
+            if (type.label.equalsIgnoreCase(value) || type.name().equalsIgnoreCase(value)) {
                 return type;
             }
         }

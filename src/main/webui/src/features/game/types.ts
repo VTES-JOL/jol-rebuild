@@ -3,10 +3,10 @@ export type RegionType =
     | 'LIBRARY' | 'CRYPT' | 'TORPOR' | 'RESEARCH' | 'REMOVED_FROM_GAME';
 
 export type CardType =
-    | 'VAMPIRE' | 'IMBUED'
-    | 'MASTER' | 'ACTION' | 'MODIFIER' | 'REACTION' | 'COMBAT'
-    | 'ALLY' | 'RETAINER' | 'POLITICAL' | 'EQUIPMENT' | 'EVENT'
-    | 'LOCATION' | 'NONE';
+    | 'Vampire' | 'Imbued'
+    | 'Master' | 'Action' | 'Action Modifier' | 'Reaction' | 'Combat'
+    | 'Ally' | 'Retainer' | 'Political Action' | 'Equipment' | 'Event'
+    | 'Location' | '';
 
 export type CardData = {
     id: string;
@@ -16,6 +16,7 @@ export type CardData = {
     cardId?: string;
     name?: string;
     type?: CardType;
+    types?: CardType[];
     contested?: boolean;
     counters?: number;
     votes?: number;
