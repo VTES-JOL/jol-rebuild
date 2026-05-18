@@ -197,7 +197,7 @@ export default function GamePage() {
                             {gameState ? (
                                 <div
                                     className="flex flex-col gap-1.5"
-                                    style={{'--card-w': 'clamp(60px, 5.5vw, 72px)'} as CSSProperties}
+                                    style={{'--card-w': 'clamp(90px, 8.25vw, 108px)'} as CSSProperties}
                                 >
                                     {orderedPlayers.map(player => (
                                         <PlayerBoard

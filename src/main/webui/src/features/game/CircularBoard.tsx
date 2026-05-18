@@ -29,7 +29,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
     return (
         <div
             className="flex flex-col gap-3 h-full"
-            style={{'--card-w': 'clamp(44px, 3.5vw, 56px)'} as CSSProperties}
+            style={{'--card-w': 'clamp(66px, 5.25vw, 84px)'} as CSSProperties}
         >
             {/* Top bar: game info left, navigation right */}
             <div className="flex items-center justify-between shrink-0 px-1">

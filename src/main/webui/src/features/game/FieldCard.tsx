@@ -30,26 +30,45 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
             )}
 
             {counters != null && counters > 0 && (
-                <div className="absolute top-[20%] left-[5%] right-[5%] flex flex-wrap gap-[3%] pointer-events-none">
-                    {counters <= 5
-                        ? Array.from({length: counters}, (_, i) => (
-                            <div key={i} className="rounded-full border border-white/70"
-                                 style={{
-                                     width: 'clamp(9px, calc(var(--card-w, 96px) * 0.14), 20px)',
-                                     height: 'clamp(9px, calc(var(--card-w, 96px) * 0.14), 20px)',
-                                     background: 'radial-gradient(circle at 35% 35%, #fca5a5, #b91c1c)',
-                                     boxShadow: '0 1px 4px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.3)',
-                                 }} />
-                        ))
-                        : (
-                            <div className="flex items-center bg-red-600/90 rounded-full border border-white/30 shadow-md"
-                                 style={{padding: 'clamp(1px, calc(var(--card-w, 96px) * 0.02), 3px) clamp(3px, calc(var(--card-w, 96px) * 0.05), 6px)'}}>
+                counters <= 20
+                    ? (
+                        <div
+                            className="absolute pointer-events-none overflow-hidden"
+                            style={{
+                                top: '15%', left: '20%', right: '10%', bottom: '20%',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '4%',
+                                alignContent: 'start',
+                            }}
+                        >
+                            {Array.from({length: counters}, (_, i) => (
+                                <div key={i} className="rounded-full border border-white/70"
+                                     style={{
+                                         aspectRatio: '1',
+                                         background: 'radial-gradient(circle at 35% 35%, #fca5a5, #b91c1c)',
+                                         boxShadow: '0 1px 4px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.3)',
+                                     }} />
+                            ))}
+                        </div>
+                    )
+                    : (
+                        <div
+                            className="absolute pointer-events-none flex items-center justify-center"
+                            style={{top: '15%', left: '20%', right: '10%', bottom: '20%'}}
+                        >
+                            <div
+                                className="rounded-full bg-red-600/90 border border-white/30 shadow-lg flex items-center justify-center"
+                                style={{
+                                    width: 'calc(var(--card-w, 96px) * 0.38)',
+                                    height: 'calc(var(--card-w, 96px) * 0.38)',
+                                }}
+                            >
                                 <span className="text-white font-bold leading-none drop-shadow"
-                                      style={{fontSize: 'clamp(8px, calc(var(--card-w, 96px) * 0.11), 12px)'}}>{counters}</span>
+                                      style={{fontSize: 'calc(var(--card-w, 96px) * 0.16)'}}>{counters}</span>
                             </div>
-                        )
-                    }
-                </div>
+                        </div>
+                    )
             )}
         </div>
     );
