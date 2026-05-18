@@ -70,10 +70,11 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
 
     const allCompactRegions = useMemo(() => createCompactRegionConfigs({
         playerName: player.name,
-        hand, library, crypt, ashHeap,
+        hand: isCurrentPlayer ? undefined : hand,
+        library, crypt, ashHeap,
         handStacks, libraryStacks, cryptStacks, ashHeapStacks,
         onCardContextMenu, onCardClick,
-    }), [hand, library, crypt, ashHeap, handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+    }), [hand, isCurrentPlayer, library, crypt, ashHeap, handStacks, libraryStacks, cryptStacks, ashHeapStacks,
         onCardClick, onCardContextMenu, player.name]);
 
     return (
@@ -126,7 +127,7 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
                         {/* Right column — compact region stacks */}
                         <div className="flex flex-col gap-1 pt-1 w-full lg:w-auto lg:shrink-0">
                             <div className="flex flex-row flex-wrap gap-1 justify-end lg:justify-start">
-                                {hand && renderRegion('HAND')}
+                                {hand && !isCurrentPlayer && renderRegion('HAND')}
                                 {library && renderRegion('LIBRARY')}
                                 {crypt && renderRegion('CRYPT')}
                                 {ashHeap?.visible && renderRegion('ASH_HEAP')}

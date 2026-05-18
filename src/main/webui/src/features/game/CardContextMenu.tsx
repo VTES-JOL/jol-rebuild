@@ -5,7 +5,7 @@ import type {CardData} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {
     addCounter, burnMinion, contestCard, discardCard, influenceOff, influenceOn,
-    lockCard, moveToTorpor, removeCounter, rescueFromTorpor,
+    lockCard, moveToTorpor, playCard, removeCounter, rescueFromTorpor,
     setCardNotes, setTitle, transferPoolOff, transferPoolOn,
     uncontestCard, unlockCard,
 } from './gameCommands.ts';
@@ -87,12 +87,13 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const showCounters = inPlayOrUncontrolled;
     const showMoveToTorpor = region === 'READY' && isMinion;
     const showRescue = region === 'TORPOR';
+    const showPlay = region === 'HAND' && isSelf;
     const showDiscard = region === 'HAND' && isSelf;
     const showBurn = isMinion && inPlay;
     const showContest = card.unique === true && inPlay;
     const showTitle = isCryptCard && region === 'READY';
-    const showNotes = inPlay && isSelf;
-    const hasZoneSection = showMoveToTorpor || showRescue || showDiscard || showBurn;
+    const showNotes = (inPlay || region === 'HAND') && isSelf;
+    const hasZoneSection = showPlay || showMoveToTorpor || showRescue || showDiscard || showBurn;
 
     const cardLabel = card.faceDown && !card.name ? '(hidden)' : (card.name ?? card.cardId ?? '—');
 
@@ -186,6 +187,9 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
             {hasZoneSection && (
                 <>
                     {SEP}
+                    {showPlay && (
+                        <button className={ITEM} onClick={() => fire(playCard(gameId, cardRef, cardRef.playerName))}>Play</button>
+                    )}
                     {showDiscard && (
                         <button className={ITEM} onClick={() => fire(discardCard(gameId, cardRef))}>Discard</button>
                     )}

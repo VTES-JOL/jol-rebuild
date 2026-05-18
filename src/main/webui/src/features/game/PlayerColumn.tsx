@@ -57,15 +57,16 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
 
     const allCompactRegions = useMemo(() => createCompactRegionConfigs({
         playerName: player.name,
-        hand, library, crypt, ashHeap,
+        hand: isCurrentUser ? undefined : hand,
+        library, crypt, ashHeap,
         handStacks, libraryStacks, cryptStacks, ashHeapStacks,
         onCardContextMenu,
-    }), [hand, library, crypt, ashHeap, handStacks, libraryStacks, cryptStacks, ashHeapStacks,
+    }), [hand, isCurrentUser, library, crypt, ashHeap, handStacks, libraryStacks, cryptStacks, ashHeapStacks,
         onCardContextMenu, player.name]);
 
     const hasBottom =
-        !!hand || !!library || !!crypt || !!ashHeap ||
-        (rfg && rfg.count > 0);
+        (!isCurrentUser && !!hand) || !!library || !!crypt || !!ashHeap ||
+        !!(rfg && rfg.count > 0);
 
     return (
         <div
@@ -115,7 +116,7 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
                         {hasBottom && (
                             <div className="mt-auto flex flex-col gap-1 pt-1 border-t border-line/20">
                                 <div className="flex flex-row flex-wrap gap-1">
-                                    {hand && renderRegion('HAND')}
+                                    {hand && !isCurrentUser && renderRegion('HAND')}
                                     {library && renderRegion('LIBRARY')}
                                     {crypt && renderRegion('CRYPT')}
                                     {ashHeap?.visible && renderRegion('ASH_HEAP')}

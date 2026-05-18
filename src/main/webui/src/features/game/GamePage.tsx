@@ -8,6 +8,7 @@ import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
+import {HandTray} from './HandTray.tsx';
 import type {CardData, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {regionToStacks} from './gameUtils.tsx';
@@ -217,6 +218,22 @@ export default function GamePage() {
                             )}
                         </div>
                     )}
+
+                    {/* Hand tray — below board on lg+, above chat on mobile */}
+                    {user && gameState && (() => {
+                        const hand = gameState.players.find(p => p.name === user.username)?.regions['HAND'];
+                        if (!hand) return null;
+                        return (
+                            <HandTray
+                                playerName={user.username}
+                                hand={hand}
+                                cards={gameState.cards}
+                                gameId={gameId}
+                                onCommand={handleCommand}
+                                onCardContextMenu={handleCardContextMenu}
+                            />
+                        );
+                    })()}
                 </div>
 
                 {/* Chat — fixed height at bottom on ≤md, right 1/4 on lg+ */}

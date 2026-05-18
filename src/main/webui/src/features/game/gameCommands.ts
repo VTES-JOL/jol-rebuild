@@ -81,6 +81,10 @@ export function discardCard(gameId: string, ref: CardRef): DiscardCardCommand {
     return {type: 'DISCARD_CARD', gameId, ref};
 }
 
+export function playCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType = 'READY'): PlayCardCommand {
+    return {type: 'PLAY_CARD', gameId, ref, targetPlayerName, targetRegionType};
+}
+
 export function moveToTorpor(gameId: string, ref: CardRef): MoveToTorporCommand {
     return {type: 'MOVE_TO_TORPOR', gameId, ref};
 }
