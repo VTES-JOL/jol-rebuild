@@ -1,4 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {expect, within} from 'storybook/test';
 import type {CounterType} from '../shared/components/CounterBadge.tsx';
 import {CounterBadge} from '../shared/components/CounterBadge.tsx';
 
@@ -21,18 +22,34 @@ type Story = StoryObj<typeof meta>;
 
 export const Blood: Story = {
     args: { type: 'blood', amount: 5, size: 20 },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByRole('img', { name: '5 blood' })).toBeInTheDocument();
+    },
 };
 
 export const Life: Story = {
     args: { type: 'life', amount: 6, size: 20 },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByRole('img', { name: '6 life' })).toBeInTheDocument();
+    },
 };
 
 export const Corruption: Story = {
     args: { type: 'corruption', amount: 3, size: 20 },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByRole('img', { name: '3 corruption' })).toBeInTheDocument();
+    },
 };
 
 export const Generic: Story = {
     args: { type: 'generic', amount: 2, size: 20 },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByRole('img', { name: '2 counter' })).toBeInTheDocument();
+    },
 };
 
 // — All types side-by-side ────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {fn} from 'storybook/test';
+import {expect, fn, userEvent, within} from 'storybook/test';
 
 import {MessageLineView} from '../features/chat/MessageLineView.tsx';
 
@@ -34,6 +34,17 @@ export const Default: Story = {
         enableReply: true,
         isFirst: true,
     },
+    play: async ({ canvasElement, args }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('This is a regular message.')).toBeInTheDocument();
+        await userEvent.hover(canvas.getByText('This is a regular message.'));
+        const replyBtn = await canvas.findByRole('button', { name: 'Reply to message' });
+        await userEvent.click(replyBtn);
+        await expect(args.onReply).toHaveBeenCalledOnce();
+        await expect(args.onReply).toHaveBeenCalledWith(
+            expect.objectContaining({ id: '1', sender: 'Alex' })
+        );
+    },
 };
 
 export const WithReplyQuote: Story = {
@@ -58,6 +69,13 @@ export const WithReplyQuote: Story = {
         enableReply: true,
         isFirst: true,
     },
+    play: async ({ canvasElement, args }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('What do you think?')).toBeInTheDocument();
+        const quoteBtn = canvas.getByText('What do you think?').closest('button')!;
+        await userEvent.click(quoteBtn);
+        await expect(args.onJumpTo).toHaveBeenCalledWith('1');
+    },
 };
 
 export const WithReactions: Story = {
@@ -80,5 +98,14 @@ export const WithReactions: Story = {
         enableReactions: true,
         enableReply: true,
         isFirst: true,
+    },
+    play: async ({ canvasElement, args }) => {
+        const canvas = within(canvasElement);
+        // Both reaction pills visible with correct counts
+        await expect(canvas.getByTitle('Alex, Jill')).toBeInTheDocument();
+        await expect(canvas.getByTitle('Sam')).toBeInTheDocument();
+        // Click the 👍 pill — calls onReact with messageId and emoji
+        await userEvent.click(canvas.getByTitle('Alex, Jill'));
+        await expect(args.onReact).toHaveBeenCalledWith('3', '👍');
     },
 };

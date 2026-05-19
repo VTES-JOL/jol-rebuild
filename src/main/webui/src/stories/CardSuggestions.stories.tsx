@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {fn} from 'storybook/test';
+import {expect, fn, userEvent, within} from 'storybook/test';
 
 import {CardSuggestions} from '../features/chat/CardSuggestions.tsx';
 
@@ -33,6 +33,17 @@ export const Default: Story = {
         activeIndex: 0,
         onSelect: fn(),
     },
+    play: async ({ canvasElement, args }) => {
+        const canvas = within(canvasElement);
+        const options = canvas.getAllByRole('option');
+        await expect(options).toHaveLength(3);
+        await expect(options[0]).toHaveAttribute('aria-selected', 'true');
+        await expect(options[1]).toHaveAttribute('aria-selected', 'false');
+        await userEvent.click(canvas.getByText('Art Scam'));
+        await expect(args.onSelect).toHaveBeenCalledWith(
+            expect.objectContaining({ name: 'Art Scam', id: '100099' })
+        );
+    },
 };
 
 export const ActiveMiddle: Story = {
@@ -44,6 +55,13 @@ export const ActiveMiddle: Story = {
         ],
         activeIndex: 1,
         onSelect: fn(),
+    },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        const options = canvas.getAllByRole('option');
+        await expect(options[0]).toHaveAttribute('aria-selected', 'false');
+        await expect(options[1]).toHaveAttribute('aria-selected', 'true');
+        await expect(options[2]).toHaveAttribute('aria-selected', 'false');
     },
 };
 

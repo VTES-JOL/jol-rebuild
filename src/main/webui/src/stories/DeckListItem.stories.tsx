@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {fn} from 'storybook/test';
+import {expect, fn, userEvent, within} from 'storybook/test';
 import DeckListItem from '../features/deck/DeckListItem';
 
 const meta = {
@@ -37,10 +37,21 @@ const oldDeck = {
 
 export const Default: Story = {
     args: { deck: recentDeck, selected: false },
+    play: async ({ canvasElement, args }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('Weenie Animalism')).toBeInTheDocument();
+        await expect(canvas.getByText(/Fast aggravated damage/)).toBeInTheDocument();
+        await userEvent.click(canvas.getByRole('button'));
+        await expect(args.onClick).toHaveBeenCalledOnce();
+    },
 };
 
 export const Selected: Story = {
     args: { deck: recentDeck, selected: true },
+    play: async ({ canvasElement }) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('Weenie Animalism')).toBeInTheDocument();
+    },
 };
 
 export const NoCommentsNoSummary: Story = {
