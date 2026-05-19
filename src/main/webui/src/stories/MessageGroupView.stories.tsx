@@ -43,6 +43,7 @@ export const SingleLine: Story = {
         enableReactions: true,
         enableReply: true,
         enableAvatars: true,
+        enableDivider: false
     },
 };
 
@@ -73,6 +74,7 @@ export const WithReactions: Story = {
         enableReactions: true,
         enableReply: true,
         enableAvatars: true,
+        enableDivider: true
     },
 };
 
@@ -94,5 +96,6 @@ export const Disabled: Story = {
         enableReactions: true,
         enableReply: true,
         enableAvatars: true,
+        enableDivider: true
     },
 };
