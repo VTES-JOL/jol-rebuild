@@ -86,7 +86,7 @@ export function TextHandPanel({playerName, hand, cards, gameId, onCommand, onCar
         const draggedId = String(active.id);
         setActiveId(null);
 
-        if (!over || draggedId === String(over.id)) {
+        if (!over) {
             setSortedIds(stacks.map((_, i) => `hand-${i}`));
             return;
         }

@@ -521,7 +521,7 @@ export function TextBoard({orderedPlayers, cards, currentUser, gameId, onCommand
                     onCardContextMenu={onCardContextMenu}
                 />
             )}
-            <div className="flex-1 min-w-0 overflow-x-auto">
+            <div className="flex-1 min-w-0 overflow-x-auto rounded-lg border border-line/40 bg-panel/20 p-2">
                 <div className="flex gap-2 h-full min-h-0">
                     {orderedPlayers.map(player => (
                         <PlayerColumn

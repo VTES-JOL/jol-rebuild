@@ -10,6 +10,7 @@ public class Preferences {
     public String countryCode;
     public String zoneId = ZoneId.systemDefault().getId();
     public boolean enableImages = true;
+    public String defaultBoard;
 
     public Preferences() {
     }

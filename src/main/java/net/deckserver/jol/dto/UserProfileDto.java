@@ -15,6 +15,7 @@ public class UserProfileDto {
     private final String countryCode;
     private final String zoneId;
     private final boolean enableImages;
+    private final String defaultBoard;
     private final Set<String> roles;
 
     public UserProfileDto(String id, String username, String email, String tournamentId, String discordId,
@@ -29,10 +30,12 @@ public class UserProfileDto {
             this.countryCode = preferences.countryCode;
             this.zoneId = preferences.zoneId;
             this.enableImages = preferences.enableImages;
+            this.defaultBoard = preferences.defaultBoard;
         } else {
             this.countryCode = null;
             this.zoneId = null;
             this.enableImages = false;
+            this.defaultBoard = null;
         }
     }
 
@@ -44,5 +47,6 @@ public class UserProfileDto {
     public String getCountryCode() { return countryCode; }
     public String getZoneId() { return zoneId; }
     public boolean isEnableImages() { return enableImages; }
+    public String getDefaultBoard() { return defaultBoard; }
     public Set<String> getRoles() { return roles; }
 }

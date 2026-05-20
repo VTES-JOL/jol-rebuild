@@ -110,6 +110,7 @@ public class UserController {
             user.preferences.zoneId = body.zoneId();
         }
         user.preferences.enableImages = body.enableImages();
+        user.preferences.defaultBoard = body.defaultBoard();
         return Response.ok().build();
     }
 
@@ -126,6 +127,6 @@ public class UserController {
     }
 
     @RegisterForReflection
-    public record UpdatePreferences(String countryCode, String zoneId, boolean enableImages) {
+    public record UpdatePreferences(String countryCode, String zoneId, boolean enableImages, String defaultBoard) {
     }
 }

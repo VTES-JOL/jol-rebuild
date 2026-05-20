@@ -6,6 +6,7 @@ export interface User {
     countryCode?: string;
     zoneId?: string;
     enableImages: boolean;
+    defaultBoard?: string;
 }
 
 export type RegisterField = "username" | "password" | "email";

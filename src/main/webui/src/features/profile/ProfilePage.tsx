@@ -28,6 +28,7 @@ export default function ProfilePage() {
     const [countryCode, setCountryCode] = useState<string>("")
     const [zoneId, setZoneId] = useState<string>("")
     const [enableImages, setEnableImages] = useState(true)
+    const [defaultBoard, setDefaultBoard] = useState<string>("linear")
     const [saving, setSaving] = useState(false)
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -39,6 +40,7 @@ export default function ProfilePage() {
             setCountryCode(user.countryCode ?? "")
             setZoneId(user.zoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone)
             setEnableImages(user.enableImages ?? true)
+            setDefaultBoard(user.defaultBoard ?? "linear")
         }
     }, [user])
 
@@ -54,6 +56,7 @@ export default function ProfilePage() {
                 countryCode: countryCode || null,
                 zoneId: zoneId,
                 enableImages,
+                defaultBoard: defaultBoard || null,
             })
             await refresh()
             setSuccess(true)
@@ -145,6 +148,31 @@ export default function ProfilePage() {
                                     >
                                         <span className={`inline-block h-5 w-5 rounded-full bg-surface shadow transform transition-transform duration-200 ${enableImages ? "translate-x-5" : "translate-x-0"}`} />
                                     </button>
+                                </div>
+
+                                {/* Default board */}
+                                <div className="space-y-1.5">
+                                    <div>
+                                        <div className="text-sm text-ink">Default board layout</div>
+                                        <div className="text-xs text-ink-muted mt-0.5">Which board view to use when entering a game</div>
+                                    </div>
+                                    <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5 w-fit">
+                                        {([["linear", "Strip"], ["circular", "Table"], ["text", "Text"]] as const).map(([value, label]) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => setDefaultBoard(value)}
+                                                className={[
+                                                    "text-xs px-3 py-1 rounded transition-colors",
+                                                    defaultBoard === value
+                                                        ? "bg-arcane/20 text-ink"
+                                                        : "text-ink-muted hover:text-ink",
+                                                ].join(" ")}
+                                            >
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Feedback */}

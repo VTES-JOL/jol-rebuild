@@ -73,6 +73,16 @@ export default function GamePage() {
     }, []);
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
+    const layoutInitialized = useRef(false);
+    useEffect(() => {
+        if (!layoutInitialized.current && user) {
+            layoutInitialized.current = true;
+            const pref = user.defaultBoard;
+            if (pref === 'linear' || pref === 'circular' || pref === 'text') {
+                setBoardLayout(pref);
+            }
+        }
+    }, [user]);
 
     const isConnected = status === 'connected';
 

@@ -4,6 +4,7 @@ export interface PreferencesPayload {
     countryCode: string | null
     zoneId: string
     enableImages: boolean
+    defaultBoard: string | null
 }
 
 export async function updatePreferences(payload: PreferencesPayload): Promise<void> {
