@@ -14,7 +14,7 @@ export function useChat({ url, username, onSystemError }: UseChatOptions) {
     const handleMessage = useCallback((msg: ChatMessage) => {
         switch (msg.type) {
             case 'HISTORY':
-                setMessages(msg.history);
+                setMessages(msg.history.filter((m): m is ChatMsg => m.type === 'CHAT'));
                 break;
             case 'CHAT':
                 setMessages(prev => [...prev, msg]);

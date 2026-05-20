@@ -2,14 +2,19 @@ import React, {useState} from 'react';
 import type {ReactionDto, ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {nameColorStyle} from '@/shared/utils/avatarUtils';
 import {MessageContent} from './MessageContent';
+import {CommandLogContent} from './CommandLogContent';
+import type {CommandLogData} from '@/features/game/commandLog.ts';
 
 const EMOJI_PALETTE = ['👍', '❤️', '😂', '😮'];
+
+export type CommandLogDetail = 'full' | 'brief';
 
 export interface MessageLine {
     id: string;
     content: string;
     reactions: ReactionDto[];
     replyTo: ReplySnapshot | null;
+    commandLog?: CommandLogData;
 }
 
 interface ReactionPillsProps {
@@ -77,6 +82,7 @@ interface MessageLineViewProps {
     enableReactions: boolean;
     enableReply: boolean;
     isFirst: boolean;
+    commandLogDetail: CommandLogDetail;
 }
 
 export const MessageLineView = React.memo(function MessageLineView({
@@ -90,6 +96,7 @@ export const MessageLineView = React.memo(function MessageLineView({
     enableReactions,
     enableReply,
     isFirst,
+    commandLogDetail,
 }: MessageLineViewProps) {
     const [hovered, setHovered] = useState(false);
 
@@ -104,7 +111,10 @@ export const MessageLineView = React.memo(function MessageLineView({
             )}
 
             <div className={isFirst ? 'pr-16' : 'mt-0.5 pr-16'}>
-                <MessageContent content={line.content} />
+                {line.commandLog
+                    ? <CommandLogContent log={line.commandLog} detail={commandLogDetail}/>
+                    : <MessageContent content={line.content}/>
+                }
             </div>
 
             {enableReactions && (
@@ -134,7 +144,7 @@ export const MessageLineView = React.memo(function MessageLineView({
                             ))}
                         </div>
                     )}
-                    {enableReply && (
+                    {enableReply && !line.commandLog && (
                         <button
                             onClick={() => onReply({ id: line.id, sender, content: line.content })}
                             className="flex items-center justify-center w-6 h-6 rounded text-ink-muted hover:bg-hover hover:text-ink transition-colors cursor-pointer text-sm mx-0.5"

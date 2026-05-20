@@ -1,4 +1,4 @@
-import type {ChatMsg} from '@/hooks/useWebSocket.ts';
+import type {ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
 import {useChat} from '@/hooks/useChat.ts';
 import {ChatPanelView} from './ChatPanelView.tsx';
 
@@ -12,6 +12,7 @@ type BaseChatPanelProps = {
     enableReply?: boolean;
     enableAvatars?: boolean;
     enableDivider?: boolean;
+    enableCommandLogFilter?: boolean;
 };
 
 type LiveChatPanelProps = BaseChatPanelProps & {
@@ -19,7 +20,7 @@ type LiveChatPanelProps = BaseChatPanelProps & {
 };
 
 type ManualChatPanelProps = BaseChatPanelProps & {
-    messages: ChatMsg[];
+    messages: (ChatMsg | CommandLogMsg)[];
     status: Status;
     onSend: (content: string, replyToId?: string) => void;
     onReact: (messageId: string, emoji: string) => void;
@@ -36,6 +37,7 @@ function LiveChatPanel({
                            enableReply = true,
                            enableAvatars = true,
                            enableDivider = true,
+                           enableCommandLogFilter = false,
                        }: LiveChatPanelProps) {
     const { messages, status, send, react } = useChat({
         url,
@@ -55,6 +57,7 @@ function LiveChatPanel({
             enableReply={enableReply}
             enableAvatars={enableAvatars}
             enableDivider={enableDivider}
+            enableCommandLogFilter={enableCommandLogFilter}
         />
     );
 }
@@ -71,6 +74,7 @@ function ManualChatPanel({
                              enableReply = true,
                              enableAvatars = true,
                              enableDivider = true,
+                             enableCommandLogFilter = false,
                          }: ManualChatPanelProps) {
     return (
         <ChatPanelView
@@ -85,6 +89,7 @@ function ManualChatPanel({
             enableReply={enableReply}
             enableAvatars={enableAvatars}
             enableDivider={enableDivider}
+            enableCommandLogFilter={enableCommandLogFilter}
         />
     );
 }

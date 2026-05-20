@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {MessageSquare} from 'lucide-react';
-import type {ChatMsg, ReplySnapshot} from '@/hooks/useWebSocket.ts';
+import type {ChatMsg, CommandLogMsg, ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {useCardAutocomplete} from '@/hooks/useCardAutocomplete.ts';
 import {useChatInput} from '@/hooks/useChatInput.ts';
 import {groupMessages} from './chatUtils.ts';
@@ -13,9 +13,13 @@ import {MessageGroupView} from './MessageGroupView';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
+type CommandLogDetail = 'full' | 'brief' | 'off';
+const COMMAND_LOG_DETAIL_KEY = 'commandLogDetail';
+const DETAIL_LABELS: Record<CommandLogDetail, string> = { full: 'Full', brief: 'Brief', off: 'Off' };
+
 export type ChatPanelViewProps = {
     title: string;
-    messages: ChatMsg[];
+    messages: (ChatMsg | CommandLogMsg)[];
     status: Status;
     currentUser: string;
     onSend: (content: string, replyToId?: string) => void;
@@ -26,6 +30,7 @@ export type ChatPanelViewProps = {
     enableReply?: boolean;
     enableAvatars?: boolean;
     enableDivider?: boolean;
+    enableCommandLogFilter?: boolean;
 };
 
 const STATUS_LABELS: Record<Status, { label: string; dotClass: string }> = {
@@ -48,7 +53,15 @@ export function ChatPanelView({
                                   enableReply = true,
                                   enableAvatars = true,
                                   enableDivider = true,
+                                  enableCommandLogFilter = false,
                               }: ChatPanelViewProps) {
+    const [commandLogDetail, setCommandLogDetailState] = useState<CommandLogDetail>(
+        () => (localStorage.getItem(COMMAND_LOG_DETAIL_KEY) as CommandLogDetail | null) ?? 'full'
+    );
+    function setCommandLogDetail(v: CommandLogDetail) {
+        localStorage.setItem(COMMAND_LOG_DETAIL_KEY, v);
+        setCommandLogDetailState(v);
+    }
     const {draft, displayValue, syncFromDisplay, syncFromEncoded, reset} = useChatInput();
     const [replyingTo, setReplyingTo] = useState<ReplySnapshot | null>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
@@ -101,13 +114,36 @@ export function ChatPanelView({
     };
 
     const statusInfo = STATUS_LABELS[status];
-    const groups = groupMessages(messages, currentUser);
+    const visibleMessages = enableCommandLogFilter && commandLogDetail === 'off'
+        ? messages.filter(m => m.type !== 'COMMAND_LOG')
+        : messages;
+    const groups = groupMessages(visibleMessages, currentUser);
+    const effectiveDetail: 'full' | 'brief' = commandLogDetail === 'off' ? 'full' : commandLogDetail;
 
     return (
         <Panel
             title={title}
             right={
                 <div className="flex items-center gap-2">
+                    {enableCommandLogFilter && (
+                        <div className="flex rounded border border-line/60 text-xs overflow-hidden">
+                            {(['full', 'brief', 'off'] as const).map((level, i, arr) => (
+                                <button
+                                    key={level}
+                                    onClick={() => setCommandLogDetail(level)}
+                                    className={[
+                                        'px-2 py-0.5 transition-colors cursor-pointer',
+                                        i < arr.length - 1 ? 'border-r border-line/60' : '',
+                                        commandLogDetail === level
+                                            ? 'bg-arcane/20 text-arcane-soft'
+                                            : 'text-ink-muted hover:bg-hover',
+                                    ].join(' ')}
+                                >
+                                    {DETAIL_LABELS[level]}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     <span
                         className={`h-2 w-2 rounded-full ${statusInfo.dotClass}`}
                         title={statusInfo.label}
@@ -118,7 +154,7 @@ export function ChatPanelView({
         >
             <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex-1 min-h-0 overflow-y-auto py-2 px-3">
-                    {messages.length === 0 && (
+                    {visibleMessages.length === 0 && (
                         <EmptyState icon={MessageSquare} title="No messages yet. Say hello!"/>
                     )}
 
@@ -145,6 +181,7 @@ export function ChatPanelView({
                                 enableReply={enableReply}
                                 enableAvatars={enableAvatars}
                                 enableDivider={true}
+                                commandLogDetail={effectiveDetail}
                             />
                         </div>
                     ))}

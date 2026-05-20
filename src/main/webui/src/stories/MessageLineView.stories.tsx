@@ -33,6 +33,7 @@ export const Default: Story = {
         enableReactions: true,
         enableReply: true,
         isFirst: true,
+        commandLogDetail: 'full',
     },
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
@@ -68,6 +69,7 @@ export const WithReplyQuote: Story = {
         enableReactions: true,
         enableReply: true,
         isFirst: true,
+        commandLogDetail: 'full',
     },
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);
@@ -98,6 +100,7 @@ export const WithReactions: Story = {
         enableReactions: true,
         enableReply: true,
         isFirst: true,
+        commandLogDetail: 'full',
     },
     play: async ({ canvasElement, args }) => {
         const canvas = within(canvasElement);

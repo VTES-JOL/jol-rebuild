@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import type {GameState} from '@/features/game/types.ts';
+import type {CommandLogData} from '@/features/game/commandLog.ts';
 
 export interface ReactionDto   { emoji: string; senders: string[] }
 export interface ReplySnapshot { id: string; sender: string; content: string }
@@ -16,9 +17,19 @@ export interface ChatMsg {
     reactions: ReactionDto[];
 }
 
+export interface CommandLogMsg {
+    type: 'COMMAND_LOG';
+    id: string;
+    sender: string;
+    content: string;
+    timestamp: string;
+    reactions: ReactionDto[];
+    commandLog: CommandLogData;
+}
+
 interface HistoryMsg {
     type: 'HISTORY';
-    history: ChatMsg[];
+    history: (ChatMsg | CommandLogMsg)[];
 }
 
 interface ReactionUpdateMsg {
@@ -42,7 +53,7 @@ export interface GameStateMsg {
     state: GameState;
 }
 
-export type ChatMessage = ChatMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | LobbyUpdateMsg | GameStateMsg;
+export type ChatMessage = ChatMsg | CommandLogMsg | HistoryMsg | ReactionUpdateMsg | ErrorMsg | LobbyUpdateMsg | GameStateMsg;
 
 // ─── Outbound messages (client → server) ─────────────────────────────────────
 

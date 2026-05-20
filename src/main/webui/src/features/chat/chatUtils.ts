@@ -1,4 +1,4 @@
-import type {ChatMsg} from '@/hooks/useWebSocket.ts';
+import type {ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
 import type {MessageLine} from '@/features/chat/MessageLineView.tsx';
 
 export interface MessageGroup {
@@ -12,7 +12,7 @@ export interface MessageGroup {
 const dateFormat = new Intl.DateTimeFormat('UTC', { dateStyle: 'medium', timeStyle: 'short' });
 const timeOnlyFormat = new Intl.DateTimeFormat('UTC', { timeStyle: 'short' });
 
-export function groupMessages(messages: ChatMsg[], currentUser: string): MessageGroup[] {
+export function groupMessages(messages: (ChatMsg | CommandLogMsg)[], currentUser: string): MessageGroup[] {
     const groups: MessageGroup[] = [];
     let lastSender = '';
     let lastFormattedFull = '';
@@ -25,13 +25,14 @@ export function groupMessages(messages: ChatMsg[], currentUser: string): Message
 
         const timestampChanged = fullTs !== lastFormattedFull;
         const senderChanged = sender !== lastSender;
-        const hasReply = !!msg.replyTo;
+        const hasReply = msg.type === 'CHAT' && !!msg.replyTo;
 
         const line: MessageLine = {
             id: msg.id,
             content: msg.content,
             reactions: msg.reactions,
-            replyTo: msg.replyTo ?? null,
+            replyTo: msg.type === 'CHAT' ? (msg.replyTo ?? null) : null,
+            commandLog: msg.type === 'COMMAND_LOG' ? msg.commandLog : undefined,
         };
 
         if (senderChanged || timestampChanged || hasReply) {

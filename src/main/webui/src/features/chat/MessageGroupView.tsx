@@ -3,6 +3,7 @@ import type {ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {nameColorStyle} from '@/shared/utils/avatarUtils';
 import Avatar from '@/shared/components/Avatar';
 import {MessageLineView} from './MessageLineView';
+import type {CommandLogDetail} from './MessageLineView';
 import type {MessageGroup} from './chatUtils.ts';
 
 export type { MessageGroup };
@@ -28,6 +29,7 @@ interface MessageGroupViewProps {
     enableReply: boolean;
     enableAvatars: boolean;
     enableDivider: boolean;
+    commandLogDetail: CommandLogDetail;
 }
 
 export const MessageGroupView = React.memo(function MessageGroupView({
@@ -42,6 +44,7 @@ export const MessageGroupView = React.memo(function MessageGroupView({
     enableReply,
     enableAvatars,
     enableDivider,
+    commandLogDetail,
 }: MessageGroupViewProps) {
     return (
         <div className="flex gap-2.5 mb-2.5">
@@ -70,6 +73,7 @@ export const MessageGroupView = React.memo(function MessageGroupView({
                         enableReactions={enableReactions}
                         enableReply={enableReply}
                         isFirst={i === 0}
+                        commandLogDetail={commandLogDetail}
                     />
                 ))}
             </div>

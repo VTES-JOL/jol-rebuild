@@ -1,5 +1,5 @@
 import {useCallback, useState} from 'react';
-import type {ChatMessage, ChatMsg} from '@/hooks/useWebSocket.ts';
+import type {ChatMessage, ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
 import {useWebSocket} from '@/hooks/useWebSocket.ts';
 import {applyOptimisticReaction} from '@/shared/utils/reactionUtils.ts';
 import type {GameState} from '@/features/game/types.ts';
@@ -11,7 +11,7 @@ interface UseGameChannelOptions {
 }
 
 export function useGameChannel({url, username}: UseGameChannelOptions) {
-    const [messages, setMessages] = useState<ChatMsg[]>([]);
+    const [messages, setMessages] = useState<(ChatMsg | CommandLogMsg)[]>([]);
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [commandError, setCommandError] = useState<string | null>(null);
 
@@ -21,6 +21,7 @@ export function useGameChannel({url, username}: UseGameChannelOptions) {
                 setMessages(msg.history);
                 break;
             case 'CHAT':
+            case 'COMMAND_LOG':
                 setMessages(prev => [...prev, msg]);
                 break;
             case 'REACTION':

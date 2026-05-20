@@ -260,6 +260,7 @@ export default function GamePage() {
                             enableReply={false}
                             enableAvatars={false}
                             enableDivider={false}
+                            enableCommandLogFilter={true}
                             placeholder="Chat with your opponents…"
                         />
                     </div>

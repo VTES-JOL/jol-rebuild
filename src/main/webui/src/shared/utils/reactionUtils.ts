@@ -1,16 +1,16 @@
-import type {ChatMsg, ReactionDto} from '@/hooks/useWebSocket.ts';
+import type {ReactionDto} from '@/hooks/useWebSocket.ts';
 
 /**
  * Applies an optimistic toggle of an emoji reaction for a given user on a message.
  * If the user has already reacted with this emoji, their reaction is removed;
  * otherwise it is added. Reactions with no senders remaining are filtered out.
  */
-export function applyOptimisticReaction(
-    messages: ChatMsg[],
+export function applyOptimisticReaction<T extends { id: string; reactions: ReactionDto[] }>(
+    messages: T[],
     messageId: string,
     emoji: string,
     username: string
-): ChatMsg[] {
+): T[] {
     return messages.map(m => {
         if (m.id !== messageId) return m;
         const reactions: ReactionDto[] = m.reactions;

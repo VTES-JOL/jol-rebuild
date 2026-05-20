@@ -23,6 +23,12 @@ public class ChatMessage extends PanacheEntityBase {
     @Column(nullable = false, columnDefinition = "TEXT")
     public String content;
 
+    @Column(length = 16, nullable = false)
+    public String messageType = "CHAT";
+
+    @Column(columnDefinition = "TEXT")
+    public String commandData;
+
     @Column(nullable = false)
     public Instant timestamp;
 
@@ -40,6 +46,18 @@ public class ChatMessage extends PanacheEntityBase {
         msg.content = content;
         msg.timestamp = Instant.now();
         msg.replyTo = replyTo;
+        msg.persist();
+        return msg;
+    }
+
+    public static ChatMessage createCommandLog(String gameId, String sender, String legacyContent, String commandDataJson) {
+        ChatMessage msg = new ChatMessage();
+        msg.gameId = gameId;
+        msg.sender = sender;
+        msg.content = legacyContent;
+        msg.commandData = commandDataJson;
+        msg.messageType = "COMMAND_LOG";
+        msg.timestamp = Instant.now();
         msg.persist();
         return msg;
     }

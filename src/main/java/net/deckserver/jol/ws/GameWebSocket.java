@@ -132,7 +132,10 @@ public class GameWebSocket {
         }
         try {
             GameCommandService.CommandResult result = commandService.execute(userName(), incoming.command);
-            if (result.logMessage() != null) {
+            if (result.commandLog() != null) {
+                ChatMessageDto log = chatService.saveCommandLog(gameId, userName(), result.logMessage(), result.commandLog());
+                connection.broadcast().sendTextAndAwait(log);
+            } else if (result.logMessage() != null) {
                 ChatMessageDto log = chatService.save(gameId, userName(), result.logMessage(), null);
                 connection.broadcast().sendTextAndAwait(log);
             }

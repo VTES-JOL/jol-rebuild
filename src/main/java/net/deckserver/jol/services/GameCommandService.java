@@ -27,11 +27,15 @@ public class GameCommandService {
     @Inject
     ObjectMapper mapper;
 
-    public record CommandResult(GameData game, String logMessage) {}
+    public record CommandResult(GameData game, String logMessage, CommandLogData commandLog) {
+        public static CommandResult silent(GameData game) {
+            return new CommandResult(game, null, null);
+        }
+    }
 
     /**
      * Validates, applies the command to the in-memory game state, persists a snapshot,
-     * and returns the result including an optional chat log message.
+     * and returns the result including an optional structured log entry.
      * Synchronized on the GameData instance so concurrent commands for the same game are serialized.
      */
     @Transactional
@@ -40,17 +44,17 @@ public class GameCommandService {
         if (game == null) {
             throw new IllegalStateException("Game not active: " + command.gameId());
         }
-        String logMessage;
+        CommandResult result;
         synchronized (game) {
-            logMessage = applyCommand(game, command, actorUsername);
-            persistSnapshot(command.gameId(), game);
+            result = applyCommand(game, command, actorUsername);
+            persistSnapshot(command.gameId(), result.game());
         }
-        return new CommandResult(game, logMessage);
+        return result;
     }
 
     // ── Dispatch ─────────────────────────────────────────────────────────────
 
-    private String applyCommand(GameData game, GameCommand cmd, String actor) {
+    private CommandResult applyCommand(GameData game, GameCommand cmd, String actor) {
         return switch (cmd) {
             case AdvancePhase c     -> handleAdvancePhase(game, c, actor);
             case NextTurn c         -> handleNextTurn(game, c, actor);
@@ -61,12 +65,12 @@ public class GameCommandService {
             case PlayCard c         -> handlePlayCard(game, c, actor);
             case MoveCard c         -> handleMoveCard(game, c, actor);
             case AttachCard c       -> handleAttachCard(game, c, actor);
-            case LockCard c         -> { handleLockCard(game, c); yield null; }
-            case UnlockCard c       -> { handleUnlockCard(game, c); yield null; }
-            case UnlockAll c        -> { handleUnlockAll(game, c); yield null; }
+            case LockCard c         -> { handleLockCard(game, c); yield CommandResult.silent(game); }
+            case UnlockCard c       -> { handleUnlockCard(game, c); yield CommandResult.silent(game); }
+            case UnlockAll c        -> { handleUnlockAll(game, c); yield CommandResult.silent(game); }
             case AddCounter c       -> handleAddCounter(game, c, actor);
             case RemoveCounter c    -> handleRemoveCounter(game, c, actor);
-            case SetCardNotes c     -> { handleSetCardNotes(game, c); yield null; }
+            case SetCardNotes c     -> { handleSetCardNotes(game, c); yield CommandResult.silent(game); }
             case SetPool c          -> handleSetPool(game, c, actor);
             case GainEdge c         -> handleGainEdge(game, c, actor);
             case TransferBlood c    -> handleTransferBlood(game, c, actor);
@@ -79,15 +83,15 @@ public class GameCommandService {
             case ClearContestCard c -> handleClearContestCard(game, c, actor);
             case SetTitle c         -> handleSetTitle(game, c, actor);
             case OustPlayer c       -> handleOustPlayer(game, c, actor);
-            case SetChoice c        -> { handleSetChoice(game, c); yield null; }
+            case SetChoice c        -> { handleSetChoice(game, c); yield CommandResult.silent(game); }
             case ReverseOrder c     -> handleReverseOrder(game, c, actor);
-            case SetGameNotes c     -> { handleSetGameNotes(game, c); yield null; }
+            case SetGameNotes c     -> { handleSetGameNotes(game, c); yield CommandResult.silent(game); }
         };
     }
 
     // ── Turn / phase ──────────────────────────────────────────────────────────
 
-    private String handleAdvancePhase(GameData game, AdvancePhase cmd, String actor) {
+    private CommandResult handleAdvancePhase(GameData game, AdvancePhase cmd, String actor) {
         Phase[] phases = Phase.values();
         int current = game.getPhase() != null ? game.getPhase().ordinal() : 0;
         int next = (current + 1) % phases.length;
@@ -95,11 +99,12 @@ public class GameCommandService {
             return handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
         } else {
             game.setPhase(phases[next]);
-            return actor + " advanced to " + phases[next].getDescription() + " phase";
+            String msg = actor + " advanced to " + phases[next].getDescription() + " phase";
+            return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[next]));
         }
     }
 
-    private String handleNextTurn(GameData game, NextTurn cmd, String actor) {
+    private CommandResult handleNextTurn(GameData game, NextTurn cmd, String actor) {
         List<String> order = game.getPlayerOrder();
         String currentName = game.getCurrentPlayerName();
         int currentIndex = currentName != null ? order.indexOf(currentName) : -1;
@@ -134,14 +139,16 @@ public class GameCommandService {
         }
 
         String nextPlayerName = nextPlayer != null ? nextPlayer.getName() : "unknown";
-        return "Turn " + major + "." + minor + " — " + nextPlayerName + " begins their turn";
+        String turn = major + "." + minor;
+        String msg = "Turn " + turn + " — " + nextPlayerName + " begins their turn";
+        return new CommandResult(game, msg, new CommandLogData.NextTurnLog(actor, turn, nextPlayerName));
     }
 
     // ── Deck operations ───────────────────────────────────────────────────────
 
-    private String handleDrawCard(GameData game, DrawCard cmd, String actor) {
+    private CommandResult handleDrawCard(GameData game, DrawCard cmd, String actor) {
         PlayerData player = game.getPlayer(actor);
-        if (player == null) return null;
+        if (player == null) return CommandResult.silent(game);
         RegionData library = player.getRegion(RegionType.LIBRARY);
         RegionData hand = player.getRegion(RegionType.HAND);
         int toDraw = Math.min(cmd.count(), library.getCards().size());
@@ -149,71 +156,92 @@ public class GameCommandService {
             if (library.getCards().isEmpty()) break;
             hand.addCard(library.getFirstCard(), false);
         }
-        return actor + " drew " + toDraw + " card(s)";
+        String msg = actor + " drew " + toDraw + " card(s)";
+        return new CommandResult(game, msg, new CommandLogData.DrawCardLog(actor, toDraw));
     }
 
-    private String handleShuffleLibrary(GameData game, String actor) {
+    private CommandResult handleShuffleLibrary(GameData game, String actor) {
         PlayerData player = game.getPlayer(actor);
-        if (player == null) return null;
+        if (player == null) return CommandResult.silent(game);
         player.getRegion(RegionType.LIBRARY).shuffle(0);
-        return actor + " shuffled their library";
+        String msg = actor + " shuffled their library";
+        return new CommandResult(game, msg, new CommandLogData.ShuffleLibraryLog(actor));
     }
 
-    private String handleShuffleCrypt(GameData game, String actor) {
+    private CommandResult handleShuffleCrypt(GameData game, String actor) {
         PlayerData player = game.getPlayer(actor);
-        if (player == null) return null;
+        if (player == null) return CommandResult.silent(game);
         player.getRegion(RegionType.CRYPT).shuffle(0);
-        return actor + " shuffled their crypt";
+        String msg = actor + " shuffled their crypt";
+        return new CommandResult(game, msg, new CommandLogData.ShuffleCryptLog(actor));
     }
 
     // ── Hand / play ───────────────────────────────────────────────────────────
 
-    private String handleDiscardCard(GameData game, DiscardCard cmd, String actor) {
+    private CommandResult handleDiscardCard(GameData game, DiscardCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false); // ASH_HEAP is visible to all
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
-        if (owner == null) return null;
+        if (owner == null) return CommandResult.silent(game);
         owner.getRegion(RegionType.ASH_HEAP).addCard(card, true);
-        return actor + " discarded " + token;
+        String msg = actor + " discarded " + token;
+        return new CommandResult(game, msg, new CommandLogData.DiscardCardLog(actor, logRef));
     }
 
-    private String handlePlayCard(GameData game, PlayCard cmd, String actor) {
+    private CommandResult handlePlayCard(GameData game, PlayCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        // Playing a card always reveals it regardless of source region
+        boolean hiddenInTarget = cmd.targetRegionType() != null && !cmd.targetRegionType().otherVisibility();
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), hiddenInTarget);
         String token = cardToken(card);
         if (cmd.targetPlayerName() == null || cmd.targetRegionType() == null) {
             PlayerData owner = card.getOwner();
             if (owner != null) owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
-            return actor + " played " + token;
+            String msg = actor + " played " + token;
+            return new CommandResult(game, msg, new CommandLogData.PlayCardLog(actor, logRef));
         }
         PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
-        if (targetPlayer == null) return null;
+        if (targetPlayer == null) return CommandResult.silent(game);
         RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
         if (target != null) target.addCard(card, false);
-        return actor + " played " + token;
+        String msg = actor + " played " + token;
+        return new CommandResult(game, msg, new CommandLogData.PlayCardLog(actor, logRef));
     }
 
-    private String handleMoveCard(GameData game, MoveCard cmd, String actor) {
+    private CommandResult handleMoveCard(GameData game, MoveCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
-        String label = cardLabel(card, cmd.ref());
+        if (card == null) return CommandResult.silent(game);
+        // Show card name if it was visible at any point — source OR destination visible to all
+        RegionData sourceRegion = card.getRegion();
+        boolean sourceVisible = sourceRegion != null && sourceRegion.getType().otherVisibility();
+        boolean destVisible = cmd.targetRegionType().otherVisibility();
+        boolean hidden = !(sourceVisible || destVisible);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), hidden);
+        String label = hidden ? cardLabel(card, cmd.ref()) : cardToken(card);
         PlayerData targetPlayer = game.getPlayer(cmd.targetPlayerName());
-        if (targetPlayer == null) return null;
+        if (targetPlayer == null) return CommandResult.silent(game);
         RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
-        if (target == null) return null;
+        if (target == null) return CommandResult.silent(game);
         target.addCard(card, cmd.position());
-        return actor + " moved " + label + " to " + cmd.targetPlayerName() + "'s " + cmd.targetRegionType().description();
+        String msg = actor + " moved " + label + " to " + cmd.targetPlayerName() + "'s " + cmd.targetRegionType().description();
+        return new CommandResult(game, msg,
+                new CommandLogData.MoveCardLog(actor, logRef, cmd.targetPlayerName(), cmd.targetRegionType().name()));
     }
 
-    private String handleAttachCard(GameData game, AttachCard cmd, String actor) {
+    private CommandResult handleAttachCard(GameData game, AttachCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         CardData target = game.getCardByRef(cmd.targetRef());
-        if (card == null || target == null) return null;
+        if (card == null || target == null) return CommandResult.silent(game);
+        LogCardRef cardRef = LogCardRef.of(card, cmd.ref(), false);   // attaching reveals the card
+        LogCardRef targetRef = LogCardRef.of(target, cmd.targetRef(), false); // target is always in-play
         String cardToken = cardToken(card);
         String targetToken = cardToken(target);
         target.add(card, false);
-        return actor + " attached " + cardToken + " to " + targetToken;
+        String msg = actor + " attached " + cardToken + " to " + targetToken;
+        return new CommandResult(game, msg, new CommandLogData.AttachCardLog(actor, cardRef, targetRef));
     }
 
     // ── Card state ────────────────────────────────────────────────────────────
@@ -232,18 +260,22 @@ public class GameCommandService {
         unlockPlayerCards(game, cmd.playerName());
     }
 
-    private String handleAddCounter(GameData game, AddCounter cmd, String actor) {
+    private CommandResult handleAddCounter(GameData game, AddCounter cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), isHidden(card));
         card.setCounters(card.getCounters() + cmd.amount());
-        return actor + " added " + cmd.amount() + " counter(s) to " + cardLabel(card, cmd.ref());
+        String msg = actor + " added " + cmd.amount() + " counter(s) to " + cardLabel(card, cmd.ref());
+        return new CommandResult(game, msg, new CommandLogData.AddCounterLog(actor, logRef, cmd.amount()));
     }
 
-    private String handleRemoveCounter(GameData game, RemoveCounter cmd, String actor) {
+    private CommandResult handleRemoveCounter(GameData game, RemoveCounter cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), isHidden(card));
         card.setCounters(Math.max(0, card.getCounters() - cmd.amount()));
-        return actor + " removed " + cmd.amount() + " counter(s) from " + cardLabel(card, cmd.ref());
+        String msg = actor + " removed " + cmd.amount() + " counter(s) from " + cardLabel(card, cmd.ref());
+        return new CommandResult(game, msg, new CommandLogData.RemoveCounterLog(actor, logRef, cmd.amount()));
     }
 
     private void handleSetCardNotes(GameData game, SetCardNotes cmd) {
@@ -253,120 +285,139 @@ public class GameCommandService {
 
     // ── Pool / edge ───────────────────────────────────────────────────────────
 
-    private String handleSetPool(GameData game, SetPool cmd, String actor) {
+    private CommandResult handleSetPool(GameData game, SetPool cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
-        if (player == null) return null;
+        if (player == null) return CommandResult.silent(game);
         player.setPool(cmd.amount());
-        return actor + " set " + cmd.playerName() + "'s pool to " + cmd.amount();
+        String msg = actor + " set " + cmd.playerName() + "'s pool to " + cmd.amount();
+        return new CommandResult(game, msg, new CommandLogData.SetPoolLog(actor, cmd.playerName(), cmd.amount()));
     }
 
-    private String handleGainEdge(GameData game, GainEdge cmd, String actor) {
+    private CommandResult handleGainEdge(GameData game, GainEdge cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
         game.setEdge(player);
-        return actor + " gained the Edge";
+        String msg = actor + " gained the Edge";
+        return new CommandResult(game, msg, new CommandLogData.GainEdgeLog(actor));
     }
 
     // ── Influence / crypt ─────────────────────────────────────────────────────
 
-    private String handleTransferBlood(GameData game, TransferBlood cmd, String actor) {
+    private CommandResult handleTransferBlood(GameData game, TransferBlood cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
         PlayerData controller = card.getController();
-        if (controller == null) return null;
+        if (controller == null) return CommandResult.silent(game);
+        // Vampires being influenced (UNCONTROLLED) are public knowledge; their identity is always visible
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         int amount = cmd.amount();
         // positive = pool → card, negative = card → pool
         controller.setPool(Math.max(0, controller.getPool() - amount));
         card.setCounters(Math.max(0, card.getCounters() + amount));
         String label = cardLabel(card, cmd.ref());
-        if (amount > 0) {
-            return actor + " transferred " + amount + " blood to " + label;
-        } else {
-            return actor + " transferred " + Math.abs(amount) + " blood from " + label;
-        }
+        String msg = amount > 0
+                ? actor + " transferred " + amount + " blood to " + label
+                : actor + " transferred " + Math.abs(amount) + " blood from " + label;
+        return new CommandResult(game, msg, new CommandLogData.TransferBloodLog(actor, logRef, amount));
     }
 
-    private String handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
-        if (cmd.ref().regionType() != RegionType.UNCONTROLLED) return null;
+    private CommandResult handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
+        if (cmd.ref().regionType() != RegionType.UNCONTROLLED) return CommandResult.silent(game);
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
-        if (owner == null) return null;
+        if (owner == null) return CommandResult.silent(game);
         owner.getRegion(RegionType.READY).addCard(card, false);
-        return actor + " moved " + token + " to the Ready region";
+        String msg = actor + " moved " + token + " to the Ready region";
+        return new CommandResult(game, msg, new CommandLogData.InfluenceCardLog(actor, logRef));
     }
 
-    private String handleMoveToCrypt(GameData game, MoveToCrypt cmd, String actor) {
+    private CommandResult handleMoveToCrypt(GameData game, MoveToCrypt cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
-        if (owner == null) return null;
+        if (owner == null) return CommandResult.silent(game);
         card.setCounters(0);
         owner.getRegion(RegionType.CRYPT).addCard(card, false);
-        return actor + " returned " + token + " to the Crypt";
+        String msg = actor + " returned " + token + " to the Crypt";
+        return new CommandResult(game, msg, new CommandLogData.MoveToCryptLog(actor, logRef));
     }
 
     // ── Minion state ──────────────────────────────────────────────────────────
 
-    private String handleMoveToTorpor(GameData game, MoveToTorpor cmd, String actor) {
+    private CommandResult handleMoveToTorpor(GameData game, MoveToTorpor cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
-        if (owner == null) return null;
+        if (owner == null) return CommandResult.silent(game);
         owner.getRegion(RegionType.TORPOR).addCard(card, false);
-        return actor + " sent " + token + " to Torpor";
+        String msg = actor + " sent " + token + " to Torpor";
+        return new CommandResult(game, msg, new CommandLogData.MoveToTorporLog(actor, logRef));
     }
 
-    private String handleRescueFromTorpor(GameData game, RescueFromTorpor cmd, String actor) {
+    private CommandResult handleRescueFromTorpor(GameData game, RescueFromTorpor cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
-        if (owner == null) return null;
+        if (owner == null) return CommandResult.silent(game);
         owner.getRegion(RegionType.READY).addCard(card, false);
-        return actor + " rescued " + token + " from Torpor";
+        String msg = actor + " rescued " + token + " from Torpor";
+        return new CommandResult(game, msg, new CommandLogData.RescueFromTorporLog(actor, logRef));
     }
 
-    private String handleBurnMinion(GameData game, BurnMinion cmd, String actor) {
+    private CommandResult handleBurnMinion(GameData game, BurnMinion cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
-        if (owner == null) return null;
+        if (owner == null) return CommandResult.silent(game);
         owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
-        return actor + " burned " + token;
+        String msg = actor + " burned " + token;
+        return new CommandResult(game, msg, new CommandLogData.BurnMinionLog(actor, logRef));
     }
 
     // ── Contesting / title ────────────────────────────────────────────────────
 
-    private String handleContestCard(GameData game, ContestCard cmd, String actor) {
+    private CommandResult handleContestCard(GameData game, ContestCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         card.setContested(true);
-        return actor + " contested " + cardToken(card);
+        String msg = actor + " contested " + cardToken(card);
+        return new CommandResult(game, msg, new CommandLogData.ContestCardLog(actor, logRef));
     }
 
-    private String handleClearContestCard(GameData game, ClearContestCard cmd, String actor) {
+    private CommandResult handleClearContestCard(GameData game, ClearContestCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         card.setContested(false);
-        return actor + " uncontested " + cardToken(card);
+        String msg = actor + " uncontested " + cardToken(card);
+        return new CommandResult(game, msg, new CommandLogData.ClearContestCardLog(actor, logRef));
     }
 
-    private String handleSetTitle(GameData game, SetTitle cmd, String actor) {
+    private CommandResult handleSetTitle(GameData game, SetTitle cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
-        if (card == null) return null;
+        if (card == null) return CommandResult.silent(game);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         card.setTitle(cmd.title());
-        return actor + " set " + cardToken(card) + "'s title to " + cmd.title();
+        String msg = actor + " set " + cardToken(card) + "'s title to " + cmd.title();
+        return new CommandResult(game, msg, new CommandLogData.SetTitleLog(actor, logRef, cmd.title()));
     }
 
     // ── Player ────────────────────────────────────────────────────────────────
 
-    private String handleOustPlayer(GameData game, OustPlayer cmd, String actor) {
+    private CommandResult handleOustPlayer(GameData game, OustPlayer cmd, String actor) {
         PlayerData ousted = game.getPlayer(cmd.playerName());
-        if (ousted == null) return null;
+        if (ousted == null) return CommandResult.silent(game);
         ousted.setOusted(true);
 
         // Award 1 VP to the predator (if any)
@@ -383,7 +434,8 @@ public class GameCommandService {
             handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
         }
 
-        return actor + " ousted " + cmd.playerName();
+        String msg = actor + " ousted " + cmd.playerName();
+        return new CommandResult(game, msg, new CommandLogData.OustPlayerLog(actor, cmd.playerName()));
     }
 
     private void handleSetChoice(GameData game, SetChoice cmd) {
@@ -391,9 +443,10 @@ public class GameCommandService {
         if (player != null) player.setChoice(cmd.choice());
     }
 
-    private String handleReverseOrder(GameData game, ReverseOrder cmd, String actor) {
+    private CommandResult handleReverseOrder(GameData game, ReverseOrder cmd, String actor) {
         game.setOrderOfPlayReversed(!game.isOrderOfPlayReversed());
-        return actor + " reversed the order of play";
+        String msg = actor + " reversed the order of play";
+        return new CommandResult(game, msg, new CommandLogData.ReverseOrderLog(actor));
     }
 
     private void handleSetGameNotes(GameData game, SetGameNotes cmd) {
@@ -419,6 +472,13 @@ public class GameCommandService {
             return "a card in " + ownerName + "'s " + type.description();
         }
         return cardToken(card);
+    }
+
+    private boolean isHidden(CardData card) {
+        RegionData region = card.getRegion();
+        if (region == null) return false;
+        RegionType type = region.getType();
+        return type == RegionType.UNCONTROLLED || RegionType.OTHER_HIDDEN_REGIONS.contains(type);
     }
 
     private void unlockPlayerCards(GameData game, String playerName) {
