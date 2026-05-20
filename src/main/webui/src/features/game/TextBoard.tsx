@@ -8,6 +8,7 @@ import type {CardRef, GameCommand} from './gameCommands.ts';
 import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import {DisciplineIcon} from '@/shared/components/DisciplineIcon.tsx';
 import {ClanIcon} from '@/shared/components/ClanIcon.tsx';
+import {TextHandPanel} from './TextHandPanel.tsx';
 
 type TextBoardProps = {
     orderedPlayers: PlayerState[];
@@ -256,8 +257,12 @@ function PlayerColumn({
     const regions = useMemo(
         () => REGION_ORDER
             .map(type => player.regions[type])
-            .filter((r): r is RegionState => r != null && (!HIDE_WHEN_EMPTY.has(r.type) || r.count > 0)),
-        [player.regions],
+            .filter((r): r is RegionState =>
+                r != null &&
+                (!HIDE_WHEN_EMPTY.has(r.type) || r.count > 0) &&
+                !(isCurrentUser && r.type === 'HAND'),
+            ),
+        [player.regions, isCurrentUser],
     );
 
     // Resolve card data by position ID without using UUIDs as external identifiers.
@@ -503,19 +508,34 @@ function PlayerColumn({
 // ── TextBoard ─────────────────────────────────────────────────────────────────
 
 export function TextBoard({orderedPlayers, cards, currentUser, gameId, onCommand, onCardContextMenu}: TextBoardProps) {
+    const hand = orderedPlayers.find(p => p.name === currentUser)?.regions['HAND'];
     return (
-        <div className="flex gap-2 h-full min-h-0 overflow-x-auto">
-            {orderedPlayers.map(player => (
-                <PlayerColumn
-                    key={player.name}
-                    player={player}
+        <div className="flex gap-2 h-full min-h-0">
+            {hand && (
+                <TextHandPanel
+                    playerName={currentUser}
+                    hand={hand}
                     cards={cards}
-                    isCurrentUser={player.name === currentUser}
                     gameId={gameId}
                     onCommand={onCommand}
                     onCardContextMenu={onCardContextMenu}
                 />
-            ))}
+            )}
+            <div className="flex-1 min-w-0 overflow-x-auto">
+                <div className="flex gap-2 h-full min-h-0">
+                    {orderedPlayers.map(player => (
+                        <PlayerColumn
+                            key={player.name}
+                            player={player}
+                            cards={cards}
+                            isCurrentUser={player.name === currentUser}
+                            gameId={gameId}
+                            onCommand={onCommand}
+                            onCardContextMenu={onCardContextMenu}
+                        />
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }

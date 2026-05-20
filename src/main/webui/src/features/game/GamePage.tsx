@@ -219,8 +219,8 @@ export default function GamePage() {
                         </div>
                     )}
 
-                    {/* Hand tray — below board on lg+, above chat on mobile */}
-                    {user && gameState && (() => {
+                    {/* Hand tray — below board on lg+, above chat on mobile (text layout uses TextHandPanel instead) */}
+                    {boardLayout !== 'text' && user && gameState && (() => {
                         const hand = gameState.players.find(p => p.name === user.username)?.regions['HAND'];
                         if (!hand) return null;
                         return (
