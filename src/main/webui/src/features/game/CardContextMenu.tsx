@@ -4,10 +4,10 @@ import {createPortal} from 'react-dom';
 import type {CardData} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {
-    addCounter, burnMinion, contestCard, discardCard, influenceOff, influenceOn,
+    addCounter, burnMinion, contestCard, discardCard, transferBloodOff, transferBloodOn,
     lockCard, moveToTorpor, playCard, removeCounter, rescueFromTorpor,
-    setCardNotes, setTitle, transferPoolOff, transferPoolOn,
-    uncontestCard, unlockCard,
+    setCardNotes, setTitle,
+    clearContestCard, unlockCard,
 } from './gameCommands.ts';
 import Input from '@/shared/components/Input.tsx';
 import {ClanIcon} from '@/shared/components/ClanIcon.tsx';
@@ -157,22 +157,12 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                                 </span>
                                 <CounterBtn
                                     disabled={playerPool === 0}
-                                    onClick={() => onCommand(
-                                        region === 'UNCONTROLLED'
-                                            ? influenceOn(gameId, cardRef)
-                                            : transferPoolOn(gameId, cardRef.playerName, cardRef)
-                                    )}
+                                    onClick={() => onCommand(transferBloodOn(gameId, cardRef))}
                                 >←</CounterBtn>
-                                <span className="text-xs text-ink-muted flex-1 text-center">
-                                    {region === 'UNCONTROLLED' ? 'Influence' : 'Transfer'}
-                                </span>
+                                <span className="text-xs text-ink-muted flex-1 text-center">Transfer</span>
                                 <CounterBtn
                                     disabled={(card.counters ?? 0) === 0}
-                                    onClick={() => onCommand(
-                                        region === 'UNCONTROLLED'
-                                            ? influenceOff(gameId, cardRef)
-                                            : transferPoolOff(gameId, cardRef.playerName, cardRef)
-                                    )}
+                                    onClick={() => onCommand(transferBloodOff(gameId, cardRef))}
                                 >→</CounterBtn>
                                 <span className="text-sm font-mono text-gold tabular-nums min-w-[1.5ch] text-center">
                                     {playerPool}
@@ -210,7 +200,7 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                 <>
                     {SEP}
                     {card.contested ? (
-                        <button className={ITEM} onClick={() => fire(uncontestCard(gameId, cardRef))}>Uncontest</button>
+                        <button className={ITEM} onClick={() => fire(clearContestCard(gameId, cardRef))}>Uncontest</button>
                     ) : (
                         <button className={ITEM} onClick={() => fire(contestCard(gameId, cardRef))}>Contest</button>
                     )}

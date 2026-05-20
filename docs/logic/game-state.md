@@ -187,12 +187,11 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `PlayCard`          | `ref`, `targetPlayerName`, `targetRegionType`               | `HAND` or `RESEARCH` → any (default: owner `ASH_HEAP`) | Move a card to a target region; discards if no target given   |
 | `MoveCard`          | `ref`, `targetPlayerName`, `targetRegionType`, `position`   | any → any                                              | Move a card to any region at a given position                 |
 | `AttachCard`        | `ref`, `targetRef`                                          | any → child of target card (typically `READY`)         | Attach a card to another card (e.g., retainer to vampire)     |
-| `MoveToReady`       | `ref`                                                       | `UNCONTROLLED` → owner `READY`                         | Move a fully influenced vampire to the Ready region           |
+| `InfluenceCard`     | `ref`                                                       | `UNCONTROLLED` → owner `READY`                         | Move a fully influenced vampire/imbued to the Ready region    |
 | `MoveToCrypt`       | `ref`                                                       | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)             |
 | `MoveToTorpor`      | `ref`                                                       | `READY` → owner `TORPOR`                               | Move a minion to Torpor                                       |
 | `RescueFromTorpor`  | `ref`                                                       | `TORPOR` → owner `READY`                               | Move a minion from Torpor to Ready                            |
 | `BurnMinion`        | `ref`                                                       | `READY` or `TORPOR` → owner `ASH_HEAP`                 | Remove a minion from play entirely                            |
-| `TransferBlood`  | `ref`, `amount`                                             | `UNCONTROLLED` (ref); pool → card counters             | Transfer blood from the owner's pool to an uncontrolled vampire |
 
 ### Card state
 | Command          | Fields (besides `gameId`)  | Valid `ref` region(s)          | Description                                               |
@@ -204,14 +203,14 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `RemoveCounter`  | `ref`, `amount`            | any                            | Decrement a card's counter (floor 0)                      |
 | `SetCardNotes`   | `ref`, `notes`             | any                            | Set freeform notes on a card                              |
 | `ContestCard`    | `ref`                      | any                            | Mark a card as contested                                  |
-| `UncontestCard`  | `ref`                      | any                            | Clear the contested flag                                  |
+| `ClearContestCard` | `ref`                    | any                            | Clear the contested flag                                  |
 | `SetTitle`       | `ref`, `title`             | any (typically `READY`)        | Set or clear a vampire's title                            |
 
 ### Player state
 | Command         | Fields (besides `gameId`)            | Valid `ref` region(s)               | Description                                                |
 |-----------------|--------------------------------------|-------------------------------------|------------------------------------------------------------|
 | `SetPool`       | `playerName`, `amount`               | —                                   | Set a player's pool to an absolute value                   |
-| `TransferPool`  | `playerName`, `ref`, `amount`        | any (typically `UNCONTROLLED`, `READY`) | Transfer blood between a player's pool and a card       |
+| `TransferBlood` | `ref`, `amount`                      | `READY`, `TORPOR`, `UNCONTROLLED` (see card movement)   | Transfer blood between controller's pool and a card     |
 | `GainEdge`      | `playerName`                         | —                                   | Award the edge to a player                                 |
 | `OustPlayer`    | `playerName`                         | —                                   | Mark a player as ousted                                    |
 | `SetChoice`     | `playerName`, `choice`               | —                                   | Set a player's choice flag                                 |

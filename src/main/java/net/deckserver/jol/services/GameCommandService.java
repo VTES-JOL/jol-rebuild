@@ -68,16 +68,15 @@ public class GameCommandService {
             case RemoveCounter c    -> handleRemoveCounter(game, c, actor);
             case SetCardNotes c     -> { handleSetCardNotes(game, c); yield null; }
             case SetPool c          -> handleSetPool(game, c, actor);
-            case TransferPool c     -> handleTransferPool(game, c, actor);
             case GainEdge c         -> handleGainEdge(game, c, actor);
             case TransferBlood c    -> handleTransferBlood(game, c, actor);
-            case MoveToReady c      -> handleMoveToReady(game, c, actor);
+            case InfluenceCard c    -> handleInfluenceCard(game, c, actor);
             case MoveToCrypt c      -> handleMoveToCrypt(game, c, actor);
             case MoveToTorpor c     -> handleMoveToTorpor(game, c, actor);
             case RescueFromTorpor c -> handleRescueFromTorpor(game, c, actor);
             case BurnMinion c       -> handleBurnMinion(game, c, actor);
             case ContestCard c      -> handleContestCard(game, c, actor);
-            case UncontestCard c    -> handleUncontestCard(game, c, actor);
+            case ClearContestCard c -> handleClearContestCard(game, c, actor);
             case SetTitle c         -> handleSetTitle(game, c, actor);
             case OustPlayer c       -> handleOustPlayer(game, c, actor);
             case SetChoice c        -> { handleSetChoice(game, c); yield null; }
@@ -261,22 +260,6 @@ public class GameCommandService {
         return actor + " set " + cmd.playerName() + "'s pool to " + cmd.amount();
     }
 
-    private String handleTransferPool(GameData game, TransferPool cmd, String actor) {
-        PlayerData player = game.getPlayer(cmd.playerName());
-        CardData card = game.getCardByRef(cmd.ref());
-        if (player == null || card == null) return null;
-        int amount = cmd.amount();
-        // positive = pool → card, negative = card → pool
-        player.setPool(Math.max(0, player.getPool() + (-amount)));
-        card.setCounters(Math.max(0, card.getCounters() + amount));
-        String label = cardLabel(card, cmd.ref());
-        if (amount > 0) {
-            return actor + " transferred " + amount + " blood to " + label;
-        } else {
-            return actor + " transferred " + Math.abs(amount) + " blood from " + label;
-        }
-    }
-
     private String handleGainEdge(GameData game, GainEdge cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
         game.setEdge(player);
@@ -288,20 +271,22 @@ public class GameCommandService {
     private String handleTransferBlood(GameData game, TransferBlood cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
-        PlayerData owner = card.getOwner();
-        if (owner == null) return null;
-        int amount = Math.min(cmd.amount(), owner.getPool());
-        owner.setPool(owner.getPool() - amount);
-        card.setCounters(card.getCounters() + amount);
+        PlayerData controller = card.getController();
+        if (controller == null) return null;
+        int amount = cmd.amount();
+        // positive = pool → card, negative = card → pool
+        controller.setPool(Math.max(0, controller.getPool() - amount));
+        card.setCounters(Math.max(0, card.getCounters() + amount));
         String label = cardLabel(card, cmd.ref());
-        if (cmd.amount() > 0) {
+        if (amount > 0) {
             return actor + " transferred " + amount + " blood to " + label;
         } else {
             return actor + " transferred " + Math.abs(amount) + " blood from " + label;
         }
     }
 
-    private String handleMoveToReady(GameData game, MoveToReady cmd, String actor) {
+    private String handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
+        if (cmd.ref().regionType() != RegionType.UNCONTROLLED) return null;
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
         String token = cardToken(card);
@@ -363,7 +348,7 @@ public class GameCommandService {
         return actor + " contested " + cardToken(card);
     }
 
-    private String handleUncontestCard(GameData game, UncontestCard cmd, String actor) {
+    private String handleClearContestCard(GameData game, ClearContestCard cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
         card.setContested(false);

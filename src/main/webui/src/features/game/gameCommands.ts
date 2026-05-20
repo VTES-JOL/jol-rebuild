@@ -38,22 +38,15 @@ export type AddCounterCommand = { type: 'ADD_COUNTER'; gameId: string; ref: Card
 export type RemoveCounterCommand = { type: 'REMOVE_COUNTER'; gameId: string; ref: CardRef; amount: number };
 export type SetCardNotesCommand = { type: 'SET_CARD_NOTES'; gameId: string; ref: CardRef; notes: string };
 export type SetPoolCommand = { type: 'SET_POOL'; gameId: string; playerName: string; amount: number };
-export type TransferPoolCommand = {
-    type: 'TRANSFER_POOL';
-    gameId: string;
-    playerName: string;
-    ref: CardRef;
-    amount: number
-};
 export type GainEdgeCommand = { type: 'GAIN_EDGE'; gameId: string };
 export type TransferBloodCommand = { type: 'TRANSFER_BLOOD'; gameId: string; ref: CardRef; amount: number };
-export type MoveToReadyCommand = { type: 'MOVE_TO_READY'; gameId: string; ref: CardRef };
+export type InfluenceCardCommand = { type: 'INFLUENCE_CARD'; gameId: string; ref: CardRef };
 export type MoveToCryptCommand = { type: 'MOVE_TO_CRYPT'; gameId: string; ref: CardRef };
 export type MoveToTorporCommand = { type: 'MOVE_TO_TORPOR'; gameId: string; ref: CardRef };
 export type RescueFromTorporCommand = { type: 'RESCUE_FROM_TORPOR'; gameId: string; ref: CardRef };
 export type BurnMinionCommand = { type: 'BURN_MINION'; gameId: string; ref: CardRef };
 export type ContestCardCommand = { type: 'CONTEST_CARD'; gameId: string; ref: CardRef };
-export type UncontestCardCommand = { type: 'UNCONTEST_CARD'; gameId: string; ref: CardRef };
+export type ClearContestCardCommand = { type: 'CLEAR_CONTEST_CARD'; gameId: string; ref: CardRef };
 export type SetTitleCommand = { type: 'SET_TITLE'; gameId: string; ref: CardRef; title: string };
 export type OustPlayerCommand = { type: 'OUST_PLAYER'; gameId: string; playerName: string };
 export type SetChoiceCommand = { type: 'SET_CHOICE'; gameId: string; choice: string };
@@ -66,10 +59,10 @@ export type GameCommand =
     | DiscardCardCommand | PlayCardCommand | MoveCardCommand | AttachCardCommand
     | LockCardCommand | UnlockCardCommand | UnlockAllCommand
     | AddCounterCommand | RemoveCounterCommand | SetCardNotesCommand
-    | SetPoolCommand | TransferPoolCommand | GainEdgeCommand
-    | TransferBloodCommand | MoveToReadyCommand | MoveToCryptCommand
+    | SetPoolCommand | GainEdgeCommand
+    | TransferBloodCommand | InfluenceCardCommand | MoveToCryptCommand
     | MoveToTorporCommand | RescueFromTorporCommand | BurnMinionCommand
-    | ContestCardCommand | UncontestCardCommand | SetTitleCommand
+    | ContestCardCommand | ClearContestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
@@ -124,8 +117,8 @@ export function contestCard(gameId: string, ref: CardRef): ContestCardCommand {
     return {type: 'CONTEST_CARD', gameId, ref};
 }
 
-export function uncontestCard(gameId: string, ref: CardRef): UncontestCardCommand {
-    return {type: 'UNCONTEST_CARD', gameId, ref};
+export function clearContestCard(gameId: string, ref: CardRef): ClearContestCardCommand {
+    return {type: 'CLEAR_CONTEST_CARD', gameId, ref};
 }
 
 export function setTitle(gameId: string, ref: CardRef, title: string): SetTitleCommand {
@@ -136,22 +129,17 @@ export function setCardNotes(gameId: string, ref: CardRef, notes: string): SetCa
     return {type: 'SET_CARD_NOTES', gameId, ref, notes};
 }
 
-/** Move 1 blood from the controller's pool onto a card (READY / TORPOR). */
-export function transferPoolOn(gameId: string, playerName: string, ref: CardRef): TransferPoolCommand {
-    return {type: 'TRANSFER_POOL', gameId, playerName, ref, amount: 1};
-}
-
-/** Move 1 blood from a card back to the controller's pool (READY / TORPOR). */
-export function transferPoolOff(gameId: string, playerName: string, ref: CardRef): TransferPoolCommand {
-    return {type: 'TRANSFER_POOL', gameId, playerName, ref, amount: -1};
-}
-
-/** Move 1 blood from the owner's pool onto an uncontrolled vampire. */
-export function influenceOn(gameId: string, ref: CardRef): TransferBloodCommand {
+/** Move blood from the controller's pool onto a card (READY, TORPOR, or UNCONTROLLED). */
+export function transferBloodOn(gameId: string, ref: CardRef): TransferBloodCommand {
     return {type: 'TRANSFER_BLOOD', gameId, ref, amount: 1};
 }
 
-/** Move 1 blood from an uncontrolled vampire back to the owner's pool. */
-export function influenceOff(gameId: string, ref: CardRef): TransferBloodCommand {
+/** Move blood from a card back to the controller's pool (READY, TORPOR, or UNCONTROLLED). */
+export function transferBloodOff(gameId: string, ref: CardRef): TransferBloodCommand {
     return {type: 'TRANSFER_BLOOD', gameId, ref, amount: -1};
+}
+
+/** Move a fully influenced vampire/imbued from UNCONTROLLED to the READY region. */
+export function influenceCard(gameId: string, ref: CardRef): InfluenceCardCommand {
+    return {type: 'INFLUENCE_CARD', gameId, ref};
 }

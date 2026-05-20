@@ -190,13 +190,13 @@ class GameServiceTest {
     }
 
     @Test
-    void transferPool_movesBloodBetweenPoolAndCard() {
+    void transferBlood_movesBloodBetweenPoolAndCard() {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
         CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
 
-        gameCommandService.execute(actor, new TransferPool(gameId, actor, ref, 3));
+        gameCommandService.execute(actor, new TransferBlood(gameId, ref, 3));
 
         assertEquals(27, gd.getPlayer(actor).getPool());
         assertEquals(3,  card.getCounters());
@@ -225,7 +225,7 @@ class GameServiceTest {
         CardData card = getFirstUncontrolledCard(gd, actor);
 
         // Move card to READY (IN_PLAY_REGIONS), then lock it
-        gameCommandService.execute(actor, new MoveToReady(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
+        gameCommandService.execute(actor, new InfluenceCard(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
         gameCommandService.execute(actor, new LockCard(gameId, CardRef.of(actor, RegionType.READY, 0)));
         assertTrue(card.isLocked());
 
@@ -261,12 +261,12 @@ class GameServiceTest {
     }
 
     @Test
-    void moveToReady_movesCardFromUncontrolled() {
+    void influenceCard_movesCardFromUncontrolled() {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
 
-        gameCommandService.execute(actor, new MoveToReady(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
+        gameCommandService.execute(actor, new InfluenceCard(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
 
         PlayerData player = gd.getPlayer(actor);
         assertTrue(player.getRegion(RegionType.READY).getCards().contains(card));
