@@ -225,7 +225,7 @@ The menu is opened via `onCardContextMenu` callbacks wired in `PlayerBoard` for 
 - Blood `−` is disabled when `card.counters === 0`.
 - Pool `→` (pool → card) is disabled when `playerPool === 0`.
 - Pool `←` (card → pool) is disabled when `card.counters === 0`.
-- For **UNCONTROLLED** region: pool arrows dispatch `INFLUENCE_VAMPIRE` (amount ±1).
+- For **UNCONTROLLED** region: pool arrows dispatch `TRANSFER_BLOOD` (amount ±1).
 - For **READY / TORPOR**: pool arrows dispatch `TRANSFER_POOL` (amount ±1).
 - Counter ± buttons dispatch `ADD_COUNTER` / `REMOVE_COUNTER` and do **not** close the menu, so rapid adjustments are possible.
 - All other items (move, burn, contest, etc.) close the menu immediately after dispatching.

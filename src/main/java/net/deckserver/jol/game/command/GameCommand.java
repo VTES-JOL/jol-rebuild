@@ -25,7 +25,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = SetPool.class,           name = "SET_POOL"),
     @JsonSubTypes.Type(value = TransferPool.class,      name = "TRANSFER_POOL"),
     @JsonSubTypes.Type(value = GainEdge.class,          name = "GAIN_EDGE"),
-    @JsonSubTypes.Type(value = InfluenceVampire.class,  name = "INFLUENCE_VAMPIRE"),
+    @JsonSubTypes.Type(value = TransferBlood.class,      name = "TRANSFER_BLOOD"),
     @JsonSubTypes.Type(value = MoveToReady.class,       name = "MOVE_TO_READY"),
     @JsonSubTypes.Type(value = MoveToCrypt.class,       name = "MOVE_TO_CRYPT"),
     @JsonSubTypes.Type(value = MoveToTorpor.class,      name = "MOVE_TO_TORPOR"),
@@ -46,7 +46,7 @@ public sealed interface GameCommand
             LockCard, UnlockCard, UnlockAll,
             AddCounter, RemoveCounter, SetCardNotes,
             SetPool, TransferPool, GainEdge,
-            InfluenceVampire, MoveToReady, MoveToCrypt,
+            TransferBlood, MoveToReady, MoveToCrypt,
             MoveToTorpor, RescueFromTorpor, BurnMinion,
             ContestCard, UncontestCard, SetTitle,
             OustPlayer, SetChoice, ReverseOrder, SetGameNotes {

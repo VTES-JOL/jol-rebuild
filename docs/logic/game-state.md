@@ -174,48 +174,48 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `NextTurn`     | Advance to the next non-ousted player's turn directly        |
 
 ### Deck operations
-| Command          | Fields (besides `gameId`)        | Description                                                |
-|------------------|----------------------------------|------------------------------------------------------------|
-| `DrawCard`       | `count`                          | Draw `count` cards from library to hand                    |
-| `ShuffleLibrary` | —                                | Shuffle the actor's library                                |
-| `ShuffleCrypt`   | —                                | Shuffle the actor's crypt                                  |
-| `DiscardCard`    | `ref: CardRef`                   | Move a card from hand to ash heap                          |
+| Command          | Fields (besides `gameId`)  | Source → Target                  | Description                                 |
+|------------------|----------------------------|----------------------------------|---------------------------------------------|
+| `DrawCard`       | `count`                    | `LIBRARY` → `HAND` (actor)       | Draw `count` cards from library to hand     |
+| `ShuffleLibrary` | —                          | `LIBRARY` (actor, in-place)      | Shuffle the actor's library                 |
+| `ShuffleCrypt`   | —                          | `CRYPT` (actor, in-place)        | Shuffle the actor's crypt                   |
+| `DiscardCard`    | `ref: CardRef`             | `HAND` → `ASH_HEAP` (owner)      | Move a card from hand to ash heap           |
 
 ### Card movement
-| Command             | Fields (besides `gameId`)                                   | Description                                                   |
-|---------------------|-------------------------------------------------------------|---------------------------------------------------------------|
-| `PlayCard`          | `ref`, `targetPlayerName`, `targetRegionType`               | Move a card to a target region; discards if no target given   |
-| `MoveCard`          | `ref`, `targetPlayerName`, `targetRegionType`, `position`   | Move a card to any region at a given position                 |
-| `AttachCard`        | `ref`, `targetRef`                                          | Attach a card to another card (e.g., retainer to vampire)     |
-| `MoveToReady`       | `ref`                                                       | Move a card to the owner's Ready region                       |
-| `MoveToCrypt`       | `ref`                                                       | Move a card to the owner's Crypt (bottom)                     |
-| `MoveToTorpor`      | `ref`                                                       | Move a minion to Torpor                                       |
-| `RescueFromTorpor`  | `ref`                                                       | Move a minion from Torpor to Ready                            |
-| `BurnMinion`        | `ref`                                                       | Remove a minion from play entirely (to ash heap)              |
-| `InfluenceVampire`  | `ref`, `amount`                                             | Transfer blood from the owner's pool to an uncontrolled vampire |
+| Command             | Fields (besides `gameId`)                                   | Source → Target                                        | Description                                                   |
+|---------------------|-------------------------------------------------------------|--------------------------------------------------------|---------------------------------------------------------------|
+| `PlayCard`          | `ref`, `targetPlayerName`, `targetRegionType`               | `HAND` or `RESEARCH` → any (default: owner `ASH_HEAP`) | Move a card to a target region; discards if no target given   |
+| `MoveCard`          | `ref`, `targetPlayerName`, `targetRegionType`, `position`   | any → any                                              | Move a card to any region at a given position                 |
+| `AttachCard`        | `ref`, `targetRef`                                          | any → child of target card (typically `READY`)         | Attach a card to another card (e.g., retainer to vampire)     |
+| `MoveToReady`       | `ref`                                                       | `UNCONTROLLED` → owner `READY`                         | Move a fully influenced vampire to the Ready region           |
+| `MoveToCrypt`       | `ref`                                                       | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)             |
+| `MoveToTorpor`      | `ref`                                                       | `READY` → owner `TORPOR`                               | Move a minion to Torpor                                       |
+| `RescueFromTorpor`  | `ref`                                                       | `TORPOR` → owner `READY`                               | Move a minion from Torpor to Ready                            |
+| `BurnMinion`        | `ref`                                                       | `READY` or `TORPOR` → owner `ASH_HEAP`                 | Remove a minion from play entirely                            |
+| `TransferBlood`  | `ref`, `amount`                                             | `UNCONTROLLED` (ref); pool → card counters             | Transfer blood from the owner's pool to an uncontrolled vampire |
 
 ### Card state
-| Command          | Fields (besides `gameId`)  | Description                                               |
-|------------------|----------------------------|-----------------------------------------------------------|
-| `LockCard`       | `ref`                      | Lock (tap) a card                                         |
-| `UnlockCard`     | `ref`                      | Unlock (untap) a card                                     |
-| `UnlockAll`      | `playerName`               | Unlock all cards for a player                             |
-| `AddCounter`     | `ref`, `amount`            | Increment a card's counter                                |
-| `RemoveCounter`  | `ref`, `amount`            | Decrement a card's counter                                |
-| `SetCardNotes`   | `ref`, `notes`             | Set freeform notes on a card                              |
-| `ContestCard`    | `ref`                      | Mark a card as contested                                  |
-| `UncontestCard`  | `ref`                      | Clear the contested flag                                  |
-| `SetTitle`       | `ref`, `title`             | Set or clear a vampire's title                            |
+| Command          | Fields (besides `gameId`)  | Valid `ref` region(s)          | Description                                               |
+|------------------|----------------------------|--------------------------------|-----------------------------------------------------------|
+| `LockCard`       | `ref`                      | any                            | Lock (tap) a card                                         |
+| `UnlockCard`     | `ref`                      | any                            | Unlock (untap) a card                                     |
+| `UnlockAll`      | `playerName`               | — (affects `READY`, `TORPOR`)  | Unlock all in-play cards for a player                     |
+| `AddCounter`     | `ref`, `amount`            | any                            | Increment a card's counter                                |
+| `RemoveCounter`  | `ref`, `amount`            | any                            | Decrement a card's counter (floor 0)                      |
+| `SetCardNotes`   | `ref`, `notes`             | any                            | Set freeform notes on a card                              |
+| `ContestCard`    | `ref`                      | any                            | Mark a card as contested                                  |
+| `UncontestCard`  | `ref`                      | any                            | Clear the contested flag                                  |
+| `SetTitle`       | `ref`, `title`             | any (typically `READY`)        | Set or clear a vampire's title                            |
 
 ### Player state
-| Command         | Fields (besides `gameId`)            | Description                                                |
-|-----------------|--------------------------------------|------------------------------------------------------------|
-| `SetPool`       | `playerName`, `amount`               | Set a player's pool to an absolute value                   |
-| `TransferPool`  | `playerName`, `ref`, `amount`        | Transfer blood between a player's pool and a card          |
-| `GainEdge`      | `playerName`                         | Award the edge to a player                                 |
-| `OustPlayer`    | `playerName`                         | Mark a player as ousted                                    |
-| `SetChoice`     | `choice`                             | Set a player's choice flag                                 |
-| `ReverseOrder`  | —                                    | Toggle the order-of-play reversal flag                     |
+| Command         | Fields (besides `gameId`)            | Valid `ref` region(s)               | Description                                                |
+|-----------------|--------------------------------------|-------------------------------------|------------------------------------------------------------|
+| `SetPool`       | `playerName`, `amount`               | —                                   | Set a player's pool to an absolute value                   |
+| `TransferPool`  | `playerName`, `ref`, `amount`        | any (typically `UNCONTROLLED`, `READY`) | Transfer blood between a player's pool and a card       |
+| `GainEdge`      | `playerName`                         | —                                   | Award the edge to a player                                 |
+| `OustPlayer`    | `playerName`                         | —                                   | Mark a player as ousted                                    |
+| `SetChoice`     | `playerName`, `choice`               | —                                   | Set a player's choice flag                                 |
+| `ReverseOrder`  | —                                    | —                                   | Toggle the order-of-play reversal flag                     |
 
 ### Game state
 | Command         | Description                       |

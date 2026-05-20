@@ -9,37 +9,56 @@ export function cardRef(playerName: string, regionType: RegionType, position: nu
     return {playerName, regionType, position, childIndex};
 }
 
-export type AdvancePhaseCommand   = { type: 'ADVANCE_PHASE';   gameId: string };
-export type NextTurnCommand       = { type: 'NEXT_TURN';       gameId: string };
-export type DrawCardCommand       = { type: 'DRAW_CARD';       gameId: string };
+export type AdvancePhaseCommand = { type: 'ADVANCE_PHASE'; gameId: string };
+export type NextTurnCommand = { type: 'NEXT_TURN'; gameId: string };
+export type DrawCardCommand = { type: 'DRAW_CARD'; gameId: string };
 export type ShuffleLibraryCommand = { type: 'SHUFFLE_LIBRARY'; gameId: string };
-export type ShuffleCryptCommand   = { type: 'SHUFFLE_CRYPT';   gameId: string };
-export type DiscardCardCommand    = { type: 'DISCARD_CARD';    gameId: string; ref: CardRef };
-export type PlayCardCommand       = { type: 'PLAY_CARD';       gameId: string; ref: CardRef; targetPlayerName: string; targetRegionType: RegionType };
-export type MoveCardCommand       = { type: 'MOVE_CARD';       gameId: string; ref: CardRef; targetPlayerName: string; targetRegionType: RegionType; position: number };
-export type AttachCardCommand     = { type: 'ATTACH_CARD';     gameId: string; ref: CardRef; targetRef: CardRef };
-export type LockCardCommand       = { type: 'LOCK_CARD';       gameId: string; ref: CardRef };
-export type UnlockCardCommand     = { type: 'UNLOCK_CARD';     gameId: string; ref: CardRef };
-export type UnlockAllCommand      = { type: 'UNLOCK_ALL';      gameId: string };
-export type AddCounterCommand     = { type: 'ADD_COUNTER';     gameId: string; ref: CardRef; amount: number };
-export type RemoveCounterCommand  = { type: 'REMOVE_COUNTER';  gameId: string; ref: CardRef; amount: number };
-export type SetCardNotesCommand   = { type: 'SET_CARD_NOTES';  gameId: string; ref: CardRef; notes: string };
-export type SetPoolCommand        = { type: 'SET_POOL';        gameId: string; playerName: string; amount: number };
-export type TransferPoolCommand   = { type: 'TRANSFER_POOL';   gameId: string; playerName: string; ref: CardRef; amount: number };
-export type GainEdgeCommand       = { type: 'GAIN_EDGE';       gameId: string };
-export type InfluenceVampireCommand  = { type: 'INFLUENCE_VAMPIRE';   gameId: string; ref: CardRef; amount: number };
-export type MoveToReadyCommand    = { type: 'MOVE_TO_READY';   gameId: string; ref: CardRef };
-export type MoveToCryptCommand    = { type: 'MOVE_TO_CRYPT';   gameId: string; ref: CardRef };
-export type MoveToTorporCommand   = { type: 'MOVE_TO_TORPOR';  gameId: string; ref: CardRef };
+export type ShuffleCryptCommand = { type: 'SHUFFLE_CRYPT'; gameId: string };
+export type DiscardCardCommand = { type: 'DISCARD_CARD'; gameId: string; ref: CardRef };
+export type PlayCardCommand = {
+    type: 'PLAY_CARD';
+    gameId: string;
+    ref: CardRef;
+    targetPlayerName: string;
+    targetRegionType: RegionType
+};
+export type MoveCardCommand = {
+    type: 'MOVE_CARD';
+    gameId: string;
+    ref: CardRef;
+    targetPlayerName: string;
+    targetRegionType: RegionType;
+    position: number
+};
+export type AttachCardCommand = { type: 'ATTACH_CARD'; gameId: string; ref: CardRef; targetRef: CardRef };
+export type LockCardCommand = { type: 'LOCK_CARD'; gameId: string; ref: CardRef };
+export type UnlockCardCommand = { type: 'UNLOCK_CARD'; gameId: string; ref: CardRef };
+export type UnlockAllCommand = { type: 'UNLOCK_ALL'; gameId: string };
+export type AddCounterCommand = { type: 'ADD_COUNTER'; gameId: string; ref: CardRef; amount: number };
+export type RemoveCounterCommand = { type: 'REMOVE_COUNTER'; gameId: string; ref: CardRef; amount: number };
+export type SetCardNotesCommand = { type: 'SET_CARD_NOTES'; gameId: string; ref: CardRef; notes: string };
+export type SetPoolCommand = { type: 'SET_POOL'; gameId: string; playerName: string; amount: number };
+export type TransferPoolCommand = {
+    type: 'TRANSFER_POOL';
+    gameId: string;
+    playerName: string;
+    ref: CardRef;
+    amount: number
+};
+export type GainEdgeCommand = { type: 'GAIN_EDGE'; gameId: string };
+export type TransferBloodCommand = { type: 'TRANSFER_BLOOD'; gameId: string; ref: CardRef; amount: number };
+export type MoveToReadyCommand = { type: 'MOVE_TO_READY'; gameId: string; ref: CardRef };
+export type MoveToCryptCommand = { type: 'MOVE_TO_CRYPT'; gameId: string; ref: CardRef };
+export type MoveToTorporCommand = { type: 'MOVE_TO_TORPOR'; gameId: string; ref: CardRef };
 export type RescueFromTorporCommand = { type: 'RESCUE_FROM_TORPOR'; gameId: string; ref: CardRef };
-export type BurnMinionCommand     = { type: 'BURN_MINION';     gameId: string; ref: CardRef };
-export type ContestCardCommand    = { type: 'CONTEST_CARD';    gameId: string; ref: CardRef };
-export type UncontestCardCommand  = { type: 'UNCONTEST_CARD';  gameId: string; ref: CardRef };
-export type SetTitleCommand       = { type: 'SET_TITLE';       gameId: string; ref: CardRef; title: string };
-export type OustPlayerCommand     = { type: 'OUST_PLAYER';     gameId: string; playerName: string };
-export type SetChoiceCommand      = { type: 'SET_CHOICE';      gameId: string; choice: string };
-export type ReverseOrderCommand   = { type: 'REVERSE_ORDER';   gameId: string };
-export type SetGameNotesCommand   = { type: 'SET_GAME_NOTES';  gameId: string; notes: string };
+export type BurnMinionCommand = { type: 'BURN_MINION'; gameId: string; ref: CardRef };
+export type ContestCardCommand = { type: 'CONTEST_CARD'; gameId: string; ref: CardRef };
+export type UncontestCardCommand = { type: 'UNCONTEST_CARD'; gameId: string; ref: CardRef };
+export type SetTitleCommand = { type: 'SET_TITLE'; gameId: string; ref: CardRef; title: string };
+export type OustPlayerCommand = { type: 'OUST_PLAYER'; gameId: string; playerName: string };
+export type SetChoiceCommand = { type: 'SET_CHOICE'; gameId: string; choice: string };
+export type ReverseOrderCommand = { type: 'REVERSE_ORDER'; gameId: string };
+export type SetGameNotesCommand = { type: 'SET_GAME_NOTES'; gameId: string; notes: string };
 
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
@@ -48,7 +67,7 @@ export type GameCommand =
     | LockCardCommand | UnlockCardCommand | UnlockAllCommand
     | AddCounterCommand | RemoveCounterCommand | SetCardNotesCommand
     | SetPoolCommand | TransferPoolCommand | GainEdgeCommand
-    | InfluenceVampireCommand | MoveToReadyCommand | MoveToCryptCommand
+    | TransferBloodCommand | MoveToReadyCommand | MoveToCryptCommand
     | MoveToTorporCommand | RescueFromTorporCommand | BurnMinionCommand
     | ContestCardCommand | UncontestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand;
@@ -128,11 +147,11 @@ export function transferPoolOff(gameId: string, playerName: string, ref: CardRef
 }
 
 /** Move 1 blood from the owner's pool onto an uncontrolled vampire. */
-export function influenceOn(gameId: string, ref: CardRef): InfluenceVampireCommand {
-    return {type: 'INFLUENCE_VAMPIRE', gameId, ref, amount: 1};
+export function influenceOn(gameId: string, ref: CardRef): TransferBloodCommand {
+    return {type: 'TRANSFER_BLOOD', gameId, ref, amount: 1};
 }
 
 /** Move 1 blood from an uncontrolled vampire back to the owner's pool. */
-export function influenceOff(gameId: string, ref: CardRef): InfluenceVampireCommand {
-    return {type: 'INFLUENCE_VAMPIRE', gameId, ref, amount: -1};
+export function influenceOff(gameId: string, ref: CardRef): TransferBloodCommand {
+    return {type: 'TRANSFER_BLOOD', gameId, ref, amount: -1};
 }

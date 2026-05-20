@@ -248,13 +248,13 @@ class GameServiceTest {
     }
 
     @Test
-    void influenceVampire_deductsPoolAndAddsToCard() {
+    void transferBlood_deductsPoolAndAddsToCard() {
         GameData gd = initGame();
         String actor = playerNames.getFirst();
         CardData card = getFirstUncontrolledCard(gd, actor);
         CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
 
-        gameCommandService.execute(actor, new InfluenceVampire(gameId, ref, 3));
+        gameCommandService.execute(actor, new TransferBlood(gameId, ref, 3));
 
         assertEquals(27, gd.getPlayer(actor).getPool());
         assertEquals(3,  card.getCounters());

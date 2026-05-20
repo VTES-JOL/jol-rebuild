@@ -70,7 +70,7 @@ public class GameCommandService {
             case SetPool c          -> handleSetPool(game, c, actor);
             case TransferPool c     -> handleTransferPool(game, c, actor);
             case GainEdge c         -> handleGainEdge(game, c, actor);
-            case InfluenceVampire c -> handleInfluenceVampire(game, c, actor);
+            case TransferBlood c    -> handleTransferBlood(game, c, actor);
             case MoveToReady c      -> handleMoveToReady(game, c, actor);
             case MoveToCrypt c      -> handleMoveToCrypt(game, c, actor);
             case MoveToTorpor c     -> handleMoveToTorpor(game, c, actor);
@@ -285,7 +285,7 @@ public class GameCommandService {
 
     // ── Influence / crypt ─────────────────────────────────────────────────────
 
-    private String handleInfluenceVampire(GameData game, InfluenceVampire cmd, String actor) {
+    private String handleTransferBlood(GameData game, TransferBlood cmd, String actor) {
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return null;
         PlayerData owner = card.getOwner();
