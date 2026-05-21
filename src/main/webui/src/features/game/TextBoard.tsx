@@ -20,11 +20,11 @@ type TextBoardProps = {
 };
 
 const REGION_ORDER: RegionType[] = [
-    'READY', 'TORPOR', 'RESEARCH', 'UNCONTROLLED', 'HAND',
-    'LIBRARY', 'CRYPT', 'ASH_HEAP', 'REMOVED_FROM_GAME',
+    'READY', 'TORPOR', 'RESEARCH', 'UNCONTROLLED',
+    'LIBRARY', 'CRYPT', 'ASH_HEAP', 'REMOVED_FROM_GAME', 'HAND',
 ];
 
-const HIDE_WHEN_EMPTY = new Set<RegionType>(['TORPOR', 'RESEARCH', 'HAND', 'REMOVED_FROM_GAME']);
+const HIDE_WHEN_EMPTY = new Set<RegionType>(['TORPOR', 'RESEARCH', 'REMOVED_FROM_GAME']);
 
 const REGION_LABELS: Record<RegionType, string> = {
     READY: 'Ready',

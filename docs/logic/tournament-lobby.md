@@ -28,8 +28,6 @@ SETUP → REGISTRATION → SEATING → ACTIVE → SEEDING → FINALS → COMPLET
 
 Non-admin players can only see tournaments in: `REGISTRATION`, `SEATING`, `ACTIVE`, `SEEDING`, `FINALS`, `COMPLETED`. Tournaments in `SETUP` are not visible to players.
 
-> **Note:** Transitions beyond `ACTIVE` (`SEEDING`, `FINALS`, `COMPLETED`) are defined in the status enum but are not yet implemented. No API endpoints exist for those transitions.
-
 ### Status Transitions (admin only)
 | Transition    | From          | To           | Side Effects                                 |
 |---------------|---------------|--------------|----------------------------------------------|

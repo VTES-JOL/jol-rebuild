@@ -145,14 +145,15 @@ Each region is a collapsible `RegionSection`. Collapsed state initialises to `!r
 ### Region visibility in Text layout
 
 - TORPOR, RESEARCH, and REMOVED_FROM_GAME are omitted when `cardIds.length === 0` (controlled by `HIDE_WHEN_EMPTY` set).
-- HAND is excluded from the `REGION_ORDER` array — it is not rendered in the Text layout at all.
+- HAND is always rendered for opponent columns regardless of card count.
+- The **current player's HAND is excluded from their TextBoard column** — it is rendered instead by `TextHandPanel`, which appears as a dedicated panel to the left of the board.
 - When `region.visible === false` or `card.faceDown === true`, the card row renders as `***********`.
 - Children (attached cards) render indented beneath their parent with a `└` prefix. When the parent region is hidden, children are not rendered separately.
 
 ### Region render order
 
 ```
-READY → TORPOR → RESEARCH → UNCONTROLLED → LIBRARY → CRYPT → ASH_HEAP → REMOVED_FROM_GAME
+READY → TORPOR → RESEARCH → UNCONTROLLED → LIBRARY → CRYPT → ASH_HEAP → REMOVED_FROM_GAME → HAND
 ```
 
 ### Interactions
