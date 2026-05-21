@@ -5,6 +5,7 @@ import {CSS} from '@dnd-kit/utilities';
 import {GripHorizontal} from 'lucide-react';
 import type {CSSProperties, ReactNode} from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 import type {CardData} from './CardStack.tsx';
 import {CARD_WIDTH, CardStack} from './CardStack.tsx';
 import {FieldCard} from './FieldCard.tsx';
@@ -648,6 +649,7 @@ export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove,
     const sensors = useSensors(useSensor(PointerSensor, {activationConstraint: {distance: 5}}));
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
     const [suppressTransition, setSuppressTransition] = useState(false);
+    const [dragCardW, setDragCardW] = useState<number | null>(null);
 
     useEffect(() => {
         if (activeDrag !== null) return;
@@ -677,6 +679,7 @@ export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove,
     const handleDragStart = useCallback((event: DragStartEvent) => {
         setActiveDrag(event.active.data.current as DragData);
         setSuppressTransition(true);
+        setDragCardW(event.active.rect.current.initial?.width ?? null);
     }, []);
 
     const handleDragOver = useCallback((event: DragOverEvent) => {
@@ -697,6 +700,7 @@ export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove,
     const handleDragEnd = useCallback((event: DragEndEvent) => {
         const {active, over} = event;
         setActiveDrag(null);
+        setDragCardW(null);
         resetSortedIds();
         if (!over) return;
 
@@ -743,6 +747,7 @@ export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove,
 
     const handleDragCancel = useCallback(() => {
         setActiveDrag(null);
+        setDragCardW(null);
         resetSortedIds();
     }, [resetSortedIds]);
 
@@ -823,9 +828,14 @@ export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove,
                 ...regions.map(r => renderRegion(r.regionKey)),
                 ...(compactRegions ?? []).map(r => renderRegion(r.regionKey)),
             ]}
-            <DragOverlay dropAnimation={null}>
-                {renderOverlay()}
-            </DragOverlay>
+            {createPortal(
+                <div style={{'--card-w': `${dragCardW ?? CARD_WIDTH}px`} as CSSProperties}>
+                    <DragOverlay dropAnimation={null}>
+                        {renderOverlay()}
+                    </DragOverlay>
+                </div>,
+                document.body,
+            )}
         </DndContext>
     );
 }

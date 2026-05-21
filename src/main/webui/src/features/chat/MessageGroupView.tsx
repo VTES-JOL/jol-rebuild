@@ -52,7 +52,7 @@ export const MessageGroupView = React.memo(function MessageGroupView({
             <div className="flex-1 min-w-0">
                 {  enableDivider && (
                         <div className="flex items-baseline gap-2 mb-0.5">
-                            <span className="text-sm font-medium" style={nameColorStyle(group.sender)}>
+                            <span className="text-xs font-medium" style={nameColorStyle(group.sender)}>
                                 {group.sender}
                             </span>
                                 {group.shortTime && (

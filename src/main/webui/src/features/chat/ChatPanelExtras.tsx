@@ -33,7 +33,7 @@ export function TimestampDivider({ label }: { label: string }) {
     return (
         <div className="flex items-center gap-2 my-2">
             <div className="flex-1 h-px bg-line/50" />
-            <span className="text-sm text-ink-muted whitespace-nowrap">{label}</span>
+            <span className="text-xs text-ink-muted whitespace-nowrap">{label}</span>
             <div className="flex-1 h-px bg-line/50" />
         </div>
     );

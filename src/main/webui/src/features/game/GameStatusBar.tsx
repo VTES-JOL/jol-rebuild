@@ -1,4 +1,5 @@
 import type {GameState} from './types.ts';
+import type {GameCommand} from './gameCommands.ts';
 
 export type BoardLayout = 'linear' | 'circular' | 'text';
 
@@ -8,30 +9,91 @@ export const LAYOUT_LABELS: Record<BoardLayout, string> = {
     text: 'Text',
 };
 
-type GameStatusBarProps = {
-    gameState: GameState | null;
-    boardLayout: BoardLayout;
-    onLayoutChange: (layout: BoardLayout) => void;
+const PHASES = ['UNLOCK', 'MASTER', 'MINION', 'INFLUENCE', 'DISCARD'] as const;
+type GamePhase = typeof PHASES[number];
+
+const PHASE_LABELS: Record<GamePhase, string> = {
+    UNLOCK: 'Unlock',
+    MASTER: 'Master',
+    MINION: 'Minion',
+    INFLUENCE: 'Influence',
+    DISCARD: 'Discard',
 };
 
-export function GameStatusBar({gameState, boardLayout, onLayoutChange}: GameStatusBarProps) {
+function PhaseTracker({phase, isMyTurn, gameId, onCommand}: {
+    phase: string;
+    isMyTurn: boolean;
+    gameId: string;
+    onCommand: (cmd: GameCommand) => void;
+}) {
+    const currentIdx = PHASES.indexOf(phase as GamePhase);
+
+    return (
+        <div className="flex items-center gap-0.5">
+            {PHASES.map((p, i) => {
+                const isPast    = i < currentIdx;
+                const isCurrent = i === currentIdx;
+                return (
+                    <span
+                        key={p}
+                        className={[
+                            'text-[11px] px-1.5 py-0.5 rounded leading-none',
+                            isCurrent ? 'bg-arcane/20 text-ink font-semibold' :
+                            isPast    ? 'text-ink-muted/30' :
+                                        'text-ink-muted/50',
+                        ].join(' ')}
+                    >
+                        {PHASE_LABELS[p]}
+                    </span>
+                );
+            })}
+            <button
+                className={[
+                    'ml-1 text-xs px-1.5 py-0.5 rounded border transition-colors leading-none',
+                    isMyTurn
+                        ? 'border-arcane/40 text-arcane hover:bg-arcane/10 cursor-pointer'
+                        : 'border-line/30 text-ink-muted/40 cursor-pointer hover:text-ink-muted hover:border-line/50',
+                ].join(' ')}
+                onClick={() => onCommand({type: 'ADVANCE_PHASE', gameId})}
+                title={isMyTurn ? 'Advance phase' : 'Advance phase (not your turn)'}
+            >
+                →
+            </button>
+        </div>
+    );
+}
+
+type GameStatusBarProps = {
+    gameState: GameState | null;
+    gameId: string;
+    currentUser: string;
+    boardLayout: BoardLayout;
+    onLayoutChange: (layout: BoardLayout) => void;
+    onCommand: (cmd: GameCommand) => void;
+};
+
+export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand}: GameStatusBarProps) {
     return (
         <div className="flex items-center justify-between pb-2 shrink-0 gap-2 min-w-0">
             <div className="flex items-center gap-2 text-xs min-w-0 overflow-hidden">
                 {gameState && (
                     <>
-                        <span className="text-ink-muted">Turn {gameState.turn}</span>
-                        <span className="text-ink-muted/40">·</span>
-                        <span className="text-ink-muted">{gameState.phase}</span>
+                        <span className="text-ink-muted shrink-0">Turn {gameState.turn}</span>
+                        <PhaseTracker
+                            phase={gameState.phase}
+                            isMyTurn={gameState.currentPlayer === currentUser}
+                            gameId={gameId}
+                            onCommand={onCommand}
+                        />
                         {gameState.currentPlayer && (
                             <>
-                                <span className="text-ink-muted/40">·</span>
+                                <span className="text-ink-muted/40 shrink-0">·</span>
                                 <span className="text-ink font-medium truncate">▶ {gameState.currentPlayer}</span>
                             </>
                         )}
                         {gameState.edgeHolder && (
                             <>
-                                <span className="text-ink-muted/40">·</span>
+                                <span className="text-ink-muted/40 shrink-0">·</span>
                                 <span className="text-ink-muted truncate">Edge: {gameState.edgeHolder}</span>
                             </>
                         )}

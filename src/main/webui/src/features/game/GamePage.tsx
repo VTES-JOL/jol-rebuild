@@ -138,8 +138,11 @@ export default function GamePage() {
 
                     <GameStatusBar
                         gameState={gameState}
+                        gameId={gameId}
+                        currentUser={user?.username ?? ''}
                         boardLayout={boardLayout}
                         onLayoutChange={setBoardLayout}
+                        onCommand={handleCommand}
                     />
 
                     {!isConnected && <ConnectionBanner status={status} />}

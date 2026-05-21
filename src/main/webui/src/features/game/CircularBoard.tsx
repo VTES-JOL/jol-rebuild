@@ -88,6 +88,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
 
         const commit = () => {
             strip.style.transition = 'none';
+            strip.style.willChange = 'auto';
             setFocusedName(newName);
         };
 
@@ -100,6 +101,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
             return;
         }
 
+        strip.style.willChange = 'transform';
         strip.style.transition = 'transform 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         setStripX(strip, targetX);
         strip.addEventListener('transitionend', commit, {once: true});
@@ -109,10 +111,12 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
         animating.current = true;
         const strip = stripRef.current;
         if (!strip) return;
+        strip.style.willChange = 'transform';
         strip.style.transition = 'transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         setStripX(strip, baseTranslate(colWidthRef.current));
         strip.addEventListener('transitionend', () => {
             strip.style.transition = 'none';
+            strip.style.willChange = 'auto';
             animating.current = false;
         }, {once: true});
     }
@@ -188,12 +192,12 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                 <div
                     ref={stripRef}
                     className="flex h-full"
-                    style={{width: `${5 * colWidth + 4 * GAP}px`, gap: `${GAP}px`, willChange: 'transform'}}
+                    style={{width: `${5 * colWidth + 4 * GAP}px`, gap: `${GAP}px`}}
                 >
                     {/* Slot 0 — prevPrev (ghost, clipped) */}
                     <div style={slot} className="h-full">
                         {prevPrev
-                            ? <PlayerColumn player={prevPrev} cards={cards} role="prey"
+                            ? <PlayerColumn key={prevPrev.name} player={prevPrev} cards={cards} role="prey"
                                             isFocused={isActive(prevPrev)}
                                             isCurrentUser={prevPrev.name === currentUser}
                                             gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
@@ -203,7 +207,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                     {/* Slot 1 — prey */}
                     <div style={slot} className="h-full">
                         {prey
-                            ? <PlayerColumn player={prey} cards={cards} role="prey"
+                            ? <PlayerColumn key={prey.name} player={prey} cards={cards} role="prey"
                                             isFocused={isActive(prey)}
                                             isCurrentUser={prey.name === currentUser}
                                             gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
@@ -213,7 +217,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                     {/* Slot 2 — focused */}
                     <div style={slot} className="h-full">
                         {focused && (
-                            <PlayerColumn player={focused} cards={cards} role="focused"
+                            <PlayerColumn key={focused.name} player={focused} cards={cards} role="focused"
                                           isFocused={isActive(focused)}
                                           isCurrentUser={focused.name === currentUser}
                                           gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
@@ -223,7 +227,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                     {/* Slot 3 — predator */}
                     <div style={slot} className="h-full">
                         {predator
-                            ? <PlayerColumn player={predator} cards={cards} role="predator"
+                            ? <PlayerColumn key={predator.name} player={predator} cards={cards} role="predator"
                                             isFocused={isActive(predator)}
                                             isCurrentUser={predator.name === currentUser}
                                             gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
@@ -233,7 +237,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                     {/* Slot 4 — nextNext (ghost, clipped) */}
                     <div style={slot} className="h-full">
                         {nextNext
-                            ? <PlayerColumn player={nextNext} cards={cards} role="predator"
+                            ? <PlayerColumn key={nextNext.name} player={nextNext} cards={cards} role="predator"
                                             isFocused={isActive(nextNext)}
                                             isCurrentUser={nextNext.name === currentUser}
                                             gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />

@@ -25,8 +25,10 @@ function BriefCardRef({ref}: { ref: LogCardRef }) {
 function BriefContent({log}: { log: CommandLogData }) {
     const actor = <span className="font-medium">{log.actor}</span>;
     switch (log.commandType) {
-        case 'ADVANCE_PHASE':
-            return <span>{actor} advanced the phase</span>;
+        case 'ADVANCE_PHASE': {
+            const phase = log.nextPhase.charAt(0) + log.nextPhase.slice(1).toLowerCase();
+            return <span>{phase} Phase</span>;
+        }
         case 'NEXT_TURN':
             return <span>Turn <span className="font-mono">{log.turn}</span> — <span className="font-medium">{log.playerName}</span> begins their turn</span>;
         case 'DRAW_CARD':
@@ -81,8 +83,10 @@ function BriefContent({log}: { log: CommandLogData }) {
 function FullContent({log}: { log: CommandLogData }) {
     const actor = <span className="font-medium">{log.actor}</span>;
     switch (log.commandType) {
-        case 'ADVANCE_PHASE':
-            return <span>{actor} advanced to <span className="font-medium">{log.nextPhase}</span> phase</span>;
+        case 'ADVANCE_PHASE': {
+            const phase = log.nextPhase.charAt(0) + log.nextPhase.slice(1).toLowerCase();
+            return <span>{actor} advances the turn to the <span className="font-medium">{phase}</span> phase</span>;
+        }
         case 'NEXT_TURN':
             return <span>Turn <span className="font-mono">{log.turn}</span> — <span className="font-medium">{log.playerName}</span> begins their turn</span>;
         case 'DRAW_CARD':
@@ -145,17 +149,17 @@ function FullContent({log}: { log: CommandLogData }) {
 export function CommandLogContent({log, detail}: { log: CommandContext; detail: 'full' | 'brief' }) {
     const {turn, phase, currentPlayer, command} = log;
     if (detail === 'brief') {
-        return <BriefContent log={command}/>;
+        return <span className="text-xs text-ink-secondary"><BriefContent log={command}/></span>;
     }
     return (
-        <>
+        <span className="text-xs text-ink-secondary">
             {(turn || phase || currentPlayer) && (
-                <span className="text-ink-muted text-xs mr-1">
+                <span className="text-ink-muted mr-1">
                     {[turn && `${turn}`, phase].filter(Boolean).join(' ')}
                     {' — '}
                 </span>
             )}
             <FullContent log={command}/>
-        </>
+        </span>
     );
 }
