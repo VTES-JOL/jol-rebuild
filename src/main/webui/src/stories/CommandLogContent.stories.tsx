@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {expect, within} from 'storybook/test';
 
 import {CommandLogContent} from '../features/chat/CommandLogContent.tsx';
-import type {CommandLogData} from '../features/game/commandLog.ts';
+import type {CommandContext, CommandLogData} from '../features/game/commandLog.ts';
 
 const meta = {
     title: 'Chat/CommandLogContent',
@@ -47,9 +47,13 @@ const hiddenChild = {
     hidden: true,
 };
 
+function ctx(command: CommandLogData, turn = '1.1', phase = 'HUNT', currentPlayer = 'Alice'): CommandContext {
+    return {turn, phase, currentPlayer, command};
+}
+
 export const KnownCard: Story = {
     args: {
-        log: { commandType: 'PLAY_CARD', actor: 'Alice', card: visibleCard } satisfies CommandLogData,
+        log: ctx({ commandType: 'PLAY_CARD', actor: 'Alice', card: visibleCard } satisfies CommandLogData),
         detail: 'full',
     },
     play: async ({canvasElement}) => {
@@ -60,7 +64,7 @@ export const KnownCard: Story = {
 
 export const HiddenCardTopLevel: Story = {
     args: {
-        log: { commandType: 'PLAY_CARD', actor: 'Alice', card: hiddenTopLevel } satisfies CommandLogData,
+        log: ctx({ commandType: 'PLAY_CARD', actor: 'Alice', card: hiddenTopLevel } satisfies CommandLogData),
         detail: 'full',
     },
     play: async ({canvasElement}) => {
@@ -71,7 +75,7 @@ export const HiddenCardTopLevel: Story = {
 
 export const HiddenChildCard: Story = {
     args: {
-        log: { commandType: 'ATTACH_CARD', actor: 'Bob', card: hiddenChild, target: hiddenTopLevel } satisfies CommandLogData,
+        log: ctx({ commandType: 'ATTACH_CARD', actor: 'Bob', card: hiddenChild, target: hiddenTopLevel } satisfies CommandLogData),
         detail: 'full',
     },
     play: async ({canvasElement}) => {
@@ -82,7 +86,7 @@ export const HiddenChildCard: Story = {
 
 export const BriefHidden: Story = {
     args: {
-        log: { commandType: 'MOVE_CARD', actor: 'Alice', card: hiddenTopLevel, targetPlayer: 'Bob', targetRegion: 'ASH_HEAP' } satisfies CommandLogData,
+        log: ctx({ commandType: 'MOVE_CARD', actor: 'Alice', card: hiddenTopLevel, targetPlayer: 'Bob', targetRegion: 'ASH_HEAP' } satisfies CommandLogData),
         detail: 'brief',
     },
 };

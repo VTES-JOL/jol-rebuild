@@ -29,6 +29,9 @@ public class ChatMessage extends PanacheEntityBase {
     @Column(columnDefinition = "TEXT")
     public String commandData;
 
+    @Column(length = 16)
+    public String turn;
+
     @Column(nullable = false)
     public Instant timestamp;
 
@@ -50,13 +53,14 @@ public class ChatMessage extends PanacheEntityBase {
         return msg;
     }
 
-    public static ChatMessage createCommandLog(String gameId, String sender, String legacyContent, String commandDataJson) {
+    public static ChatMessage createCommandLog(String gameId, String sender, String legacyContent, String commandDataJson, String turn) {
         ChatMessage msg = new ChatMessage();
         msg.gameId = gameId;
         msg.sender = sender;
         msg.content = legacyContent;
         msg.commandData = commandDataJson;
         msg.messageType = "COMMAND_LOG";
+        msg.turn = turn;
         msg.timestamp = Instant.now();
         msg.persist();
         return msg;
@@ -80,6 +84,10 @@ public class ChatMessage extends PanacheEntityBase {
                         "WHERE m.id IN ?1 " +
                         "ORDER BY m.timestamp ASC", ids)
                 .list();
+    }
+
+    public static List<ChatMessage> findByTurn(String gameId, String turn) {
+        return find("gameId = ?1 AND turn = ?2 AND messageType = 'COMMAND_LOG'", gameId, turn).list();
     }
 
     public static List<ChatMessage> findRecent(String gameId, int limit) {

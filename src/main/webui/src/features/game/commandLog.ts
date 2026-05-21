@@ -49,3 +49,10 @@ export type CommandLogData =
     | AddCounterLog | RemoveCounterLog | MoveToTorporLog | RescueFromTorporLog
     | BurnMinionLog | ContestCardLog | ClearContestCardLog | SetTitleLog
     | SetPoolLog | GainEdgeLog | TransferBloodLog | OustPlayerLog | ReverseOrderLog;
+
+export interface CommandContext {
+    turn: string | null;
+    phase: string | null;
+    currentPlayer: string | null;
+    command: CommandLogData;
+}

@@ -1,4 +1,4 @@
-import type {CommandLogData, LogCardRef} from '@/features/game/commandLog.ts';
+import type {CommandContext, CommandLogData, LogCardRef} from '@/features/game/commandLog.ts';
 import {CardToken} from '@/shared/components/CardToken.tsx';
 
 function CardRef({ref}: { ref: LogCardRef }) {
@@ -8,6 +8,16 @@ function CardRef({ref}: { ref: LogCardRef }) {
             ? `#${ref.position + 1}.${ref.childIndex + 1}`
             : `#${ref.position + 1}`;
         return <span className="text-ink-muted italic">card in {ownerPart}{ref.region.toLowerCase()} region ({pos})</span>;
+    }
+    return <CardToken id={ref.cardId} label={ref.cardName}/>;
+}
+
+function BriefCardRef({ref}: { ref: LogCardRef }) {
+    if (ref.hidden || ref.cardId == null || ref.cardName == null) {
+        const pos = ref.childIndex >= 0
+            ? `#${ref.position + 1}.${ref.childIndex + 1}`
+            : `#${ref.position + 1}`;
+        return <span className="text-ink-muted italic">{pos}</span>;
     }
     return <CardToken id={ref.cardId} label={ref.cardName}/>;
 }
@@ -26,39 +36,41 @@ function BriefContent({log}: { log: CommandLogData }) {
         case 'SHUFFLE_CRYPT':
             return <span>{actor} shuffled their crypt</span>;
         case 'PLAY_CARD':
-            return <span>{actor} played a card</span>;
+            return <span>{actor} played <BriefCardRef ref={log.card}/></span>;
         case 'DISCARD_CARD':
-            return <span>{actor} discarded a card</span>;
+            return <span>{actor} discarded <BriefCardRef ref={log.card}/></span>;
         case 'MOVE_CARD':
-            return <span>{actor} moved a card</span>;
+            return <span>{actor} moved <BriefCardRef ref={log.card}/></span>;
         case 'ATTACH_CARD':
-            return <span>{actor} attached a card</span>;
+            return <span>{actor} attached <BriefCardRef ref={log.card}/></span>;
         case 'MOVE_TO_CRYPT':
-            return <span>{actor} returned a vampire to the Crypt</span>;
+            return <span>{actor} returned <BriefCardRef ref={log.card}/> to the Crypt</span>;
         case 'INFLUENCE_CARD':
-            return <span>{actor} moved a vampire to the Ready region</span>;
+            return <span>{actor} moved <BriefCardRef ref={log.card}/> to Ready</span>;
         case 'ADD_COUNTER':
-            return <span>{actor} added <span className="font-medium">{log.amount}</span> counter(s)</span>;
+            return <span>{actor} added <span className="font-medium">{log.amount}</span> counter(s) to <BriefCardRef ref={log.card}/></span>;
         case 'REMOVE_COUNTER':
-            return <span>{actor} removed <span className="font-medium">{log.amount}</span> counter(s)</span>;
+            return <span>{actor} removed <span className="font-medium">{log.amount}</span> counter(s) from <BriefCardRef ref={log.card}/></span>;
         case 'MOVE_TO_TORPOR':
-            return <span>{actor} sent a vampire to Torpor</span>;
+            return <span>{actor} sent <BriefCardRef ref={log.card}/> to Torpor</span>;
         case 'RESCUE_FROM_TORPOR':
-            return <span>{actor} rescued a vampire from Torpor</span>;
+            return <span>{actor} rescued <BriefCardRef ref={log.card}/> from Torpor</span>;
         case 'BURN_MINION':
-            return <span>{actor} burned a vampire</span>;
+            return <span>{actor} burned <BriefCardRef ref={log.card}/></span>;
         case 'CONTEST_CARD':
-            return <span>{actor} contested a card</span>;
+            return <span>{actor} contested <BriefCardRef ref={log.card}/></span>;
         case 'CLEAR_CONTEST_CARD':
-            return <span>{actor} uncontested a card</span>;
+            return <span>{actor} uncontested <BriefCardRef ref={log.card}/></span>;
         case 'SET_TITLE':
-            return <span>{actor} set a card's title</span>;
+            return <span>{actor} set <BriefCardRef ref={log.card}/>'s title</span>;
         case 'SET_POOL':
             return <span>{actor} set <span className="font-medium">{log.targetPlayer}</span>'s pool to <span className="font-medium">{log.amount}</span></span>;
         case 'GAIN_EDGE':
             return <span>{actor} gained the Edge</span>;
         case 'TRANSFER_BLOOD':
-            return <span>{actor} transferred <span className="font-medium">{Math.abs(log.amount)}</span> blood</span>;
+            return log.amount > 0
+                ? <span>{actor} transferred <span className="font-medium">{log.amount}</span> blood to <BriefCardRef ref={log.card}/></span>
+                : <span>{actor} transferred <span className="font-medium">{Math.abs(log.amount)}</span> blood from <BriefCardRef ref={log.card}/></span>;
         case 'OUST_PLAYER':
             return <span>{actor} ousted <span className="font-medium">{log.oustedPlayer}</span></span>;
         case 'REVERSE_ORDER':
@@ -83,8 +95,16 @@ function FullContent({log}: { log: CommandLogData }) {
             return <span>{actor} played <CardRef ref={log.card}/></span>;
         case 'DISCARD_CARD':
             return <span>{actor} discarded <CardRef ref={log.card}/></span>;
-        case 'MOVE_CARD':
-            return <span>{actor} moved <CardRef ref={log.card}/> to <span className="font-medium">{log.targetPlayer}</span>'s {log.targetRegion.toLowerCase().replace(/_/g, ' ')}</span>;
+        case 'MOVE_CARD': {
+            const fmt = (r: string) => r.toLowerCase().replace(/_/g, ' ');
+            const samePlayer = log.card.owner === log.targetPlayer;
+            const sameRegion = log.card.region === log.targetRegion;
+            const src = samePlayer ?<>their {fmt(log.card.region)}</> : <><span className="font-medium">{log.card.owner}</span>'s {fmt(log.card.region)}</>;
+            const dst = samePlayer ? <>their {fmt(log.targetRegion)}</> : <><span className="font-medium">{log.targetPlayer}</span>'s {fmt(log.targetRegion)}</>;
+            return (!sameRegion || !samePlayer)
+                ? <span>{actor} moved <CardRef ref={log.card}/> from {src} to {dst}</span>
+                : <span>{actor} moved <CardRef ref={log.card}/> to {dst}</span>;
+        }
         case 'ATTACH_CARD':
             return <span>{actor} attached <CardRef ref={log.card}/> to <CardRef ref={log.target}/></span>;
         case 'MOVE_TO_CRYPT':
@@ -122,6 +142,20 @@ function FullContent({log}: { log: CommandLogData }) {
     }
 }
 
-export function CommandLogContent({log, detail}: { log: CommandLogData; detail: 'full' | 'brief' }) {
-    return detail === 'brief' ? <BriefContent log={log}/> : <FullContent log={log}/>;
+export function CommandLogContent({log, detail}: { log: CommandContext; detail: 'full' | 'brief' }) {
+    const {turn, phase, currentPlayer, command} = log;
+    if (detail === 'brief') {
+        return <BriefContent log={command}/>;
+    }
+    return (
+        <>
+            {(turn || phase || currentPlayer) && (
+                <span className="text-ink-muted text-xs mr-1">
+                    {[turn && `${turn}`, phase].filter(Boolean).join(' ')}
+                    {' — '}
+                </span>
+            )}
+            <FullContent log={command}/>
+        </>
+    );
 }

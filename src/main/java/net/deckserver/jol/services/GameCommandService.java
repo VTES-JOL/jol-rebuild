@@ -307,8 +307,7 @@ public class GameCommandService {
         if (card == null) return CommandResult.silent(game);
         PlayerData controller = card.getController();
         if (controller == null) return CommandResult.silent(game);
-        // Vampires being influenced (UNCONTROLLED) are public knowledge; their identity is always visible
-        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
+        LogCardRef logRef = LogCardRef.of(card, cmd.ref(), isHidden(card));
         int amount = cmd.amount();
         // positive = pool → card, negative = card → pool
         controller.setPool(Math.max(0, controller.getPool() - amount));

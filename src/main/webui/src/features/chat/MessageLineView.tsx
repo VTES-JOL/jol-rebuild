@@ -3,7 +3,7 @@ import type {ReactionDto, ReplySnapshot} from '@/hooks/useWebSocket.ts';
 import {nameColorStyle} from '@/shared/utils/avatarUtils';
 import {MessageContent} from './MessageContent';
 import {CommandLogContent} from './CommandLogContent';
-import type {CommandLogData} from '@/features/game/commandLog.ts';
+import type {CommandContext} from '@/features/game/commandLog.ts';
 
 const EMOJI_PALETTE = ['👍', '❤️', '😂', '😮'];
 
@@ -14,7 +14,7 @@ export interface MessageLine {
     content: string;
     reactions: ReactionDto[];
     replyTo: ReplySnapshot | null;
-    commandLog?: CommandLogData;
+    commandLog?: CommandContext;
 }
 
 interface ReactionPillsProps {

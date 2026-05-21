@@ -11,6 +11,7 @@ import net.deckserver.jol.dto.ReactionDto;
 import net.deckserver.jol.dto.ReplySnapshotDto;
 import net.deckserver.jol.entity.ChatMessage;
 import net.deckserver.jol.entity.ChatMessageReaction;
+import net.deckserver.jol.game.command.CommandContext;
 import net.deckserver.jol.game.command.CommandLogData;
 import org.jboss.logging.Logger;
 
@@ -42,15 +43,15 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessageDto saveCommandLog(String gameId, String sender, String legacyContent, CommandLogData log) {
+    public ChatMessageDto saveCommandLog(String gameId, String sender, String legacyContent, CommandContext ctx) {
         String json = null;
         try {
-            json = mapper.writeValueAsString(log);
+            json = mapper.writeValueAsString(ctx);
         } catch (JsonProcessingException e) {
             LOG.errorf(e, "Failed to serialize command log");
         }
-        ChatMessage entity = ChatMessage.createCommandLog(gameId, sender, legacyContent, json);
-        return ChatMessageDto.commandLog(entity.id, entity.sender, entity.content, entity.timestamp, log);
+        ChatMessage entity = ChatMessage.createCommandLog(gameId, sender, legacyContent, json, ctx.turn());
+        return ChatMessageDto.commandLog(entity.id, entity.sender, entity.content, entity.timestamp, ctx);
     }
 
     @Transactional
@@ -92,8 +93,8 @@ public class ChatService {
         List<ReactionDto> reactions = buildReactionDtos(m.reactions);
         if ("COMMAND_LOG".equals(m.messageType) && m.commandData != null) {
             try {
-                CommandLogData log = mapper.readValue(m.commandData, CommandLogData.class);
-                return ChatMessageDto.commandLog(m.id, m.sender, m.content, m.timestamp, log);
+                CommandContext ctx = mapper.readValue(m.commandData, CommandContext.class);
+                return ChatMessageDto.commandLog(m.id, m.sender, m.content, m.timestamp, ctx);
             } catch (Exception e) {
                 LOG.warnf("Failed to deserialize command log for message %s; falling back to CHAT", m.id);
             }

@@ -1,7 +1,7 @@
 package net.deckserver.jol.dto;
 
 import io.quarkus.runtime.annotations.RegisterForReflection;
-import net.deckserver.jol.game.command.CommandLogData;
+import net.deckserver.jol.game.command.CommandContext;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,7 +27,7 @@ public class ChatMessageDto {
     public String replyToId;  // client sends this when replying
     public String emoji;      // client sends this for REACTION messages
     public String gameId;     // populated on LOBBY_UPDATE events
-    public CommandLogData commandLog;
+    public CommandContext commandLog;
 
     public static ChatMessageDto chat(String id, String sender, String content,
                                       Instant timestamp, ReplySnapshotDto replyTo,
@@ -76,14 +76,14 @@ public class ChatMessageDto {
     }
 
     public static ChatMessageDto commandLog(String id, String sender, String legacyContent,
-                                             Instant timestamp, CommandLogData log) {
+                                             Instant timestamp, CommandContext ctx) {
         ChatMessageDto dto = new ChatMessageDto();
         dto.type = Type.COMMAND_LOG;
         dto.id = id;
         dto.sender = sender;
         dto.content = legacyContent;
         dto.timestamp = timestamp;
-        dto.commandLog = log;
+        dto.commandLog = ctx;
         dto.reactions = List.of();
         return dto;
     }

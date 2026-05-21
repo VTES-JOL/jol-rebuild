@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import type {GameState} from '@/features/game/types.ts';
-import type {CommandLogData} from '@/features/game/commandLog.ts';
+import type {CommandContext} from '@/features/game/commandLog.ts';
 
 export interface ReactionDto   { emoji: string; senders: string[] }
 export interface ReplySnapshot { id: string; sender: string; content: string }
@@ -24,7 +24,7 @@ export interface CommandLogMsg {
     content: string;
     timestamp: string;
     reactions: ReactionDto[];
-    commandLog: CommandLogData;
+    commandLog: CommandContext;
 }
 
 interface HistoryMsg {

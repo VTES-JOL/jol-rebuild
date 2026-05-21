@@ -10,6 +10,7 @@ import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.dto.GameMessageDto;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.command.CommandContext;
 import net.deckserver.jol.services.ChatService;
 import net.deckserver.jol.services.GameCommandService;
 import net.deckserver.jol.services.GameStateBroadcaster;
@@ -133,7 +134,14 @@ public class GameWebSocket {
         try {
             GameCommandService.CommandResult result = commandService.execute(userName(), incoming.command);
             if (result.commandLog() != null) {
-                ChatMessageDto log = chatService.saveCommandLog(gameId, userName(), result.logMessage(), result.commandLog());
+                GameData g = result.game();
+                CommandContext ctx = new CommandContext(
+                        g.getTurn(),
+                        g.getPhase() != null ? g.getPhase().name() : null,
+                        g.getCurrentPlayerName(),
+                        result.commandLog()
+                );
+                ChatMessageDto log = chatService.saveCommandLog(gameId, userName(), result.logMessage(), ctx);
                 connection.broadcast().sendTextAndAwait(log);
             } else if (result.logMessage() != null) {
                 ChatMessageDto log = chatService.save(gameId, userName(), result.logMessage(), null);
