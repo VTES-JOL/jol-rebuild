@@ -2,7 +2,7 @@ import {useMemo} from 'react';
 import type {CardData, PlayerState} from './types.ts';
 import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
-import {createCompactRegionConfigs, fieldRegionCbs, makeFieldContextMenuHandler, RegionBadge} from './gameUtils.tsx';
+import {buildActiveRegionConfigs, CompactRegionRow, createCompactRegionConfigs} from './gameUtils.tsx';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
@@ -28,30 +28,13 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
     } = usePlayerRegions(player, cards, gameId, onCommand);
 
     // All regions share ONE DndContext so compact→active cross-region drags work.
-    const allRegions = useMemo<FieldRegionConfig[]>(() => {
-        const regions: FieldRegionConfig[] = [];
-        if (ready) regions.push({
-            regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 5, minRows: 2,
-            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'READY', readyStacks, onCardContextMenu),
-            ...fieldRegionCbs(player, ready, gameId, onCommand),
-        });
-        if (torpor && torpor.count > 0) regions.push({
-            regionKey: 'TORPOR', name: 'Torpor', stacks: torporStacks, columns: 4,
-            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'TORPOR', torporStacks, onCardContextMenu),
-            ...fieldRegionCbs(player, torpor, gameId, onCommand),
-        });
-        if (research && research.count > 0) regions.push({
-            regionKey: 'RESEARCH', name: 'Research', stacks: researchStacks, columns: 4, narrowGap: true,
-            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'RESEARCH', researchStacks, onCardContextMenu),
-            ...fieldRegionCbs(player, research, gameId, onCommand),
-        });
-        if (uncontrolled && uncontrolled.count > 0) regions.push({
-            regionKey: 'UNCONTROLLED', name: 'Uncontrolled', stacks: uncontrolledStacks, columns: 4, narrowGap: true,
-            onCardContextMenu: makeFieldContextMenuHandler(player.name, 'UNCONTROLLED', uncontrolledStacks, onCardContextMenu),
-            ...fieldRegionCbs(player, uncontrolled, gameId, onCommand),
-        });
-        return regions;
-    }, [ready, torpor, research, uncontrolled,
+    const allRegions = useMemo<FieldRegionConfig[]>(() => buildActiveRegionConfigs({
+        player, gameId, onCommand, onCardContextMenu,
+        ready, torpor, research, uncontrolled,
+        readyStacks, torporStacks, researchStacks, uncontrolledStacks,
+        readyMinRows: 2,
+        requireUncontrolledCount: true,
+    }), [ready, torpor, research, uncontrolled,
         readyStacks, torporStacks, researchStacks, uncontrolledStacks,
         gameId, onCommand, onCardContextMenu, player]);
 
@@ -115,18 +98,15 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
                         {/* Compact stacks pinned to the bottom */}
                         {hasBottom && (
                             <div className="mt-auto flex flex-col gap-1 pt-1 border-t border-line/20">
-                                <div className="flex flex-row flex-wrap gap-1">
-                                    {hand && !isCurrentUser && renderRegion('HAND')}
-                                    {library && renderRegion('LIBRARY')}
-                                    {crypt && renderRegion('CRYPT')}
-                                    {ashHeap?.visible && renderRegion('ASH_HEAP')}
-                                    {ashHeap && !ashHeap.visible && (
-                                        <RegionBadge label="Ash Heap" count={ashHeap.count} />
-                                    )}
-                                    {rfg && rfg.count > 0 && (
-                                        <RegionBadge label="RFG" count={rfg.count} />
-                                    )}
-                                </div>
+                                <CompactRegionRow
+                                    hand={hand}
+                                    isCurrentUser={!!isCurrentUser}
+                                    library={library}
+                                    crypt={crypt}
+                                    ashHeap={ashHeap}
+                                    rfg={rfg}
+                                    renderRegion={renderRegion}
+                                />
                             </div>
                         )}
                     </>

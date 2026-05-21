@@ -1,7 +1,8 @@
+import type {ReactNode} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
 import type {GameCommand, CardRef} from './gameCommands.ts';
 import {attachCard, cardRef, moveCard} from './gameCommands.ts';
-import type {CompactRegionConfig} from './FieldRegion.tsx';
+import type {CompactRegionConfig, FieldRegionConfig} from './FieldRegion.tsx';
 
 export function fieldRegionCbs(
     player: PlayerState,
@@ -136,6 +137,83 @@ export function RegionBadge({label, count}: {label: string; count: number}) {
         <div className="flex items-center gap-1 rounded px-2 py-0.5 text-xs bg-panel border border-line/75 text-ink-muted">
             <span>{label}</span>
             <span className="font-medium text-ink-secondary">{count}</span>
+        </div>
+    );
+}
+
+type BuildActiveRegionConfigsOptions = {
+    player: PlayerState;
+    gameId: string | undefined;
+    onCommand: ((cmd: GameCommand) => void) | undefined;
+    onCardContextMenu: ((card: CardData, ref: CardRef, x: number, y: number) => void) | undefined;
+    onCardClick?: (regionType: RegionType, si: number, ci: number) => void;
+    ready: RegionState | undefined;
+    torpor: RegionState | undefined;
+    research: RegionState | undefined;
+    uncontrolled: RegionState | undefined;
+    readyStacks: CardData[][];
+    torporStacks: CardData[][];
+    researchStacks: CardData[][];
+    uncontrolledStacks: CardData[][];
+    readyMinRows?: number;
+    requireUncontrolledCount?: boolean;
+};
+
+export function buildActiveRegionConfigs({
+    player, gameId, onCommand, onCardContextMenu, onCardClick,
+    ready, torpor, research, uncontrolled,
+    readyStacks, torporStacks, researchStacks, uncontrolledStacks,
+    readyMinRows, requireUncontrolledCount = false,
+}: BuildActiveRegionConfigsOptions): FieldRegionConfig[] {
+    const regions: FieldRegionConfig[] = [];
+    if (ready) regions.push({
+        regionKey: 'READY', name: 'Ready', stacks: readyStacks, columns: 5,
+        ...(readyMinRows !== undefined && {minRows: readyMinRows}),
+        ...(onCardClick && {onCardClick: (si: number, ci: number) => onCardClick('READY', si, ci)}),
+        onCardContextMenu: makeFieldContextMenuHandler(player.name, 'READY', readyStacks, onCardContextMenu),
+        ...fieldRegionCbs(player, ready, gameId, onCommand),
+    });
+    if (torpor && torpor.count > 0) regions.push({
+        regionKey: 'TORPOR', name: 'Torpor', stacks: torporStacks, columns: 4,
+        ...(onCardClick && {onCardClick: (si: number, ci: number) => onCardClick('TORPOR', si, ci)}),
+        onCardContextMenu: makeFieldContextMenuHandler(player.name, 'TORPOR', torporStacks, onCardContextMenu),
+        ...fieldRegionCbs(player, torpor, gameId, onCommand),
+    });
+    if (research && research.count > 0) regions.push({
+        regionKey: 'RESEARCH', name: 'Research', stacks: researchStacks, columns: 4, narrowGap: true,
+        ...(onCardClick && {onCardClick: (si: number, ci: number) => onCardClick('RESEARCH', si, ci)}),
+        onCardContextMenu: makeFieldContextMenuHandler(player.name, 'RESEARCH', researchStacks, onCardContextMenu),
+        ...fieldRegionCbs(player, research, gameId, onCommand),
+    });
+    if (uncontrolled && (!requireUncontrolledCount || uncontrolled.count > 0)) regions.push({
+        regionKey: 'UNCONTROLLED', name: 'Uncontrolled', stacks: uncontrolledStacks, columns: 4, narrowGap: true,
+        ...(onCardClick && {onCardClick: (si: number, ci: number) => onCardClick('UNCONTROLLED', si, ci)}),
+        onCardContextMenu: makeFieldContextMenuHandler(player.name, 'UNCONTROLLED', uncontrolledStacks, onCardContextMenu),
+        ...fieldRegionCbs(player, uncontrolled, gameId, onCommand),
+    });
+    return regions;
+}
+
+export function CompactRegionRow({
+    hand, isCurrentUser, library, crypt, ashHeap, rfg, renderRegion, className,
+}: {
+    hand: RegionState | undefined;
+    isCurrentUser: boolean;
+    library: RegionState | undefined;
+    crypt: RegionState | undefined;
+    ashHeap: RegionState | undefined;
+    rfg: RegionState | undefined;
+    renderRegion: (key: string) => ReactNode;
+    className?: string;
+}) {
+    return (
+        <div className={`flex flex-row flex-wrap gap-1${className ? ` ${className}` : ''}`}>
+            {hand && !isCurrentUser && renderRegion('HAND')}
+            {library && renderRegion('LIBRARY')}
+            {crypt && renderRegion('CRYPT')}
+            {ashHeap?.visible && renderRegion('ASH_HEAP')}
+            {ashHeap && !ashHeap.visible && <RegionBadge label="Ash Heap" count={ashHeap.count} />}
+            {rfg && rfg.count > 0 && <RegionBadge label="RFG" count={rfg.count} />}
         </div>
     );
 }

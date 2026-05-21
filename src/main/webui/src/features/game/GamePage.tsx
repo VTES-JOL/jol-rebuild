@@ -9,19 +9,49 @@ import {TextBoard} from './TextBoard.tsx';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
 import {HandTray} from './HandTray.tsx';
-import type {CardData, PlayerState} from './types.ts';
+import type {CardData, GameState, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {regionToStacks} from './gameUtils.tsx';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
+import type {BoardLayout} from './GameStatusBar.tsx';
+import {CommandErrorBanner, ConnectionBanner, GameStatusBar} from './GameStatusBar.tsx';
 
 
-type BoardLayout = 'linear' | 'circular' | 'text';
-
-const LAYOUT_LABELS: Record<BoardLayout, string> = {
-    linear: 'Strip',
-    circular: 'Table',
-    text: 'Text',
+type GameContextMenuOverlayProps = {
+    contextMenu: {ref: CardRef; x: number; y: number} | null;
+    gameState: GameState | null;
+    gameId: string;
+    currentUser: string;
+    onCommand: (cmd: GameCommand) => void;
+    onClose: () => void;
 };
+
+function GameContextMenuOverlay({contextMenu, gameState, gameId, currentUser, onCommand, onClose}: GameContextMenuOverlayProps) {
+    if (!contextMenu || !gameState) return null;
+    const {ref} = contextMenu;
+    const player = gameState.players.find(p => p.name === ref.playerName);
+    if (!player) return null;
+    const region = player.regions[ref.regionType];
+    if (!region) return null;
+    const stacks = regionToStacks(region, gameState.cards);
+    const stack = stacks[ref.position];
+    if (!stack) return null;
+    const liveCard = ref.childIndex === -1 ? stack[0] : stack[ref.childIndex + 1];
+    if (!liveCard) return null;
+    return (
+        <CardContextMenu
+            card={liveCard}
+            cardRef={ref}
+            gameId={gameId}
+            currentUser={currentUser}
+            playerPool={player.pool}
+            position={{x: contextMenu.x, y: contextMenu.y}}
+            onCommand={onCommand}
+            onClose={onClose}
+        />
+    );
+}
+
 
 export default function GamePage() {
     const {user, loading} = useAuthContext();
@@ -73,113 +103,56 @@ export default function GamePage() {
     }, []);
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
+    const [layoutReady, setLayoutReady] = useState(false);
     const layoutInitialized = useRef(false);
     useEffect(() => {
-        if (!layoutInitialized.current && user) {
-            layoutInitialized.current = true;
+        if (layoutInitialized.current || loading) return;
+        layoutInitialized.current = true;
+        if (user) {
             const pref = user.defaultBoard;
             if (pref === 'linear' || pref === 'circular' || pref === 'text') {
                 setBoardLayout(pref);
             }
         }
-    }, [user]);
+        setLayoutReady(true);
+    }, [user, loading]);
 
     const isConnected = status === 'connected';
+    const currentUserHand = user && gameState
+        ? gameState.players.find(p => p.name === user.username)?.regions['HAND'] ?? null
+        : null;
 
     return (
         <GameLayout>
-            {contextMenu && gameState && (() => {
-                const {ref} = contextMenu;
-                const player = gameState.players.find(p => p.name === ref.playerName);
-                if (!player) return null;
-                const region = player.regions[ref.regionType];
-                if (!region) return null;
-                const stacks = regionToStacks(region, gameState.cards);
-                const stack = stacks[ref.position];
-                if (!stack) return null;
-                const liveCard = ref.childIndex === -1 ? stack[0] : stack[ref.childIndex + 1];
-                if (!liveCard) return null;
-                return (
-                    <CardContextMenu
-                        card={liveCard}
-                        cardRef={ref}
-                        gameId={gameId}
-                        currentUser={user?.username ?? ''}
-                        playerPool={player.pool}
-                        position={{x: contextMenu.x, y: contextMenu.y}}
-                        onCommand={handleCommand}
-                        onClose={() => setContextMenu(null)}
-                    />
-                );
-            })()}
+            <GameContextMenuOverlay
+                contextMenu={contextMenu}
+                gameState={gameState}
+                gameId={gameId}
+                currentUser={user?.username ?? ''}
+                onCommand={handleCommand}
+                onClose={() => setContextMenu(null)}
+            />
             <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
                 {/* Board — full width on ≤md, left 3/4 on lg+ */}
                 <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">
 
-                    {/* Top bar: turn/phase info + layout selector */}
-                    <div className="flex items-center justify-between pb-2 shrink-0 gap-2 min-w-0">
-                        <div className="flex items-center gap-2 text-xs min-w-0 overflow-hidden">
-                            {gameState && (
-                                <>
-                                    <span className="text-ink-muted">Turn {gameState.turn}</span>
-                                    <span className="text-ink-muted/40">·</span>
-                                    <span className="text-ink-muted">{gameState.phase}</span>
-                                    {gameState.currentPlayer && (
-                                        <>
-                                            <span className="text-ink-muted/40">·</span>
-                                            <span className="text-ink font-medium truncate">▶ {gameState.currentPlayer}</span>
-                                        </>
-                                    )}
-                                    {gameState.edgeHolder && (
-                                        <>
-                                            <span className="text-ink-muted/40">·</span>
-                                            <span className="text-ink-muted truncate">Edge: {gameState.edgeHolder}</span>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5 shrink-0">
-                            {(['linear', 'circular', 'text'] as const).map(l => (
-                                <button
-                                    key={l}
-                                    className={[
-                                        'text-xs px-2 py-0.5 rounded transition-colors',
-                                        boardLayout === l
-                                            ? 'bg-arcane/20 text-ink'
-                                            : 'text-ink-muted hover:text-ink',
-                                    ].join(' ')}
-                                    onClick={() => setBoardLayout(l)}
-                                >
-                                    {LAYOUT_LABELS[l]}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    <GameStatusBar
+                        gameState={gameState}
+                        boardLayout={boardLayout}
+                        onLayoutChange={setBoardLayout}
+                    />
 
-                    {/* Connection status banner */}
-                    {!isConnected && (
-                        <div className="shrink-0 mb-1.5 flex items-center gap-2 rounded border border-gold/30 bg-gold/5 px-3 py-1.5 text-xs text-gold">
-                            <span className="animate-pulse">●</span>
-                            <span>{status === 'connecting' ? 'Connecting…' : 'Connection lost — reconnecting…'}</span>
-                        </div>
-                    )}
+                    {!isConnected && <ConnectionBanner status={status} />}
 
-                    {/* Command error banner */}
                     {commandError && (
-                        <div className="shrink-0 mb-1.5 flex items-center gap-2 rounded border border-blood/30 bg-blood/5 px-3 py-1.5 text-xs text-blood">
-                            <span className="flex-1">{commandError}</span>
-                            <button
-                                className="text-blood/60 hover:text-blood transition-colors leading-none"
-                                onClick={clearCommandError}
-                                aria-label="Dismiss"
-                            >
-                                ✕
-                            </button>
-                        </div>
+                        <CommandErrorBanner error={commandError} onDismiss={clearCommandError} />
                     )}
 
-                    {boardLayout === 'circular' && gameState ? (
+                    {!layoutReady ? (
+                        <div className="flex items-center justify-center h-32 text-ink-muted text-sm">
+                            Loading…
+                        </div>
+                    ) : boardLayout === 'circular' && gameState ? (
                         <div className="flex-1 min-h-0 overflow-hidden">
                             <CircularBoard
                                 orderedPlayers={orderedPlayers}
@@ -230,20 +203,16 @@ export default function GamePage() {
                     )}
 
                     {/* Hand tray — below board on lg+, above chat on mobile (text layout uses TextHandPanel instead) */}
-                    {boardLayout !== 'text' && user && gameState && (() => {
-                        const hand = gameState.players.find(p => p.name === user.username)?.regions['HAND'];
-                        if (!hand) return null;
-                        return (
-                            <HandTray
-                                playerName={user.username}
-                                hand={hand}
-                                cards={gameState.cards}
-                                gameId={gameId}
-                                onCommand={handleCommand}
-                                onCardContextMenu={handleCardContextMenu}
-                            />
-                        );
-                    })()}
+                    {boardLayout !== 'text' && currentUserHand && gameState && user && (
+                        <HandTray
+                            playerName={user.username}
+                            hand={currentUserHand}
+                            cards={gameState.cards}
+                            gameId={gameId}
+                            onCommand={handleCommand}
+                            onCardContextMenu={handleCardContextMenu}
+                        />
+                    )}
                 </div>
 
                 {/* Chat — fixed height at bottom on ≤md, right 1/4 on lg+ */}
