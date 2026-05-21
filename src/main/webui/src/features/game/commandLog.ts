@@ -14,6 +14,7 @@ export interface NextTurnLog       { commandType: 'NEXT_TURN';      actor: strin
 
 // ── Deck ───────────────────────────────────────────────────────────────────────
 export interface DrawCardLog       { commandType: 'DRAW_CARD';       actor: string; count: number }
+export interface DrawCryptLog      { commandType: 'DRAW_CRYPT';      actor: string; count: number }
 export interface ShuffleLibraryLog { commandType: 'SHUFFLE_LIBRARY'; actor: string }
 export interface ShuffleCryptLog   { commandType: 'SHUFFLE_CRYPT';   actor: string }
 
@@ -44,7 +45,7 @@ export interface ReverseOrderLog  { commandType: 'REVERSE_ORDER';  actor: string
 
 export type CommandLogData =
     | AdvancePhaseLog | NextTurnLog
-    | DrawCardLog | ShuffleLibraryLog | ShuffleCryptLog
+    | DrawCardLog | DrawCryptLog | ShuffleLibraryLog | ShuffleCryptLog
     | PlayCardLog | DiscardCardLog | MoveCardLog | AttachCardLog | MoveToCryptLog | InfluenceCardLog
     | AddCounterLog | RemoveCounterLog | MoveToTorporLog | RescueFromTorporLog
     | BurnMinionLog | ContestCardLog | ClearContestCardLog | SetTitleLog

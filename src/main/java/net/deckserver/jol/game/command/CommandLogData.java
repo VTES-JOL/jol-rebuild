@@ -11,6 +11,7 @@ import net.deckserver.jol.enums.Phase;
         @JsonSubTypes.Type(value = CommandLogData.AdvancePhaseLog.class,      name = "ADVANCE_PHASE"),
         @JsonSubTypes.Type(value = CommandLogData.NextTurnLog.class,           name = "NEXT_TURN"),
         @JsonSubTypes.Type(value = CommandLogData.DrawCardLog.class,           name = "DRAW_CARD"),
+        @JsonSubTypes.Type(value = CommandLogData.DrawCryptLog.class,          name = "DRAW_CRYPT"),
         @JsonSubTypes.Type(value = CommandLogData.ShuffleLibraryLog.class,     name = "SHUFFLE_LIBRARY"),
         @JsonSubTypes.Type(value = CommandLogData.ShuffleCryptLog.class,       name = "SHUFFLE_CRYPT"),
         @JsonSubTypes.Type(value = CommandLogData.PlayCardLog.class,           name = "PLAY_CARD"),
@@ -36,7 +37,7 @@ import net.deckserver.jol.enums.Phase;
 public sealed interface CommandLogData
         permits
         CommandLogData.AdvancePhaseLog, CommandLogData.NextTurnLog,
-        CommandLogData.DrawCardLog, CommandLogData.ShuffleLibraryLog, CommandLogData.ShuffleCryptLog,
+        CommandLogData.DrawCardLog, CommandLogData.DrawCryptLog, CommandLogData.ShuffleLibraryLog, CommandLogData.ShuffleCryptLog,
         CommandLogData.PlayCardLog, CommandLogData.DiscardCardLog, CommandLogData.MoveCardLog,
         CommandLogData.AttachCardLog, CommandLogData.MoveToCryptLog, CommandLogData.InfluenceCardLog,
         CommandLogData.AddCounterLog, CommandLogData.RemoveCounterLog,
@@ -54,6 +55,7 @@ public sealed interface CommandLogData
 
     // ── Deck ──────────────────────────────────────────────────────────────────
     record DrawCardLog(String actor, int count) implements CommandLogData {}
+    record DrawCryptLog(String actor, int count) implements CommandLogData {}
     record ShuffleLibraryLog(String actor) implements CommandLogData {}
     record ShuffleCryptLog(String actor) implements CommandLogData {}
 

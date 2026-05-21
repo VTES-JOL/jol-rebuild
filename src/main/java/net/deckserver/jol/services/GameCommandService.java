@@ -59,6 +59,7 @@ public class GameCommandService {
             case AdvancePhase c     -> handleAdvancePhase(game, c, actor);
             case NextTurn c         -> handleNextTurn(game, c, actor);
             case DrawCard c         -> handleDrawCard(game, c, actor);
+            case DrawCrypt c        -> handleDrawCrypt(game, c, actor);
             case ShuffleLibrary c   -> handleShuffleLibrary(game, actor);
             case ShuffleCrypt c     -> handleShuffleCrypt(game, actor);
             case DiscardCard c      -> handleDiscardCard(game, c, actor);
@@ -158,6 +159,20 @@ public class GameCommandService {
         }
         String msg = actor + " drew " + toDraw + " card(s)";
         return new CommandResult(game, msg, new CommandLogData.DrawCardLog(actor, toDraw));
+    }
+
+    private CommandResult handleDrawCrypt(GameData game, DrawCrypt cmd, String actor) {
+        PlayerData player = game.getPlayer(actor);
+        if (player == null) return CommandResult.silent(game);
+        RegionData crypt = player.getRegion(RegionType.CRYPT);
+        RegionData uncontrolled = player.getRegion(RegionType.UNCONTROLLED);
+        int toDraw = Math.min(cmd.count(), crypt.getCards().size());
+        for (int i = 0; i < toDraw; i++) {
+            if (crypt.getCards().isEmpty()) break;
+            uncontrolled.addCard(crypt.getFirstCard(), false);
+        }
+        String msg = actor + " drew " + toDraw + " card(s) from crypt";
+        return new CommandResult(game, msg, new CommandLogData.DrawCryptLog(actor, toDraw));
     }
 
     private CommandResult handleShuffleLibrary(GameData game, String actor) {

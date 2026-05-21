@@ -6,7 +6,7 @@ import type {CardRef, GameCommand} from './gameCommands.ts';
 import {
     addCounter, burnMinion, contestCard, discardCard, transferBloodOff, transferBloodOn,
     lockCard, moveToTorpor, playCard, removeCounter, rescueFromTorpor,
-    setCardNotes, setTitle,
+    setCardNotes, setTitle, influenceCard,
     clearContestCard, unlockCard,
 } from './gameCommands.ts';
 import Input from '@/shared/components/Input.tsx';
@@ -90,10 +90,11 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const showPlay = region === 'HAND' && isSelf;
     const showDiscard = region === 'HAND' && isSelf;
     const showBurn = isMinion && inPlay;
+    const showInfluence = region === 'UNCONTROLLED' && isSelf;
     const showContest = card.unique === true && inPlay;
     const showTitle = isCryptCard && region === 'READY';
     const showNotes = (inPlay || region === 'HAND') && isSelf;
-    const hasZoneSection = showPlay || showMoveToTorpor || showRescue || showDiscard || showBurn;
+    const hasZoneSection = showPlay || showMoveToTorpor || showRescue || showDiscard || showBurn || showInfluence;
 
     const cardLabel = card.faceDown && !card.name ? '(hidden)' : (card.name ?? card.cardId ?? '—');
 
@@ -182,6 +183,9 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                     )}
                     {showDiscard && (
                         <button className={ITEM} onClick={() => fire(discardCard(gameId, cardRef))}>Discard</button>
+                    )}
+                    {showInfluence && (
+                        <button className={ITEM} onClick={() => fire(influenceCard(gameId, cardRef))}>Influence to Ready</button>
                     )}
                     {showMoveToTorpor && (
                         <button className={ITEM} onClick={() => fire(moveToTorpor(gameId, cardRef))}>Move to Torpor</button>

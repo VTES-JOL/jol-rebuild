@@ -1,4 +1,5 @@
 import type {GameState} from './types.ts';
+import {drawCard, drawCrypt, gainEdge, shuffleCrypt, shuffleLibrary} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
 
 export type BoardLayout = 'linear' | 'circular' | 'text';
@@ -63,6 +64,8 @@ function PhaseTracker({phase, isMyTurn, gameId, onCommand}: {
     );
 }
 
+const ACTION_BTN = 'text-[11px] px-1.5 py-0.5 rounded border transition-colors leading-none border-line/40 text-ink-muted hover:text-ink hover:border-line/70 cursor-pointer';
+
 type GameStatusBarProps = {
     gameState: GameState | null;
     gameId: string;
@@ -73,49 +76,76 @@ type GameStatusBarProps = {
 };
 
 export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand}: GameStatusBarProps) {
+    const isMyTurn = gameState?.currentPlayer === currentUser;
+    const hasEdge = gameState?.edgeHolder != null;
+
     return (
-        <div className="flex items-center justify-between pb-2 shrink-0 gap-2 min-w-0">
-            <div className="flex items-center gap-2 text-xs min-w-0 overflow-hidden">
-                {gameState && (
-                    <>
-                        <span className="text-ink-muted shrink-0">Turn {gameState.turn}</span>
-                        <PhaseTracker
-                            phase={gameState.phase}
-                            isMyTurn={gameState.currentPlayer === currentUser}
-                            gameId={gameId}
-                            onCommand={onCommand}
-                        />
-                        {gameState.currentPlayer && (
-                            <>
-                                <span className="text-ink-muted/40 shrink-0">·</span>
-                                <span className="text-ink font-medium truncate">▶ {gameState.currentPlayer}</span>
-                            </>
-                        )}
-                        {gameState.edgeHolder && (
-                            <>
-                                <span className="text-ink-muted/40 shrink-0">·</span>
-                                <span className="text-ink-muted truncate">Edge: {gameState.edgeHolder}</span>
-                            </>
-                        )}
-                    </>
-                )}
+        <div className="flex flex-col pb-2 shrink-0 gap-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center gap-2 text-xs min-w-0 overflow-hidden">
+                    {gameState && (
+                        <>
+                            <span className="text-ink-muted shrink-0">Turn {gameState.turn}</span>
+                            <PhaseTracker
+                                phase={gameState.phase}
+                                isMyTurn={isMyTurn}
+                                gameId={gameId}
+                                onCommand={onCommand}
+                            />
+                            {gameState.currentPlayer && (
+                                <>
+                                    <span className="text-ink-muted/40 shrink-0">·</span>
+                                    <span className="text-ink font-medium truncate">▶ {gameState.currentPlayer}</span>
+                                </>
+                            )}
+                            {gameState.edgeHolder && (
+                                <>
+                                    <span className="text-ink-muted/40 shrink-0">·</span>
+                                    <span className="text-ink-muted truncate">Edge: {gameState.edgeHolder}</span>
+                                </>
+                            )}
+                        </>
+                    )}
+                </div>
+                <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5 shrink-0">
+                    {(['linear', 'circular', 'text'] as const).map(l => (
+                        <button
+                            key={l}
+                            className={[
+                                'text-xs px-2 py-0.5 rounded transition-colors',
+                                boardLayout === l
+                                    ? 'bg-arcane/20 text-ink'
+                                    : 'text-ink-muted hover:text-ink',
+                            ].join(' ')}
+                            onClick={() => onLayoutChange(l)}
+                        >
+                            {LAYOUT_LABELS[l]}
+                        </button>
+                    ))}
+                </div>
             </div>
-            <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5 shrink-0">
-                {(['linear', 'circular', 'text'] as const).map(l => (
-                    <button
-                        key={l}
-                        className={[
-                            'text-xs px-2 py-0.5 rounded transition-colors',
-                            boardLayout === l
-                                ? 'bg-arcane/20 text-ink'
-                                : 'text-ink-muted hover:text-ink',
-                        ].join(' ')}
-                        onClick={() => onLayoutChange(l)}
-                    >
-                        {LAYOUT_LABELS[l]}
+
+            {gameState && (
+                <div className="flex items-center gap-1">
+                    <button className={ACTION_BTN} onClick={() => onCommand(drawCard(gameId))} title="Draw a card from your library">
+                        Draw
                     </button>
-                ))}
-            </div>
+                    <button className={ACTION_BTN} onClick={() => onCommand(drawCrypt(gameId))} title="Draw a card from your crypt to uncontrolled">
+                        Draw Crypt
+                    </button>
+                    <button className={ACTION_BTN} onClick={() => onCommand(shuffleLibrary(gameId))} title="Shuffle your library">
+                        ↺ Library
+                    </button>
+                    <button className={ACTION_BTN} onClick={() => onCommand(shuffleCrypt(gameId))} title="Shuffle your crypt">
+                        ↺ Crypt
+                    </button>
+                    {!hasEdge && (
+                        <button className={ACTION_BTN} onClick={() => onCommand(gainEdge(gameId))} title="Gain the Edge">
+                            Gain Edge
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

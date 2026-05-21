@@ -33,6 +33,8 @@ function BriefContent({log}: { log: CommandLogData }) {
             return <span>Turn <span className="font-mono">{log.turn}</span> — <span className="font-medium">{log.playerName}</span> begins their turn</span>;
         case 'DRAW_CARD':
             return <span>{actor} drew <span className="font-medium">{log.count}</span> card(s)</span>;
+        case 'DRAW_CRYPT':
+            return <span>{actor} drew <span className="font-medium">{log.count}</span> from crypt</span>;
         case 'SHUFFLE_LIBRARY':
             return <span>{actor} shuffled their library</span>;
         case 'SHUFFLE_CRYPT':
@@ -91,6 +93,8 @@ function FullContent({log}: { log: CommandLogData }) {
             return <span>Turn <span className="font-mono">{log.turn}</span> — <span className="font-medium">{log.playerName}</span> begins their turn</span>;
         case 'DRAW_CARD':
             return <span>{actor} drew <span className="font-medium">{log.count}</span> card(s)</span>;
+        case 'DRAW_CRYPT':
+            return <span>{actor} drew <span className="font-medium">{log.count}</span> from crypt</span>;
         case 'SHUFFLE_LIBRARY':
             return <span>{actor} shuffled their library</span>;
         case 'SHUFFLE_CRYPT':

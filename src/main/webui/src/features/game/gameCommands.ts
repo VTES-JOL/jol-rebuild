@@ -11,7 +11,8 @@ export function cardRef(playerName: string, regionType: RegionType, position: nu
 
 export type AdvancePhaseCommand = { type: 'ADVANCE_PHASE'; gameId: string };
 export type NextTurnCommand = { type: 'NEXT_TURN'; gameId: string };
-export type DrawCardCommand = { type: 'DRAW_CARD'; gameId: string };
+export type DrawCardCommand = { type: 'DRAW_CARD'; gameId: string; count: number };
+export type DrawCryptCommand = { type: 'DRAW_CRYPT'; gameId: string; count: number };
 export type ShuffleLibraryCommand = { type: 'SHUFFLE_LIBRARY'; gameId: string };
 export type ShuffleCryptCommand = { type: 'SHUFFLE_CRYPT'; gameId: string };
 export type DiscardCardCommand = { type: 'DISCARD_CARD'; gameId: string; ref: CardRef };
@@ -55,7 +56,7 @@ export type SetGameNotesCommand = { type: 'SET_GAME_NOTES'; gameId: string; note
 
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
-    | DrawCardCommand | ShuffleLibraryCommand | ShuffleCryptCommand
+    | DrawCardCommand | DrawCryptCommand | ShuffleLibraryCommand | ShuffleCryptCommand
     | DiscardCardCommand | PlayCardCommand | MoveCardCommand | AttachCardCommand
     | LockCardCommand | UnlockCardCommand | UnlockAllCommand
     | AddCounterCommand | RemoveCounterCommand | SetCardNotesCommand
@@ -142,4 +143,32 @@ export function transferBloodOff(gameId: string, ref: CardRef): TransferBloodCom
 /** Move a fully influenced vampire/imbued from UNCONTROLLED to the READY region. */
 export function influenceCard(gameId: string, ref: CardRef): InfluenceCardCommand {
     return {type: 'INFLUENCE_CARD', gameId, ref};
+}
+
+export function drawCard(gameId: string, count = 1): DrawCardCommand {
+    return {type: 'DRAW_CARD', gameId, count};
+}
+
+export function drawCrypt(gameId: string, count = 1): DrawCryptCommand {
+    return {type: 'DRAW_CRYPT', gameId, count};
+}
+
+export function shuffleLibrary(gameId: string): ShuffleLibraryCommand {
+    return {type: 'SHUFFLE_LIBRARY', gameId};
+}
+
+export function shuffleCrypt(gameId: string): ShuffleCryptCommand {
+    return {type: 'SHUFFLE_CRYPT', gameId};
+}
+
+export function setPool(gameId: string, playerName: string, amount: number): SetPoolCommand {
+    return {type: 'SET_POOL', gameId, playerName, amount};
+}
+
+export function gainEdge(gameId: string): GainEdgeCommand {
+    return {type: 'GAIN_EDGE', gameId};
+}
+
+export function oustPlayer(gameId: string, playerName: string): OustPlayerCommand {
+    return {type: 'OUST_PLAYER', gameId, playerName};
 }

@@ -4,6 +4,7 @@ import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
 import {buildActiveRegionConfigs, CompactRegionRow, createCompactRegionConfigs} from './gameUtils.tsx';
 import type {CardRef, GameCommand} from './gameCommands.ts';
+import {setPool} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
 type PlayerBoardProps = {
@@ -73,7 +74,24 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
                 <span className={`text-sm leading-tight truncate ${isCurrentPlayer ? 'font-semibold text-ink' : 'font-medium text-ink-secondary'}`}>
                     {player.name}
                 </span>
-                <span className="text-xs text-blood font-medium">{player.pool} pool</span>
+                {gameId && onCommand ? (
+                    <div className="flex items-center gap-0.5">
+                        <button
+                            className="w-3.5 h-3.5 flex items-center justify-center text-[10px] text-blood/50 hover:text-blood rounded transition-colors leading-none"
+                            onClick={() => onCommand(setPool(gameId, player.name, player.pool - 1))}
+                            title="Remove 1 pool"
+                        >−</button>
+                        <span className="text-xs text-blood font-medium tabular-nums">{player.pool}</span>
+                        <button
+                            className="w-3.5 h-3.5 flex items-center justify-center text-[10px] text-blood/50 hover:text-blood rounded transition-colors leading-none"
+                            onClick={() => onCommand(setPool(gameId, player.name, player.pool + 1))}
+                            title="Add 1 pool"
+                        >+</button>
+                        <span className="text-[10px] text-blood/60">pool</span>
+                    </div>
+                ) : (
+                    <span className="text-xs text-blood font-medium">{player.pool} pool</span>
+                )}
                 {player.victoryPoints > 0 && (
                     <span className="text-xs text-gold font-medium">{player.victoryPoints} VP</span>
                 )}
