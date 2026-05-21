@@ -1,8 +1,23 @@
-import React, {useRef, useState} from 'react';
+import React, {useLayoutEffect, useRef, useState} from 'react';
 import type {CSSProperties} from 'react';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import {PlayerColumn} from './PlayerColumn.tsx';
 import type {CardRef, GameCommand} from './gameCommands.ts';
+
+const GAP = 12; // gap-3 = 12px between slots
+
+function baseTranslate(colW: number) { return -(colW + GAP); }
+function setStripX(strip: HTMLDivElement | null, px: number) {
+    if (strip) strip.style.transform = `translateX(${px}px)`;
+}
+
+function EmptySlot({label}: {label?: string}) {
+    return (
+        <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
+            {label}
+        </div>
+    );
+}
 
 export type CircularBoardProps = {
     orderedPlayers: PlayerState[];
@@ -21,158 +36,275 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
         orderedPlayers[0]?.name;
 
     const [focusedName, setFocusedName] = useState(initialFocus);
-    const boardRef  = useRef<HTMLDivElement>(null);
-    const dragStart = useRef<{x: number; y: number} | null>(null);
+    const [colWidth, setColWidth] = useState(0);
 
-    const navigate = (name: string, dir: 'left' | 'right') => {
-        setFocusedName(name);
-        const el = boardRef.current;
+    const clipRef     = useRef<HTMLDivElement>(null);
+    const stripRef    = useRef<HTMLDivElement>(null);
+    const colWidthRef = useRef(0);
+    const animating   = useRef(false);
+    const dragState   = useRef<{
+        startX: number; startY: number;
+        pointerId: number; isDragging: boolean;
+    } | null>(null);
+
+    // Measure column width; skip re-render if dragging (update ref only)
+    useLayoutEffect(() => {
+        const el = clipRef.current;
         if (!el) return;
-        el.classList.remove('board-slide-left', 'board-slide-right');
-        void el.offsetWidth; // force reflow to restart animation
-        el.classList.add(dir === 'right' ? 'board-slide-right' : 'board-slide-left');
-    };
+        const measure = () => {
+            const w = Math.floor((el.clientWidth - 2 * GAP) / 3);
+            colWidthRef.current = w;
+            if (!dragState.current?.isDragging) setColWidth(w);
+        };
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(el);
+        return () => {
+            ro.disconnect();
+            animating.current = false;
+            if (stripRef.current) stripRef.current.style.transition = 'none';
+        };
+    }, []);
+
+    // Keep strip at rest position when colWidth changes (initial placement + resize)
+    useLayoutEffect(() => {
+        if (colWidth > 0) setStripX(stripRef.current, baseTranslate(colWidth));
+    }, [colWidth]);
+
+    // After focusedName change commits new slot content to DOM, reset strip position
+    // in the same frame (useLayoutEffect runs before paint) to eliminate flicker.
+    useLayoutEffect(() => {
+        const colW = colWidthRef.current;
+        if (colW > 0) {
+            setStripX(stripRef.current, baseTranslate(colW));
+            animating.current = false;
+        }
+    }, [focusedName]);
+
+    function snapTo(targetX: number, newName: string) {
+        animating.current = true;
+        const strip = stripRef.current;
+        if (!strip) return;
+
+        const commit = () => {
+            strip.style.transition = 'none';
+            setFocusedName(newName);
+        };
+
+        // If the strip is already at the target (user dragged to the clamp boundary),
+        // transitionend would never fire — commit directly to avoid permanent lock.
+        const match = /translateX\((-?[\d.]+)px\)/.exec(strip.style.transform);
+        const currentX = match ? parseFloat(match[1]) : 0;
+        if (Math.abs(currentX - targetX) < 1) {
+            commit();
+            return;
+        }
+
+        strip.style.transition = 'transform 280ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        setStripX(strip, targetX);
+        strip.addEventListener('transitionend', commit, {once: true});
+    }
+
+    function snapBack() {
+        animating.current = true;
+        const strip = stripRef.current;
+        if (!strip) return;
+        strip.style.transition = 'transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        setStripX(strip, baseTranslate(colWidthRef.current));
+        strip.addEventListener('transitionend', () => {
+            strip.style.transition = 'none';
+            animating.current = false;
+        }, {once: true});
+    }
+
+    // Called by arrow buttons: dir='left' → prey ◀, dir='right' → predator ▶
+    function navigate(name: string, dir: 'left' | 'right') {
+        if (animating.current) return;
+        const colW = colWidthRef.current;
+        const target = dir === 'left' ? 0 : -(2 * (colW + GAP));
+        snapTo(target, name);
+    }
 
     const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+        if (animating.current) return;
         if ((e.target as HTMLElement).closest('button,a,input,[role="button"]')) return;
+        dragState.current = {startX: e.clientX, startY: e.clientY, pointerId: e.pointerId, isDragging: false};
+    };
+
+    const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+        const state = dragState.current;
+        if (!state || animating.current) return;
+        const dx = e.clientX - state.startX;
+        const dy = e.clientY - state.startY;
+        if (!state.isDragging) {
+            if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+            // Yield vertical motion to DnD-kit card drags
+            if (Math.abs(dy) > Math.abs(dx)) { dragState.current = null; return; }
+            state.isDragging = true;
+            e.currentTarget.setPointerCapture(state.pointerId);
+        }
         e.preventDefault();
-        dragStart.current = {x: e.clientX, y: e.clientY};
+        const colW = colWidthRef.current;
+        const clamped = Math.max(-(colW + GAP), Math.min(colW + GAP, dx));
+        setStripX(stripRef.current, baseTranslate(colW) + clamped);
     };
 
     const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-        const start = dragStart.current;
-        dragStart.current = null;
-        if (!start) return;
-        const dx = e.clientX - start.x;
-        const dy = e.clientY - start.y;
-        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)) return;
-        if (dx < 0 && predator) navigate(predator.name, 'right');
-        if (dx > 0 && prey)     navigate(prey.name,     'left');
+        const state = dragState.current;
+        dragState.current = null;
+        if (!state) return;
+        if (state.isDragging) e.currentTarget.releasePointerCapture(state.pointerId);
+        if (!state.isDragging) return;
+        const dx = e.clientX - state.startX;
+        const colW = colWidthRef.current;
+        const threshold = Math.max(60, colW * 0.25);
+        if (dx < -threshold && predator)      snapTo(-(2 * (colW + GAP)), predator.name);
+        else if (dx > threshold && prey)      snapTo(0, prey.name);
+        else                                  snapBack();
+    };
+
+    const onPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+        const state = dragState.current;
+        dragState.current = null;
+        if (state?.isDragging) {
+            e.currentTarget.releasePointerCapture(state.pointerId);
+            snapBack();
+        }
     };
 
     const focused  = orderedPlayers.find(p => p.name === focusedName);
-    const predator = focused?.predator ? orderedPlayers.find(p => p.name === focused.predator) : undefined;
-    const prey     = focused?.prey     ? orderedPlayers.find(p => p.name === focused.prey)     : undefined;
+    const prey     = focused?.prey      ? orderedPlayers.find(p => p.name === focused.prey)            : undefined;
+    const predator = focused?.predator  ? orderedPlayers.find(p => p.name === focused.predator)        : undefined;
+    const prevPrev = prey?.prey         ? orderedPlayers.find(p => p.name === prey.prey)               : undefined;
+    const nextNext = predator?.predator ? orderedPlayers.find(p => p.name === predator.predator)       : undefined;
+
+    const isActive = (player: PlayerState | undefined) => player?.name === gameState.currentPlayer;
+
+    const slot: CSSProperties = {width: colWidth, flexShrink: 0};
 
     return (
         <div
-            ref={boardRef}
-            className="flex gap-3 h-full select-none"
+            ref={clipRef}
+            className="relative overflow-x-hidden h-full select-none"
             style={{'--card-w': 'clamp(66px, 5.25vw, 84px)'} as CSSProperties}
             onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
-            onPointerLeave={() => { dragStart.current = null; }}
-            onAnimationEnd={() => boardRef.current?.classList.remove('board-slide-left', 'board-slide-right')}
+            onPointerCancel={onPointerCancel}
         >
-            {/* Prey column — nav arrow on inner (right) edge */}
-            <div className="flex-1 min-w-0 relative pr-8">
-                {prey ? (
-                    <>
-                        <PlayerColumn
-                            player={prey}
-                            cards={cards}
-                            role="prey"
-                            isCurrentUser={prey.name === currentUser}
-                            gameId={gameId}
-                            onCommand={onCommand}
-                            onCardContextMenu={onCardContextMenu}
-                        />
-                        <div className="pointer-events-none absolute right-0 top-0 w-7 flex items-center justify-center overflow-hidden select-none"
-                             style={{bottom: 'calc(50% + 44px)'}}>
-                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
-                                  style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Prey</span>
-                        </div>
-                        <div className="pointer-events-none absolute right-0 bottom-0 w-7 flex items-center justify-center overflow-hidden select-none"
-                             style={{top: 'calc(50% + 44px)'}}>
-                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
-                                  style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Prey</span>
-                        </div>
-                        <button
-                            className="group absolute right-0 top-1/2 -translate-y-1/2 z-10
-                                       flex items-center justify-center w-7 h-20
-                                       bg-surface/90 border border-line/60 rounded-l-full
-                                       text-ink-muted hover:text-ink hover:bg-surface-raised
-                                       transition-colors shadow-md text-lg cursor-pointer"
-                            onClick={() => navigate(prey.name, 'left')}
-                            aria-label="Focus prey"
-                        >
-                            ◀
-                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2
-                                             whitespace-nowrap rounded bg-ink/90 px-2 py-1 text-xs text-surface
-                                             opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                Focus {prey.name}
-                            </span>
-                        </button>
-                    </>
-                ) : (
-                    <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
-                        no prey
+            {colWidth > 0 && (
+                <div
+                    ref={stripRef}
+                    className="flex h-full"
+                    style={{width: `${5 * colWidth + 4 * GAP}px`, gap: `${GAP}px`, willChange: 'transform'}}
+                >
+                    {/* Slot 0 — prevPrev (ghost, clipped) */}
+                    <div style={slot} className="h-full pr-8">
+                        {prevPrev
+                            ? <PlayerColumn player={prevPrev} cards={cards} role="prey"
+                                            isFocused={isActive(prevPrev)}
+                                            isCurrentUser={prevPrev.name === currentUser}
+                                            gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
+                            : <EmptySlot />}
                     </div>
-                )}
-            </div>
 
-            {/* Focused player column */}
-            <div className="flex-1 min-w-0">
-                {focused && (
-                    <PlayerColumn
-                        player={focused}
-                        cards={cards}
-                        role="focused"
-                        isFocused
-                        isCurrentUser={focused.name === currentUser}
-                        gameId={gameId}
-                        onCommand={onCommand}
-                        onCardContextMenu={onCardContextMenu}
-                    />
-                )}
-            </div>
-
-            {/* Predator column — nav arrow on inner (left) edge */}
-            <div className="flex-1 min-w-0 relative pl-8">
-                {predator ? (
-                    <>
-                        <div className="pointer-events-none absolute left-0 top-0 w-7 flex items-center justify-center overflow-hidden select-none"
-                             style={{bottom: 'calc(50% + 44px)'}}>
-                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
-                                  style={{writingMode: 'vertical-rl'}}>Predator</span>
-                        </div>
-                        <div className="pointer-events-none absolute left-0 bottom-0 w-7 flex items-center justify-center overflow-hidden select-none"
-                             style={{top: 'calc(50% + 44px)'}}>
-                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
-                                  style={{writingMode: 'vertical-rl'}}>Predator</span>
-                        </div>
-                        <button
-                            className="group absolute left-0 top-1/2 -translate-y-1/2 z-10
-                                       flex items-center justify-center w-7 h-20
-                                       bg-surface/90 border border-line/60 rounded-r-full
-                                       text-ink-muted hover:text-ink hover:bg-surface-raised
-                                       transition-colors shadow-md text-lg cursor-pointer"
-                            onClick={() => navigate(predator.name, 'right')}
-                            aria-label="Focus predator"
-                        >
-                            ▶
-                            <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2
-                                             whitespace-nowrap rounded bg-ink/90 px-2 py-1 text-xs text-surface
-                                             opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                                Focus {predator.name}
-                            </span>
-                        </button>
-                        <PlayerColumn
-                            player={predator}
-                            cards={cards}
-                            role="predator"
-                            isCurrentUser={predator.name === currentUser}
-                            gameId={gameId}
-                            onCommand={onCommand}
-                            onCardContextMenu={onCardContextMenu}
-                        />
-                    </>
-                ) : (
-                    <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
-                        no predator
+                    {/* Slot 1 — prey + ◀ arrow */}
+                    <div style={slot} className="relative h-full pr-8">
+                        {prey ? (
+                            <>
+                                <PlayerColumn player={prey} cards={cards} role="prey"
+                                              isFocused={isActive(prey)}
+                                              isCurrentUser={prey.name === currentUser}
+                                              gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
+                                <div className="pointer-events-none absolute right-0 top-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                                     style={{bottom: 'calc(50% + 44px)'}}>
+                                    <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                          style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Prey</span>
+                                </div>
+                                <div className="pointer-events-none absolute right-0 bottom-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                                     style={{top: 'calc(50% + 44px)'}}>
+                                    <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                          style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Prey</span>
+                                </div>
+                                <button
+                                    className="group absolute right-0 top-1/2 -translate-y-1/2 z-10
+                                               flex items-center justify-center w-7 h-20
+                                               bg-surface/90 border border-line/60 rounded-l-full
+                                               text-ink-muted hover:text-ink hover:bg-surface-raised
+                                               transition-colors shadow-md text-lg cursor-pointer"
+                                    onClick={() => navigate(prey.name, 'left')}
+                                    aria-label="Focus prey"
+                                >
+                                    ◀
+                                    <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2
+                                                     whitespace-nowrap rounded bg-ink/90 px-2 py-1 text-xs text-surface
+                                                     opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                        Focus {prey.name}
+                                    </span>
+                                </button>
+                            </>
+                        ) : <EmptySlot label="no prey" />}
                     </div>
-                )}
-            </div>
+
+                    {/* Slot 2 — focused */}
+                    <div style={slot} className="h-full">
+                        {focused && (
+                            <PlayerColumn player={focused} cards={cards} role="focused"
+                                          isFocused={isActive(focused)}
+                                          isCurrentUser={focused.name === currentUser}
+                                          gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
+                        )}
+                    </div>
+
+                    {/* Slot 3 — predator + ▶ arrow */}
+                    <div style={slot} className="relative h-full pl-8">
+                        {predator ? (
+                            <>
+                                <div className="pointer-events-none absolute left-0 top-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                                     style={{bottom: 'calc(50% + 44px)'}}>
+                                    <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                          style={{writingMode: 'vertical-rl'}}>Predator</span>
+                                </div>
+                                <div className="pointer-events-none absolute left-0 bottom-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                                     style={{top: 'calc(50% + 44px)'}}>
+                                    <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                          style={{writingMode: 'vertical-rl'}}>Predator</span>
+                                </div>
+                                <button
+                                    className="group absolute left-0 top-1/2 -translate-y-1/2 z-10
+                                               flex items-center justify-center w-7 h-20
+                                               bg-surface/90 border border-line/60 rounded-r-full
+                                               text-ink-muted hover:text-ink hover:bg-surface-raised
+                                               transition-colors shadow-md text-lg cursor-pointer"
+                                    onClick={() => navigate(predator.name, 'right')}
+                                    aria-label="Focus predator"
+                                >
+                                    ▶
+                                    <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2
+                                                     whitespace-nowrap rounded bg-ink/90 px-2 py-1 text-xs text-surface
+                                                     opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                        Focus {predator.name}
+                                    </span>
+                                </button>
+                                <PlayerColumn player={predator} cards={cards} role="predator"
+                                              isFocused={isActive(predator)}
+                                              isCurrentUser={predator.name === currentUser}
+                                              gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
+                            </>
+                        ) : <EmptySlot label="no predator" />}
+                    </div>
+
+                    {/* Slot 4 — nextNext (ghost, clipped) */}
+                    <div style={slot} className="h-full pl-8">
+                        {nextNext
+                            ? <PlayerColumn player={nextNext} cards={cards} role="predator"
+                                            isFocused={isActive(nextNext)}
+                                            isCurrentUser={nextNext.name === currentUser}
+                                            gameId={gameId} onCommand={onCommand} onCardContextMenu={onCardContextMenu} />
+                            : <EmptySlot />}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
