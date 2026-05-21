@@ -1,4 +1,4 @@
-import type {SeatingDto, Tournament} from './types';
+import type {SeatingDto, Tournament, TournamentGame} from './types';
 import TournamentRegistrationPanel from './TournamentRegistrationPanel';
 import TournamentSeatingPanel from './TournamentSeatingPanel';
 import TournamentSeatingReadOnlyView from './TournamentSeatingReadOnlyView';
@@ -11,13 +11,14 @@ interface Props {
     tournament: Tournament;
     isTournamentAdmin: boolean;
     seating: SeatingDto | 'error' | null;
+    games?: TournamentGame[];
     onChanged: () => void;
     onSeatingChanged?: () => void;
 }
 
 const ACTIVE_STATUSES = new Set(['ACTIVE', 'SEEDING', 'FINALS', 'COMPLETED']);
 
-export default function TournamentInfoView({tournament, isTournamentAdmin, seating, onChanged, onSeatingChanged}: Props) {
+export default function TournamentInfoView({tournament, isTournamentAdmin, seating, games = [], onChanged, onSeatingChanged}: Props) {
 
     const renderContextualContent = () => {
         if (tournament.status === 'REGISTRATION') {
@@ -34,7 +35,7 @@ export default function TournamentInfoView({tournament, isTournamentAdmin, seati
             );
         }
         if (ACTIVE_STATUSES.has(tournament.status)) {
-            return <TournamentSeatingReadOnlyView seating={seating} />;
+            return <TournamentSeatingReadOnlyView seating={seating} games={games} />;
         }
         return (
             <div className="h-24 flex items-center justify-center border-2 border-dashed border-line rounded-xl text-ink-muted text-sm italic">

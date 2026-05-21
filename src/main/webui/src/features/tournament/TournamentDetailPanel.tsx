@@ -2,7 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {Pencil, Trash2} from 'lucide-react';
 import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
-import type {SeatingDto, Tournament} from './types';
+import type {SeatingDto, Tournament, TournamentGame} from './types';
 import tournamentApi from './api';
 import TournamentInfoView from './TournamentInfoView';
 import TournamentEditForm from './TournamentEditForm';
@@ -23,7 +23,9 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [confirmUnpublish, setConfirmUnpublish] = useState(false);
     const [transitioning, setTransitioning] = useState(false);
+    const [adminError, setAdminError] = useState<string | null>(null);
     const [seating, setSeating] = useState<SeatingDto | 'error' | null>(null);
+    const [games, setGames] = useState<TournamentGame[]>([]);
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -46,28 +48,31 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
         if (tournament.status === 'ACTIVE' || tournament.status === 'SEEDING'
             || tournament.status === 'FINALS' || tournament.status === 'COMPLETED') {
             tournamentApi.getSeating(tournament.id).then(setSeating).catch(() => setSeating('error'));
+            tournamentApi.getTournamentGames(tournament.id).then(setGames).catch(() => setGames([]));
         }
     }, [tournament.id, tournament.status]);
 
     const canEdit = isTournamentAdmin && tournament.status === 'SETUP';
 
     const handleSave = async () => {
+        setAdminError(null);
         try {
             await tournamentApi.update(tournament.id, editData);
             setIsEditing(false);
             onChanged();
         } catch (e) {
-            console.error('Failed to update tournament', e);
+            setAdminError(e instanceof Error ? e.message : 'Failed to update tournament');
         }
     };
 
     const handleTransition = async (action: () => Promise<Tournament>) => {
         setTransitioning(true);
+        setAdminError(null);
         try {
             await action();
             onChanged();
         } catch (e) {
-            console.error('Tournament transition failed', e);
+            setAdminError(e instanceof Error ? e.message : 'Action failed');
         } finally {
             setTransitioning(false);
         }
@@ -185,9 +190,14 @@ export default function TournamentDetailPanel({tournament, isTournamentAdmin, on
                 </div>
             }
         >
+            {adminError && (
+                <div className="mx-6 mt-4 text-sm text-blood bg-blood/5 border border-blood/20 rounded px-3 py-2" role="alert">
+                    {adminError}
+                </div>
+            )}
             {isEditing
                 ? <TournamentEditForm editData={editData} onDataChange={setEditData} />
-                : <TournamentInfoView tournament={tournament} isTournamentAdmin={isTournamentAdmin} seating={seating} onChanged={onChanged} onSeatingChanged={onSeatingChanged} />
+                : <TournamentInfoView tournament={tournament} isTournamentAdmin={isTournamentAdmin} seating={seating} games={games} onChanged={onChanged} onSeatingChanged={onSeatingChanged} />
             }
         </Panel>
     );

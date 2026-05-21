@@ -184,12 +184,14 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                         <div className="text-[10px] text-ink-muted uppercase tracking-wider font-semibold mb-1">Format</div>
                         {isOwner && game.status === 'OPEN' ? (
                             <select
-                                className="bg-transparent text-sm font-medium text-ink outline-none cursor-pointer hover:text-accent-soft"
+                                className="bg-transparent text-sm font-medium text-ink outline-none cursor-pointer hover:text-accent-soft disabled:opacity-40 disabled:cursor-not-allowed"
                                 value={game.format}
+                                disabled={game.registrationCount > 0}
+                                title={game.registrationCount > 0 ? 'Cannot change format once players have registered' : undefined}
                                 onChange={e => {
                                     gameApi.updateGame(game.id, {format: e.target.value as GameDto['format']})
                                         .then(() => onChanged?.())
-                                        .catch(console.error);
+                                        .catch(e => setOwnerError(e instanceof Error ? e.message : 'Failed to change format'));
                                 }}
                             >
                                 <option value="STANDARD">Standard</option>

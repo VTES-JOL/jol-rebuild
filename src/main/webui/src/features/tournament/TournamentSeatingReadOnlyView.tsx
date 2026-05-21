@@ -1,12 +1,15 @@
 import {useState} from 'react';
 import {ChevronDown, ChevronRight} from 'lucide-react';
-import type {SeatingDto} from './types';
+import {Link} from 'react-router-dom';
+import type {SeatingDto, TournamentGame} from './types';
 
 interface Props {
     seating: SeatingDto | 'error' | null;
+    games?: TournamentGame[];
 }
 
-export default function TournamentSeatingReadOnlyView({seating}: Props) {
+export default function TournamentSeatingReadOnlyView({seating, games = []}: Props) {
+    const gameByTable = new Map(games.map(g => [g.tableId, g]));
     const [expandedRounds, setExpandedRounds] = useState<Set<number>>(() =>
         new Set(seating && seating !== 'error' ? seating.rounds.map(r => r.roundNumber) : [])
     );
@@ -67,12 +70,22 @@ export default function TournamentSeatingReadOnlyView({seating}: Props) {
 
                         {isExpanded && (
                             <div className="p-4 space-y-3">
-                                {round.tables.map((table, tableIdx) => (
+                                {round.tables.map((table, tableIdx) => {
+                                    const game = gameByTable.get(table.id);
+                                    return (
                                     <div key={table.id}>
-                                        <div className="mb-1.5">
+                                        <div className="mb-1.5 flex items-center gap-2">
                                             <span className="text-xs font-bold text-ink-muted uppercase tracking-wider">
                                                 Table {tableIdx + 1}
                                             </span>
+                                            {game && (
+                                                <Link
+                                                    to={`/game/${game.gameId}`}
+                                                    className="text-[10px] px-1.5 py-0.5 rounded border border-arcane/40 text-arcane hover:bg-arcane/10 transition-colors leading-none"
+                                                >
+                                                    Enter Game →
+                                                </Link>
+                                            )}
                                         </div>
                                         <div className="flex gap-1.5">
                                             {[1, 2, 3, 4, 5].map(pos => {
@@ -92,7 +105,8 @@ export default function TournamentSeatingReadOnlyView({seating}: Props) {
                                             })}
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
 
                                 {round.byes.length > 0 && (
                                     <div className="space-y-1.5">

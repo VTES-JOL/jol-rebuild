@@ -36,6 +36,7 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
     useEffect(() => {
         async function load() {
             setLoading(true);
+            setError(null);
             try {
                 const [regs, decks] = await Promise.all([
                     tournamentApi.getRegistrations(tournament.id),
@@ -45,6 +46,8 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
                 setMyRegistration(regs.find(r => r.username === user?.username) ?? null);
                 setAvailableDecks(decks);
                 setSelectedDeckIds(Array(deckCount).fill(''));
+            } catch (e) {
+                setError(e instanceof Error ? e.message : 'Failed to load registration data');
             } finally {
                 setLoading(false);
             }
@@ -148,20 +151,27 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
                                             Round {i + 1} Deck
                                         </label>
                                     )}
-                                    <select
-                                        value={selectedDeckIds[i] ?? ''}
-                                        onChange={e => {
-                                            const ids = [...selectedDeckIds];
-                                            ids[i] = e.target.value;
-                                            setSelectedDeckIds(ids);
-                                        }}
-                                        className="w-full bg-panel border border-line rounded px-3 py-2 text-sm text-ink outline-none"
-                                    >
-                                        <option value=''>— Select a deck —</option>
-                                        {availableDecks.map(d => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
-                                        ))}
-                                    </select>
+                                    {availableDecks.length === 0 ? (
+                                        <p className="text-xs text-ink-muted bg-hover/30 border border-line/40 rounded px-3 py-2">
+                                            No {tournament.gameFormat} decks found. Build one in the{' '}
+                                            <a href="/decks" className="text-accent-soft hover:underline">Decks</a> section first.
+                                        </p>
+                                    ) : (
+                                        <select
+                                            value={selectedDeckIds[i] ?? ''}
+                                            onChange={e => {
+                                                const ids = [...selectedDeckIds];
+                                                ids[i] = e.target.value;
+                                                setSelectedDeckIds(ids);
+                                            }}
+                                            className="w-full bg-panel border border-line rounded px-3 py-2 text-sm text-ink outline-none"
+                                        >
+                                            <option value=''>— Select a deck —</option>
+                                            {availableDecks.map(d => (
+                                                <option key={d.id} value={d.id}>{d.name}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                 </div>
                             ))}
                         </div>
