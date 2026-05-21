@@ -432,12 +432,12 @@ public class GameCommandService {
     private CommandResult handleOustPlayer(GameData game, OustPlayer cmd, String actor) {
         PlayerData ousted = game.getPlayer(cmd.playerName());
         if (ousted == null) return CommandResult.silent(game);
-        ousted.setOusted(true);
+        ousted.setPool(0);
 
-        // Award 1 VP to the predator (if any)
         PlayerData predator = ousted.getPredator();
         if (predator != null) {
             predator.addVictoryPoints(1.0f);
+            predator.setPool(predator.getPool() + 6);
         }
 
         // Rebuild predator-prey ring excluding ousted players

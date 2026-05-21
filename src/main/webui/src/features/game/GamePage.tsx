@@ -1,4 +1,5 @@
 import type {CSSProperties} from 'react';
+import {createPortal} from 'react-dom';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
@@ -11,11 +12,67 @@ import {CardContextMenu} from './CardContextMenu.tsx';
 import {HandTray} from './HandTray.tsx';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
+import {oustPlayer} from './gameCommands.ts';
 import {regionToStacks} from './gameUtils.tsx';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 import type {BoardLayout} from './GameStatusBar.tsx';
 import {CommandErrorBanner, ConnectionBanner, GameStatusBar} from './GameStatusBar.tsx';
 
+
+function ZeroPoolOustModal({
+    playerName,
+    gameId,
+    onConfirm,
+    onDismiss,
+}: {
+    playerName: string;
+    gameId: string;
+    onConfirm: (cmd: GameCommand) => void;
+    onDismiss: () => void;
+}) {
+    return createPortal(
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={onDismiss}
+        >
+            <div
+                className="bg-surface border border-line/60 rounded-xl shadow-2xl w-full max-w-xs mx-4 overflow-hidden"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-line/40">
+                    <span className="text-sm font-semibold text-ink">Oust {playerName}?</span>
+                    <button
+                        className="text-ink-muted hover:text-ink transition-colors leading-none"
+                        onClick={onDismiss}
+                        aria-label="Close"
+                    >✕</button>
+                </div>
+                <div className="px-4 py-4 space-y-4">
+                    <p className="text-xs text-ink-muted">
+                        <span className="font-semibold text-blood">{playerName}</span>'s pool has reached 0.
+                        Their predator gains <span className="text-online font-semibold">+6 pool</span> and{' '}
+                        <span className="text-gold font-semibold">+1 VP</span>.
+                    </p>
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            className="text-xs px-3 py-1.5 rounded border border-line/40 text-ink-muted hover:text-ink transition-colors"
+                            onClick={onDismiss}
+                        >
+                            Dismiss
+                        </button>
+                        <button
+                            className="text-xs px-3 py-1.5 rounded bg-blood/20 border border-blood/40 text-blood hover:bg-blood/30 transition-colors font-medium"
+                            onClick={() => { onConfirm(oustPlayer(gameId, playerName)); onDismiss(); }}
+                        >
+                            Confirm Oust
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+}
 
 type GameContextMenuOverlayProps = {
     contextMenu: {ref: CardRef; x: number; y: number} | null;
@@ -71,7 +128,7 @@ export default function GamePage() {
     const orderedPlayers: PlayerState[] = gameState
         ? (gameState.playerOrder
             .map(name => gameState.players.find(p => p.name === name))
-            .filter(Boolean) as PlayerState[])
+            .filter((p): p is PlayerState => !!p && !p.ousted))
         : [];
 
     const prevCardIdsRef = useRef<Set<string>>(new Set());
@@ -91,8 +148,37 @@ export default function GamePage() {
         prevCardIdsRef.current = next;
     }, [gameState?.cards]);
 
+    // Track previous pool values to detect transitions to 0.
+    // Players whose pool hits 0 via SetPool/TransferBlood (not OustPlayer) get queued for oust confirmation.
+    const prevPoolsRef = useRef<Map<string, number>>(new Map());
+    // Track OustPlayer commands that were explicitly sent so we don't double-trigger.
+    const pendingOustRef = useRef<Set<string>>(new Set());
+    const [zeroPoolQueue, setZeroPoolQueue] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (!gameState) return;
+        const prev = prevPoolsRef.current;
+        const newOusts: string[] = [];
+        for (const player of gameState.players) {
+            const prevPool = prev.get(player.name);
+            if (prevPool !== undefined && prevPool > 0 && player.pool <= 0) {
+                if (!pendingOustRef.current.has(player.name)) {
+                    newOusts.push(player.name);
+                }
+                pendingOustRef.current.delete(player.name);
+            }
+            prev.set(player.name, player.pool);
+        }
+        if (newOusts.length > 0) {
+            setZeroPoolQueue(q => [...q, ...newOusts]);
+        }
+    }, [gameState]);
+
     const handleCommand = useCallback((cmd: GameCommand) => {
         clearCommandError();
+        if (cmd.type === 'OUST_PLAYER') {
+            pendingOustRef.current.add(cmd.playerName);
+        }
         sendCommand(cmd);
     }, [sendCommand, clearCommandError]);
 
@@ -122,6 +208,10 @@ export default function GamePage() {
         ? gameState.players.find(p => p.name === user.username)?.regions['HAND'] ?? null
         : null;
 
+    const dismissZeroPool = useCallback(() => {
+        setZeroPoolQueue(q => q.slice(1));
+    }, []);
+
     return (
         <GameLayout>
             <GameContextMenuOverlay
@@ -132,6 +222,14 @@ export default function GamePage() {
                 onCommand={handleCommand}
                 onClose={() => setContextMenu(null)}
             />
+            {zeroPoolQueue.length > 0 && (
+                <ZeroPoolOustModal
+                    playerName={zeroPoolQueue[0]}
+                    gameId={gameId}
+                    onConfirm={handleCommand}
+                    onDismiss={dismissZeroPool}
+                />
+            )}
             <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
                 {/* Board — full width on ≤md, left 3/4 on lg+ */}
                 <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">

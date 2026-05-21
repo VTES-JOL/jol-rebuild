@@ -1,5 +1,7 @@
+import {createPortal} from 'react-dom';
+import {useState} from 'react';
 import type {GameState} from './types.ts';
-import {drawCard, drawCrypt, gainEdge, shuffleCrypt, shuffleLibrary} from './gameCommands.ts';
+import {drawCard, drawCrypt, gainEdge, oustPlayer, shuffleCrypt, shuffleLibrary} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
 
 export type BoardLayout = 'linear' | 'circular' | 'text';
@@ -66,6 +68,90 @@ function PhaseTracker({phase, isMyTurn, gameId, onCommand}: {
 
 const ACTION_BTN = 'text-[11px] px-1.5 py-0.5 rounded border transition-colors leading-none border-line/40 text-ink-muted hover:text-ink hover:border-line/70 cursor-pointer';
 
+type OustModalState = { step: 'select' } | { step: 'confirm'; playerName: string };
+
+function OustPlayerModal({
+    players,
+    currentUser,
+    gameId,
+    onCommand,
+    onClose,
+}: {
+    players: GameState['players'];
+    currentUser: string;
+    gameId: string;
+    onCommand: (cmd: GameCommand) => void;
+    onClose: () => void;
+}) {
+    const [state, setState] = useState<OustModalState>({step: 'select'});
+    const eligible = players.filter(p => p.pool > 0 && p.name !== currentUser);
+
+    const confirm = (name: string) => {
+        onCommand(oustPlayer(gameId, name));
+        onClose();
+    };
+
+    return createPortal(
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+        >
+            <div
+                className="bg-surface border border-line/60 rounded-xl shadow-2xl w-full max-w-xs mx-4 overflow-hidden"
+                onClick={e => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-line/40">
+                    <span className="text-sm font-semibold text-ink">
+                        {state.step === 'confirm' ? `Oust ${state.playerName}?` : 'Oust Player'}
+                    </span>
+                    <button
+                        className="text-ink-muted hover:text-ink transition-colors leading-none"
+                        onClick={onClose}
+                        aria-label="Close"
+                    >✕</button>
+                </div>
+
+                {state.step === 'select' ? (
+                    eligible.length === 0 ? (
+                        <p className="px-4 py-6 text-sm text-ink-muted text-center italic">No eligible players to oust.</p>
+                    ) : (
+                        <ul className="divide-y divide-line/20">
+                            {eligible.map(p => (
+                                <li key={p.name}>
+                                    <button
+                                        className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-ink hover:bg-hover transition-colors text-left"
+                                        onClick={() => setState({step: 'confirm', playerName: p.name})}
+                                    >
+                                        <span className="font-medium">{p.name}</span>
+                                        <span className="text-xs text-blood font-mono">{p.pool} pool</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )
+                ) : (
+                    <div className="px-4 py-4 space-y-4">
+                        <p className="text-xs text-ink-muted">
+                            Their predator gains <span className="text-online font-semibold">+6 pool</span> and <span className="text-gold font-semibold">+1 VP</span>.
+                        </p>
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                className="text-xs px-3 py-1.5 rounded border border-line/40 text-ink-muted hover:text-ink transition-colors"
+                                onClick={() => setState({step: 'select'})}
+                            >Back</button>
+                            <button
+                                className="text-xs px-3 py-1.5 rounded bg-blood/20 border border-blood/40 text-blood hover:bg-blood/30 transition-colors font-medium"
+                                onClick={() => confirm((state as {step: 'confirm'; playerName: string}).playerName)}
+                            >Confirm Oust</button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>,
+        document.body
+    );
+}
+
 type GameStatusBarProps = {
     gameState: GameState | null;
     gameId: string;
@@ -78,6 +164,8 @@ type GameStatusBarProps = {
 export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand}: GameStatusBarProps) {
     const isMyTurn = gameState?.currentPlayer === currentUser;
     const hasEdge = gameState?.edgeHolder != null;
+    const [oustOpen, setOustOpen] = useState(false);
+    const eligibleToOust = gameState?.players.filter(p => p.pool > 0 && p.name !== currentUser) ?? [];
 
     return (
         <div className="flex flex-col pb-2 shrink-0 gap-1 min-w-0">
@@ -144,7 +232,24 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                             Gain Edge
                         </button>
                     )}
+                    <button
+                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', eligibleToOust.length === 0 ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
+                        disabled={eligibleToOust.length === 0}
+                        onClick={() => setOustOpen(true)}
+                        title="Oust a player"
+                    >
+                        Oust Player
+                    </button>
                 </div>
+            )}
+            {oustOpen && gameState && (
+                <OustPlayerModal
+                    players={gameState.players}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    onCommand={onCommand}
+                    onClose={() => setOustOpen(false)}
+                />
             )}
         </div>
     );

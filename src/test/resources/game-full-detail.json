@@ -5166,8 +5166,7 @@
           "player": "Player5",
           "type": "HAND"
         }
-      },
-      "ousted": false
+      }
     },
     "Player2": {
       "name": "Player2",
@@ -5319,8 +5318,7 @@
           "player": "Player2",
           "type": "HAND"
         }
-      },
-      "ousted": false
+      }
     },
     "Player1": {
       "name": "Player1",
@@ -5484,8 +5482,7 @@
           "player": "Player1",
           "type": "HAND"
         }
-      },
-      "ousted": false
+      }
     },
     "Player4": {
       "name": "Player4",
@@ -5650,8 +5647,7 @@
           "player": "Player4",
           "type": "HAND"
         }
-      },
-      "ousted": false
+      }
     },
     "Player3": {
       "name": "Player3",
@@ -5815,8 +5811,7 @@
           "player": "Player3",
           "type": "HAND"
         }
-      },
-      "ousted": false
+      }
     }
   },
   "currentPlayer": "Player5"

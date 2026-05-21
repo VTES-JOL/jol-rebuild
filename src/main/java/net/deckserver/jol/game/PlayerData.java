@@ -22,7 +22,6 @@ public class PlayerData {
 
     private Map<RegionType, RegionData> regions = new HashMap<>();
 
-    private boolean ousted = false;
     private String notes;
     private String choice;
 
@@ -49,8 +48,9 @@ public class PlayerData {
         return name;
     }
 
+    @JsonIgnore
     public boolean isOusted() {
-        return ousted;
+        return pool <= 0;
     }
 
     public int getPool() {
@@ -70,7 +70,6 @@ public class PlayerData {
     }
 
     public void setPool(int pool) { this.pool = pool; }
-    public void setOusted(boolean ousted) { this.ousted = ousted; }
     public float getVictoryPoints() { return victoryPoints; }
     public void setVictoryPoints(float victoryPoints) { this.victoryPoints = victoryPoints; }
     public String getNotes() { return notes; }

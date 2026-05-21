@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import type {CSSProperties} from 'react';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import {PlayerColumn} from './PlayerColumn.tsx';
@@ -37,6 +37,13 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
 
     const [focusedName, setFocusedName] = useState(initialFocus);
     const [colWidth, setColWidth] = useState(0);
+
+    // If the focused player has been ousted and removed from the list, shift focus to the first remaining player.
+    useEffect(() => {
+        if (!orderedPlayers.find(p => p.name === focusedName) && orderedPlayers.length > 0) {
+            setFocusedName(orderedPlayers[0].name);
+        }
+    }, [orderedPlayers, focusedName]);
 
     const clipRef     = useRef<HTMLDivElement>(null);
     const stripRef    = useRef<HTMLDivElement>(null);
@@ -167,6 +174,31 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
             snapBack();
         }
     };
+
+    // With ≤2 active players the predator/prey strip produces duplicates — use a simple layout instead.
+    if (orderedPlayers.length <= 2) {
+        return (
+            <div
+                className="h-full flex gap-3 overflow-hidden"
+                style={{'--card-w': 'clamp(66px, 5.25vw, 84px)'} as CSSProperties}
+            >
+                {orderedPlayers.map(p => (
+                    <div key={p.name} className="flex-1 min-w-0 h-full">
+                        <PlayerColumn
+                            player={p}
+                            cards={cards}
+                            role={p.name === currentUser ? 'focused' : 'prey'}
+                            isFocused={p.name === gameState.currentPlayer}
+                            isCurrentUser={p.name === currentUser}
+                            gameId={gameId}
+                            onCommand={onCommand}
+                            onCardContextMenu={onCardContextMenu}
+                        />
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
     const focused  = orderedPlayers.find(p => p.name === focusedName);
     const prey     = focused?.prey      ? orderedPlayers.find(p => p.name === focused.prey)            : undefined;
