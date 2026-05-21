@@ -46,8 +46,8 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
         const dx = e.clientX - start.x;
         const dy = e.clientY - start.y;
         if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)) return;
-        if (dx < 0 && prey)     navigate(prey.name,     'right');
-        if (dx > 0 && predator) navigate(predator.name, 'left');
+        if (dx < 0 && predator) navigate(predator.name, 'right');
+        if (dx > 0 && prey)     navigate(prey.name,     'left');
     };
 
     const focused  = orderedPlayers.find(p => p.name === focusedName);
@@ -64,34 +64,49 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
             onPointerLeave={() => { dragStart.current = null; }}
             onAnimationEnd={() => boardRef.current?.classList.remove('board-slide-left', 'board-slide-right')}
         >
-            {/* Predator column — nav arrow on inner edge */}
-            <div className="flex-1 min-w-0 relative">
-                {predator ? (
+            {/* Prey column — nav arrow on inner (right) edge */}
+            <div className="flex-1 min-w-0 relative pr-8">
+                {prey ? (
                     <>
                         <PlayerColumn
-                            player={predator}
+                            player={prey}
                             cards={cards}
-                            role="predator"
-                            isCurrentUser={predator.name === currentUser}
+                            role="prey"
+                            isCurrentUser={prey.name === currentUser}
                             gameId={gameId}
                             onCommand={onCommand}
                             onCardContextMenu={onCardContextMenu}
                         />
+                        <div className="pointer-events-none absolute right-0 top-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                             style={{bottom: 'calc(50% + 44px)'}}>
+                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                  style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Prey</span>
+                        </div>
+                        <div className="pointer-events-none absolute right-0 bottom-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                             style={{top: 'calc(50% + 44px)'}}>
+                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                  style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Prey</span>
+                        </div>
                         <button
-                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+                            className="group absolute right-0 top-1/2 -translate-y-1/2 z-10
                                        flex items-center justify-center w-7 h-20
                                        bg-surface/90 border border-line/60 rounded-l-full
                                        text-ink-muted hover:text-ink hover:bg-surface-raised
                                        transition-colors shadow-md text-lg cursor-pointer"
-                            onClick={() => navigate(predator.name, 'left')}
-                            aria-label="Focus predator"
+                            onClick={() => navigate(prey.name, 'left')}
+                            aria-label="Focus prey"
                         >
                             ◀
+                            <span className="pointer-events-none absolute right-full mr-2 top-1/2 -translate-y-1/2
+                                             whitespace-nowrap rounded bg-ink/90 px-2 py-1 text-xs text-surface
+                                             opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                Focus {prey.name}
+                            </span>
                         </button>
                     </>
                 ) : (
                     <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
-                        no predator
+                        no prey
                     </div>
                 )}
             </div>
@@ -112,26 +127,41 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                 )}
             </div>
 
-            {/* Prey column — nav arrow on inner edge */}
-            <div className="flex-1 min-w-0 relative">
-                {prey ? (
+            {/* Predator column — nav arrow on inner (left) edge */}
+            <div className="flex-1 min-w-0 relative pl-8">
+                {predator ? (
                     <>
+                        <div className="pointer-events-none absolute left-0 top-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                             style={{bottom: 'calc(50% + 44px)'}}>
+                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                  style={{writingMode: 'vertical-rl'}}>Predator</span>
+                        </div>
+                        <div className="pointer-events-none absolute left-0 bottom-0 w-7 flex items-center justify-center overflow-hidden select-none"
+                             style={{top: 'calc(50% + 44px)'}}>
+                            <span className="text-[10px] tracking-[0.25em] uppercase text-ink-muted/80"
+                                  style={{writingMode: 'vertical-rl'}}>Predator</span>
+                        </div>
                         <button
-                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+                            className="group absolute left-0 top-1/2 -translate-y-1/2 z-10
                                        flex items-center justify-center w-7 h-20
                                        bg-surface/90 border border-line/60 rounded-r-full
                                        text-ink-muted hover:text-ink hover:bg-surface-raised
                                        transition-colors shadow-md text-lg cursor-pointer"
-                            onClick={() => navigate(prey.name, 'right')}
-                            aria-label="Focus prey"
+                            onClick={() => navigate(predator.name, 'right')}
+                            aria-label="Focus predator"
                         >
                             ▶
+                            <span className="pointer-events-none absolute left-full ml-2 top-1/2 -translate-y-1/2
+                                             whitespace-nowrap rounded bg-ink/90 px-2 py-1 text-xs text-surface
+                                             opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                                Focus {predator.name}
+                            </span>
                         </button>
                         <PlayerColumn
-                            player={prey}
+                            player={predator}
                             cards={cards}
-                            role="prey"
-                            isCurrentUser={prey.name === currentUser}
+                            role="predator"
+                            isCurrentUser={predator.name === currentUser}
                             gameId={gameId}
                             onCommand={onCommand}
                             onCardContextMenu={onCardContextMenu}
@@ -139,7 +169,7 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
                     </>
                 ) : (
                     <div className="h-full rounded-lg border border-dashed border-line/30 flex items-center justify-center text-xs text-ink-muted/40">
-                        no prey
+                        no predator
                     </div>
                 )}
             </div>
