@@ -104,6 +104,12 @@ const gameApi = {
         }));
     },
 
+    async startGame(id: string): Promise<GameDto> {
+        const res = await baseFetch(`/api/games/${id}/start`, { ...OPTS, method: 'POST' });
+        if (!res.ok) throw new Error(await res.text().catch(() => `${res.status} ${res.statusText}`));
+        return res.json();
+    },
+
     async invitePlayer(gameId: string, username: string): Promise<void> {
         const res = await baseFetch(`/api/games/${gameId}/invite`, {
             ...OPTS, method: 'POST',

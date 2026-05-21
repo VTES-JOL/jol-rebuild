@@ -23,6 +23,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
     const [nameValue, setNameValue] = useState(game.name);
     const [ownerError, setOwnerError] = useState<string | null>(null);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [starting, setStarting] = useState(false);
     const nameInputRef = useRef<HTMLInputElement>(null);
 
     const fetchDetail = useCallback(() => gameApi.getGameDetail(game.id), [game.id]);
@@ -73,6 +74,19 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
             onChanged?.();
         } catch (e) {
             setOwnerError(e instanceof Error ? e.message : 'Failed to delete game');
+        }
+    };
+
+    const handleStart = async () => {
+        setStarting(true);
+        setOwnerError(null);
+        try {
+            await gameApi.startGame(game.id);
+            onChanged?.();
+        } catch (e) {
+            setOwnerError(e instanceof Error ? e.message : 'Failed to start game');
+        } finally {
+            setStarting(false);
         }
     };
 
@@ -137,10 +151,15 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                             </Button>
                         )
                     )}
-                    {game.status === 'ACTIVE' && (
-                        <Button variant="primary" size="sm">
-                            Enter Game <Link className="ml-1.5 w-3 h-3" to={`/game/${game.id}`} />
+                    {isOwner && game.status === 'OPEN' && game.registrationCount >= 2 && (
+                        <Button variant="primary" size="sm" onClick={handleStart} disabled={starting}>
+                            {starting ? 'Starting…' : 'Start Game'}
                         </Button>
+                    )}
+                    {game.status === 'ACTIVE' && (
+                        <Link to={`/game/${game.id}`}>
+                            <Button variant="primary" size="sm">Enter Game</Button>
+                        </Link>
                     )}
                 </div>
             }

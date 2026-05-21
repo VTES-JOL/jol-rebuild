@@ -1,5 +1,6 @@
 import {memo} from 'react';
 import type {CardData} from './types.ts';
+import {useCardPreview} from '@/hooks/useCardPreview.tsx';
 
 type FieldCardProps = CardData & {suppressTransition?: boolean};
 
@@ -13,14 +14,37 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
         : `https://static.deckserver.net/images/${cardId}`;
     const alt = faceDown ? `${isCrypt ? 'Crypt' : 'Library'} card back` : `Card ${cardId ?? id}`;
 
+    const showPreview = !faceDown && !!cardId;
+    const {anchorRef, onMouseEnter, onMouseLeave, tooltip} = useCardPreview<HTMLDivElement>(cardId ?? '');
+
+    // While the card image loads, show the card back as a background so there's
+    // no flash of alt text. The foreground img fades in once it's ready.
+    const needsLoadingBack = !faceDown && !!cardId;
+    const cardBack = isCrypt ? CRYPT_BACK : LIBRARY_BACK;
+
     return (
-        <div className={[
+        <>
+        <div
+            ref={showPreview ? anchorRef : undefined}
+            onMouseEnter={showPreview ? onMouseEnter : undefined}
+            onMouseLeave={showPreview ? onMouseLeave : undefined}
+            className={[
             'relative aspect-5/7 rounded shadow-md',
             !suppressTransition && 'transition-transform duration-200',
             locked && 'rotate-90',
         ].filter(Boolean).join(' ')}>
-            <div className="absolute inset-0 overflow-hidden rounded">
-                <img src={src} alt={alt} className="w-full h-full object-cover" />
+            <div
+                className="absolute inset-0 overflow-hidden rounded"
+                style={needsLoadingBack ? {backgroundImage: `url(${cardBack})`, backgroundSize: 'cover'} : undefined}
+            >
+                <img
+                    src={src}
+                    alt={alt}
+                    className="w-full h-full object-cover"
+                    style={needsLoadingBack ? {opacity: 0, transition: 'opacity 150ms'} : undefined}
+                    onLoad={needsLoadingBack ? (e => { e.currentTarget.style.opacity = '1'; }) : undefined}
+                    onError={needsLoadingBack ? (e => { e.currentTarget.style.display = 'none'; }) : undefined}
+                />
             </div>
 
             {!faceDown && capacity != null && isCrypt && (
@@ -71,5 +95,7 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
                     )
             )}
         </div>
+        {tooltip}
+        </>
     );
 });

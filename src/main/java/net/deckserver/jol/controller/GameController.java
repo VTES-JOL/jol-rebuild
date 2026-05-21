@@ -105,6 +105,30 @@ public class GameController {
         return Response.noContent().build();
     }
 
+    @POST
+    @Path("/{id}/start")
+    @Transactional
+    @RolesAllowed("USER")
+    public GameDto startGame(@PathParam("id") String id) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+
+        String username = identity.getPrincipal().getName();
+        if (!game.isOwnedBy(username)) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
+        if (game.status != Status.OPEN) {
+            throw new WebApplicationException("Game must be OPEN to start", Response.Status.CONFLICT);
+        }
+        long playerCount = Registration.getRegistrations(game).size();
+        if (playerCount < 2) {
+            throw new WebApplicationException("At least 2 players must be registered", Response.Status.CONFLICT);
+        }
+
+        gameInitService.initializeGame(game);
+        return new GameDto(game);
+    }
+
     @GET
     @Path("/{id}")
     public GameDto get(@PathParam("id") String id) {
