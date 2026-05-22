@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, GripVertical, PlusCircle, Users, X} from 'lucide-react';
 import type {DragEndEvent, Modifier} from '@dnd-kit/core';
-import {DndContext, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
+import {DndContext, DragOverlay, MouseSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors} from '@dnd-kit/core';
 import Button from '@/shared/components/Button';
 import Spinner from '@/shared/components/Spinner';
 import type {Seat, SeatingDto, Tournament, UnseatedPlayer} from './types';
@@ -46,6 +46,10 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
     const [expandedRounds, setExpandedRounds] = useState<Set<number>>(new Set([1]));
     const [activating, setActivating] = useState(false);
     const [activeDrag, setActiveDrag] = useState<DragData | null>(null);
+    const sensors = useSensors(
+        useSensor(MouseSensor),
+        useSensor(TouchSensor, {activationConstraint: {delay: 250, tolerance: 5}}),
+    );
 
     useEffect(() => {
         if (seating) setLocalSeating(seating);
@@ -172,6 +176,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
                     <div key={round.roundNumber} className="border border-line/30 rounded-xl overflow-hidden">
                         <button
                             className="w-full flex items-center justify-between px-4 py-3 bg-hover/20 hover:bg-hover/30 transition-colors"
+                            aria-expanded={isExpanded}
                             onClick={() => toggleRound(round.roundNumber)}
                         >
                             <div className="flex items-center gap-2">
@@ -191,6 +196,7 @@ export default function TournamentSeatingPanel({tournament, onActivated, onChang
 
                         {isExpanded && (
                             <DndContext
+                                sensors={sensors}
                                 modifiers={DRAG_MODIFIERS}
                                 accessibility={{restoreFocus: false}}
                                 onDragStart={e => setActiveDrag(e.active.data.current as DragData)}

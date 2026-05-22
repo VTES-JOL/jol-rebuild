@@ -31,6 +31,7 @@ public class TournamentRegistration extends PanacheEntityBase {
     public List<DeckEntry> decks = new ArrayList<>();
 
     public static class DeckEntry {
+        public String deckId;
         public String deck;      // JSON-encoded deck contents
         public String deckName;
         public String summary;

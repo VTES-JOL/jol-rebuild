@@ -43,9 +43,14 @@ export default function TournamentRegistrationPanel({tournament, onChanged}: Pro
                     deckApi.list({format: tournament.gameFormat}),
                 ]);
                 setAllRegistrations(regs);
-                setMyRegistration(regs.find(r => r.username === user?.username) ?? null);
+                const existing = regs.find(r => r.username === user?.username) ?? null;
+                setMyRegistration(existing);
                 setAvailableDecks(decks);
-                setSelectedDeckIds(Array(deckCount).fill(''));
+                setSelectedDeckIds(
+                    existing
+                        ? existing.decks.map(d => d.deckId ?? '')
+                        : Array(deckCount).fill('')
+                );
             } catch (e) {
                 setError(e instanceof Error ? e.message : 'Failed to load registration data');
             } finally {

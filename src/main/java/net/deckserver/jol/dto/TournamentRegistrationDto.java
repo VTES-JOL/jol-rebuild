@@ -13,11 +13,11 @@ public record TournamentRegistrationDto(
     List<DeckEntryDto> decks
 ) {
     @RegisterForReflection
-    public record DeckEntryDto(String deckName, String summary) {}
+    public record DeckEntryDto(String deckId, String deckName, String summary) {}
 
     public static TournamentRegistrationDto from(TournamentRegistration reg) {
         List<DeckEntryDto> deckDtos = reg.decks.stream()
-            .map(d -> new DeckEntryDto(d.deckName, d.summary))
+            .map(d -> new DeckEntryDto(d.deckId, d.deckName, d.summary))
             .toList();
         return new TournamentRegistrationDto(reg.id, reg.user.id, reg.user.username, deckDtos);
     }

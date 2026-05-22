@@ -71,7 +71,7 @@ export default function MobileMenu() {
 
     return (
         <div className="md:hidden">
-            <button ref={buttonRef} onClick={handleToggle} className="mr-2">☰</button>
+            <button ref={buttonRef} onClick={handleToggle} className="mr-2" aria-label="Toggle navigation menu" aria-expanded={open}>☰</button>
             {menu}
         </div>
     )

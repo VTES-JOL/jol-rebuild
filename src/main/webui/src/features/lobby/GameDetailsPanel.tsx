@@ -129,7 +129,7 @@ export default function GameDetailsPanel({game, currentUsername, onChanged}: Pro
                 <div className="flex items-center gap-2">
                     {isOwner && game.status === 'OPEN' && (
                         <div className="flex items-center gap-1 mr-2">
-                            <Button variant="ghost" size="sm" onClick={toggleVisibility} title="Change Visibility">
+                            <Button variant="ghost" size="sm" onClick={toggleVisibility} title={game.visibility === 'PUBLIC' ? 'Make Private' : 'Make Public'}>
                                 {game.visibility === 'PUBLIC' ? <Lock className="w-3.5 h-3.5" /> : <Globe className="w-3.5 h-3.5" />}
                             </Button>
                         </div>

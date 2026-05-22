@@ -56,13 +56,13 @@ const availableDecks: Deck[] = [
 
 const myRegistration: TournamentRegistration = {
     id: '101', userId: 'user-1', username: 'dracula',
-    decks: [{deckName: 'Weenie Animalism', summary: '12,80,4/5'}],
+    decks: [{deckId: '1', deckName: 'Weenie Animalism', summary: '12,80,4/5'}],
 };
 
 const otherRegistrations: TournamentRegistration[] = [
-    {id: '102', userId: 'user-2', username: 'lasombra', decks: [{deckName: 'Political Ventrue', summary: '13,77,3/4'}]},
-    {id: '103', userId: 'user-3', username: 'malkav', decks: [{deckName: 'Malkavian Madness', summary: '12,78,3/4'}]},
-    {id: '104', userId: 'user-4', username: 'brujah', decks: [{deckName: 'Rush Brujah', summary: '12,80,3'}]},
+    {id: '102', userId: 'user-2', username: 'lasombra', decks: [{deckId: '2', deckName: 'Political Ventrue', summary: '13,77,3/4'}]},
+    {id: '103', userId: 'user-3', username: 'malkav', decks: [{deckId: null, deckName: 'Malkavian Madness', summary: '12,78,3/4'}]},
+    {id: '104', userId: 'user-4', username: 'brujah', decks: [{deckId: null, deckName: 'Rush Brujah', summary: '12,80,3'}]},
 ];
 
 // ── Meta ──────────────────────────────────────────────────────────────────────
@@ -172,9 +172,9 @@ export const MultiDeckRegistered: Story = {
         const multiReg: TournamentRegistration = {
             id: '101', userId: 'user-1', username: 'dracula',
             decks: [
-                {deckName: 'Weenie Animalism', summary: '12,80,4/5'},
-                {deckName: 'Political Ventrue', summary: '13,77,3/4'},
-                {deckName: 'Ravnos Toolbox', summary: '12,78,5/6'},
+                {deckId: '1', deckName: 'Weenie Animalism', summary: '12,80,4/5'},
+                {deckId: '2', deckName: 'Political Ventrue', summary: '13,77,3/4'},
+                {deckId: '3', deckName: 'Ravnos Toolbox', summary: '12,78,5/6'},
             ],
         };
         tournamentApi.getRegistrations = () => Promise.resolve([multiReg, ...otherRegistrations]);

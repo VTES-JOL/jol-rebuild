@@ -251,6 +251,7 @@ public class TournamentController {
                 throw new BadRequestException("Deck '" + deck.name + "' is not valid for " + t.gameFormat);
             }
             TournamentRegistration.DeckEntry entry = new TournamentRegistration.DeckEntry();
+            entry.deckId = deckId;
             entry.deck = deck.contents;
             entry.deckName = deck.name;
             entry.summary = deck.summary;

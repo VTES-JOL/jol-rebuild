@@ -30,6 +30,7 @@ export interface Tournament {
 }
 
 export interface DeckEntry {
+    deckId: string | null;
     deckName: string;
     summary: string;
 }
