@@ -13,6 +13,7 @@ type BaseChatPanelProps = {
     enableAvatars?: boolean;
     enableDivider?: boolean;
     enableCommandLogFilter?: boolean;
+    chatDisabled?: boolean;
 };
 
 type LiveChatPanelProps = BaseChatPanelProps & {
@@ -38,6 +39,7 @@ function LiveChatPanel({
                            enableAvatars = true,
                            enableDivider = true,
                            enableCommandLogFilter = false,
+                           chatDisabled = false,
                        }: LiveChatPanelProps) {
     const { messages, status, send, react } = useChat({
         url,
@@ -58,6 +60,7 @@ function LiveChatPanel({
             enableAvatars={enableAvatars}
             enableDivider={enableDivider}
             enableCommandLogFilter={enableCommandLogFilter}
+            chatDisabled={chatDisabled}
         />
     );
 }
@@ -75,6 +78,7 @@ function ManualChatPanel({
                              enableAvatars = true,
                              enableDivider = true,
                              enableCommandLogFilter = false,
+                             chatDisabled = false,
                          }: ManualChatPanelProps) {
     return (
         <ChatPanelView
@@ -90,6 +94,7 @@ function ManualChatPanel({
             enableAvatars={enableAvatars}
             enableDivider={enableDivider}
             enableCommandLogFilter={enableCommandLogFilter}
+            chatDisabled={chatDisabled}
         />
     );
 }

@@ -15,7 +15,7 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
     const alt = faceDown ? `${isCrypt ? 'Crypt' : 'Library'} card back` : `Card ${cardId ?? id}`;
 
     const showPreview = !faceDown && !!cardId;
-    const {anchorRef, onMouseEnter, onMouseLeave, tooltip} = useCardPreview<HTMLDivElement>(cardId ?? '');
+    const {anchorRef, onClick, tooltip} = useCardPreview<HTMLDivElement>(cardId ?? '');
 
     // While the card image loads, show the card back as a background so there's
     // no flash of alt text. The foreground img fades in once it's ready.
@@ -26,8 +26,7 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
         <>
         <div
             ref={showPreview ? anchorRef : undefined}
-            onMouseEnter={showPreview ? onMouseEnter : undefined}
-            onMouseLeave={showPreview ? onMouseLeave : undefined}
+            onClick={showPreview ? onClick : undefined}
             className={[
             'relative aspect-5/7 rounded shadow-md',
             !suppressTransition && 'transition-transform duration-200',

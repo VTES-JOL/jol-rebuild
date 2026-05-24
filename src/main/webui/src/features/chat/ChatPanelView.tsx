@@ -31,6 +31,7 @@ export type ChatPanelViewProps = {
     enableAvatars?: boolean;
     enableDivider?: boolean;
     enableCommandLogFilter?: boolean;
+    chatDisabled?: boolean;
 };
 
 const STATUS_LABELS: Record<Status, { label: string; dotClass: string }> = {
@@ -54,6 +55,7 @@ export function ChatPanelView({
                                   enableAvatars = true,
                                   enableDivider = true,
                                   enableCommandLogFilter = false,
+                                  chatDisabled = false,
                               }: ChatPanelViewProps) {
     const [commandLogDetail, setCommandLogDetailState] = useState<CommandLogDetail>(
         () => (localStorage.getItem(COMMAND_LOG_DETAIL_KEY) as CommandLogDetail | null) ?? 'full'
@@ -221,8 +223,8 @@ export function ChatPanelView({
                                 void handleInputChange(newEncoded, encodedCursor);
                             }}
                             onKeyDown={handleKeyDown}
-                            placeholder={replyingTo ? `Reply to ${replyingTo.sender}…` : placeholder}
-                            disabled={!connected}
+                            placeholder={chatDisabled ? 'Unlock board to chat…' : replyingTo ? `Reply to ${replyingTo.sender}…` : placeholder}
+                            disabled={!connected || chatDisabled}
                             maxLength={1000}
                         />
                     </div>
@@ -230,7 +232,7 @@ export function ChatPanelView({
                         variant="primary"
                         size="md"
                         onClick={handleSend}
-                        disabled={!connected || !draft.trim()}
+                        disabled={!connected || !draft.trim() || chatDisabled}
                         className="rounded-lg shrink-0"
                     >
                         Send

@@ -154,6 +154,9 @@ export default function GamePage() {
     // Track OustPlayer commands that were explicitly sent so we don't double-trigger.
     const pendingOustRef = useRef<Set<string>>(new Set());
     const [zeroPoolQueue, setZeroPoolQueue] = useState<string[]>([]);
+    const currentUser = user?.username ?? '';
+    const isSpectator = gameState ? !gameState.players.some(p => p.name === currentUser) : true;
+    const [boardLocked, setBoardLocked] = useState(true);
 
     useEffect(() => {
         if (!gameState) return;
@@ -175,18 +178,20 @@ export default function GamePage() {
     }, [gameState]);
 
     const handleCommand = useCallback((cmd: GameCommand) => {
+        if (boardLocked) return;
         clearCommandError();
         if (cmd.type === 'OUST_PLAYER') {
             pendingOustRef.current.add(cmd.playerName);
         }
         sendCommand(cmd);
-    }, [sendCommand, clearCommandError]);
+    }, [boardLocked, sendCommand, clearCommandError]);
 
     const [contextMenu, setContextMenu] = useState<{ref: CardRef; x: number; y: number} | null>(null);
 
     const handleCardContextMenu = useCallback((_card: CardData, ref: CardRef, x: number, y: number) => {
+        if (boardLocked) return;
         setContextMenu({ref, x, y});
-    }, []);
+    }, [boardLocked]);
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
     const [layoutReady, setLayoutReady] = useState(false);
@@ -218,7 +223,7 @@ export default function GamePage() {
                 contextMenu={contextMenu}
                 gameState={gameState}
                 gameId={gameId}
-                currentUser={user?.username ?? ''}
+                currentUser={currentUser}
                 onCommand={handleCommand}
                 onClose={() => setContextMenu(null)}
             />
@@ -237,10 +242,13 @@ export default function GamePage() {
                     <GameStatusBar
                         gameState={gameState}
                         gameId={gameId}
-                        currentUser={user?.username ?? ''}
+                        currentUser={currentUser}
                         boardLayout={boardLayout}
                         onLayoutChange={setBoardLayout}
                         onCommand={handleCommand}
+                        boardLocked={boardLocked}
+                        onLockChange={locked => !isSpectator && setBoardLocked(locked)}
+                        isSpectator={isSpectator}
                     />
 
                     {!isConnected && <ConnectionBanner status={status} />}
@@ -258,7 +266,7 @@ export default function GamePage() {
                             <CircularBoard
                                 orderedPlayers={orderedPlayers}
                                 cards={gameState.cards}
-                                currentUser={user?.username ?? ''}
+                                currentUser={currentUser}
                                 gameState={gameState}
                                 gameId={gameId}
                                 onCommand={handleCommand}
@@ -270,7 +278,7 @@ export default function GamePage() {
                             <TextBoard
                                 orderedPlayers={orderedPlayers}
                                 cards={gameState.cards}
-                                currentUser={user?.username ?? ''}
+                                currentUser={currentUser}
                                 gameId={gameId}
                                 onCommand={handleCommand}
                                 onCardContextMenu={handleCardContextMenu}
@@ -288,7 +296,7 @@ export default function GamePage() {
                                             key={player.name}
                                             player={player}
                                             cards={gameState.cards}
-                                            isCurrentPlayer={player.name === user?.username}
+                                            isCurrentPlayer={player.name === currentUser}
                                             gameId={gameId}
                                             onCommand={handleCommand}
                                             onCardContextMenu={handleCardContextMenu}
@@ -323,7 +331,7 @@ export default function GamePage() {
                             title="Game chat"
                             messages={messages}
                             status={status}
-                            currentUser={user.username}
+                            currentUser={currentUser}
                             onSend={send}
                             onReact={react}
                             enableReactions={false}
@@ -332,6 +340,7 @@ export default function GamePage() {
                             enableDivider={false}
                             enableCommandLogFilter={true}
                             placeholder="Chat with your opponents…"
+                            chatDisabled={boardLocked}
                         />
                     </div>
                 )}
