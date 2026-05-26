@@ -41,6 +41,13 @@ UNLOCK → MASTER → MINION → INFLUENCE → DISCARD
 - Resets phase to `UNLOCK`.
 - Auto-unlocks all cards belonging to the new current player.
 
+### Transfer budget
+`transfersRemaining` is a game-level integer tracking how many influence transfers the current player has left this turn. It is set when `AdvancePhase` enters `INFLUENCE`, using the formula:
+- Round 1: `min(seat, 4)` (seat 1 → 1T, seat 2 → 2T, seat 3 → 3T, seat 4+ → 4T)
+- Round 2+: always 4
+
+It is reset to 0 on `NextTurn`. It is sent to clients via `GameStateDto.transfersRemaining`.
+
 ### Edge
 The **edge** is a single `PlayerData` reference indicating which player currently holds it. It is transferred via the `GainEdge` command and starts as unset.
 
@@ -170,8 +177,8 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 ### Turn / phase
 | Command        | Description                                                  |
 |----------------|--------------------------------------------------------------|
-| `AdvancePhase` | Move to the next phase; wraps to next turn after DISCARD     |
-| `NextTurn`     | Advance to the next non-ousted player's turn directly        |
+| `AdvancePhase` | Move to the next phase; wraps to next turn after DISCARD. When entering `INFLUENCE`, sets `transfersRemaining` to the current player's budget for this turn. |
+| `NextTurn`     | Advance to the next non-ousted player's turn directly. Resets `transfersRemaining` to 0. |
 
 ### Deck operations
 | Command          | Fields (besides `gameId`)  | Source → Target                  | Description                                 |
@@ -187,7 +194,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `PlayCard`          | `ref`, `targetPlayerName`, `targetRegionType`               | `HAND` or `RESEARCH` → any (default: owner `ASH_HEAP`) | Move a card to a target region; discards if no target given   |
 | `MoveCard`          | `ref`, `targetPlayerName`, `targetRegionType`, `position`   | any → any                                              | Move a card to any region at a given position                 |
 | `AttachCard`        | `ref`, `targetRef`                                          | any → child of target card (typically `READY`)         | Attach a card to another card (e.g., retainer to vampire)     |
-| `InfluenceCard`     | `ref`                                                       | `UNCONTROLLED` → owner `READY`                         | Move a fully influenced vampire/imbued to the Ready region    |
+| `InfluenceCard`     | `ref`                                                       | `UNCONTROLLED` → owner `READY`                         | Move a fully influenced vampire/imbued to the Ready region. Requires: `INFLUENCE` phase, actor is the current player, `counters ≥ capacity > 0`. Silently no-ops otherwise. |
 | `MoveToCrypt`       | `ref`                                                       | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)             |
 | `MoveToTorpor`      | `ref`                                                       | `READY` → owner `TORPOR`                               | Move a minion to Torpor                                       |
 | `RescueFromTorpor`  | `ref`                                                       | `TORPOR` → owner `READY`                               | Move a minion from Torpor to Ready                            |
@@ -210,7 +217,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | Command         | Fields (besides `gameId`)            | Valid `ref` region(s)               | Description                                                |
 |-----------------|--------------------------------------|-------------------------------------|------------------------------------------------------------|
 | `SetPool`       | `playerName`, `amount`               | —                                   | Set a player's pool to an absolute value                   |
-| `TransferBlood` | `ref`, `amount`                      | `READY`, `TORPOR`, `UNCONTROLLED` (see card movement)   | Transfer blood between controller's pool and a card     |
+| `TransferBlood` | `ref`, `amount`                      | `READY`, `TORPOR`, `UNCONTROLLED`   | Transfer blood between controller's pool and a card. For `UNCONTROLLED` cards: restricted to the current player during `INFLUENCE` phase only; pool → card costs 1 transfer/blood; card → pool costs 2 transfers/blood. Silently no-ops if budget is insufficient. |
 | `GainEdge`      | `playerName`                         | —                                   | Award the edge to a player                                 |
 | `OustPlayer`    | `playerName`                         | —                                   | Mark a player as ousted                                    |
 | `SetChoice`     | `playerName`, `choice`               | —                                   | Set a player's choice flag                                 |

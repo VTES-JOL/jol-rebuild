@@ -21,4 +21,6 @@ public class GameStateDto {
     public List<PlayerStateDto> players;
     /** Cards visible to this viewer — keyed by card UUID. Hidden cards are omitted entirely. */
     public Map<String, CardStateDto> cards;
+    /** Influence transfers remaining for the current player this turn (0 outside INFLUENCE phase). */
+    public int transfersRemaining;
 }

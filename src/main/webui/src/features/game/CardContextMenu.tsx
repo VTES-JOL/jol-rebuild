@@ -33,6 +33,9 @@ type Props = {
     gameId: string;
     currentUser: string;
     playerPool: number;
+    transfersRemaining: number;
+    phase: string;
+    isCurrentPlayer: boolean;
     position: {x: number; y: number};
     onCommand: (cmd: GameCommand) => void;
     onClose: () => void;
@@ -47,7 +50,7 @@ const SEP = <hr className="border-line/40 my-1" />;
 const MENU_MAX_W = 280;
 const MENU_MAX_H = 440;
 
-export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool, position, onCommand, onClose}: Props) {
+export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool, transfersRemaining, phase, isCurrentPlayer, position, onCommand, onClose}: Props) {
     const menuRef = useRef<HTMLDivElement>(null);
     const [inlineForm, setInlineForm] = useState<InlineForm>(null);
     const [titleInput, setTitleInput] = useState(card.title ?? '');
@@ -83,14 +86,16 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const isMinion = card.minion === true || isCryptCard;
     const inPlayOrUncontrolled = inPlay || region === 'UNCONTROLLED';
     const showLockUnlock = inPlay;
-    const showPoolTransfer = inPlayOrUncontrolled && isSelf;
+    const showPoolTransfer = (inPlay && isSelf) ||
+        (region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer);
     const showCounters = inPlayOrUncontrolled;
     const showMoveToTorpor = region === 'READY' && isMinion;
     const showRescue = region === 'TORPOR';
     const showPlay = region === 'HAND' && isSelf;
     const showDiscard = region === 'HAND' && isSelf;
     const showBurn = isMinion && inPlay;
-    const showInfluence = region === 'UNCONTROLLED' && isSelf;
+    const showInfluence = region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer &&
+        card.capacity != null && card.capacity > 0 && (card.counters ?? 0) >= card.capacity;
     const showContest = card.unique === true && inPlay;
     const showTitle = isCryptCard && region === 'READY';
     const showNotes = (inPlay || region === 'HAND') && isSelf;
@@ -157,12 +162,14 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                                     {card.counters ?? 0}
                                 </span>
                                 <CounterBtn
-                                    disabled={playerPool === 0}
+                                    disabled={playerPool === 0 || (region === 'UNCONTROLLED' && transfersRemaining < 1)}
                                     onClick={() => onCommand(transferBloodOn(gameId, cardRef))}
                                 >←</CounterBtn>
-                                <span className="text-xs text-ink-muted flex-1 text-center">Transfer</span>
+                                <span className="text-xs text-ink-muted flex-1 text-center">
+                                    {region === 'UNCONTROLLED' ? `${transfersRemaining} Transfers` : 'Transfer'}
+                                </span>
                                 <CounterBtn
-                                    disabled={(card.counters ?? 0) === 0}
+                                    disabled={(card.counters ?? 0) === 0 || (region === 'UNCONTROLLED' && transfersRemaining < 2)}
                                     onClick={() => onCommand(transferBloodOff(gameId, cardRef))}
                                 >→</CounterBtn>
                                 <span className="text-sm font-mono text-gold tabular-nums min-w-[1.5ch] text-center">

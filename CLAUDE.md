@@ -2,6 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 * When creating new classes or components create tests or story files to confirm functionality
+* Update docs when mechanics or list items are changed / completed
 
 ## Logical Model
 JOL is a representation of the Vampire: The Eternal Struggle card game.  As such it tries to mimic the logic and constraints that apply in a real-world game.
@@ -14,6 +15,7 @@ Below is the detailed documentation for the logical constraints each domain mode
 - [Game State](docs/logic/game-state.md)
 - [Board Layouts](docs/logic/board-layouts.md)
 - [Chat System](docs/logic/chat.md)
+- [VTES Mechanics Gap Analysis](docs/logic/vtes-mechanics-gaps.md)
 
 ## Commands
 

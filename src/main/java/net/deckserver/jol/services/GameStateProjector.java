@@ -37,6 +37,7 @@ public class GameStateProjector {
         dto.notes = game.getNotes();
         dto.playerOrder = List.copyOf(game.getPlayerOrder());
 
+        dto.transfersRemaining = game.getTransfersRemaining();
         dto.players = buildPlayerStates(game, viewerUsername);
         dto.cards = buildCardMap(game, viewerUsername);
         return dto;

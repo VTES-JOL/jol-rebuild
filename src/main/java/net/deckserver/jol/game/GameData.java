@@ -30,6 +30,7 @@ public class GameData {
     private String notes;
 
     private String timeoutRequestor;
+    private int transfersRemaining = 0;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -170,6 +171,9 @@ public class GameData {
     public List<String> getPlayerOrder() { return playerOrder; }
     public PlayerData getCurrentPlayer() { return currentPlayer; }
     public PlayerData getEdge() { return edge; }
+
+    public int getTransfersRemaining() { return transfersRemaining; }
+    public void setTransfersRemaining(int transfersRemaining) { this.transfersRemaining = transfersRemaining; }
 
     public void setPhase(Phase phase) { this.phase = phase; }
     public void setCurrentPlayer(PlayerData currentPlayer) { this.currentPlayer = currentPlayer; }

@@ -77,4 +77,6 @@ export type GameState = {
     playerOrder: string[];
     players: PlayerState[];
     cards: Record<string, CardData>;
+    /** Influence transfers remaining for the current player this turn (0 outside INFLUENCE phase). */
+    transfersRemaining: number;
 };

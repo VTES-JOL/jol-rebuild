@@ -102,6 +102,9 @@ function GameContextMenuOverlay({contextMenu, gameState, gameId, currentUser, on
             gameId={gameId}
             currentUser={currentUser}
             playerPool={player.pool}
+            transfersRemaining={gameState.transfersRemaining}
+            phase={gameState.phase}
+            isCurrentPlayer={gameState.currentPlayer === currentUser}
             position={{x: contextMenu.x, y: contextMenu.y}}
             onCommand={onCommand}
             onClose={onClose}
@@ -156,7 +159,6 @@ export default function GamePage() {
     const [zeroPoolQueue, setZeroPoolQueue] = useState<string[]>([]);
     const currentUser = user?.username ?? '';
     const isSpectator = gameState ? !gameState.players.some(p => p.name === currentUser) : true;
-    const [boardLocked, setBoardLocked] = useState(true);
 
     useEffect(() => {
         if (!gameState) return;
@@ -178,20 +180,20 @@ export default function GamePage() {
     }, [gameState]);
 
     const handleCommand = useCallback((cmd: GameCommand) => {
-        if (boardLocked) return;
+        if (isSpectator) return;
         clearCommandError();
         if (cmd.type === 'OUST_PLAYER') {
             pendingOustRef.current.add(cmd.playerName);
         }
         sendCommand(cmd);
-    }, [boardLocked, sendCommand, clearCommandError]);
+    }, [isSpectator, sendCommand, clearCommandError]);
 
     const [contextMenu, setContextMenu] = useState<{ref: CardRef; x: number; y: number} | null>(null);
 
     const handleCardContextMenu = useCallback((_card: CardData, ref: CardRef, x: number, y: number) => {
-        if (boardLocked) return;
+        if (isSpectator) return;
         setContextMenu({ref, x, y});
-    }, [boardLocked]);
+    }, [isSpectator]);
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
     const [layoutReady, setLayoutReady] = useState(false);
@@ -246,8 +248,6 @@ export default function GamePage() {
                         boardLayout={boardLayout}
                         onLayoutChange={setBoardLayout}
                         onCommand={handleCommand}
-                        boardLocked={boardLocked}
-                        onLockChange={locked => !isSpectator && setBoardLocked(locked)}
                         isSpectator={isSpectator}
                     />
 
@@ -340,7 +340,7 @@ export default function GamePage() {
                             enableDivider={false}
                             enableCommandLogFilter={true}
                             placeholder="Chat with your opponents…"
-                            chatDisabled={boardLocked}
+                            chatDisabled={isSpectator}
                         />
                     </div>
                 )}

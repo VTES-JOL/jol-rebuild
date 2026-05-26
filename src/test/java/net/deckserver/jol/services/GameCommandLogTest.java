@@ -3,6 +3,7 @@ package net.deckserver.jol.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
@@ -49,6 +50,10 @@ class GameCommandLogTest {
 
     @Test
     void transferBlood_fromUncontrolled_logIsHidden() {
+        // Grant budget and set influence phase as current player to allow the transfer
+        gameData.setTransfersRemaining(4);
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
         CardRef ref = CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0);
 
         var result = gameCommandService.execute(ACTOR, new TransferBlood(gameId, ref, 1));
@@ -64,6 +69,7 @@ class GameCommandLogTest {
     @Test
     void transferBlood_fromReadyRegion_logIsVisible() {
         // Move a card to READY first so we can transfer blood back from it
+        setupInfluenceAsActor();
         gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
 
         var result = gameCommandService.execute(ACTOR,
@@ -79,6 +85,7 @@ class GameCommandLogTest {
 
     @Test
     void influenceCard_logIsVisible() {
+        setupInfluenceAsActor();
         var result = gameCommandService.execute(ACTOR,
                 new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
 
@@ -129,6 +136,7 @@ class GameCommandLogTest {
     @Test
     void moveCard_fromVisibleToHidden_logIsVisible() {
         // Move to READY first, then back to LIBRARY: source was visible so card is revealed
+        setupInfluenceAsActor();
         gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
 
         var result = gameCommandService.execute(ACTOR,
@@ -153,6 +161,7 @@ class GameCommandLogTest {
 
     @Test
     void addCounter_onReadyCard_logIsVisible() {
+        setupInfluenceAsActor();
         gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
 
         var result = gameCommandService.execute(ACTOR,
@@ -161,5 +170,13 @@ class GameCommandLogTest {
         var log = assertInstanceOf(CommandLogData.AddCounterLog.class, result.commandLog());
         assertFalse(log.card().hidden());
         assertNotNull(log.card().cardId());
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /** Sets INFLUENCE phase with ACTOR as current player so InfluenceCard commands are accepted. */
+    private void setupInfluenceAsActor() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
     }
 }

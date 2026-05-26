@@ -23,12 +23,13 @@ const PHASE_LABELS: Record<GamePhase, string> = {
     DISCARD: 'Discard',
 };
 
-function PhaseTracker({phase, isMyTurn, gameId, onCommand, disabled}: {
+function PhaseTracker({phase, isMyTurn, gameId, onCommand, disabled, transfersRemaining}: {
     phase: string;
     isMyTurn: boolean;
     gameId: string;
     onCommand: (cmd: GameCommand) => void;
     disabled: boolean;
+    transfersRemaining: number;
 }) {
     const currentIdx = PHASES.indexOf(phase as GamePhase);
 
@@ -51,6 +52,14 @@ function PhaseTracker({phase, isMyTurn, gameId, onCommand, disabled}: {
                     </span>
                 );
             })}
+            {phase === 'INFLUENCE' && isMyTurn && (
+                <span
+                    className="ml-1 text-[11px] px-1.5 py-0.5 rounded bg-blood/10 text-blood/80 font-mono leading-none"
+                    title={`${transfersRemaining} influence transfer${transfersRemaining !== 1 ? 's' : ''} remaining`}
+                >
+                    {transfersRemaining}T
+                </span>
+            )}
             <button
                 className={[
                     'ml-1 text-xs px-1.5 py-0.5 rounded border transition-colors leading-none',
@@ -62,7 +71,7 @@ function PhaseTracker({phase, isMyTurn, gameId, onCommand, disabled}: {
                 ].join(' ')}
                 onClick={() => !disabled && onCommand({type: 'ADVANCE_PHASE', gameId})}
                 disabled={disabled}
-                title={disabled ? 'Unlock board to advance phase' : isMyTurn ? 'Advance phase' : 'Advance phase (not your turn)'}
+                title={isMyTurn ? 'Advance phase' : 'Advance phase (not your turn)'}
             >
                 →
             </button>
@@ -163,12 +172,10 @@ type GameStatusBarProps = {
     boardLayout: BoardLayout;
     onLayoutChange: (layout: BoardLayout) => void;
     onCommand: (cmd: GameCommand) => void;
-    boardLocked: boolean;
-    onLockChange: (locked: boolean) => void;
     isSpectator: boolean;
 };
 
-export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand, boardLocked, onLockChange, isSpectator}: GameStatusBarProps) {
+export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand, isSpectator}: GameStatusBarProps) {
     const isMyTurn = gameState?.currentPlayer === currentUser;
     const hasEdge = gameState?.edgeHolder != null;
     const [oustOpen, setOustOpen] = useState(false);
@@ -186,7 +193,8 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                                 isMyTurn={isMyTurn}
                                 gameId={gameId}
                                 onCommand={onCommand}
-                                disabled={boardLocked}
+                                disabled={isSpectator}
+                                transfersRemaining={gameState.transfersRemaining ?? 0}
                             />
                             {gameState.currentPlayer && (
                                 <>
@@ -204,20 +212,6 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                    {!isSpectator && (
-                        <button
-                            className={[
-                                'text-xs px-1.5 py-0.5 rounded border transition-colors leading-none',
-                                boardLocked
-                                    ? 'border-gold/40 text-gold/80 bg-gold/5 hover:bg-gold/10'
-                                    : 'border-online/40 text-online/80 hover:bg-online/10',
-                            ].join(' ')}
-                            onClick={() => onLockChange(!boardLocked)}
-                            title={boardLocked ? 'Board locked — click to unlock' : 'Board unlocked — click to lock'}
-                        >
-                            {boardLocked ? '🔒' : '🔓'}
-                        </button>
-                    )}
                     <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5">
                     {(['linear', 'circular', 'text'] as const).map(l => (
                         <button
@@ -239,28 +233,28 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
 
             {gameState && (
                 <div className="flex items-center gap-1">
-                    <button className={ACTION_BTN} disabled={boardLocked} onClick={() => onCommand(drawCard(gameId))} title={boardLocked ? 'Unlock board to draw' : 'Draw a card from your library'}>
+                    <button className={ACTION_BTN} disabled={isSpectator} onClick={() => onCommand(drawCard(gameId))} title="Draw a card from your library">
                         Draw
                     </button>
-                    <button className={ACTION_BTN} disabled={boardLocked} onClick={() => onCommand(drawCrypt(gameId))} title={boardLocked ? 'Unlock board to draw crypt' : 'Draw a card from your crypt to uncontrolled'}>
+                    <button className={ACTION_BTN} disabled={isSpectator} onClick={() => onCommand(drawCrypt(gameId))} title="Draw a card from your crypt to uncontrolled">
                         Draw Crypt
                     </button>
-                    <button className={ACTION_BTN} disabled={boardLocked} onClick={() => onCommand(shuffleLibrary(gameId))} title={boardLocked ? 'Unlock board to shuffle' : 'Shuffle your library'}>
+                    <button className={ACTION_BTN} disabled={isSpectator} onClick={() => onCommand(shuffleLibrary(gameId))} title="Shuffle your library">
                         ↺ Library
                     </button>
-                    <button className={ACTION_BTN} disabled={boardLocked} onClick={() => onCommand(shuffleCrypt(gameId))} title={boardLocked ? 'Unlock board to shuffle' : 'Shuffle your crypt'}>
+                    <button className={ACTION_BTN} disabled={isSpectator} onClick={() => onCommand(shuffleCrypt(gameId))} title="Shuffle your crypt">
                         ↺ Crypt
                     </button>
                     {!hasEdge && (
-                        <button className={ACTION_BTN} disabled={boardLocked} onClick={() => onCommand(gainEdge(gameId))} title={boardLocked ? 'Unlock board to gain edge' : 'Gain the Edge'}>
+                        <button className={ACTION_BTN} disabled={isSpectator} onClick={() => onCommand(gainEdge(gameId))} title="Gain the Edge">
                             Gain Edge
                         </button>
                     )}
                     <button
-                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (boardLocked || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
-                        disabled={boardLocked || eligibleToOust.length === 0}
+                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (isSpectator || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
+                        disabled={isSpectator || eligibleToOust.length === 0}
                         onClick={() => setOustOpen(true)}
-                        title={boardLocked ? 'Unlock board to oust a player' : 'Oust a player'}
+                        title="Oust a player"
                     >
                         Oust Player
                     </button>

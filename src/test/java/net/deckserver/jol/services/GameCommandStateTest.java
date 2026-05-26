@@ -102,15 +102,122 @@ class GameCommandStateTest {
     }
 
     @Test
-    void transferBlood_deductsPoolAndAddsToCard() {
-        CardData card = firstUncontrolled(ACTOR);
-        int initialPool     = gameData.getPlayer(ACTOR).getPool();
+    void transferBlood_uncontrolled_requiresBudget() {
+        // In UNLOCK phase budget is 0 — transfer must be a no-op
+        String currentPlayer = gameData.getCurrentPlayerName(); // Player5
+        CardData card = firstUncontrolled(currentPlayer);
+        int initialPool     = gameData.getPlayer(currentPlayer).getPool();
         int initialCounters = card.getCounters();
 
-        gameCommandService.execute(ACTOR, new TransferBlood(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0), 3));
+        gameCommandService.execute(currentPlayer, new TransferBlood(gameId, CardRef.of(currentPlayer, RegionType.UNCONTROLLED, 0), 1));
 
-        assertEquals(initialPool - 3,     gameData.getPlayer(ACTOR).getPool());
-        assertEquals(initialCounters + 3, card.getCounters());
+        assertEquals(initialPool,     gameData.getPlayer(currentPlayer).getPool());
+        assertEquals(initialCounters, card.getCounters());
+    }
+
+    @Test
+    void transferBlood_uncontrolled_deductsFromBudget() {
+        // Advance to INFLUENCE phase — budget = 1 (turn 1.1, round 1)
+        String actor = gameData.getCurrentPlayerName(); // Player5
+        advanceToInfluence(actor);
+
+        assertEquals(1, gameData.getTransfersRemaining());
+
+        CardData card = firstUncontrolled(actor);
+        int initialPool     = gameData.getPlayer(actor).getPool();
+        int initialCounters = card.getCounters();
+
+        gameCommandService.execute(actor, new TransferBlood(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0), 1));
+
+        assertEquals(initialPool - 1,     gameData.getPlayer(actor).getPool());
+        assertEquals(initialCounters + 1, card.getCounters());
+        assertEquals(0, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void transferBlood_uncontrolled_blockedWhenBudgetExhausted() {
+        String actor = gameData.getCurrentPlayerName(); // Player5, budget = 1
+        advanceToInfluence(actor);
+
+        CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
+        gameCommandService.execute(actor, new TransferBlood(gameId, ref, 1)); // uses the 1 transfer
+        assertEquals(0, gameData.getTransfersRemaining());
+
+        CardData card = firstUncontrolled(actor);
+        int poolAfterFirst = gameData.getPlayer(actor).getPool();
+        int countersAfterFirst = card.getCounters();
+
+        // Second transfer should be rejected
+        gameCommandService.execute(actor, new TransferBlood(gameId, ref, 1));
+
+        assertEquals(poolAfterFirst,     gameData.getPlayer(actor).getPool());
+        assertEquals(countersAfterFirst, card.getCounters());
+    }
+
+    @Test
+    void transferBlood_uncontrolled_extractionCostsTwoTransfers() {
+        // Advance to round 4+ to have a budget of 4
+        gameData.setTurn("4.1");
+        String actor = gameData.getCurrentPlayerName(); // Player5
+        advanceToInfluence(actor);
+
+        assertEquals(4, gameData.getTransfersRemaining());
+
+        // Put some blood on the card first (bypassing budget by setting counters directly)
+        CardData card = firstUncontrolled(actor);
+        card.setCounters(3);
+
+        // Extract 1 blood (card → pool): costs 2 transfers
+        CardRef ref = CardRef.of(actor, RegionType.UNCONTROLLED, 0);
+        gameCommandService.execute(actor, new TransferBlood(gameId, ref, -1));
+
+        assertEquals(2, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_turn1_1_budgetIs1() {
+        assertEquals("1.1", gameData.getTurn());
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(1, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_turn1_2_budgetIs2() {
+        gameData.setTurn("1.2");
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(2, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_turn1_3_budgetIs3() {
+        gameData.setTurn("1.3");
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(3, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_turn1_4_budgetCappedAt4() {
+        gameData.setTurn("1.4");
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(4, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_round2Plus_budgetAlways4() {
+        gameData.setTurn("2.1");
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(4, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void nextTurn_resetsTransferBudget() {
+        String actor = gameData.getCurrentPlayerName();
+        advanceToInfluence(actor);
+        assertEquals(1, gameData.getTransfersRemaining());
+
+        gameCommandService.execute(actor, new NextTurn(gameId));
+
+        assertEquals(0, gameData.getTransfersRemaining());
     }
 
     // ── Card state ────────────────────────────────────────────────────────────
@@ -129,6 +236,8 @@ class GameCommandStateTest {
 
     @Test
     void unlockAll_unlocksCardsInPlayRegions() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
         CardData card = firstUncontrolled(ACTOR);
 
         gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
@@ -156,6 +265,9 @@ class GameCommandStateTest {
 
     @Test
     void influenceCard_movesCardFromUncontrolledToReady() {
+        // Card in fixture already has counters == capacity; set phase and current player
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
         CardData card = firstUncontrolled(ACTOR);
 
         gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
@@ -163,6 +275,40 @@ class GameCommandStateTest {
         PlayerData player = gameData.getPlayer(ACTOR);
         assertTrue(player.getRegion(RegionType.READY).getCards().contains(card));
         assertFalse(player.getRegion(RegionType.UNCONTROLLED).getCards().contains(card));
+    }
+
+    @Test
+    void influenceCard_blockedWhenCapacityNotMet() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        CardData card = firstUncontrolled(ACTOR);
+        card.setCounters(card.getCapacity() - 1); // one short
+
+        gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
+
+        assertFalse(gameData.getPlayer(ACTOR).getRegion(RegionType.READY).getCards().contains(card));
+    }
+
+    @Test
+    void influenceCard_blockedOutsideInfluencePhase() {
+        // Phase is UNLOCK in the fixture — should be rejected
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        CardData card = firstUncontrolled(ACTOR);
+
+        gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
+
+        assertFalse(gameData.getPlayer(ACTOR).getRegion(RegionType.READY).getCards().contains(card));
+    }
+
+    @Test
+    void influenceCard_blockedForNonCurrentPlayer() {
+        gameData.setPhase(Phase.INFLUENCE);
+        // Current player remains Player5, ACTOR is Player1
+        CardData card = firstUncontrolled(ACTOR);
+
+        gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
+
+        assertFalse(gameData.getPlayer(ACTOR).getRegion(RegionType.READY).getCards().contains(card));
     }
 
     // ── Player state ──────────────────────────────────────────────────────────
@@ -184,5 +330,12 @@ class GameCommandStateTest {
 
     private CardData firstUncontrolled(String playerName) {
         return gameData.getPlayer(playerName).getRegion(RegionType.UNCONTROLLED).getCards().getFirst();
+    }
+
+    /** Advances through UNLOCK → MASTER → MINION → INFLUENCE, setting the transfer budget. */
+    private void advanceToInfluence(String actor) {
+        gameCommandService.execute(actor, new AdvancePhase(gameId)); // → MASTER
+        gameCommandService.execute(actor, new AdvancePhase(gameId)); // → MINION
+        gameCommandService.execute(actor, new AdvancePhase(gameId)); // → INFLUENCE
     }
 }

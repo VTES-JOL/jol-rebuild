@@ -100,9 +100,20 @@ public class GameCommandService {
             return handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
         } else {
             game.setPhase(phases[next]);
+            if (phases[next] == Phase.INFLUENCE) {
+                game.setTransfersRemaining(computeTransferBudget(game));
+            }
             String msg = actor + " advanced to " + phases[next].getDescription() + " phase";
             return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[next]));
         }
+    }
+
+    private int computeTransferBudget(GameData game) {
+        String[] parts = game.getTurn().split("\\.");
+        int major = Integer.parseInt(parts[0]);
+        if (major >= 2) return 4;
+        int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+        return Math.min(minor, 4);
     }
 
     private CommandResult handleNextTurn(GameData game, NextTurn cmd, String actor) {
@@ -133,6 +144,7 @@ public class GameCommandService {
         PlayerData nextPlayer = game.getPlayer(order.get(nextIndex));
         game.setCurrentPlayer(nextPlayer);
         game.setPhase(Phase.UNLOCK);
+        game.setTransfersRemaining(0);
 
         // Auto-unlock all cards for the new current player
         if (nextPlayer != null) {
@@ -324,6 +336,18 @@ public class GameCommandService {
         if (controller == null) return CommandResult.silent(game);
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), isHidden(card));
         int amount = cmd.amount();
+
+        // Transfers to/from UNCONTROLLED vampires are only valid during the current player's
+        // influence phase and consume the transfer budget.
+        // Pool → card costs 1 transfer per blood; card → pool costs 2 transfers per blood.
+        if (cmd.ref().regionType() == RegionType.UNCONTROLLED) {
+            if (game.getPhase() != Phase.INFLUENCE) return CommandResult.silent(game);
+            if (!actor.equals(game.getCurrentPlayerName())) return CommandResult.silent(game);
+            int cost = amount > 0 ? amount : Math.abs(amount) * 2;
+            if (game.getTransfersRemaining() < cost) return CommandResult.silent(game);
+            game.setTransfersRemaining(game.getTransfersRemaining() - cost);
+        }
+
         // positive = pool → card, negative = card → pool
         controller.setPool(Math.max(0, controller.getPool() - amount));
         card.setCounters(Math.max(0, card.getCounters() + amount));
@@ -336,8 +360,11 @@ public class GameCommandService {
 
     private CommandResult handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
         if (cmd.ref().regionType() != RegionType.UNCONTROLLED) return CommandResult.silent(game);
+        if (game.getPhase() != Phase.INFLUENCE) return CommandResult.silent(game);
+        if (!actor.equals(game.getCurrentPlayerName())) return CommandResult.silent(game);
         CardData card = game.getCardByRef(cmd.ref());
         if (card == null) return CommandResult.silent(game);
+        if (card.getCapacity() <= 0 || card.getCounters() < card.getCapacity()) return CommandResult.silent(game);
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = cardToken(card);
         PlayerData owner = card.getOwner();
