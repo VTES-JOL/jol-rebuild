@@ -5,15 +5,18 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import net.deckserver.jol.entity.Game;
+import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
 import org.jboss.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -84,9 +87,13 @@ public class GameCommandService {
             case ClearContestCard c -> handleClearContestCard(game, c, actor);
             case SetTitle c         -> handleSetTitle(game, c, actor);
             case OustPlayer c       -> handleOustPlayer(game, c, actor);
-            case SetChoice c        -> { handleSetChoice(game, c); yield CommandResult.silent(game); }
-            case ReverseOrder c     -> handleReverseOrder(game, c, actor);
-            case SetGameNotes c     -> { handleSetGameNotes(game, c); yield CommandResult.silent(game); }
+            case SetChoice c            -> { handleSetChoice(game, c); yield CommandResult.silent(game); }
+            case ReverseOrder c         -> handleReverseOrder(game, c, actor);
+            case SetGameNotes c         -> { handleSetGameNotes(game, c); yield CommandResult.silent(game); }
+            case OpenImpulseWindow c    -> handleOpenImpulseWindow(game, c, actor);
+            case PassImpulse c          -> handlePassImpulse(game, c, actor);
+            case ClaimImpulse c         -> handleClaimImpulse(game, c, actor);
+            case CloseImpulseWindow c   -> handleCloseImpulseWindow(game, c, actor);
         };
     }
 
@@ -492,6 +499,104 @@ public class GameCommandService {
 
     private void handleSetGameNotes(GameData game, SetGameNotes cmd) {
         game.setNotes(cmd.notes());
+    }
+
+    // ── Impulse / Sequencing ──────────────────────────────────────────────────
+
+    private CommandResult handleOpenImpulseWindow(GameData game, OpenImpulseWindow cmd, String actor) {
+        ImpulseState state = new ImpulseState();
+        state.setActive(true);
+        state.setContext(cmd.context());
+        state.setActingPlayer(cmd.actingPlayer());
+        state.setCurrentImpulseHolder(cmd.actingPlayer());
+        state.setConsecutivePasses(0);
+        state.setPassOrder(buildPassOrder(game, cmd.context(), cmd.actingPlayer(), cmd.targetPlayerName()));
+        game.setImpulseWindow(state);
+        String contextLabel = cmd.context().name().toLowerCase().replace('_', ' ');
+        String msg = actor + " opened an impulse window (" + contextLabel + ") — " + cmd.actingPlayer() + " has first impulse";
+        return new CommandResult(game, msg, new CommandLogData.OpenImpulseLog(actor, cmd.context().name(), cmd.actingPlayer()));
+    }
+
+    private CommandResult handlePassImpulse(GameData game, PassImpulse cmd, String actor) {
+        ImpulseState state = game.getImpulseWindow();
+        if (state == null || !state.isActive()) return CommandResult.silent(game);
+        if (!cmd.playerName().equals(state.getCurrentImpulseHolder())) return CommandResult.silent(game);
+
+        int passes = state.getConsecutivePasses() + 1;
+        state.setConsecutivePasses(passes);
+
+        if (passes >= state.getPassOrder().size()) {
+            state.setActive(false);
+            String msg = actor + " passed — all players have passed; impulse window closes";
+            return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor));
+        }
+
+        List<String> order = state.getPassOrder();
+        int idx = order.indexOf(state.getCurrentImpulseHolder());
+        state.setCurrentImpulseHolder(order.get((idx + 1) % order.size()));
+        String msg = actor + " passed impulse to " + state.getCurrentImpulseHolder();
+        return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor));
+    }
+
+    private CommandResult handleClaimImpulse(GameData game, ClaimImpulse cmd, String actor) {
+        ImpulseState state = game.getImpulseWindow();
+        if (state == null || !state.isActive()) return CommandResult.silent(game);
+        if (!cmd.playerName().equals(state.getCurrentImpulseHolder())) return CommandResult.silent(game);
+
+        state.setConsecutivePasses(0);
+        state.setCurrentImpulseHolder(state.getActingPlayer());
+        String msg = actor + " used their impulse — impulse returns to " + state.getActingPlayer();
+        return new CommandResult(game, msg, new CommandLogData.ClaimImpulseLog(actor));
+    }
+
+    private CommandResult handleCloseImpulseWindow(GameData game, CloseImpulseWindow cmd, String actor) {
+        ImpulseState state = game.getImpulseWindow();
+        if (state != null) state.setActive(false);
+        game.setImpulseWindow(null);
+        String msg = actor + " closed the impulse window";
+        return new CommandResult(game, msg, new CommandLogData.CloseImpulseLog(actor));
+    }
+
+    private List<String> buildPassOrder(GameData game, ImpulseContext context, String actingPlayer, String targetPlayerName) {
+        List<String> active = game.getCurrentPlayers().stream()
+                .map(PlayerData::getName)
+                .collect(java.util.stream.Collectors.toList());
+        if (!active.contains(actingPlayer)) return List.of(actingPlayer);
+
+        List<String> order = new ArrayList<>();
+        order.add(actingPlayer);
+
+        int actingIdx = active.indexOf(actingPlayer);
+        int n = active.size();
+
+        PlayerData acting = game.getPlayer(actingPlayer);
+        String prey = acting.getPrey() != null ? acting.getPrey().getName() : null;
+        String predator = acting.getPredator() != null ? acting.getPredator().getName() : null;
+
+        switch (context) {
+            case UNDIRECTED -> {
+                if (prey != null && active.contains(prey)) order.add(prey);
+                if (predator != null && active.contains(predator)) order.add(predator);
+                for (int i = 1; i < n; i++) {
+                    String name = active.get((actingIdx + i) % n);
+                    if (!order.contains(name)) order.add(name);
+                }
+            }
+            case DIRECTED_SINGLE, COMBAT -> {
+                if (targetPlayerName != null && active.contains(targetPlayerName)) order.add(targetPlayerName);
+                for (int i = 1; i < n; i++) {
+                    String name = active.get((actingIdx + i) % n);
+                    if (!order.contains(name)) order.add(name);
+                }
+            }
+            case DIRECTED_MULTI -> {
+                for (int i = 1; i < n; i++) {
+                    String name = active.get((actingIdx + i) % n);
+                    if (!order.contains(name)) order.add(name);
+                }
+            }
+        }
+        return order;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

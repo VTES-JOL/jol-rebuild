@@ -4,8 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import net.deckserver.jol.dto.CardSlotDto;
 import net.deckserver.jol.dto.CardStateDto;
 import net.deckserver.jol.dto.GameStateDto;
+import net.deckserver.jol.dto.ImpulseStateDto;
 import net.deckserver.jol.dto.PlayerStateDto;
 import net.deckserver.jol.dto.RegionStateDto;
+import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
@@ -38,6 +40,7 @@ public class GameStateProjector {
         dto.playerOrder = List.copyOf(game.getPlayerOrder());
 
         dto.transfersRemaining = game.getTransfersRemaining();
+        dto.impulseWindow = toImpulseStateDto(game.getImpulseWindow());
         dto.players = buildPlayerStates(game, viewerUsername);
         dto.cards = buildCardMap(game, viewerUsername);
         return dto;
@@ -101,6 +104,18 @@ public class GameStateProjector {
                 dto.slots = buildSlots(region);
             }
         }
+        return dto;
+    }
+
+    private ImpulseStateDto toImpulseStateDto(ImpulseState state) {
+        if (state == null || !state.isActive()) return null;
+        ImpulseStateDto dto = new ImpulseStateDto();
+        dto.active = state.isActive();
+        dto.context = state.getContext() != null ? state.getContext().name() : null;
+        dto.actingPlayer = state.getActingPlayer();
+        dto.currentImpulseHolder = state.getCurrentImpulseHolder();
+        dto.passOrder = List.copyOf(state.getPassOrder());
+        dto.consecutivePasses = state.getConsecutivePasses();
         return dto;
     }
 

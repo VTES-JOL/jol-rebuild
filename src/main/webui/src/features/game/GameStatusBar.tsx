@@ -3,6 +3,7 @@ import {useState} from 'react';
 import type {GameState} from './types.ts';
 import {drawCard, drawCrypt, gainEdge, oustPlayer, shuffleCrypt, shuffleLibrary} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
+import {ImpulsePanel, OpenImpulseButton} from './ImpulsePanel.tsx';
 
 export type BoardLayout = 'linear' | 'circular' | 'text';
 
@@ -258,7 +259,18 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     >
                         Oust Player
                     </button>
+                    {!isSpectator && !gameState.impulseWindow?.active && (
+                        <OpenImpulseButton gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
+                    )}
                 </div>
+            )}
+            {gameState?.impulseWindow?.active && (
+                <ImpulsePanel
+                    impulse={gameState.impulseWindow}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    onCommand={onCommand}
+                />
             )}
             {oustOpen && gameState && (
                 <OustPlayerModal

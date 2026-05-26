@@ -54,6 +54,12 @@ export type SetChoiceCommand = { type: 'SET_CHOICE'; gameId: string; choice: str
 export type ReverseOrderCommand = { type: 'REVERSE_ORDER'; gameId: string };
 export type SetGameNotesCommand = { type: 'SET_GAME_NOTES'; gameId: string; notes: string };
 
+export type ImpulseContext = 'UNDIRECTED' | 'DIRECTED_SINGLE' | 'DIRECTED_MULTI' | 'COMBAT';
+export type OpenImpulseWindowCommand = { type: 'OPEN_IMPULSE_WINDOW'; gameId: string; context: ImpulseContext; actingPlayer: string; targetPlayerName?: string | null };
+export type PassImpulseCommand = { type: 'PASS_IMPULSE'; gameId: string; playerName: string };
+export type ClaimImpulseCommand = { type: 'CLAIM_IMPULSE'; gameId: string; playerName: string };
+export type CloseImpulseWindowCommand = { type: 'CLOSE_IMPULSE_WINDOW'; gameId: string };
+
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
     | DrawCardCommand | DrawCryptCommand | ShuffleLibraryCommand | ShuffleCryptCommand
@@ -64,7 +70,8 @@ export type GameCommand =
     | TransferBloodCommand | InfluenceCardCommand | MoveToCryptCommand
     | MoveToTorporCommand | RescueFromTorporCommand | BurnMinionCommand
     | ContestCardCommand | ClearContestCardCommand | SetTitleCommand
-    | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand;
+    | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand
+    | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
     return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
@@ -171,4 +178,20 @@ export function gainEdge(gameId: string): GainEdgeCommand {
 
 export function oustPlayer(gameId: string, playerName: string): OustPlayerCommand {
     return {type: 'OUST_PLAYER', gameId, playerName};
+}
+
+export function openImpulseWindow(gameId: string, context: ImpulseContext, actingPlayer: string, targetPlayerName?: string | null): OpenImpulseWindowCommand {
+    return {type: 'OPEN_IMPULSE_WINDOW', gameId, context, actingPlayer, targetPlayerName};
+}
+
+export function passImpulse(gameId: string, playerName: string): PassImpulseCommand {
+    return {type: 'PASS_IMPULSE', gameId, playerName};
+}
+
+export function claimImpulse(gameId: string, playerName: string): ClaimImpulseCommand {
+    return {type: 'CLAIM_IMPULSE', gameId, playerName};
+}
+
+export function closeImpulseWindow(gameId: string): CloseImpulseWindowCommand {
+    return {type: 'CLOSE_IMPULSE_WINDOW', gameId};
 }

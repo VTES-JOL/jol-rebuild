@@ -9,7 +9,7 @@ import net.deckserver.jol.game.command.CardRef;
 
 import java.util.*;
 
-@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "cards", "players", "currentPlayer", "edge"})
+@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "cards", "players", "currentPlayer", "edge"})
 public class GameData {
     private String id;
     private String name;
@@ -31,6 +31,7 @@ public class GameData {
 
     private String timeoutRequestor;
     private int transfersRemaining = 0;
+    private ImpulseState impulseWindow;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -174,6 +175,9 @@ public class GameData {
 
     public int getTransfersRemaining() { return transfersRemaining; }
     public void setTransfersRemaining(int transfersRemaining) { this.transfersRemaining = transfersRemaining; }
+
+    public ImpulseState getImpulseWindow() { return impulseWindow; }
+    public void setImpulseWindow(ImpulseState impulseWindow) { this.impulseWindow = impulseWindow; }
 
     public void setPhase(Phase phase) { this.phase = phase; }
     public void setCurrentPlayer(PlayerData currentPlayer) { this.currentPlayer = currentPlayer; }

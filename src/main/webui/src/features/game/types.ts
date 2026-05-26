@@ -66,6 +66,15 @@ export type PlayerState = {
     regions: Partial<Record<RegionType, RegionState>>;
 };
 
+export type ImpulseState = {
+    active: boolean;
+    context: string;
+    actingPlayer: string;
+    currentImpulseHolder: string;
+    passOrder: string[];
+    consecutivePasses: number;
+};
+
 export type GameState = {
     gameId: string;
     gameName: string;
@@ -79,4 +88,6 @@ export type GameState = {
     cards: Record<string, CardData>;
     /** Influence transfers remaining for the current player this turn (0 outside INFLUENCE phase). */
     transfersRemaining: number;
+    /** Active impulse window, or null/undefined when no window is open. */
+    impulseWindow?: ImpulseState | null;
 };

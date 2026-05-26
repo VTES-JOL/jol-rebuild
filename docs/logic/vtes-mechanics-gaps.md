@@ -221,7 +221,53 @@ These could also be automated server-side as part of `AdvancePhase` when leaving
 
 ---
 
-### 9. Anarch Conversion
+### 9. Sequencing (Impulse)
+
+VTES uses a priority system called "impulse" to resolve multiple players wanting to play cards or effects at the same time. This is a **cross-cutting mechanic** required by Voting (§1), Action/Blocking (§2), and Combat (§3).
+
+**Rules summary** (Advanced Rules — Sequencing; full detail: [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary)):
+
+- The **acting Methuselah always has the first impulse** and may chain as many cards/effects as they wish.
+- Once they pass, impulse travels to other players in a context-dependent order:
+  - **Combat / action directed at a single Methuselah** — defending Methuselah first, then others clockwise.
+  - **Action directed at a set of Methuselahs** — those Methuselahs in clockwise order, then others.
+  - **Undirected action** — prey first, then predator, then all others clockwise.
+- **If any Methuselah plays a card or effect at any point, the acting Methuselah regains the impulse**, and the cycle restarts.
+- The window closes only when all Methuselahs pass consecutively.
+
+This creates a "round-robin until all pass, with reset on any play" loop — conceptually similar to a stack/priority system in other card games.
+
+**Current state:** Not implemented. Players handle sequencing disputes verbally through chat.
+
+**Proposed state model (`ImpulseState` on `GameData`):**
+
+| Field | Type | Description |
+|---|---|---|
+| `active` | boolean | Whether an impulse window is currently open |
+| `context` | `COMBAT` \| `DIRECTED_SINGLE` \| `DIRECTED_MULTI` \| `UNDIRECTED` | Determines pass order |
+| `actingPlayer` | String | The player who initiated the action/combat/vote |
+| `currentImpulseHolder` | String | Player who currently holds impulse |
+| `passOrder` | List\<String\> | Resolved clockwise sequence for the current context |
+| `consecutivePasses` | int | Resets to 0 whenever any player uses a card/effect |
+
+**Proposed commands:**
+
+| Command | Fields | Description |
+|---|---|---|
+| `OpenImpulseWindow` | `context`, `actingPlayer` | Start an impulse window; computes `passOrder` from current seating and context |
+| `PassImpulse` | `playerName` | Player declines to play; advances `currentImpulseHolder`. If all pass consecutively, closes the window |
+| `ClaimImpulse` | `playerName` | Player plays a card/effect; returns impulse to the acting Methuselah and resets `consecutivePasses` |
+| `CloseImpulseWindow` | — | Explicitly close the window when all players have passed (or server auto-closes after `PassImpulse` when `consecutivePasses == passOrder.size`) |
+
+**Relationship to other systems:**
+- `DeclareAction` (§2) should open an impulse window with context `DIRECTED_SINGLE` or `UNDIRECTED`.
+- `CallReferendum` (§1) should open a window with context `DIRECTED_MULTI` (all players).
+- `EnterCombat` (§3) should open a window with context `COMBAT`.
+- Card plays during an open window should dispatch `ClaimImpulse` before applying their effect.
+
+---
+
+### 10. Anarch Conversion
 
 | Mechanic | Rulebook reference |
 |---|---|
@@ -252,6 +298,7 @@ Currently `OustPlayer` marks players ousted but does not detect when only one pl
 | Priority | Area | Rationale |
 |---|---|---|
 | ~~P1~~ | ~~Transfer tracking~~ | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI. |
+| ~~P1~~ | ~~Sequencing / Impulse engine~~ | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. |
 | **P1** | Voting / Referendum engine | Required for any political-action deck to function; blood hunt has no fallback |
 | **P1** | Game end auto-detection (survivor VP) | Needed for accurate game records |
 | **P2** | Formal action / block declaration | Adds structure; currently relies entirely on player honesty and chat |

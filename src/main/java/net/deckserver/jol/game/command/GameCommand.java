@@ -37,7 +37,11 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = OustPlayer.class,        name = "OUST_PLAYER"),
     @JsonSubTypes.Type(value = SetChoice.class,         name = "SET_CHOICE"),
     @JsonSubTypes.Type(value = ReverseOrder.class,      name = "REVERSE_ORDER"),
-    @JsonSubTypes.Type(value = SetGameNotes.class,      name = "SET_GAME_NOTES"),
+    @JsonSubTypes.Type(value = SetGameNotes.class,          name = "SET_GAME_NOTES"),
+    @JsonSubTypes.Type(value = OpenImpulseWindow.class,    name = "OPEN_IMPULSE_WINDOW"),
+    @JsonSubTypes.Type(value = PassImpulse.class,          name = "PASS_IMPULSE"),
+    @JsonSubTypes.Type(value = ClaimImpulse.class,         name = "CLAIM_IMPULSE"),
+    @JsonSubTypes.Type(value = CloseImpulseWindow.class,   name = "CLOSE_IMPULSE_WINDOW"),
 })
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
@@ -49,7 +53,8 @@ public sealed interface GameCommand
             TransferBlood, InfluenceCard, MoveToCrypt,
             MoveToTorpor, RescueFromTorpor, BurnMinion,
             ContestCard, ClearContestCard, SetTitle,
-            OustPlayer, SetChoice, ReverseOrder, SetGameNotes {
+            OustPlayer, SetChoice, ReverseOrder, SetGameNotes,
+            OpenImpulseWindow, PassImpulse, ClaimImpulse, CloseImpulseWindow {
 
     String gameId();
 }

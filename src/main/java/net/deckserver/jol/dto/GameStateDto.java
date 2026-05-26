@@ -23,4 +23,6 @@ public class GameStateDto {
     public Map<String, CardStateDto> cards;
     /** Influence transfers remaining for the current player this turn (0 outside INFLUENCE phase). */
     public int transfersRemaining;
+    /** Active impulse window, or null when no impulse window is open. */
+    public ImpulseStateDto impulseWindow;
 }

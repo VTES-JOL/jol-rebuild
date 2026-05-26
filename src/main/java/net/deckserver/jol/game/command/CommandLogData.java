@@ -33,6 +33,10 @@ import net.deckserver.jol.enums.Phase;
         @JsonSubTypes.Type(value = CommandLogData.TransferBloodLog.class,      name = "TRANSFER_BLOOD"),
         @JsonSubTypes.Type(value = CommandLogData.OustPlayerLog.class,         name = "OUST_PLAYER"),
         @JsonSubTypes.Type(value = CommandLogData.ReverseOrderLog.class,       name = "REVERSE_ORDER"),
+        @JsonSubTypes.Type(value = CommandLogData.OpenImpulseLog.class,        name = "OPEN_IMPULSE_WINDOW"),
+        @JsonSubTypes.Type(value = CommandLogData.PassImpulseLog.class,        name = "PASS_IMPULSE"),
+        @JsonSubTypes.Type(value = CommandLogData.ClaimImpulseLog.class,       name = "CLAIM_IMPULSE"),
+        @JsonSubTypes.Type(value = CommandLogData.CloseImpulseLog.class,       name = "CLOSE_IMPULSE_WINDOW"),
 })
 public sealed interface CommandLogData
         permits
@@ -45,7 +49,8 @@ public sealed interface CommandLogData
         CommandLogData.BurnMinionLog, CommandLogData.ContestCardLog, CommandLogData.ClearContestCardLog,
         CommandLogData.SetTitleLog,
         CommandLogData.SetPoolLog, CommandLogData.GainEdgeLog, CommandLogData.TransferBloodLog,
-        CommandLogData.OustPlayerLog, CommandLogData.ReverseOrderLog {
+        CommandLogData.OustPlayerLog, CommandLogData.ReverseOrderLog,
+        CommandLogData.OpenImpulseLog, CommandLogData.PassImpulseLog, CommandLogData.ClaimImpulseLog, CommandLogData.CloseImpulseLog {
 
     String actor();
 
@@ -84,4 +89,10 @@ public sealed interface CommandLogData
     record TransferBloodLog(String actor, LogCardRef card, int amount) implements CommandLogData {}
     record OustPlayerLog(String actor, String oustedPlayer) implements CommandLogData {}
     record ReverseOrderLog(String actor) implements CommandLogData {}
+
+    // ── Impulse / Sequencing ──────────────────────────────────────────────────
+    record OpenImpulseLog(String actor, String context, String actingPlayer) implements CommandLogData {}
+    record PassImpulseLog(String actor) implements CommandLogData {}
+    record ClaimImpulseLog(String actor) implements CommandLogData {}
+    record CloseImpulseLog(String actor) implements CommandLogData {}
 }
