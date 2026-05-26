@@ -105,6 +105,7 @@ function GameContextMenuOverlay({contextMenu, gameState, gameId, currentUser, on
             transfersRemaining={gameState.transfersRemaining}
             phase={gameState.phase}
             isCurrentPlayer={gameState.currentPlayer === currentUser}
+            impulseHolder={gameState.impulseWindow?.active ? gameState.impulseWindow.currentImpulseHolder : null}
             position={{x: contextMenu.x, y: contextMenu.y}}
             onCommand={onCommand}
             onClose={onClose}

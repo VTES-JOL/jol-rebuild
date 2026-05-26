@@ -48,6 +48,19 @@ UNLOCK → MASTER → MINION → INFLUENCE → DISCARD
 
 It is reset to 0 on `NextTurn`. It is sent to clients via `GameStateDto.transfersRemaining`.
 
+### Impulse window (phase-level)
+Every time a new phase begins — either via `AdvancePhase` or `NextTurn` — the server **automatically opens an impulse window** (`ImpulseState`) for the current player using an `UNDIRECTED` context. The current player starts as both the `actingPlayer` and `currentImpulseHolder`. The pass order is built from the predator–prey ring (same as a manually-opened undirected window).
+
+While an impulse window is active, **game action commands are gated**: only the player whose name matches `currentImpulseHolder` may execute them. Commands that are exempt from this gate (i.e. always allowed regardless of impulse):
+
+| Command | Reason |
+|---|---|
+| `AdvancePhase` / `NextTurn` | Phase management — current player can always advance |
+| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself |
+| `SetGameNotes` / `SetCardNotes` / `SetChoice` | Administrative / meta |
+
+When `AdvancePhase` is called, any open window is replaced by a fresh window for the incoming phase's current player. Manually closing the window (✕ button) removes gating for that phase; the window reopens automatically on the next phase advance.
+
 ### Edge
 The **edge** is a single `PlayerData` reference indicating which player currently holds it. It is transferred via the `GainEdge` command and starts as unset.
 

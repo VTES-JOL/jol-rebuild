@@ -18,6 +18,7 @@ import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @ApplicationScoped
 public class GameCommandService {
@@ -57,7 +58,17 @@ public class GameCommandService {
 
     // ── Dispatch ─────────────────────────────────────────────────────────────
 
+    private static final Set<Class<? extends GameCommand>> IMPULSE_EXEMPT = Set.of(
+        AdvancePhase.class, NextTurn.class,
+        OpenImpulseWindow.class, PassImpulse.class, ClaimImpulse.class, CloseImpulseWindow.class,
+        SetGameNotes.class, SetCardNotes.class, SetChoice.class
+    );
+
     private CommandResult applyCommand(GameData game, GameCommand cmd, String actor) {
+        ImpulseState impulse = game.getImpulseWindow();
+        if (impulse != null && impulse.isActive() && !IMPULSE_EXEMPT.contains(cmd.getClass())) {
+            if (!actor.equals(impulse.getCurrentImpulseHolder())) return CommandResult.silent(game);
+        }
         return switch (cmd) {
             case AdvancePhase c     -> handleAdvancePhase(game, c, actor);
             case NextTurn c         -> handleNextTurn(game, c, actor);
@@ -99,6 +110,17 @@ public class GameCommandService {
 
     // ── Turn / phase ──────────────────────────────────────────────────────────
 
+    private void openAutoImpulse(GameData game, String actingPlayer) {
+        ImpulseState state = new ImpulseState();
+        state.setActive(true);
+        state.setContext(ImpulseContext.UNDIRECTED);
+        state.setActingPlayer(actingPlayer);
+        state.setCurrentImpulseHolder(actingPlayer);
+        state.setConsecutivePasses(0);
+        state.setPassOrder(buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null));
+        game.setImpulseWindow(state);
+    }
+
     private CommandResult handleAdvancePhase(GameData game, AdvancePhase cmd, String actor) {
         Phase[] phases = Phase.values();
         int current = game.getPhase() != null ? game.getPhase().ordinal() : 0;
@@ -110,6 +132,7 @@ public class GameCommandService {
             if (phases[next] == Phase.INFLUENCE) {
                 game.setTransfersRemaining(computeTransferBudget(game));
             }
+            openAutoImpulse(game, game.getCurrentPlayerName());
             String msg = actor + " advanced to " + phases[next].getDescription() + " phase";
             return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[next]));
         }
@@ -159,6 +182,7 @@ public class GameCommandService {
         }
 
         String nextPlayerName = nextPlayer != null ? nextPlayer.getName() : "unknown";
+        openAutoImpulse(game, nextPlayerName);
         String turn = major + "." + minor;
         String msg = "Turn " + turn + " — " + nextPlayerName + " begins their turn";
         return new CommandResult(game, msg, new CommandLogData.NextTurnLog(actor, turn, nextPlayerName));

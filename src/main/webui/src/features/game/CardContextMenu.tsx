@@ -36,6 +36,7 @@ type Props = {
     transfersRemaining: number;
     phase: string;
     isCurrentPlayer: boolean;
+    impulseHolder: string | null;
     position: {x: number; y: number};
     onCommand: (cmd: GameCommand) => void;
     onClose: () => void;
@@ -50,7 +51,7 @@ const SEP = <hr className="border-line/40 my-1" />;
 const MENU_MAX_W = 280;
 const MENU_MAX_H = 440;
 
-export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool, transfersRemaining, phase, isCurrentPlayer, position, onCommand, onClose}: Props) {
+export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool, transfersRemaining, phase, isCurrentPlayer, impulseHolder, position, onCommand, onClose}: Props) {
     const menuRef = useRef<HTMLDivElement>(null);
     const [inlineForm, setInlineForm] = useState<InlineForm>(null);
     const [titleInput, setTitleInput] = useState(card.title ?? '');
@@ -85,16 +86,17 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const isCryptCard = card.type === 'Vampire' || card.type === 'Imbued' || card.crypt === true;
     const isMinion = card.minion === true || isCryptCard;
     const inPlayOrUncontrolled = inPlay || region === 'UNCONTROLLED';
+    const hasImpulse = !impulseHolder || impulseHolder === currentUser;
     const showLockUnlock = inPlay;
-    const showPoolTransfer = (inPlay && isSelf) ||
-        (region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer);
+    const showPoolTransfer = hasImpulse && ((inPlay && isSelf) ||
+        (region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer));
     const showCounters = inPlayOrUncontrolled;
-    const showMoveToTorpor = region === 'READY' && isMinion;
-    const showRescue = region === 'TORPOR';
-    const showPlay = region === 'HAND' && isSelf;
-    const showDiscard = region === 'HAND' && isSelf;
-    const showBurn = isMinion && inPlay;
-    const showInfluence = region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer &&
+    const showMoveToTorpor = hasImpulse && region === 'READY' && isMinion;
+    const showRescue = hasImpulse && region === 'TORPOR';
+    const showPlay = hasImpulse && region === 'HAND' && isSelf;
+    const showDiscard = hasImpulse && region === 'HAND' && isSelf;
+    const showBurn = hasImpulse && isMinion && inPlay;
+    const showInfluence = hasImpulse && region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer &&
         card.capacity != null && card.capacity > 0 && (card.counters ?? 0) >= card.capacity;
     const showContest = card.unique === true && inPlay;
     const showTitle = isCryptCard && region === 'READY';
