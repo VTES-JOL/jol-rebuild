@@ -16,6 +16,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.deckserver.jol.exception.GameRuleException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -117,13 +119,11 @@ class ImpulseWindowTest {
     }
 
     @Test
-    void passImpulse_byNonHolder_isNoOp() {
+    void passImpulse_byNonHolder_throwsGameRuleException() {
         openUndirected("Alice");
 
-        gameCommandService.execute("Bob", new PassImpulse(gameId, "Bob")); // Alice holds, not Bob
-
-        assertEquals("Alice", game.getImpulseWindow().getCurrentImpulseHolder());
-        assertEquals(0, game.getImpulseWindow().getConsecutivePasses());
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Bob", new PassImpulse(gameId, "Bob"))); // Alice holds, not Bob
     }
 
     @Test
@@ -169,13 +169,11 @@ class ImpulseWindowTest {
     }
 
     @Test
-    void claimImpulse_byNonHolder_isNoOp() {
+    void claimImpulse_byNonHolder_throwsGameRuleException() {
         openUndirected("Alice"); // Alice holds impulse
 
-        gameCommandService.execute("Bob", new ClaimImpulse(gameId, "Bob")); // Bob doesn't hold it
-
-        assertEquals("Alice", game.getImpulseWindow().getCurrentImpulseHolder());
-        assertEquals(0, game.getImpulseWindow().getConsecutivePasses());
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Bob", new ClaimImpulse(gameId, "Bob"))); // Bob doesn't hold it
     }
 
     // ── Close window ──────────────────────────────────────────────────────────
@@ -231,9 +229,8 @@ class ImpulseWindowTest {
     void commandBlockedWhenActorLacksImpulse() {
         openUndirected("Alice");
 
-        var result = gameCommandService.execute("Bob", new DrawCard(gameId, 1));
-
-        assertNull(result.logMessage());
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Bob", new DrawCard(gameId, 1)));
     }
 
     @Test

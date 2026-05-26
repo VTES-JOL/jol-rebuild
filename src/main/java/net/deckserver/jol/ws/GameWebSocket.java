@@ -9,9 +9,11 @@ import jakarta.inject.Inject;
 import net.deckserver.jol.config.Config;
 import net.deckserver.jol.dto.ChatMessageDto;
 import net.deckserver.jol.dto.GameMessageDto;
+import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.command.CommandContext;
 import net.deckserver.jol.services.ChatService;
+import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameCommandService;
 import net.deckserver.jol.services.GameStateBroadcaster;
 import net.deckserver.jol.services.GameStateStore;
@@ -132,7 +134,7 @@ public class GameWebSocket {
             return;
         }
         try {
-            GameCommandService.CommandResult result = commandService.execute(userName(), incoming.command);
+            CommandResult result = commandService.execute(userName(), incoming.command);
             if (result.commandLog() != null) {
                 GameData g = result.game();
                 CommandContext ctx = new CommandContext(
@@ -148,7 +150,7 @@ public class GameWebSocket {
                 connection.broadcast().sendTextAndAwait(log);
             }
             broadcaster.broadcastState(gameId, result.game());
-        } catch (IllegalStateException e) {
+        } catch (GameRuleException | IllegalStateException e) {
             sendSafely(GameMessageDto.error(e.getMessage()));
         }
     }

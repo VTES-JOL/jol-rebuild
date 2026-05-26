@@ -13,6 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import net.deckserver.jol.exception.GameRuleException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -103,16 +105,12 @@ class GameCommandStateTest {
 
     @Test
     void transferBlood_uncontrolled_requiresBudget() {
-        // In UNLOCK phase budget is 0 — transfer must be a no-op
+        // In UNLOCK phase — transfer to UNCONTROLLED must be rejected with a rule violation
         String currentPlayer = gameData.getCurrentPlayerName(); // Player5
-        CardData card = firstUncontrolled(currentPlayer);
-        int initialPool     = gameData.getPlayer(currentPlayer).getPool();
-        int initialCounters = card.getCounters();
 
-        gameCommandService.execute(currentPlayer, new TransferBlood(gameId, CardRef.of(currentPlayer, RegionType.UNCONTROLLED, 0), 1));
-
-        assertEquals(initialPool,     gameData.getPlayer(currentPlayer).getPool());
-        assertEquals(initialCounters, card.getCounters());
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(currentPlayer,
+                        new TransferBlood(gameId, CardRef.of(currentPlayer, RegionType.UNCONTROLLED, 0), 1)));
     }
 
     @Test
@@ -147,11 +145,9 @@ class GameCommandStateTest {
         int poolAfterFirst = gameData.getPlayer(actor).getPool();
         int countersAfterFirst = card.getCounters();
 
-        // Second transfer should be rejected
-        gameCommandService.execute(actor, new TransferBlood(gameId, ref, 1));
-
-        assertEquals(poolAfterFirst,     gameData.getPlayer(actor).getPool());
-        assertEquals(countersAfterFirst, card.getCounters());
+        // Second transfer should be rejected with a rule violation
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(actor, new TransferBlood(gameId, ref, 1)));
     }
 
     @Test
@@ -284,31 +280,26 @@ class GameCommandStateTest {
         CardData card = firstUncontrolled(ACTOR);
         card.setCounters(card.getCapacity() - 1); // one short
 
-        gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
-
-        assertFalse(gameData.getPlayer(ACTOR).getRegion(RegionType.READY).getCards().contains(card));
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0))));
     }
 
     @Test
     void influenceCard_blockedOutsideInfluencePhase() {
         // Phase is UNLOCK in the fixture — should be rejected
         gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
-        CardData card = firstUncontrolled(ACTOR);
 
-        gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
-
-        assertFalse(gameData.getPlayer(ACTOR).getRegion(RegionType.READY).getCards().contains(card));
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0))));
     }
 
     @Test
     void influenceCard_blockedForNonCurrentPlayer() {
         gameData.setPhase(Phase.INFLUENCE);
         // Current player remains Player5, ACTOR is Player1
-        CardData card = firstUncontrolled(ACTOR);
 
-        gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0)));
-
-        assertFalse(gameData.getPlayer(ACTOR).getRegion(RegionType.READY).getCards().contains(card));
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0))));
     }
 
     // ── Player state ──────────────────────────────────────────────────────────
