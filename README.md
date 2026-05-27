@@ -1,62 +1,52 @@
-# code-with-quarkus
+# JOL - Vampire: The Eternal Struggle Online
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+JOL is a digital representation of the **Vampire: The Eternal Struggle (VTES)** card game. It aims to accurately mimic the logic, constraints, and mechanics of the real-world game in an online environment.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Overview
 
-## Running the application in dev mode
+The project provides a platform for:
+- **Game Play**: Online implementation of VTES mechanics and card play rules.
+- **Deck Management**: Tools for building, importing, and validating decks (Standard, Duel, and V5 formats).
+- **Lobby & Social**: Game and tournament lobbies with a comprehensive chat system.
+- **Card Database**: Full registry of VTES cards (Crypt and Library) with fuzzy search capabilities.
 
-You can run your application in dev mode that enables live coding using:
+## Architecture
 
-```shell script
+JOL is built as a modern web application:
+- **Backend**: Java powered by [Quarkus](https://quarkus.io/).
+- **Frontend**: React, TypeScript, and Tailwind CSS, integrated via [Quinoa](https://quarkus.io/extensions/io.quarkiverse.quinoa/quarkus-quinoa).
+- **Persistence**: PostgreSQL with Hibernate ORM Panache.
+- **Real-time**: WebSockets for game state updates and chat.
+
+## Getting Started
+
+### Backend (Quarkus)
+
+Run the application in dev mode with live reload:
+```bash
 ./mvnw quarkus:dev
 ```
+The Dev UI will be available at `http://localhost:8080/q/dev/`.
 
-> **_NOTE:_** Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
-
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
+To build the application:
+```bash
 ./mvnw package
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not a _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+### Frontend (React)
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-To build the _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+The frontend is located in `src/main/webui/`. In dev mode, you can run it separately for Vite's HMR:
+```bash
+cd src/main/webui/
+npm install
+npm run dev
 ```
+It will proxy API calls to the Quarkus backend.
 
-The application, packaged as a _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+## Documentation
 
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/code-with-quarkus-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Provided Code
-
-### REST
-
-Start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+For more detailed information, please refer to:
+- [CLAUDE.md](CLAUDE.md): Development guidelines and quick commands.
+- [Architecture Guide](docs/architecture/README.md): Detailed technical overview.
+- [Logical Model](docs/logic/README.md): Documentation on game rules and implementation.
+- [Improvement Roadmap](docs/architecture/improvement-roadmap.md): Planned features and enhancements.
