@@ -317,6 +317,27 @@ class GameCommandStateTest {
         assertEquals(1.0f, predator.getVictoryPoints(), 0.001f);
     }
 
+    @Test
+    void oustPlayer_lastOust_marksGameCompletedAndAwardsSurvivorVP() {
+        // Directly eliminate 3 of 5 players so only Player4 and Player5 remain
+        gameData.getPlayer("Player1").setPool(0);
+        gameData.getPlayer("Player2").setPool(0);
+        gameData.getPlayer("Player3").setPool(0);
+        gameData.updatePredatorMapping();
+
+        PlayerData survivor = gameData.getPlayer("Player5");
+        float vpBefore = survivor.getVictoryPoints();
+
+        // Player5 ousts Player4 — the last remaining opponent
+        gameCommandService.execute("Player5", new OustPlayer(gameId, "Player4"));
+
+        assertTrue(gameData.isCompleted());
+        // survivor bonus (+1 VP) stacks on top of the predator VP (+1 VP for ousting Player4)
+        assertEquals(vpBefore + 2.0f, survivor.getVictoryPoints(), 0.001f);
+        // game evicted from store
+        assertFalse(gameStateStore.contains(gameId));
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private CardData firstUncontrolled(String playerName) {

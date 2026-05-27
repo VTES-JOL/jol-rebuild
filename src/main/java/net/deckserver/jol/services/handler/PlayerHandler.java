@@ -3,6 +3,8 @@ package net.deckserver.jol.services.handler;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
+
+import java.util.List;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
 
@@ -23,6 +25,12 @@ public final class PlayerHandler {
 
         if (cmd.playerName().equals(game.getCurrentPlayerName())) {
             TurnPhaseHandler.handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
+        }
+
+        List<PlayerData> survivors = game.getCurrentPlayers();
+        if (survivors.size() == 1) {
+            survivors.getFirst().addVictoryPoints(1.0f);
+            game.setCompleted(true);
         }
 
         String msg = actor + " ousted " + cmd.playerName();

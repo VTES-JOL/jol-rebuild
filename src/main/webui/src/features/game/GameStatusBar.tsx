@@ -1,7 +1,7 @@
 import {createPortal} from 'react-dom';
 import {useState} from 'react';
 import type {GameState} from './types.ts';
-import {drawCard, drawCrypt, gainEdge, oustPlayer, shuffleCrypt, shuffleLibrary} from './gameCommands.ts';
+import {drawCard, drawCrypt, gainEdge, oustPlayer, reverseOrder, shuffleCrypt, shuffleLibrary, unlockAll} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
 import {ImpulsePanel, OpenImpulseButton} from './ImpulsePanel.tsx';
 
@@ -214,6 +214,18 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                    {gameState && !isSpectator && (
+                        <button
+                            className={[
+                                ACTION_BTN,
+                                gameState.orderReversed ? 'border-arcane/40 text-arcane/80' : '',
+                            ].join(' ')}
+                            onClick={() => onCommand(reverseOrder(gameId))}
+                            title={gameState.orderReversed ? 'Turn order reversed — click to restore' : 'Reverse turn order'}
+                        >
+                            {gameState.orderReversed ? '←' : '→'}
+                        </button>
+                    )}
                     <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5">
                     {(['linear', 'circular', 'text'] as const).map(l => (
                         <button
@@ -246,6 +258,9 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     </button>
                     <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(shuffleCrypt(gameId))} title={hasImpulse ? 'Shuffle your crypt' : 'Not your impulse'}>
                         ↺ Crypt
+                    </button>
+                    <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(unlockAll(gameId))} title={hasImpulse ? 'Unlock all your cards' : 'Not your impulse'}>
+                        ↺ Unlock All
                     </button>
                     {!hasEdge && (
                         <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(gainEdge(gameId))} title={hasImpulse ? 'Gain the Edge' : 'Not your impulse'}>

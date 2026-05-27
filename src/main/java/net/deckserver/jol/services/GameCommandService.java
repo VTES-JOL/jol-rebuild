@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.enums.ImpulseContext;
+import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.command.*;
@@ -41,6 +42,9 @@ public class GameCommandService {
         synchronized (game) {
             result = dispatch(game, command, actorUsername);
             persistSnapshot(command.gameId(), result.game());
+            if (result.game().isCompleted()) {
+                finishGame(command.gameId());
+            }
         }
         return result;
     }
@@ -108,6 +112,14 @@ public class GameCommandService {
             }
         } catch (Exception e) {
             LOG.errorf(e, "Failed to persist game snapshot for %s", gameId);
+        }
+    }
+
+    private void finishGame(String gameId) {
+        store.remove(gameId);
+        Game entity = Game.findById(gameId);
+        if (entity != null) {
+            entity.status = Status.FINISHED;
         }
     }
 }

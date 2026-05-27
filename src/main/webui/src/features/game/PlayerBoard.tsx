@@ -1,10 +1,10 @@
-import {useMemo} from 'react';
+import {useMemo, useState} from 'react';
 import type {CardData, PlayerState, RegionType} from './types.ts';
 import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
 import {buildActiveRegionConfigs, CompactRegionRow, createCompactRegionConfigs} from './gameUtils.tsx';
 import type {CardRef, GameCommand} from './gameCommands.ts';
-import {setPool} from './gameCommands.ts';
+import {setChoice, setPool} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
 type PlayerBoardProps = {
@@ -30,6 +30,14 @@ export function BleedConnector() {
 }
 
 export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, onCardClick, onCardContextMenu}: PlayerBoardProps) {
+    const [choiceEditing, setChoiceEditing] = useState(false);
+    const [choiceInput, setChoiceInput] = useState('');
+
+    const saveChoice = () => {
+        if (gameId && onCommand) onCommand(setChoice(gameId, player.name, choiceInput));
+        setChoiceEditing(false);
+    };
+
     const {
         ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap, rfg,
         readyStacks, torporStacks, researchStacks, uncontrolledStacks,
@@ -95,6 +103,35 @@ export function PlayerBoard({player, cards, isCurrentPlayer, gameId, onCommand, 
                 {player.victoryPoints > 0 && (
                     <span className="text-xs text-gold font-medium">{player.victoryPoints} VP</span>
                 )}
+                {isCurrentPlayer && gameId && onCommand ? (
+                    choiceEditing ? (
+                        <div className="flex items-center gap-0.5">
+                            <input
+                                className="text-[10px] w-full px-1 py-0.5 rounded border border-line/50 bg-panel/30 text-ink outline-none focus:border-arcane/40"
+                                value={choiceInput}
+                                onChange={e => setChoiceInput(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') saveChoice();
+                                    if (e.key === 'Escape') { e.stopPropagation(); setChoiceEditing(false); }
+                                }}
+                                placeholder="Choice…"
+                                autoFocus
+                            />
+                            <button className="text-[10px] text-ink-muted hover:text-ink transition-colors leading-none shrink-0" onClick={saveChoice}>✓</button>
+                            <button className="text-[10px] text-ink-muted hover:text-ink transition-colors leading-none shrink-0" onClick={() => setChoiceEditing(false)}>✕</button>
+                        </div>
+                    ) : (
+                        <button
+                            className="text-[10px] text-ink-muted/60 hover:text-ink-muted transition-colors leading-none text-left truncate"
+                            onClick={() => { setChoiceInput(player.choice ?? ''); setChoiceEditing(true); }}
+                            title="Set your choice"
+                        >
+                            {player.choice ? `[${player.choice}]` : 'Choice…'}
+                        </button>
+                    )
+                ) : player.choice ? (
+                    <span className="text-[10px] text-ink-muted/60 leading-none truncate">[{player.choice}]</span>
+                ) : null}
                 {player.prey && (
                     <span className="text-[10px] text-ink-muted/50 leading-none truncate" title={`Prey: ${player.prey}`}>
                         ▼ {player.prey}

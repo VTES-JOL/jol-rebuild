@@ -5,7 +5,7 @@ import type {CardData} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {
     addCounter, burnMinion, contestCard, discardCard, transferBloodOff, transferBloodOn,
-    lockCard, moveToTorpor, playCard, removeCounter, rescueFromTorpor,
+    lockCard, moveToTorpor, moveToCrypt, playCard, removeCounter, rescueFromTorpor,
     setCardNotes, setTitle, influenceCard,
     clearContestCard, unlockCard,
 } from './gameCommands.ts';
@@ -98,10 +98,11 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
     const showBurn = hasImpulse && isMinion && inPlay;
     const showInfluence = hasImpulse && region === 'UNCONTROLLED' && isSelf && phase === 'INFLUENCE' && isCurrentPlayer &&
         card.capacity != null && card.capacity > 0 && (card.counters ?? 0) >= card.capacity;
+    const showMoveToCrypt = hasImpulse && region === 'UNCONTROLLED' && isSelf;
     const showContest = card.unique === true && inPlay;
     const showTitle = isCryptCard && region === 'READY';
     const showNotes = (inPlay || region === 'HAND') && isSelf;
-    const hasZoneSection = showPlay || showMoveToTorpor || showRescue || showDiscard || showBurn || showInfluence;
+    const hasZoneSection = showPlay || showMoveToTorpor || showRescue || showDiscard || showBurn || showInfluence || showMoveToCrypt;
 
     const cardLabel = card.faceDown && !card.name ? '(hidden)' : (card.name ?? card.cardId ?? '—');
 
@@ -195,6 +196,9 @@ export function CardContextMenu({card, cardRef, gameId, currentUser, playerPool,
                     )}
                     {showInfluence && (
                         <button className={ITEM} onClick={() => fire(influenceCard(gameId, cardRef))}>Influence to Ready</button>
+                    )}
+                    {showMoveToCrypt && (
+                        <button className={ITEM} onClick={() => fire(moveToCrypt(gameId, cardRef))}>Return to Crypt</button>
                     )}
                     {showMoveToTorpor && (
                         <button className={ITEM} onClick={() => fire(moveToTorpor(gameId, cardRef))}>Move to Torpor</button>

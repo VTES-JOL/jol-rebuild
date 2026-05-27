@@ -50,7 +50,7 @@ export type ContestCardCommand = { type: 'CONTEST_CARD'; gameId: string; ref: Ca
 export type ClearContestCardCommand = { type: 'CLEAR_CONTEST_CARD'; gameId: string; ref: CardRef };
 export type SetTitleCommand = { type: 'SET_TITLE'; gameId: string; ref: CardRef; title: string };
 export type OustPlayerCommand = { type: 'OUST_PLAYER'; gameId: string; playerName: string };
-export type SetChoiceCommand = { type: 'SET_CHOICE'; gameId: string; choice: string };
+export type SetChoiceCommand = { type: 'SET_CHOICE'; gameId: string; playerName: string; choice: string };
 export type ReverseOrderCommand = { type: 'REVERSE_ORDER'; gameId: string };
 export type SetGameNotesCommand = { type: 'SET_GAME_NOTES'; gameId: string; notes: string };
 
@@ -178,6 +178,18 @@ export function gainEdge(gameId: string): GainEdgeCommand {
 
 export function oustPlayer(gameId: string, playerName: string): OustPlayerCommand {
     return {type: 'OUST_PLAYER', gameId, playerName};
+}
+
+export function setChoice(gameId: string, playerName: string, choice: string): SetChoiceCommand {
+    return {type: 'SET_CHOICE', gameId, playerName, choice};
+}
+
+export function reverseOrder(gameId: string): ReverseOrderCommand {
+    return {type: 'REVERSE_ORDER', gameId};
+}
+
+export function unlockAll(gameId: string): UnlockAllCommand {
+    return {type: 'UNLOCK_ALL', gameId};
 }
 
 export function openImpulseWindow(gameId: string, context: ImpulseContext, actingPlayer: string, targetPlayerName?: string | null): OpenImpulseWindowCommand {

@@ -1,10 +1,10 @@
-import {useMemo} from 'react';
+import {useMemo, useState} from 'react';
 import type {CardData, PlayerState} from './types.ts';
 import type {FieldRegionConfig} from './FieldRegion.tsx';
 import {FieldRegionDndGroup} from './FieldRegion.tsx';
 import {buildActiveRegionConfigs, CompactRegionRow, createCompactRegionConfigs} from './gameUtils.tsx';
 import type {CardRef, GameCommand} from './gameCommands.ts';
-import {setPool} from './gameCommands.ts';
+import {setChoice, setPool} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
 export type PlayerColumnRole = 'predator' | 'focused' | 'prey';
@@ -21,6 +21,14 @@ type PlayerColumnProps = {
 };
 
 export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gameId, onCommand, onCardContextMenu}: PlayerColumnProps) {
+    const [choiceEditing, setChoiceEditing] = useState(false);
+    const [choiceInput, setChoiceInput] = useState('');
+
+    const saveChoice = () => {
+        if (gameId && onCommand) onCommand(setChoice(gameId, player.name, choiceInput));
+        setChoiceEditing(false);
+    };
+
     const {
         ready, torpor, research, uncontrolled, hand, library, crypt, ashHeap, rfg,
         readyStacks, torporStacks, researchStacks, uncontrolledStacks,
@@ -94,6 +102,35 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
                 {player.ousted && (
                     <span className="text-xs text-ink-muted shrink-0">ousted</span>
                 )}
+                {isCurrentUser && gameId && onCommand ? (
+                    choiceEditing ? (
+                        <div className="flex items-center gap-0.5 shrink-0">
+                            <input
+                                className="text-[10px] w-20 px-1 py-0.5 rounded border border-line/50 bg-panel/30 text-ink outline-none focus:border-arcane/40"
+                                value={choiceInput}
+                                onChange={e => setChoiceInput(e.target.value)}
+                                onKeyDown={e => {
+                                    if (e.key === 'Enter') saveChoice();
+                                    if (e.key === 'Escape') { e.stopPropagation(); setChoiceEditing(false); }
+                                }}
+                                placeholder="Choice…"
+                                autoFocus
+                            />
+                            <button className="text-[10px] text-ink-muted hover:text-ink transition-colors leading-none" onClick={saveChoice}>✓</button>
+                            <button className="text-[10px] text-ink-muted hover:text-ink transition-colors leading-none" onClick={() => setChoiceEditing(false)}>✕</button>
+                        </div>
+                    ) : (
+                        <button
+                            className="text-[10px] text-ink-muted/60 hover:text-ink-muted shrink-0 transition-colors leading-none"
+                            onClick={() => { setChoiceInput(player.choice ?? ''); setChoiceEditing(true); }}
+                            title="Set your choice"
+                        >
+                            {player.choice ? `[${player.choice}]` : 'Choice…'}
+                        </button>
+                    )
+                ) : player.choice ? (
+                    <span className="text-[10px] text-ink-muted/60 shrink-0">[{player.choice}]</span>
+                ) : null}
             </div>
 
             {/* All regions share ONE DndContext so compact→active cross-region DnD works */}

@@ -32,6 +32,7 @@ public class GameData {
     private String timeoutRequestor;
     private int transfersRemaining = 0;
     private ImpulseState impulseWindow;
+    private boolean completed = false;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -186,6 +187,8 @@ public class GameData {
     public void setNotes(String notes) { this.notes = notes; }
     public void setOrderOfPlayReversed(boolean orderOfPlayReversed) { this.orderOfPlayReversed = orderOfPlayReversed; }
     public void setTimeoutRequestor(String timeoutRequestor) { this.timeoutRequestor = timeoutRequestor; }
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);

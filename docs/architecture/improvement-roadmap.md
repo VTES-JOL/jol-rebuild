@@ -42,9 +42,9 @@ class CardRules {
 }
 ```
 
-### 4. Game End Detection (P1 per gap doc)
+### 4. ~~Game End Detection~~ — **Done 2026-05**
 
-After `OustPlayer`, check if only one non-ousted player remains. If so, award +1 VP (survivor bonus) and transition the game entity to `COMPLETED`. Add in `PlayerHandler.handleOustPlayer` as a post-mutation check.
+After `OustPlayer`, if only one non-ousted player remains: awards +1 VP (survivor bonus) to that player, sets `GameData.completed = true`, transitions the `Game` entity to `Status.FINISHED`, and evicts from `GameStateStore`.
 
 ---
 
@@ -143,7 +143,7 @@ Several backend commands have no frontend path:
 ## Recommended Implementation Sequence
 
 1. ~~Backend refactor (handlers + GameRules)~~ — **Done 2026-05**
-2. Game end detection — small, P1
+2. ~~Game end detection~~ — **Done 2026-05**
 3. Voting/Referendum engine + Referendum Modal UI
 4. Phase-contextual action panel + card targeting mode
 5. Formal action/blocking (integrates with existing impulse engine)
