@@ -267,27 +267,54 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 
 ---
 
+### 11. Card Play Phase Gating
+
+`PlayCard` currently has no phase or card-type validation. Any card in `HAND` can be played in any phase by whoever holds impulse. The full rules are defined in [card-play-rules.md](card-play-rules.md).
+
+**Missing mechanics:**
+
+| Mechanic                                                                               | Notes                                                            |
+|----------------------------------------------------------------------------------------|------------------------------------------------------------------|
+| `PlayCard` phase enforcement by card type (Master/Minion/Unlock/Discard)               | No phase check; any card plays in any phase                      |
+| Action Modifier restricted to acting player; Reaction restricted to non-acting players | Not enforced                                                     |
+| Out-of-turn Master detection (`CardData.outOfTurn` flag)                               | Not derived from card text at build time                         |
+| Out-of-turn master action cost (next master phase action, or trifle use)               | No `masterActionsRemaining` on `GameData`                        |
+| Conviction cards playable from `ASH_HEAP`                                              | `PlayCard` restricted to `PLAYABLE_REGIONS` (HAND / RESEARCH)    |
+| `CONVICTION` and `POWER` card types                                                    | Both map to `CardType.NONE` in `GameInitService.toCardType()`    |
+| `LOCATION` enum value reachable                                                        | Location cards import as `MASTER`; `CardType.LOCATION` is unused |
+
+**Proposed implementation work:**
+
+- Add `CONVICTION` and `POWER` to `CardType` enum; update `toCardType()` in `GameInitService.java`.
+- Add `outOfTurn` boolean to `CardData`; populate in `GameInitService.buildCard()` by checking card text for `"out-of-turn"`.
+- Add `masterActionsRemaining` to `GameData`; set to 1 on `MASTER` phase entry; deducted by each master play (including out-of-turn plays against the player's next master phase).
+- Add phase + card-type guard in `CardMovementHandler.handlePlayCard()`.
+- Extend allowed source regions for Conviction: check `ASH_HEAP` in addition to `PLAYABLE_REGIONS`.
+- Update `CardContextMenu` in frontend to show Play only when phase matches card type.
+
+---
+
 ### 10. Anarch Conversion
 
-| Mechanic | Rulebook reference |
-|---|---|
-| Converting a ready vampire to Anarch costs 2 blood (or 1 if controller already has another ready Anarch) | Anarch Sect |
-| Converted vampire becomes Anarch independent | Anarch Sect |
+| Mechanic                                                                                                 | Rulebook reference |
+|----------------------------------------------------------------------------------------------------------|--------------------|
+| Converting a ready vampire to Anarch costs 2 blood (or 1 if controller already has another ready Anarch) | Anarch Sect        |
+| Converted vampire becomes Anarch independent                                                             | Anarch Sect        |
 
 **Proposed command:**
 
-| Command | Fields | Description |
-|---|---|---|
-| `ConvertToAnarch` | `ref` | Pay blood cost (checking for existing Anarch discount), update vampire sect to ANARCH |
+| Command           | Fields | Description                                                                           |
+|-------------------|--------|---------------------------------------------------------------------------------------|
+| `ConvertToAnarch` | `ref`  | Pay blood cost (checking for existing Anarch discount), update vampire sect to ANARCH |
 
 ---
 
 ### 10. Game End Detection
 
-| Mechanic | Rulebook reference |
-|---|---|
-| Last surviving player gains +1 VP | Victory Conditions |
-| Library exhaustion withdrawal — specific conditions required | Withdrawal |
+| Mechanic                                                     | Rulebook reference |
+|--------------------------------------------------------------|--------------------|
+| Last surviving player gains +1 VP                            | Victory Conditions |
+| Library exhaustion withdrawal — specific conditions required | Withdrawal         |
 
 Currently `OustPlayer` marks players ousted but does not detect when only one player remains or auto-apply the survivor VP. A post-`OustPlayer` hook should check remaining player count and, if one player remains, award +1 VP and transition game to `COMPLETED`.
 
@@ -295,17 +322,18 @@ Currently `OustPlayer` marks players ousted but does not detect when only one pl
 
 ## Implementation Priority
 
-| Priority | Area | Rationale |
-|---|---|---|
-| ~~P1~~ | ~~Transfer tracking~~ | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI. |
-| ~~P1~~ | ~~Sequencing / Impulse engine~~ | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. |
-| **P1** | Voting / Referendum engine | Required for any political-action deck to function; blood hunt has no fallback |
-| **P1** | Game end auto-detection (survivor VP) | Needed for accurate game records |
-| **P2** | Formal action / block declaration | Adds structure; currently relies entirely on player honesty and chat |
-| **P2** | Withdrawal mechanic | Common end-game scenario |
-| **P2** | Diablerie full resolution | Currently requires many manual steps |
-| **P3** | Master phase action accounting (trifle / out-of-turn) | Rare edge case but rule-correct |
-| **P3** | Unlock phase auto-effects (edge pool, contest upkeep) | Quality-of-life automation |
-| **P3** | Combat system | Complex; most tables already manage manually through counter adjustments |
-| **P4** | Anarch conversion command | Convenience; achievable today via manual counter + SetTitle |
-| **P4** | Advanced vampire merge | Edge case; rare in practice |
+| Priority | Area                                                  | Rationale                                                                                                                                                                                                                                                                                                                                    |
+|----------|-------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ~~P1~~   | ~~Transfer tracking~~                                 | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI.                                                                                                |
+| ~~P1~~   | ~~Sequencing / Impulse engine~~                       | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. |
+| **P1**   | Voting / Referendum engine                            | Required for any political-action deck to function; blood hunt has no fallback                                                                                                                                                                                                                                                               |
+| **P1**   | Game end auto-detection (survivor VP)                 | Needed for accurate game records                                                                                                                                                                                                                                                                                                             |
+| **P2**   | Card play phase gating                                | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                           |
+| **P2**   | Formal action / block declaration                     | Adds structure; currently relies entirely on player honesty and chat                                                                                                                                                                                                                                                                         |
+| **P2**   | Withdrawal mechanic                                   | Common end-game scenario                                                                                                                                                                                                                                                                                                                     |
+| **P2**   | Diablerie full resolution                             | Currently requires many manual steps                                                                                                                                                                                                                                                                                                         |
+| **P3**   | Master phase action accounting (trifle / out-of-turn) | Rare edge case but rule-correct                                                                                                                                                                                                                                                                                                              |
+| **P3**   | Unlock phase auto-effects (edge pool, contest upkeep) | Quality-of-life automation                                                                                                                                                                                                                                                                                                                   |
+| **P3**   | Combat system                                         | Complex; most tables already manage manually through counter adjustments                                                                                                                                                                                                                                                                     |
+| **P4**   | Anarch conversion command                             | Convenience; achievable today via manual counter + SetTitle                                                                                                                                                                                                                                                                                  |
+| **P4**   | Advanced vampire merge                                | Edge case; rare in practice                                                                                                                                                                                                                                                                                                                  |
