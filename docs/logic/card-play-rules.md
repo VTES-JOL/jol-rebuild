@@ -62,6 +62,22 @@ A card cancelled "as it is played" (Section B):
 
 Maximum hand size is **7**. Whenever a player's hand falls below a maximum, they draw back up at the next replacement opportunity. This is what drives all card replacements — after Section C completes, after a cancelled card resolves, etc.
 
+### "Do Not Replace" Conditions
+
+Some cards delay the replacement draw. The condition is stated in the card text and is one of the following:
+
+| Card text pattern | Replacement trigger |
+|---|---|
+| `"Do not replace until after this action."` | After the current action resolves |
+| `"Do not replace until after combat."` | After the current combat ends |
+| `"Do not replace until after the current turn."` | At the end of the current player's turn |
+| `"Do not replace until your next discard phase."` | At the start of the playing player's next DISCARD phase |
+| `"Do not replace until your next unlock phase."` | At the start of the playing player's next UNLOCK phase |
+| `"Do not replace until [game event]."` | When the named event occurs (e.g. a vampire commits diablerie, a vampire successfully hunts, a Methuselah is ousted) |
+| `"Do not replace as long as this card is in play."` | Never (card stays unreplaced while the card remains in play) |
+
+Cancellation voids any "do not replace" clause — a cancelled card is always replaced normally.
+
 ---
 
 ## No Repeat Action (NRA) Rule
@@ -103,6 +119,25 @@ NRA is triggered at the **Complete Action** step — after block attempts are re
 
 ---
 
+## Limited Effects
+
+Source: VEKN Rulebook — Bleed and Additional Strikes.
+
+Some cumulative effects are forbidden by the rules. A card is "limited" if it cannot stack with another card or effect of the same limited type. The card text marks this with `"(limited)"`.
+
+Two specific limited categories exist:
+
+| Category | Rule |
+|---|---|
+| **Bleed increase (limited)** | During a bleed action, at most one action modifier may increase the bleed amount via a "limited" source. A second "(limited)" bleed modifier cannot be played if the bleed is already being increased by another "(limited)" modifier. |
+| **Additional strikes (limited)** | A minion cannot gain additional strikes per round from more than one "(limited)" source. |
+
+A card that does **not** include `"(limited)"` in its text does not count against these limits and may be played alongside a limited card.
+
+Implementation note: the engine must track per-action whether a limited bleed modifier has already been played, and per-combat-round whether a limited additional-strike source has already been used.
+
+---
+
 ## Phase Constraints by Card Type
 
 | Card Type                    | Valid Phase                                               | Who can play                            | Source Regions       |
@@ -140,7 +175,12 @@ A Master card is out-of-turn if its card text contains the string `"out-of-turn"
 
 ### Conviction Cards
 - Conviction cards are the only card type playable from ASH_HEAP (in addition to HAND).
-- Playing a Conviction card places a conviction counter on a ready Imbued the player controls.
+- Playing a Conviction card attaches that card onto a ready Imbued the player controls.
+- When an Imbued enters play with no conviction, then that player may search their hand, library, or ash heap for a conviction card to attach to that Imbued.
+
+### Locked Minion Reaction Exception
+
+The default rule is that only **ready** (unlocked) minions may play reaction cards. Some reaction cards explicitly override this with the text `"Usable by a locked minion."` When that text is present the locked minion may play the reaction despite not being ready. No other reaction card may be played by a locked minion.
 
 ### Action Modifiers vs Reactions
 These two types are explicitly asymmetric:

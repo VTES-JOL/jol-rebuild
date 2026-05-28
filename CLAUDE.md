@@ -3,6 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 * When creating new classes or components create tests or story files to confirm functionality
 * Update docs when mechanics or list items are changed / completed
+* When documenting, make sure all markdown documents are formatted correctly
 
 ## Logical Model
 JOL is a representation of the Vampire: The Eternal Struggle card game.  As such it tries to mimic the logic and constraints that apply in a real-world game.
