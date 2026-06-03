@@ -131,6 +131,8 @@ Combat has no formal structure in JOL. Players simulate it through counter adjus
 
 A `PendingCombatState` on `GameData` should hold: `attackerRef`, `defenderRef`, `range` (CLOSE/LONG), `round`, `attackerStrike`, `defenderStrike`, `status`.
 
+**Combat queuing (FIFO):** Combat resolves inside the Resolution state and must fully complete before the action lifecycle continues. If a card effect generates a new combat while `pendingCombat` is already active (e.g. a press that redirects to a different opponent, or an effect mid-combat), the new combat is **enqueued** — it does not nest or interrupt the current one. Add a `combatQueue: List<CombatPair>` to `GameData`; `EnterCombat` appends to the queue when `pendingCombat` is set, and `EndCombat` dequeues the next combat if one is waiting.
+
 ---
 
 ### 4. Influence Phase — Transfer Tracking
@@ -227,9 +229,15 @@ These could also be automated server-side as part of `AdvancePhase` when leaving
 
 ---
 
-### 9. Sequencing (Impulse)
+### 9. Sequencing and Impulse
 
-VTES uses a priority system called "impulse" to resolve multiple players wanting to play cards or effects at the same time. This is a **cross-cutting mechanic** required by Voting (§1), Action/Blocking (§2), and Combat (§3).
+VTES uses a layered priority system to resolve multiple players wanting to play cards or effects at the same time. **Sequencing** is the underlying clockwise priority mechanism. **Impulse** is the active form of sequencing used specifically during the During Action state.
+
+Key distinction:
+- **Impulse** exists only during the During Action (interactive) state. It resets to the acting player whenever anyone plays a card or effect. Impulse does **not** exist in: As Announced, Resolution, After Resolution, combat, or referendum steps.
+- **Sequencing** governs the As Announced window (before impulse opens) and the After Resolution window (after the impulse loop closes). In these windows players act in clockwise priority order with no reset-on-play; it is a restricted, one-pass window. Referendum voting is also governed by sequencing, not impulse.
+
+This is a **cross-cutting mechanic** required by Voting (§1), Action/Blocking (§2), and Combat (§3).
 
 **Rules summary** (Advanced Rules — Sequencing; full detail: [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary)):
 
@@ -418,7 +426,7 @@ This gap is coupled with Gap §2 (Hunt action is listed as an `actionType` in `D
 | Priority | Area                                                                | Rationale                                                                                                                                                                                                                                                                                                                                                      |
 |----------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ~~P1~~   | ~~Transfer tracking~~                                               | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI. `DrawCryptToUncontrolled` enforces 4T + 1 pool cost to draw from crypt to UNCONTROLLED.       |
-| ~~P1~~   | ~~Sequencing / Impulse engine~~                                     | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. |
+| ~~P1~~   | ~~Sequencing / Impulse engine~~                                     | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. Note: impulse covers only the During Action state; As Announced and After Resolution use sequencing (clockwise, no reset-on-play). |
 | **P1**   | Voting / Referendum engine                                          | Required for any political-action deck to function; blood hunt has no fallback                                                                                                                                                                                                                                                               |
 | **P1**   | Game end auto-detection (survivor VP)                               | Needed for accurate game records                                                                                                                                                                                                                                                                                                             |
 | **P2**   | Card play phase gating                                              | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                           |

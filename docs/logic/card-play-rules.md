@@ -9,9 +9,32 @@ The golden rule of VTES is that rules on the card overwrite rules in the ruleboo
 
 ---
 
+## Action Lifecycle State Machine
+
+Every action follows this state sequence:
+
+```
+Idle → As Announced → During Action (Impulse Loop) → Resolution → After Resolution → End
+```
+
+| State | Impulse? | Priority system | Notes |
+|---|---|---|---|
+| **As Announced** | No | Sequencing (clockwise) | Restricted window; only "as played" cancellers legal |
+| **During Action** | Yes | Impulse (resets on any play) | Fully interactive; stealth/intercept/modifiers/reactions |
+| **Resolution** | No | Deterministic | No player interaction; two branches (see below) |
+| **After Resolution** | No | Sequencing (clockwise) | One effect at a time; Freak Drive, Voter Captivation, etc. |
+
+**Resolution branches:**
+- Action not blocked → pay cost → apply effect → enter After Resolution
+- Action blocked → combat subsystem (FIFO queue) → when combat fully resolves → enter After Resolution
+
+Combat must fully resolve before the lifecycle leaves Resolution.
+
+---
+
 ## Impulse Window and Card Play
 
-All card plays occur within an **impulse window**. A player may only play a card when they hold the impulse. The pass order and return-to-current-player-after-resolution rules are defined in [game-state.md § Impulse window](game-state.md#impulse-window-phase-level).
+Most card plays occur within an **impulse window**. The exception is the As Announced window (Section B below), which uses **sequencing** (clockwise priority) — impulse does not exist until the During Action state begins. A player may only play a card when they hold the impulse or sequencing priority. The pass order and return-to-current-player-after-resolution rules are defined in [game-state.md § Impulse window](game-state.md#impulse-window-phase-level).
 
 ---
 
@@ -23,8 +46,10 @@ Based on [Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summar
 
 1. The playing player fully declares all attributes of the card: targets, modes, and cost. The cost must be payable at the time of declaration for the play to be legal.
 2. The card leaves the hand immediately — hand size drops by 1.
-3. This opens a narrow window for **"as it is played" / "as announced" cancellers only**. No other cards or effects may be played at this step.
+3. This opens a narrow window for **"as it is played" / "as announced" cancellers only** (e.g. Direct Intervention). No other cards or effects may be played at this step.
 4. If the card is cancelled here → see [Cancelled Cards](#cancelled-cards) below.
+
+> **Interrupt Layer note:** These cancellers form an independent interrupt layer that is orthogonal to the action state machine and to impulse/sequencing. They intercept card play at the moment of declaration, regardless of which action state is active or who holds priority. They do not interact with the impulse loop and do not consume or transfer sequencing priority.
 
 ### C — Replace card
 
@@ -219,6 +244,26 @@ Where a card ends up after being played is determined by its card text, not its 
 | Neither pattern                                                   | Moves to the owner's `ASH_HEAP`               |
 
 This applies to all card types. `CardType.permanentTypes()` is a coarse approximation used for UI hints; card text is the authoritative source.
+
+---
+
+## After Resolution
+
+After an action fully resolves (or is blocked and combat ends), the game enters the **After Resolution** state before the action lifecycle closes.
+
+- Uses **sequencing** (clockwise priority), not impulse — the impulse loop has already ended.
+- One card or effect resolves at a time; this is not an open loop.
+- Only "after successful action" or "after resolution" effects are legal here.
+
+Typical effects that fire in this window:
+
+| Card / Effect       | Trigger condition                       |
+|---------------------|-----------------------------------------|
+| Freak Drive         | After the acting minion's action resolves (success or block) |
+| Voter Captivation   | After a successful political action     |
+| "After this action" effects | Any card text specifying this window |
+
+No further block attempts, stealth/intercept plays, or action modifiers are legal here — those windows have closed.
 
 ---
 
