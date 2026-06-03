@@ -78,9 +78,11 @@ public class GameCommandService {
             case SetCardNotes c         -> CardStateHandler.handleSetCardNotes(game, c);
             case SetPool c              -> PoolEdgeHandler.handleSetPool(game, c, actor);
             case GainEdge c             -> PoolEdgeHandler.handleGainEdge(game, c, actor);
-            case TransferBlood c        -> InfluenceHandler.handleTransferBlood(game, c, actor);
-            case InfluenceCard c        -> InfluenceHandler.handleInfluenceCard(game, c, actor);
-            case MoveToCrypt c          -> InfluenceHandler.handleMoveToCrypt(game, c, actor);
+            case TransferBlood c            -> InfluenceHandler.handleTransferBlood(game, c, actor);
+            case InfluenceCard c            -> InfluenceHandler.handleInfluenceCard(game, c, actor);
+            case MoveToCrypt c              -> InfluenceHandler.handleMoveToCrypt(game, c, actor);
+            case DrawCryptToUncontrolled c  -> InfluenceHandler.handleDrawCryptToUncontrolled(game, c, actor);
+            case MergeAdvanced c            -> InfluenceHandler.handleMergeAdvanced(game, c, actor);
             case MoveToTorpor c         -> MinionHandler.handleMoveToTorpor(game, c, actor);
             case RescueFromTorpor c     -> MinionHandler.handleRescueFromTorpor(game, c, actor);
             case BurnMinion c           -> MinionHandler.handleBurnMinion(game, c, actor);

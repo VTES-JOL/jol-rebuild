@@ -33,17 +33,19 @@ import net.deckserver.jol.enums.Phase;
         @JsonSubTypes.Type(value = CommandLogData.TransferBloodLog.class,      name = "TRANSFER_BLOOD"),
         @JsonSubTypes.Type(value = CommandLogData.OustPlayerLog.class,         name = "OUST_PLAYER"),
         @JsonSubTypes.Type(value = CommandLogData.ReverseOrderLog.class,       name = "REVERSE_ORDER"),
-        @JsonSubTypes.Type(value = CommandLogData.OpenImpulseLog.class,        name = "OPEN_IMPULSE_WINDOW"),
-        @JsonSubTypes.Type(value = CommandLogData.PassImpulseLog.class,        name = "PASS_IMPULSE"),
-        @JsonSubTypes.Type(value = CommandLogData.ClaimImpulseLog.class,       name = "CLAIM_IMPULSE"),
-        @JsonSubTypes.Type(value = CommandLogData.CloseImpulseLog.class,       name = "CLOSE_IMPULSE_WINDOW"),
+        @JsonSubTypes.Type(value = CommandLogData.OpenImpulseLog.class,               name = "OPEN_IMPULSE_WINDOW"),
+        @JsonSubTypes.Type(value = CommandLogData.PassImpulseLog.class,               name = "PASS_IMPULSE"),
+        @JsonSubTypes.Type(value = CommandLogData.ClaimImpulseLog.class,              name = "CLAIM_IMPULSE"),
+        @JsonSubTypes.Type(value = CommandLogData.CloseImpulseLog.class,              name = "CLOSE_IMPULSE_WINDOW"),
+        @JsonSubTypes.Type(value = CommandLogData.DrawCryptToUncontrolledLog.class,   name = "DRAW_CRYPT_TO_UNCONTROLLED"),
+        @JsonSubTypes.Type(value = CommandLogData.MergeAdvancedLog.class,             name = "MERGE_ADVANCED"),
 })
 public sealed interface CommandLogData
         permits
         CommandLogData.AdvancePhaseLog, CommandLogData.NextTurnLog,
-        CommandLogData.DrawCardLog, CommandLogData.DrawCryptLog, CommandLogData.ShuffleLibraryLog, CommandLogData.ShuffleCryptLog,
+        CommandLogData.DrawCardLog, CommandLogData.DrawCryptLog, CommandLogData.DrawCryptToUncontrolledLog, CommandLogData.ShuffleLibraryLog, CommandLogData.ShuffleCryptLog,
         CommandLogData.PlayCardLog, CommandLogData.DiscardCardLog, CommandLogData.MoveCardLog,
-        CommandLogData.AttachCardLog, CommandLogData.MoveToCryptLog, CommandLogData.InfluenceCardLog,
+        CommandLogData.AttachCardLog, CommandLogData.MoveToCryptLog, CommandLogData.InfluenceCardLog, CommandLogData.MergeAdvancedLog,
         CommandLogData.AddCounterLog, CommandLogData.RemoveCounterLog,
         CommandLogData.MoveToTorporLog, CommandLogData.RescueFromTorporLog,
         CommandLogData.BurnMinionLog, CommandLogData.ContestCardLog, CommandLogData.ClearContestCardLog,
@@ -71,6 +73,8 @@ public sealed interface CommandLogData
     record AttachCardLog(String actor, LogCardRef card, LogCardRef target) implements CommandLogData {}
     record MoveToCryptLog(String actor, LogCardRef card) implements CommandLogData {}
     record InfluenceCardLog(String actor, LogCardRef card) implements CommandLogData {}
+    record DrawCryptToUncontrolledLog(String actor) implements CommandLogData {}
+    record MergeAdvancedLog(String actor, LogCardRef card, LogCardRef target) implements CommandLogData {}
 
     // ── Card State ────────────────────────────────────────────────────────────
     record AddCounterLog(String actor, LogCardRef card, int amount) implements CommandLogData {}

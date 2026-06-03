@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 
 import net.deckserver.jol.exception.GameRuleException;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -300,6 +302,209 @@ class GameCommandStateTest {
 
         assertThrows(GameRuleException.class,
                 () -> gameCommandService.execute(ACTOR, new InfluenceCard(gameId, CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0))));
+    }
+
+    // ── DrawCryptToUncontrolled ───────────────────────────────────────────────
+
+    @Test
+    void drawCryptToUncontrolled_movesTopCryptCardAndDeductsCost() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        gameData.setTransfersRemaining(4);
+
+        PlayerData player = gameData.getPlayer(ACTOR);
+        int cryptSizeBefore        = player.getRegion(RegionType.CRYPT).getCards().size();
+        int uncontrolledSizeBefore = player.getRegion(RegionType.UNCONTROLLED).getCards().size();
+        int poolBefore             = player.getPool();
+
+        gameCommandService.execute(ACTOR, new DrawCryptToUncontrolled(gameId));
+
+        assertEquals(cryptSizeBefore - 1,        player.getRegion(RegionType.CRYPT).getCards().size());
+        assertEquals(uncontrolledSizeBefore + 1,  player.getRegion(RegionType.UNCONTROLLED).getCards().size());
+        assertEquals(poolBefore - 1,              player.getPool());
+        assertEquals(0,                           gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void drawCryptToUncontrolled_blockedOutsideInfluencePhase() {
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        // Phase is UNLOCK in the fixture
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new DrawCryptToUncontrolled(gameId)));
+    }
+
+    @Test
+    void drawCryptToUncontrolled_blockedForNonCurrentPlayer() {
+        gameData.setPhase(Phase.INFLUENCE);
+        // Current player remains Player5, ACTOR is Player1
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new DrawCryptToUncontrolled(gameId)));
+    }
+
+    @Test
+    void drawCryptToUncontrolled_blockedWhenInsufficientTransfers() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        gameData.setTransfersRemaining(3); // one short
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new DrawCryptToUncontrolled(gameId)));
+    }
+
+    @Test
+    void drawCryptToUncontrolled_blockedWhenInsufficientPool() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        gameData.setTransfersRemaining(4);
+        gameData.getPlayer(ACTOR).setPool(0);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new DrawCryptToUncontrolled(gameId)));
+    }
+
+    @Test
+    void drawCryptToUncontrolled_blockedWhenCryptEmpty() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        gameData.setTransfersRemaining(4);
+        // Move all crypt cards to ash heap so crypt is empty
+        PlayerData player = gameData.getPlayer(ACTOR);
+        List.copyOf(player.getRegion(RegionType.CRYPT).getCards())
+                .forEach(c -> player.getRegion(RegionType.ASH_HEAP).addCard(c, false));
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new DrawCryptToUncontrolled(gameId)));
+    }
+
+    // ── MergeAdvanced ─────────────────────────────────────────────────────────
+
+    @Test
+    void mergeAdvanced_attachesUncontrolledToReadyAndBurnsCounters() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        PlayerData player = gameData.getPlayer(ACTOR);
+
+        // Set up base card in READY
+        CardData baseCard = player.getRegion(RegionType.CRYPT).getFirstCard();
+        baseCard.setName("TestVampire");
+        baseCard.setAdvanced(false);
+        baseCard.setCounters(3);
+        player.getRegion(RegionType.READY).addCard(baseCard, false);
+
+        // Set up advanced card in UNCONTROLLED with counters (to be burned)
+        CardData advCard = player.getRegion(RegionType.UNCONTROLLED).getFirstCard();
+        advCard.setName("TestVampire");
+        advCard.setAdvanced(true);
+        advCard.setCounters(5);
+
+        int readyCountersBefore = baseCard.getCounters();
+
+        gameCommandService.execute(ACTOR, new MergeAdvanced(gameId,
+                CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0),
+                CardRef.of(ACTOR, RegionType.READY, 0)));
+
+        // Uncontrolled card is now attached to the base card
+        assertTrue(baseCard.getCards().contains(advCard));
+        // Counters on the advanced card were burned
+        assertEquals(0, advCard.getCounters());
+        // Counters on the base card are unchanged
+        assertEquals(readyCountersBefore, baseCard.getCounters());
+    }
+
+    @Test
+    void mergeAdvanced_burnsAttachedCardsOnIncomingCard() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        PlayerData player = gameData.getPlayer(ACTOR);
+
+        CardData baseCard = player.getRegion(RegionType.CRYPT).getFirstCard();
+        baseCard.setName("TestVampire");
+        baseCard.setAdvanced(false);
+        player.getRegion(RegionType.READY).addCard(baseCard, false);
+
+        CardData advCard = player.getRegion(RegionType.UNCONTROLLED).getFirstCard();
+        advCard.setName("TestVampire");
+        advCard.setAdvanced(true);
+
+        // Attach a card to the advanced vampire in UNCONTROLLED
+        CardData attachment = player.getRegion(RegionType.CRYPT).getFirstCard();
+        advCard.add(attachment, false);
+
+        int ashHeapSizeBefore = player.getRegion(RegionType.ASH_HEAP).getCards().size();
+
+        gameCommandService.execute(ACTOR, new MergeAdvanced(gameId,
+                CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0),
+                CardRef.of(ACTOR, RegionType.READY, 0)));
+
+        assertEquals(ashHeapSizeBefore + 1, player.getRegion(RegionType.ASH_HEAP).getCards().size());
+        assertTrue(player.getRegion(RegionType.ASH_HEAP).getCards().contains(attachment));
+    }
+
+    @Test
+    void mergeAdvanced_blockedWhenNamesDiffer() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        PlayerData player = gameData.getPlayer(ACTOR);
+
+        CardData baseCard = player.getRegion(RegionType.CRYPT).getFirstCard();
+        baseCard.setName("Vampire A");
+        baseCard.setAdvanced(false);
+        player.getRegion(RegionType.READY).addCard(baseCard, false);
+
+        CardData advCard = player.getRegion(RegionType.UNCONTROLLED).getFirstCard();
+        advCard.setName("Vampire B");
+        advCard.setAdvanced(true);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new MergeAdvanced(gameId,
+                        CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0),
+                        CardRef.of(ACTOR, RegionType.READY, 0))));
+    }
+
+    @Test
+    void mergeAdvanced_blockedWhenBothAdvanced() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        PlayerData player = gameData.getPlayer(ACTOR);
+
+        CardData baseCard = player.getRegion(RegionType.CRYPT).getFirstCard();
+        baseCard.setName("TestVampire");
+        baseCard.setAdvanced(true);
+        player.getRegion(RegionType.READY).addCard(baseCard, false);
+
+        CardData advCard = player.getRegion(RegionType.UNCONTROLLED).getFirstCard();
+        advCard.setName("TestVampire");
+        advCard.setAdvanced(true);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new MergeAdvanced(gameId,
+                        CardRef.of(ACTOR, RegionType.UNCONTROLLED, 0),
+                        CardRef.of(ACTOR, RegionType.READY, 0))));
+    }
+
+    @Test
+    void mergeAdvanced_blockedWhenRefNotInUncontrolled() {
+        gameData.setPhase(Phase.INFLUENCE);
+        gameData.setCurrentPlayer(gameData.getPlayer(ACTOR));
+        PlayerData player = gameData.getPlayer(ACTOR);
+
+        // Move both cards to READY — neither is in UNCONTROLLED
+        CardData card1 = player.getRegion(RegionType.CRYPT).getFirstCard();
+        card1.setName("TestVampire");
+        card1.setAdvanced(false);
+        player.getRegion(RegionType.READY).addCard(card1, false);
+
+        CardData card2 = player.getRegion(RegionType.CRYPT).getFirstCard();
+        card2.setName("TestVampire");
+        card2.setAdvanced(true);
+        player.getRegion(RegionType.READY).addCard(card2, false);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new MergeAdvanced(gameId,
+                        CardRef.of(ACTOR, RegionType.READY, 1),   // not UNCONTROLLED
+                        CardRef.of(ACTOR, RegionType.READY, 0))));
     }
 
     // ── Player state ──────────────────────────────────────────────────────────
