@@ -9,7 +9,7 @@ import net.deckserver.jol.game.command.CardRef;
 
 import java.util.*;
 
-@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "cards", "players", "currentPlayer", "edge"})
+@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "cards", "players", "currentPlayer", "edge"})
 public class GameData {
     private String id;
     private String name;
@@ -32,6 +32,8 @@ public class GameData {
     private String timeoutRequestor;
     private int transfersRemaining = 0;
     private ImpulseState impulseWindow;
+    private PendingActionState pendingAction;
+    private SequencingWindowState sequencingWindow;
     private boolean completed = false;
 
     public GameData(String id, String name) {
@@ -179,6 +181,12 @@ public class GameData {
 
     public ImpulseState getImpulseWindow() { return impulseWindow; }
     public void setImpulseWindow(ImpulseState impulseWindow) { this.impulseWindow = impulseWindow; }
+
+    public PendingActionState getPendingAction() { return pendingAction; }
+    public void setPendingAction(PendingActionState pendingAction) { this.pendingAction = pendingAction; }
+
+    public SequencingWindowState getSequencingWindow() { return sequencingWindow; }
+    public void setSequencingWindow(SequencingWindowState sequencingWindow) { this.sequencingWindow = sequencingWindow; }
 
     public void setPhase(Phase phase) { this.phase = phase; }
     public void setCurrentPlayer(PlayerData currentPlayer) { this.currentPlayer = currentPlayer; }

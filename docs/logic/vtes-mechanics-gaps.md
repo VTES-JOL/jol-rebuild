@@ -281,7 +281,33 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 
 ---
 
-### 11. Card Play Phase Gating
+### 10. Anarch Conversion
+
+| Mechanic                                                                                                 | Rulebook reference |
+|----------------------------------------------------------------------------------------------------------|--------------------|
+| Converting a ready vampire to Anarch costs 2 blood (or 1 if controller already has another ready Anarch) | Anarch Sect        |
+| Converted vampire becomes Anarch independent                                                             | Anarch Sect        |
+
+**Proposed command:**
+
+| Command           | Fields | Description                                                                           |
+|-------------------|--------|---------------------------------------------------------------------------------------|
+| `ConvertToAnarch` | `ref`  | Pay blood cost (checking for existing Anarch discount), update vampire sect to ANARCH |
+
+---
+
+### 11. Game End Detection
+
+| Mechanic                                                     | Rulebook reference |
+|--------------------------------------------------------------|--------------------|
+| Last surviving player gains +1 VP                            | Victory Conditions |
+| Library exhaustion withdrawal — specific conditions required | Withdrawal         |
+
+Currently `OustPlayer` marks players ousted but does not detect when only one player remains or auto-apply the survivor VP. A post-`OustPlayer` hook should check remaining player count and, if one player remains, award +1 VP and transition game to `COMPLETED`.
+
+---
+
+### 12. Card Play Phase Gating
 
 `PlayCard` currently has no phase or card-type validation. Any card in `HAND` can be played in any phase by whoever holds impulse. The full rules are defined in [card-play-rules.md](card-play-rules.md).
 
@@ -308,33 +334,7 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 
 ---
 
-### 10. Anarch Conversion
-
-| Mechanic                                                                                                 | Rulebook reference |
-|----------------------------------------------------------------------------------------------------------|--------------------|
-| Converting a ready vampire to Anarch costs 2 blood (or 1 if controller already has another ready Anarch) | Anarch Sect        |
-| Converted vampire becomes Anarch independent                                                             | Anarch Sect        |
-
-**Proposed command:**
-
-| Command           | Fields | Description                                                                           |
-|-------------------|--------|---------------------------------------------------------------------------------------|
-| `ConvertToAnarch` | `ref`  | Pay blood cost (checking for existing Anarch discount), update vampire sect to ANARCH |
-
----
-
-### 10. Game End Detection
-
-| Mechanic                                                     | Rulebook reference |
-|--------------------------------------------------------------|--------------------|
-| Last surviving player gains +1 VP                            | Victory Conditions |
-| Library exhaustion withdrawal — specific conditions required | Withdrawal         |
-
-Currently `OustPlayer` marks players ousted but does not detect when only one player remains or auto-apply the survivor VP. A post-`OustPlayer` hook should check remaining player count and, if one player remains, award +1 VP and transition game to `COMPLETED`.
-
----
-
-### 12. Named Counter Types and Attached Conviction Cards
+### 13. Named Counter Types and Attached Conviction Cards
 
 #### Named counters
 
@@ -355,7 +355,7 @@ The engine already supports attached cards via `AttachCard`, so Aye/Orun placeme
 
 ---
 
-### 13. Minion Traits
+### 14. Minion Traits
 
 Traits are attributes a minion can have that interact with other game effects. They allow a minion to play cards requiring that trait, or make the minion subject to specific automatic rules. None of the following traits are currently modeled or detected at build time.
 
@@ -383,7 +383,7 @@ Traits are attributes a minion can have that interact with other game effects. T
 
 ---
 
-### 14. Trophy, Investment, and Path Master Subtypes
+### 15. Trophy, Investment, and Path Master Subtypes
 
 Three master card subtypes have distinct in-play rules that are not yet specified or implemented.
 
@@ -397,20 +397,20 @@ Three master card subtypes have distinct in-play rules that are not yet specifie
 
 ---
 
-### 15. Card Control Transfer
+### 16. Card Control Transfer
 
 A small number of cards explicitly transfer control of themselves from one Methuselah to another mid-game (e.g. a reaction that places the card in the acting player's area, or a card that tells you to "give this card to another Methuselah"). The current model conflates owner and controller — every card in a region is assumed to be controlled by that region's owner.
 
-| Mechanic            | Notes                                                                                                                                                        |
-|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Owner vs controller | A card's owner is the Methuselah whose library it came from. Controller is who currently benefits from / is responsible for the card. These can differ.      |
+| Mechanic            | Notes                                                                                                                                        |
+|---------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| Owner vs controller | A card's owner is the Methuselah whose library it came from. Controller is who currently benefits from / is responsible for the card. These can differ. |
 | Transfer on play    | Some cards instruct the playing Methuselah to give the card to another specific Methuselah; that player then controls the in-play card's effects and upkeep. |
 
 **Proposed work:** Add an optional `controllerName` field to `CardState`; defaults to `null` (meaning controller = owner). Commands that read or affect the card use `controllerName` when set.
 
 ---
 
-### 16. Hunting Ground Locations
+### 17. Hunting Ground Locations
 
 Many master location cards carry the subtype `"Hunting ground"`. This subtype modifies how the hunt action resolves for vampires at that location.
 
@@ -423,27 +423,29 @@ This gap is coupled with Gap §2 (Hunt action is listed as an `actionType` in `D
 
 ---
 
+## Implementation Priority
+
 | Priority | Area                                                                | Rationale                                                                                                                                                                                                                                                                                                                                                      |
 |----------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ~~P1~~   | ~~Transfer tracking~~                                               | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI. `DrawCryptToUncontrolled` enforces 4T + 1 pool cost to draw from crypt to UNCONTROLLED.       |
+| ~~P1~~   | ~~Transfer tracking~~                                               | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI. `DrawCryptToUncontrolled` enforces 4T + 1 pool cost to draw from crypt to UNCONTROLLED.                          |
 | ~~P1~~   | ~~Sequencing / Impulse engine~~                                     | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. Note: impulse covers only the During Action state; As Announced and After Resolution use sequencing (clockwise, no reset-on-play). |
-| **P1**   | Voting / Referendum engine                                          | Required for any political-action deck to function; blood hunt has no fallback                                                                                                                                                                                                                                                               |
-| **P1**   | Game end auto-detection (survivor VP)                               | Needed for accurate game records                                                                                                                                                                                                                                                                                                             |
-| **P2**   | Card play phase gating                                              | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                           |
-| **P2**   | Formal action / block declaration                                   | Adds structure; currently relies entirely on player honesty and chat                                                                                                                                                                                                                                                                         |
-| **P2**   | Withdrawal mechanic                                                 | Common end-game scenario                                                                                                                                                                                                                                                                                                                     |
-| **P2**   | Diablerie full resolution                                           | Currently requires many manual steps                                                                                                                                                                                                                                                                                                         |
-| **P3**   | Master phase action accounting (trifle / out-of-turn)               | Rare edge case but rule-correct                                                                                                                                                                                                                                                                                                              |
-| **P3**   | Unlock phase auto-effects (edge pool, contest upkeep)               | Quality-of-life automation                                                                                                                                                                                                                                                                                                                   |
-| **P3**   | Combat system                                                       | Complex; most tables already manage manually through counter adjustments                                                                                                                                                                                                                                                                     |
-| **P4**   | Anarch conversion command                                           | Convenience; achievable today via manual counter + SetTitle                                                                                                                                                                                                                                                                                  |
-| ~~P4~~   | ~~Advanced vampire merge~~                                          | **Done** — `MergeAdvanced` command; validates same name + one advanced, burns incoming counters/attachments, attaches incoming card to READY card.                                                                                                                                                                                           |
-| **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth and intercept must be tracked as running totals on `PendingActionState`                                                                                                                                                                                                              |
-| **P2**   | Directed `(D)` action block priority (§2 extension)                 | Needed alongside formal action declaration; targeted Methuselah must get first block opportunity                                                                                                                                                                                                                                             |
-| **P2**   | Minion traits: Infernal, Sterile, Blood Cursed, Slave, Scarce (§13) | Infernal unlock cost is automatic; Sterile/Blood Cursed/Slave block illegal actions; Scarce enforces pool cost on influence                                                                                                                                                                                                                  |
-| **P3**   | Minion traits: Black Hand, Flight, Red List, Circle (§13)           | Parse-time flags; required for card requirement checks and Red List mark-and-hunt mechanic                                                                                                                                                                                                                                                   |
-| **P3**   | Named counter types (§12)                                           | Corruption counters have cross-player semantics; Aye/Orun are attached cards counted by name                                                                                                                                                                                                                                                 |
-| **P3**   | Limited effect enforcement (§11 / card-play-rules.md)               | Requires per-action and per-combat-round tracking of whether a limited source has been used                                                                                                                                                                                                                                                  |
-| **P3**   | Trophy / Investment / Path subtypes (§14)                           | Master subtype parsing is prerequisite for correct in-play behavior                                                                                                                                                                                                                                                                          |
-| **P4**   | Card control transfer (§15)                                         | Affects only a handful of cards; owner/controller split is a prerequisite                                                                                                                                                                                                                                                                    |
-| **P4**   | Hunting ground bonus on hunt resolution (§16)                       | Dependent on formal hunt action being implemented in §2                                                                                                                                                                                                                                                                                      |
+| ~~P4~~   | ~~Advanced vampire merge~~                                          | **Done** — `MergeAdvanced` command; validates same name + one advanced, burns incoming counters/attachments, attaches incoming card to READY card.                                                                                                                                                                                                              |
+| **P1**   | Voting / Referendum engine                                          | Required for any political-action deck to function; blood hunt has no fallback                                                                                                                                                                                                                                                                                 |
+| **P1**   | Game end auto-detection (survivor VP)                               | Needed for accurate game records                                                                                                                                                                                                                                                                                                                               |
+| **P2**   | Formal action / block declaration                                   | Adds structure; currently relies entirely on player honesty and chat                                                                                                                                                                                                                                                                                           |
+| **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth and intercept must be tracked as running totals on `PendingActionState`                                                                                                                                                                                                                                 |
+| **P2**   | Directed `(D)` action block priority (§2 extension)                 | Needed alongside formal action declaration; targeted Methuselah must get first block opportunity                                                                                                                                                                                                                                                               |
+| **P2**   | Card play phase gating                                              | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                                             |
+| **P2**   | Withdrawal mechanic                                                 | Common end-game scenario                                                                                                                                                                                                                                                                                                                                       |
+| **P2**   | Diablerie full resolution                                           | Currently requires many manual steps                                                                                                                                                                                                                                                                                                                           |
+| **P2**   | Minion traits: Infernal, Sterile, Blood Cursed, Slave, Scarce (§14) | Infernal unlock cost is automatic; Sterile/Blood Cursed/Slave block illegal actions; Scarce enforces pool cost on influence                                                                                                                                                                                                                                     |
+| **P3**   | Master phase action accounting (trifle / out-of-turn)               | Rare edge case but rule-correct                                                                                                                                                                                                                                                                                                                                |
+| **P3**   | Unlock phase auto-effects (edge pool, contest upkeep)               | Quality-of-life automation                                                                                                                                                                                                                                                                                                                                     |
+| **P3**   | Combat system                                                       | Complex; most tables already manage manually through counter adjustments                                                                                                                                                                                                                                                                                       |
+| **P3**   | Minion traits: Black Hand, Flight, Red List, Circle (§14)           | Parse-time flags; required for card requirement checks and Red List mark-and-hunt mechanic                                                                                                                                                                                                                                                                     |
+| **P3**   | Named counter types (§13)                                           | Corruption counters have cross-player semantics; Aye/Orun are attached cards counted by name                                                                                                                                                                                                                                                                   |
+| **P3**   | Limited effect enforcement (§12 / card-play-rules.md)               | Requires per-action and per-combat-round tracking of whether a limited source has been used                                                                                                                                                                                                                                                                    |
+| **P3**   | Trophy / Investment / Path subtypes (§15)                           | Master subtype parsing is prerequisite for correct in-play behavior                                                                                                                                                                                                                                                                                            |
+| **P4**   | Anarch conversion command                                           | Convenience; achievable today via manual counter + SetTitle                                                                                                                                                                                                                                                                                                    |
+| **P4**   | Card control transfer (§16)                                         | Affects only a handful of cards; owner/controller split is a prerequisite                                                                                                                                                                                                                                                                                      |
+| **P4**   | Hunting ground bonus on hunt resolution (§17)                       | Dependent on formal hunt action being implemented in §2                                                                                                                                                                                                                                                                                                        |

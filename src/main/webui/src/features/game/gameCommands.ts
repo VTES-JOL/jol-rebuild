@@ -60,6 +60,23 @@ export type PassImpulseCommand = { type: 'PASS_IMPULSE'; gameId: string; playerN
 export type ClaimImpulseCommand = { type: 'CLAIM_IMPULSE'; gameId: string; playerName: string };
 export type CloseImpulseWindowCommand = { type: 'CLOSE_IMPULSE_WINDOW'; gameId: string };
 
+export type DeclareActionCommand = {
+    type: 'DECLARE_ACTION';
+    gameId: string;
+    actorRef: import('./types').CardRef;
+    actionType: import('./types').ActionType;
+    targetPlayerName?: string | null;
+};
+export type AttemptBlockCommand = {
+    type: 'ATTEMPT_BLOCK';
+    gameId: string;
+    blockerRef: import('./types').CardRef;
+};
+export type ResolveActionCommand = { type: 'RESOLVE_ACTION'; gameId: string };
+export type AbortActionCommand = { type: 'ABORT_ACTION'; gameId: string };
+export type PassSequencingCommand = { type: 'PASS_SEQUENCING'; gameId: string; playerName: string };
+export type CloseSequencingWindowCommand = { type: 'CLOSE_SEQUENCING_WINDOW'; gameId: string };
+
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
     | DrawCardCommand | DrawCryptCommand | ShuffleLibraryCommand | ShuffleCryptCommand
@@ -71,7 +88,9 @@ export type GameCommand =
     | MoveToTorporCommand | RescueFromTorporCommand | BurnMinionCommand
     | ContestCardCommand | ClearContestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand
-    | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand;
+    | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand
+    | DeclareActionCommand | AttemptBlockCommand | ResolveActionCommand | AbortActionCommand
+    | PassSequencingCommand | CloseSequencingWindowCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
     return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
@@ -206,4 +225,33 @@ export function claimImpulse(gameId: string, playerName: string): ClaimImpulseCo
 
 export function closeImpulseWindow(gameId: string): CloseImpulseWindowCommand {
     return {type: 'CLOSE_IMPULSE_WINDOW', gameId};
+}
+
+export function declareAction(
+    gameId: string,
+    actorRef: import('./types').CardRef,
+    actionType: import('./types').ActionType,
+    targetPlayerName?: string | null,
+): DeclareActionCommand {
+    return {type: 'DECLARE_ACTION', gameId, actorRef, actionType, targetPlayerName};
+}
+
+export function attemptBlock(gameId: string, blockerRef: import('./types').CardRef): AttemptBlockCommand {
+    return {type: 'ATTEMPT_BLOCK', gameId, blockerRef};
+}
+
+export function resolveAction(gameId: string): ResolveActionCommand {
+    return {type: 'RESOLVE_ACTION', gameId};
+}
+
+export function abortAction(gameId: string): AbortActionCommand {
+    return {type: 'ABORT_ACTION', gameId};
+}
+
+export function passSequencing(gameId: string, playerName: string): PassSequencingCommand {
+    return {type: 'PASS_SEQUENCING', gameId, playerName};
+}
+
+export function closeSequencingWindow(gameId: string): CloseSequencingWindowCommand {
+    return {type: 'CLOSE_SEQUENCING_WINDOW', gameId};
 }

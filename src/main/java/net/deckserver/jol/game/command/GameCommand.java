@@ -44,6 +44,12 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = CloseImpulseWindow.class,        name = "CLOSE_IMPULSE_WINDOW"),
     @JsonSubTypes.Type(value = DrawCryptToUncontrolled.class,   name = "DRAW_CRYPT_TO_UNCONTROLLED"),
     @JsonSubTypes.Type(value = MergeAdvanced.class,             name = "MERGE_ADVANCED"),
+    @JsonSubTypes.Type(value = DeclareAction.class,             name = "DECLARE_ACTION"),
+    @JsonSubTypes.Type(value = AttemptBlock.class,              name = "ATTEMPT_BLOCK"),
+    @JsonSubTypes.Type(value = ResolveAction.class,             name = "RESOLVE_ACTION"),
+    @JsonSubTypes.Type(value = AbortAction.class,               name = "ABORT_ACTION"),
+    @JsonSubTypes.Type(value = PassSequencing.class,            name = "PASS_SEQUENCING"),
+    @JsonSubTypes.Type(value = CloseSequencingWindow.class,     name = "CLOSE_SEQUENCING_WINDOW"),
 })
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
@@ -56,9 +62,12 @@ public sealed interface GameCommand
             MoveToTorpor, RescueFromTorpor, BurnMinion,
             ContestCard, ClearContestCard, SetTitle,
             OustPlayer, SetChoice, ReverseOrder, SetGameNotes,
-            OpenImpulseWindow, PassImpulse, ClaimImpulse, CloseImpulseWindow {
+            OpenImpulseWindow, PassImpulse, ClaimImpulse, CloseImpulseWindow,
+            DeclareAction, AttemptBlock, ResolveAction, AbortAction,
+            PassSequencing, CloseSequencingWindow {
 
     String gameId();
 
-    default boolean isImpulseExempt() { return false; }
+    default boolean isImpulseExempt()    { return false; }
+    default boolean isSequencingExempt() { return false; }
 }

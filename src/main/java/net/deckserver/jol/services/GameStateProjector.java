@@ -5,9 +5,13 @@ import net.deckserver.jol.dto.CardSlotDto;
 import net.deckserver.jol.dto.CardStateDto;
 import net.deckserver.jol.dto.GameStateDto;
 import net.deckserver.jol.dto.ImpulseStateDto;
+import net.deckserver.jol.dto.PendingActionStateDto;
 import net.deckserver.jol.dto.PlayerStateDto;
 import net.deckserver.jol.dto.RegionStateDto;
+import net.deckserver.jol.dto.SequencingWindowStateDto;
 import net.deckserver.jol.game.ImpulseState;
+import net.deckserver.jol.game.PendingActionState;
+import net.deckserver.jol.game.SequencingWindowState;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
@@ -41,6 +45,8 @@ public class GameStateProjector {
 
         dto.transfersRemaining = game.getTransfersRemaining();
         dto.impulseWindow = toImpulseStateDto(game.getImpulseWindow());
+        dto.pendingAction = toPendingActionStateDto(game.getPendingAction());
+        dto.sequencingWindow = toSequencingWindowStateDto(game.getSequencingWindow());
         dto.players = buildPlayerStates(game, viewerUsername);
         dto.cards = buildCardMap(game, viewerUsername);
         return dto;
@@ -116,6 +122,28 @@ public class GameStateProjector {
         dto.currentImpulseHolder = state.getCurrentImpulseHolder();
         dto.passOrder = List.copyOf(state.getPassOrder());
         dto.consecutivePasses = state.getConsecutivePasses();
+        return dto;
+    }
+
+    private PendingActionStateDto toPendingActionStateDto(PendingActionState state) {
+        if (state == null) return null;
+        PendingActionStateDto dto = new PendingActionStateDto();
+        dto.actorRef = state.getActorRef();
+        dto.actionType = state.getActionType() != null ? state.getActionType().name() : null;
+        dto.targetPlayerName = state.getTargetPlayerName();
+        dto.status = state.getStatus() != null ? state.getStatus().name() : null;
+        dto.blockerRef = state.getBlockerRef();
+        return dto;
+    }
+
+    private SequencingWindowStateDto toSequencingWindowStateDto(SequencingWindowState state) {
+        if (state == null || !state.isActive()) return null;
+        SequencingWindowStateDto dto = new SequencingWindowStateDto();
+        dto.active = state.isActive();
+        dto.windowType = state.getWindowType() != null ? state.getWindowType().name() : null;
+        dto.passOrder = List.copyOf(state.getPassOrder());
+        dto.consecutivePasses = state.getConsecutivePasses();
+        dto.currentHolder = state.getCurrentHolder();
         return dto;
     }
 

@@ -39,6 +39,12 @@ import net.deckserver.jol.enums.Phase;
         @JsonSubTypes.Type(value = CommandLogData.CloseImpulseLog.class,              name = "CLOSE_IMPULSE_WINDOW"),
         @JsonSubTypes.Type(value = CommandLogData.DrawCryptToUncontrolledLog.class,   name = "DRAW_CRYPT_TO_UNCONTROLLED"),
         @JsonSubTypes.Type(value = CommandLogData.MergeAdvancedLog.class,             name = "MERGE_ADVANCED"),
+        @JsonSubTypes.Type(value = CommandLogData.DeclareActionLog.class,             name = "DECLARE_ACTION"),
+        @JsonSubTypes.Type(value = CommandLogData.AttemptBlockLog.class,              name = "ATTEMPT_BLOCK"),
+        @JsonSubTypes.Type(value = CommandLogData.ResolveActionLog.class,             name = "RESOLVE_ACTION"),
+        @JsonSubTypes.Type(value = CommandLogData.AbortActionLog.class,               name = "ABORT_ACTION"),
+        @JsonSubTypes.Type(value = CommandLogData.PassSequencingLog.class,            name = "PASS_SEQUENCING"),
+        @JsonSubTypes.Type(value = CommandLogData.CloseSequencingWindowLog.class,     name = "CLOSE_SEQUENCING_WINDOW"),
 })
 public sealed interface CommandLogData
         permits
@@ -52,7 +58,9 @@ public sealed interface CommandLogData
         CommandLogData.SetTitleLog,
         CommandLogData.SetPoolLog, CommandLogData.GainEdgeLog, CommandLogData.TransferBloodLog,
         CommandLogData.OustPlayerLog, CommandLogData.ReverseOrderLog,
-        CommandLogData.OpenImpulseLog, CommandLogData.PassImpulseLog, CommandLogData.ClaimImpulseLog, CommandLogData.CloseImpulseLog {
+        CommandLogData.OpenImpulseLog, CommandLogData.PassImpulseLog, CommandLogData.ClaimImpulseLog, CommandLogData.CloseImpulseLog,
+        CommandLogData.DeclareActionLog, CommandLogData.AttemptBlockLog, CommandLogData.ResolveActionLog, CommandLogData.AbortActionLog,
+        CommandLogData.PassSequencingLog, CommandLogData.CloseSequencingWindowLog {
 
     String actor();
 
@@ -99,4 +107,12 @@ public sealed interface CommandLogData
     record PassImpulseLog(String actor) implements CommandLogData {}
     record ClaimImpulseLog(String actor) implements CommandLogData {}
     record CloseImpulseLog(String actor) implements CommandLogData {}
+
+    // ── Action Windows ────────────────────────────────────────────────────────
+    record DeclareActionLog(String actor, String actionType, String actorName) implements CommandLogData {}
+    record AttemptBlockLog(String actor, String blockerName) implements CommandLogData {}
+    record ResolveActionLog(String actor) implements CommandLogData {}
+    record AbortActionLog(String actor) implements CommandLogData {}
+    record PassSequencingLog(String actor) implements CommandLogData {}
+    record CloseSequencingWindowLog(String actor) implements CommandLogData {}
 }

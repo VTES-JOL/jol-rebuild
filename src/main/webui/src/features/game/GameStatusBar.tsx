@@ -4,6 +4,8 @@ import type {GameState} from './types.ts';
 import {drawCard, drawCrypt, gainEdge, oustPlayer, reverseOrder, shuffleCrypt, shuffleLibrary, unlockAll} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
 import {ImpulsePanel, OpenImpulseButton} from './ImpulsePanel.tsx';
+import {ActionDeclarationPanel} from './ActionDeclarationPanel.tsx';
+import {SequencingPanel} from './SequencingPanel.tsx';
 
 export type BoardLayout = 'linear' | 'circular' | 'text';
 
@@ -284,6 +286,23 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
             {gameState?.impulseWindow?.active && (
                 <ImpulsePanel
                     impulse={gameState.impulseWindow}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    onCommand={onCommand}
+                />
+            )}
+            {gameState?.pendingAction && (
+                <ActionDeclarationPanel
+                    pending={gameState.pendingAction}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    players={gameState.players}
+                    onCommand={onCommand}
+                />
+            )}
+            {gameState?.sequencingWindow?.active && (
+                <SequencingPanel
+                    seq={gameState.sequencingWindow}
                     currentUser={currentUser}
                     gameId={gameId}
                     onCommand={onCommand}

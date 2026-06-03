@@ -8,6 +8,7 @@ import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;
+import net.deckserver.jol.game.SequencingWindowState;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.services.handler.*;
 import org.jboss.logging.Logger;
@@ -59,6 +60,13 @@ public class GameCommandService {
                         "It is not your impulse — " + impulse.getCurrentImpulseHolder() + " holds the impulse");
             }
         }
+        SequencingWindowState seq = game.getSequencingWindow();
+        if (seq != null && seq.isActive() && !cmd.isSequencingExempt()) {
+            if (!actor.equals(seq.getCurrentHolder())) {
+                throw new net.deckserver.jol.exception.GameRuleException(
+                        "It is not your sequencing priority — " + seq.getCurrentHolder() + " holds priority");
+            }
+        }
         return switch (cmd) {
             case AdvancePhase c         -> TurnPhaseHandler.handleAdvancePhase(game, c, actor);
             case NextTurn c             -> TurnPhaseHandler.handleNextTurn(game, c, actor);
@@ -97,6 +105,12 @@ public class GameCommandService {
             case PassImpulse c          -> ImpulseHandler.handlePassImpulse(game, c, actor);
             case ClaimImpulse c         -> ImpulseHandler.handleClaimImpulse(game, c, actor);
             case CloseImpulseWindow c   -> ImpulseHandler.handleCloseImpulseWindow(game, c, actor);
+            case DeclareAction c        -> ActionHandler.handleDeclareAction(game, c, actor);
+            case AttemptBlock c         -> ActionHandler.handleAttemptBlock(game, c, actor);
+            case ResolveAction c        -> ActionHandler.handleResolveAction(game, c, actor);
+            case AbortAction c          -> ActionHandler.handleAbortAction(game, c, actor);
+            case PassSequencing c       -> SequencingHandler.handlePassSequencing(game, c, actor);
+            case CloseSequencingWindow c -> SequencingHandler.handleCloseSequencingWindow(game, c, actor);
         };
     }
 

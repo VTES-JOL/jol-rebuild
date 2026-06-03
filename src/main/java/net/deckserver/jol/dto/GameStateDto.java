@@ -25,4 +25,8 @@ public class GameStateDto {
     public int transfersRemaining;
     /** Active impulse window, or null when no impulse window is open. */
     public ImpulseStateDto impulseWindow;
+    /** Active action declaration, or null when no action is in progress. */
+    public PendingActionStateDto pendingAction;
+    /** Active sequencing window (AS_ANNOUNCED or AFTER_RESOLUTION), or null. */
+    public SequencingWindowStateDto sequencingWindow;
 }

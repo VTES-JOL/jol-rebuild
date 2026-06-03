@@ -75,6 +75,35 @@ export type ImpulseState = {
     consecutivePasses: number;
 };
 
+export type CardRef = {
+    playerName: string;
+    regionType: string;
+    position: number;
+    childIndex: number;
+};
+
+export type ActionType =
+    | 'BLEED' | 'HUNT' | 'EQUIP' | 'EMPLOY_RETAINER' | 'RECRUIT_ALLY'
+    | 'POLITICAL' | 'LEAVE_TORPOR' | 'RESCUE' | 'DIABLERISE' | 'CUSTOM';
+
+export type ActionStatus = 'AS_ANNOUNCED' | 'DURING_ACTION' | 'BLOCKED' | 'AFTER_RESOLUTION';
+
+export type PendingActionState = {
+    actorRef: CardRef;
+    actionType: ActionType;
+    targetPlayerName: string | null;
+    status: ActionStatus;
+    blockerRef: CardRef | null;
+};
+
+export type SequencingWindowState = {
+    active: boolean;
+    windowType: 'AS_ANNOUNCED' | 'AFTER_RESOLUTION';
+    passOrder: string[];
+    consecutivePasses: number;
+    currentHolder: string;
+};
+
 export type GameState = {
     gameId: string;
     gameName: string;
@@ -90,4 +119,8 @@ export type GameState = {
     transfersRemaining: number;
     /** Active impulse window, or null/undefined when no window is open. */
     impulseWindow?: ImpulseState | null;
+    /** Active action declaration, or null/undefined when no action is in progress. */
+    pendingAction?: PendingActionState | null;
+    /** Active sequencing window (AS_ANNOUNCED or AFTER_RESOLUTION), or null/undefined. */
+    sequencingWindow?: SequencingWindowState | null;
 };
