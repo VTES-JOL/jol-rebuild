@@ -47,6 +47,7 @@ public class GameStateProjector {
         dto.impulseWindow = toImpulseStateDto(game.getImpulseWindow());
         dto.pendingAction = toPendingActionStateDto(game.getPendingAction());
         dto.sequencingWindow = toSequencingWindowStateDto(game.getSequencingWindow());
+        dto.rulesEnforced = game.isRulesEnforced();
         dto.players = buildPlayerStates(game, viewerUsername);
         dto.cards = buildCardMap(game, viewerUsername);
         return dto;

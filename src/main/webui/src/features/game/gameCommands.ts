@@ -90,7 +90,8 @@ export type GameCommand =
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand
     | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand
     | DeclareActionCommand | AttemptBlockCommand | ResolveActionCommand | AbortActionCommand
-    | PassSequencingCommand | CloseSequencingWindowCommand;
+    | PassSequencingCommand | CloseSequencingWindowCommand
+    | SetRulesModeCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
     return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
@@ -254,4 +255,10 @@ export function passSequencing(gameId: string, playerName: string): PassSequenci
 
 export function closeSequencingWindow(gameId: string): CloseSequencingWindowCommand {
     return {type: 'CLOSE_SEQUENCING_WINDOW', gameId};
+}
+
+export type SetRulesModeCommand = { type: 'SET_RULES_MODE'; gameId: string; enforced: boolean };
+
+export function setRulesMode(gameId: string, enforced: boolean): SetRulesModeCommand {
+    return {type: 'SET_RULES_MODE', gameId, enforced};
 }

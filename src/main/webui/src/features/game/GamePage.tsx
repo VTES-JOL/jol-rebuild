@@ -7,7 +7,6 @@ import {useGameChannel} from '@/hooks/useGameChannel.ts';
 import {PlayerBoard} from './PlayerBoard.tsx';
 import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
-import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
 import {HandTray} from './HandTray.tsx';
 import type {CardData, GameState, PlayerState} from './types.ts';
@@ -106,6 +105,7 @@ function GameContextMenuOverlay({contextMenu, gameState, gameId, currentUser, on
             phase={gameState.phase}
             isCurrentPlayer={gameState.currentPlayer === currentUser}
             impulseHolder={gameState.impulseWindow?.active ? gameState.impulseWindow.currentImpulseHolder : null}
+            rulesEnforced={gameState.rulesEnforced ?? false}
             position={{x: contextMenu.x, y: contextMenu.y}}
             onCommand={onCommand}
             onClose={onClose}
@@ -124,7 +124,7 @@ export default function GamePage() {
         ? `${protocol}//${window.location.host}/ws/game/${encodeURIComponent(gameId)}`
         : null;
 
-    const {messages, gameState, status, send, react, sendCommand, commandError, clearCommandError} = useGameChannel({
+    const {gameState, status, sendCommand, commandError, clearCommandError} = useGameChannel({
         url: wsUrl,
         username: user?.username ?? '',
     });
@@ -238,9 +238,8 @@ export default function GamePage() {
                     onDismiss={dismissZeroPool}
                 />
             )}
-            <div className="flex flex-col lg:flex-row gap-4 h-full min-h-0 px-4 pb-4">
-                {/* Board — full width on ≤md, left 3/4 on lg+ */}
-                <div className="flex-1 lg:flex-3 min-w-0 min-h-0 flex flex-col">
+            <div className="flex flex-col h-full min-h-0 px-4 pb-4">
+                <div className="flex-1 min-w-0 min-h-0 flex flex-col">
 
                     <GameStatusBar
                         gameState={gameState}
@@ -312,7 +311,7 @@ export default function GamePage() {
                         </div>
                     )}
 
-                    {/* Hand tray — below board on lg+, above chat on mobile (text layout uses TextHandPanel instead) */}
+                    {/* Hand tray — below board (text layout uses TextHandPanel instead) */}
                     {boardLayout !== 'text' && currentUserHand && gameState && user && (
                         <HandTray
                             playerName={user.username}
@@ -324,27 +323,6 @@ export default function GamePage() {
                         />
                     )}
                 </div>
-
-                {/* Chat — fixed height at bottom on ≤md, right 1/4 on lg+ */}
-                {user && (
-                    <div className="h-60 shrink-0 lg:h-auto lg:flex-1 min-w-0 min-h-0">
-                        <ChatPanel
-                            title="Game chat"
-                            messages={messages}
-                            status={status}
-                            currentUser={currentUser}
-                            onSend={send}
-                            onReact={react}
-                            enableReactions={false}
-                            enableReply={false}
-                            enableAvatars={false}
-                            enableDivider={false}
-                            enableCommandLogFilter={true}
-                            placeholder="Chat with your opponents…"
-                            chatDisabled={isSpectator}
-                        />
-                    </div>
-                )}
             </div>
         </GameLayout>
     );

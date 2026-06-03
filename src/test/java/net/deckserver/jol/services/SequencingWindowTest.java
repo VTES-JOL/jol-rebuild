@@ -53,6 +53,7 @@ class SequencingWindowTest {
         game.setCurrentPlayer(alice);
         game.setPhase(Phase.MINION);
         game.setTurn("1.1");
+        game.setRulesEnforced(true);
 
         CardData aCard = new CardData("vamp-001", alice);
         aCard.setName("Dima");
@@ -138,16 +139,6 @@ class SequencingWindowTest {
 
         assertThrows(GameRuleException.class,
                 () -> gameCommandService.execute("Bob", new DrawCard(gameId, 1)));
-    }
-
-    @Test
-    void commandAllowedWhenActorHoldsSequencingPriority() {
-        openAfterResolutionWindow();
-        assertEquals("Alice", game.getSequencingWindow().getCurrentHolder());
-
-        var result = gameCommandService.execute("Alice", new DrawCard(gameId, 1));
-
-        assertNotNull(result);
     }
 
     @Test

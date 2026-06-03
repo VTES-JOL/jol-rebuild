@@ -3,7 +3,12 @@ package net.deckserver.jol.services.handler;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.GameCompletedEffect;
+import net.deckserver.jol.game.effect.GameEffect;
+import net.deckserver.jol.game.effect.PlayerOustedEffect;
+import net.deckserver.jol.game.effect.PlayerPoolChangedEffect;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
@@ -15,10 +20,14 @@ public final class PlayerHandler {
         PlayerData ousted = GameRules.requirePlayer(game, cmd.playerName());
         ousted.setPool(0);
 
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new PlayerOustedEffect(cmd.playerName()));
+
         PlayerData predator = ousted.getPredator();
         if (predator != null) {
             predator.addVictoryPoints(1.0f);
             predator.setPool(predator.getPool() + 6);
+            effects.add(new PlayerPoolChangedEffect(predator.getName(), 6));
         }
 
         game.updatePredatorMapping();
@@ -29,16 +38,18 @@ public final class PlayerHandler {
             if (turnResult.logMessage() != null) {
                 turnMsg = "; " + turnResult.logMessage();
             }
+            effects.addAll(turnResult.effects());
         }
 
         List<PlayerData> survivors = game.getCurrentPlayers();
         if (survivors.size() == 1) {
             survivors.getFirst().addVictoryPoints(1.0f);
             game.setCompleted(true);
+            effects.add(new GameCompletedEffect());
         }
 
         String msg = actor + " ousted " + cmd.playerName() + turnMsg;
-        return new CommandResult(game, msg, new CommandLogData.OustPlayerLog(actor, cmd.playerName()));
+        return new CommandResult(game, msg, new CommandLogData.OustPlayerLog(actor, cmd.playerName()), effects);
     }
 
     public static CommandResult handleSetChoice(GameData game, SetChoice cmd) {

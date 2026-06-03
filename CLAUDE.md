@@ -18,6 +18,7 @@ Below is the detailed documentation for the logical constraints each domain mode
 - [Chat System](docs/logic/chat.md)
 - [VTES Mechanics Gap Analysis](docs/logic/vtes-mechanics-gaps.md)
 - [Card Play Rules](docs/logic/card-play-rules.md)
+- [Game Modes](docs/logic/game-modes.md)
 
 ## Commands
 

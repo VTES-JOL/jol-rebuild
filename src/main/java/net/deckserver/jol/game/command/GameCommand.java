@@ -50,6 +50,7 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = AbortAction.class,               name = "ABORT_ACTION"),
     @JsonSubTypes.Type(value = PassSequencing.class,            name = "PASS_SEQUENCING"),
     @JsonSubTypes.Type(value = CloseSequencingWindow.class,     name = "CLOSE_SEQUENCING_WINDOW"),
+    @JsonSubTypes.Type(value = SetRulesMode.class,              name = "SET_RULES_MODE"),
 })
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
@@ -64,7 +65,8 @@ public sealed interface GameCommand
             OustPlayer, SetChoice, ReverseOrder, SetGameNotes,
             OpenImpulseWindow, PassImpulse, ClaimImpulse, CloseImpulseWindow,
             DeclareAction, AttemptBlock, ResolveAction, AbortAction,
-            PassSequencing, CloseSequencingWindow {
+            PassSequencing, CloseSequencingWindow,
+            SetRulesMode {
 
     String gameId();
 

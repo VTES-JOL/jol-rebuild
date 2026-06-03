@@ -5,8 +5,11 @@ import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.CardMovedEffect;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
+
+import java.util.List;
 
 public final class MinionHandler {
     private MinionHandler() {}
@@ -18,7 +21,8 @@ public final class MinionHandler {
         PlayerData owner = GameRules.requireOwner(card);
         owner.getRegion(RegionType.TORPOR).addCard(card, false);
         String msg = actor + " sent " + token + " to Torpor";
-        return new CommandResult(game, msg, new CommandLogData.MoveToTorporLog(actor, logRef));
+        return new CommandResult(game, msg, new CommandLogData.MoveToTorporLog(actor, logRef),
+                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.TORPOR.name())));
     }
 
     public static CommandResult handleRescueFromTorpor(GameData game, RescueFromTorpor cmd, String actor) {
@@ -28,7 +32,8 @@ public final class MinionHandler {
         PlayerData owner = GameRules.requireOwner(card);
         owner.getRegion(RegionType.READY).addCard(card, false);
         String msg = actor + " rescued " + token + " from Torpor";
-        return new CommandResult(game, msg, new CommandLogData.RescueFromTorporLog(actor, logRef));
+        return new CommandResult(game, msg, new CommandLogData.RescueFromTorporLog(actor, logRef),
+                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.READY.name())));
     }
 
     public static CommandResult handleBurnMinion(GameData game, BurnMinion cmd, String actor) {
@@ -38,6 +43,7 @@ public final class MinionHandler {
         PlayerData owner = GameRules.requireOwner(card);
         owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
         String msg = actor + " burned " + token;
-        return new CommandResult(game, msg, new CommandLogData.BurnMinionLog(actor, logRef));
+        return new CommandResult(game, msg, new CommandLogData.BurnMinionLog(actor, logRef),
+                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.ASH_HEAP.name())));
     }
 }

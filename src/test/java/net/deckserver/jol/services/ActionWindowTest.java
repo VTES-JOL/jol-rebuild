@@ -54,6 +54,7 @@ class ActionWindowTest {
         game.setCurrentPlayer(alice);
         game.setPhase(Phase.MINION);
         game.setTurn("1.1");
+        game.setRulesEnforced(true);
 
         CardData aCard = new CardData("vamp-001", alice);
         aCard.setName("Dima");

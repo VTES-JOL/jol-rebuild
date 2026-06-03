@@ -45,6 +45,7 @@ import net.deckserver.jol.enums.Phase;
         @JsonSubTypes.Type(value = CommandLogData.AbortActionLog.class,               name = "ABORT_ACTION"),
         @JsonSubTypes.Type(value = CommandLogData.PassSequencingLog.class,            name = "PASS_SEQUENCING"),
         @JsonSubTypes.Type(value = CommandLogData.CloseSequencingWindowLog.class,     name = "CLOSE_SEQUENCING_WINDOW"),
+        @JsonSubTypes.Type(value = CommandLogData.SetRulesModeLog.class,              name = "SET_RULES_MODE"),
 })
 public sealed interface CommandLogData
         permits
@@ -60,7 +61,8 @@ public sealed interface CommandLogData
         CommandLogData.OustPlayerLog, CommandLogData.ReverseOrderLog,
         CommandLogData.OpenImpulseLog, CommandLogData.PassImpulseLog, CommandLogData.ClaimImpulseLog, CommandLogData.CloseImpulseLog,
         CommandLogData.DeclareActionLog, CommandLogData.AttemptBlockLog, CommandLogData.ResolveActionLog, CommandLogData.AbortActionLog,
-        CommandLogData.PassSequencingLog, CommandLogData.CloseSequencingWindowLog {
+        CommandLogData.PassSequencingLog, CommandLogData.CloseSequencingWindowLog,
+        CommandLogData.SetRulesModeLog {
 
     String actor();
 
@@ -115,4 +117,7 @@ public sealed interface CommandLogData
     record AbortActionLog(String actor) implements CommandLogData {}
     record PassSequencingLog(String actor) implements CommandLogData {}
     record CloseSequencingWindowLog(String actor) implements CommandLogData {}
+
+    // ── Game Mode ─────────────────────────────────────────────────────────────
+    record SetRulesModeLog(String actor, boolean enforced) implements CommandLogData {}
 }

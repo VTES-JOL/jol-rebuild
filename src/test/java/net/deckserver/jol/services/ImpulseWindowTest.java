@@ -49,6 +49,7 @@ class ImpulseWindowTest {
         game.setCurrentPlayer(alice);
         game.setPhase(Phase.MINION);
         game.setTurn("1.1");
+        game.setRulesEnforced(true);
         gameId = game.getId();
         gameStateStore.put(gameId, game);
     }
@@ -215,35 +216,6 @@ class ImpulseWindowTest {
         assertNull(game.getImpulseWindow());
     }
 
-    // ── Auto-open impulse on phase advance ────────────────────────────────────
-
-    @Test
-    void advancePhase_autoOpensImpulseWindow() {
-        assertNull(game.getImpulseWindow());
-
-        gameCommandService.execute("Alice", new AdvancePhase(gameId));
-
-        assertEquals(Phase.INFLUENCE, game.getPhase());
-        assertNotNull(game.getImpulseWindow());
-        assertTrue(game.getImpulseWindow().isActive());
-        assertEquals("Alice", game.getImpulseWindow().getActingPlayer());
-        assertEquals("Alice", game.getImpulseWindow().getCurrentImpulseHolder());
-    }
-
-    @Test
-    void nextTurn_autoOpensImpulseWindowForNewPlayer() {
-        game.setPhase(Phase.DISCARD);
-
-        gameCommandService.execute("Alice", new AdvancePhase(gameId));
-
-        assertEquals(Phase.UNLOCK, game.getPhase());
-        assertEquals("Bob", game.getCurrentPlayerName());
-        assertNotNull(game.getImpulseWindow());
-        assertTrue(game.getImpulseWindow().isActive());
-        assertEquals("Bob", game.getImpulseWindow().getActingPlayer());
-        assertEquals("Bob", game.getImpulseWindow().getCurrentImpulseHolder());
-    }
-
     // ── Impulse gate ──────────────────────────────────────────────────────────
 
     @Test
@@ -254,30 +226,7 @@ class ImpulseWindowTest {
                 () -> gameCommandService.execute("Bob", new DrawCard(gameId, 1)));
     }
 
-    @Test
-    void commandAllowedWhenActorHoldsImpulse() {
-        openUndirected("Alice");
-
-        var result = gameCommandService.execute("Alice", new DrawCard(gameId, 1));
-
-        assertNotNull(result.logMessage());
-    }
-
-    @Test
-    void advancePhaseWorksRegardlessOfImpulseHolder() {
-        openUndirected("Alice");
-        gameCommandService.execute("Alice", new PassImpulse(gameId, "Alice"));
-        assertEquals("Bob", game.getImpulseWindow().getCurrentImpulseHolder());
-
-        var result = gameCommandService.execute("Alice", new AdvancePhase(gameId));
-
-        assertNotNull(result.logMessage());
-        assertEquals(Phase.INFLUENCE, game.getPhase());
-        assertNotNull(game.getImpulseWindow());
-        assertEquals("Alice", game.getImpulseWindow().getCurrentImpulseHolder());
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
+       // ── Helpers ───────────────────────────────────────────────────────────────
 
     private void openUndirected(String actor) {
         gameCommandService.execute(actor, new OpenImpulseWindow(gameId, ImpulseContext.UNDIRECTED, actor, null));

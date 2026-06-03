@@ -123,4 +123,6 @@ export type GameState = {
     pendingAction?: PendingActionState | null;
     /** Active sequencing window (AS_ANNOUNCED or AFTER_RESOLUTION), or null/undefined. */
     sequencingWindow?: SequencingWindowState | null;
+    /** Whether rules are enforced (true) or permissive free-form play (false, default). */
+    rulesEnforced: boolean;
 };

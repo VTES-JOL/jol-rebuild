@@ -13,6 +13,8 @@ import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.services.handler.*;
 import org.jboss.logging.Logger;
 
+import java.util.List;
+
 @ApplicationScoped
 public class GameCommandService {
 
@@ -53,6 +55,16 @@ public class GameCommandService {
     // ── Dispatch ─────────────────────────────────────────────────────────────
 
     private CommandResult dispatch(GameData game, GameCommand cmd, String actor) {
+        // Mode enforcement — applied before impulse/sequencing checks
+        if (game.isRulesEnforced() && isPermissiveOnly(cmd)) {
+            throw new net.deckserver.jol.exception.GameRuleException(
+                    "This command is not available in rules-enforced mode");
+        }
+        if (!game.isRulesEnforced() && isEnforcedOnly(cmd)) {
+            throw new net.deckserver.jol.exception.GameRuleException(
+                    "This command is not available in permissive mode");
+        }
+
         ImpulseState impulse = game.getImpulseWindow();
         if (impulse != null && impulse.isActive() && !cmd.isImpulseExempt()) {
             if (!actor.equals(impulse.getCurrentImpulseHolder())) {
@@ -111,7 +123,34 @@ public class GameCommandService {
             case AbortAction c          -> ActionHandler.handleAbortAction(game, c, actor);
             case PassSequencing c       -> SequencingHandler.handlePassSequencing(game, c, actor);
             case CloseSequencingWindow c -> SequencingHandler.handleCloseSequencingWindow(game, c, actor);
+            case SetRulesMode c         -> {
+                game.setRulesEnforced(c.enforced());
+                String label = c.enforced() ? "rules-enforced" : "permissive";
+                yield new CommandResult(game, actor + " switched the game to " + label + " mode",
+                        new net.deckserver.jol.game.command.CommandLogData.SetRulesModeLog(actor, c.enforced()),
+                        List.of(new net.deckserver.jol.game.effect.GameModeChangedEffect(c.enforced())));
+            }
         };
+    }
+
+    private static boolean isPermissiveOnly(GameCommand command) {
+        return command instanceof MoveCard || command instanceof DrawCard || command instanceof DrawCrypt
+                || command instanceof DrawCryptToUncontrolled || command instanceof DiscardCard
+                || command instanceof PlayCard || command instanceof AttachCard
+                || command instanceof SetPool || command instanceof GainEdge
+                || command instanceof TransferBlood || command instanceof InfluenceCard
+                || command instanceof MoveToCrypt || command instanceof MoveToTorpor
+                || command instanceof RescueFromTorpor || command instanceof BurnMinion
+                || command instanceof MergeAdvanced || command instanceof OustPlayer
+                || command instanceof AdvancePhase || command instanceof NextTurn;
+    }
+
+    private static boolean isEnforcedOnly(GameCommand command) {
+        return command instanceof OpenImpulseWindow || command instanceof CloseImpulseWindow
+                || command instanceof PassImpulse || command instanceof ClaimImpulse
+                || command instanceof DeclareAction || command instanceof AttemptBlock
+                || command instanceof ResolveAction || command instanceof AbortAction
+                || command instanceof PassSequencing || command instanceof CloseSequencingWindow;
     }
 
     private void persistSnapshot(String gameId, GameData gameData) {

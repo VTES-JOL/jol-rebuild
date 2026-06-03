@@ -130,4 +130,42 @@ class GameRuleViolationTest {
                 () -> gameCommandService.execute(nonHolder, new PassImpulse(gameId, nonHolder)));
         assertNotNull(ex.getMessage());
     }
+
+    // ── Game Mode Tests ────────────────────────────────────────────────────────
+
+    @Test
+    void setRulesMode_togglesMode() {
+        assertFalse(gameData.isRulesEnforced(), "Default mode should be permissive");
+        gameCommandService.execute(ACTOR, new SetRulesMode(gameId, true));
+        assertTrue(gameData.isRulesEnforced());
+        gameCommandService.execute(ACTOR, new SetRulesMode(gameId, false));
+        assertFalse(gameData.isRulesEnforced());
+    }
+
+    @Test
+    void permissiveOnlyCommand_rejectedInEnforcedMode() {
+        gameData.setRulesEnforced(true);
+        GameRuleException ex = assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new AdvancePhase(gameId)));
+        assertTrue(ex.getMessage().contains("rules-enforced"), "Error should mention rules-enforced mode, got: " + ex.getMessage());
+    }
+
+    @Test
+    void enforcedOnlyCommand_rejectedInPermissiveMode() {
+        assertFalse(gameData.isRulesEnforced());
+        // Close any active impulse window so the mode gate fires first
+        gameData.setImpulseWindow(null);
+        GameRuleException ex = assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new OpenImpulseWindow(gameId,
+                        net.deckserver.jol.enums.ImpulseContext.UNDIRECTED, ACTOR, null)));
+        assertTrue(ex.getMessage().contains("permissive"), "Error should mention permissive mode, got: " + ex.getMessage());
+    }
+
+    @Test
+    void universalCommand_allowedInBothModes() {
+        // Universal commands (e.g. SET_GAME_NOTES) should succeed regardless of mode
+        assertDoesNotThrow(() -> gameCommandService.execute(ACTOR, new SetGameNotes(gameId, "test note")));
+        gameData.setRulesEnforced(true);
+        assertDoesNotThrow(() -> gameCommandService.execute(ACTOR, new SetGameNotes(gameId, "enforced note")));
+    }
 }

@@ -12,6 +12,9 @@ import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.PendingActionState;
 import net.deckserver.jol.game.SequencingWindowState;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
+import net.deckserver.jol.game.effect.PendingActionChangedEffect;
+import net.deckserver.jol.game.effect.SequencingWindowChangedEffect;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
 
@@ -65,7 +68,8 @@ public final class ActionHandler {
         String targetSuffix = cmd.targetPlayerName() != null ? " targeting " + cmd.targetPlayerName() : "";
         String msg = actor + " declared a " + actionLabel + " action" + targetSuffix;
         return new CommandResult(game, msg,
-                new CommandLogData.DeclareActionLog(actor, cmd.actionType().name(), actor_card.getName()));
+                new CommandLogData.DeclareActionLog(actor, cmd.actionType().name(), actor_card.getName()),
+                List.of(new PendingActionChangedEffect(true), new ImpulseWindowChangedEffect(true)));
     }
 
     public static CommandResult handleAttemptBlock(GameData game, AttemptBlock cmd, String actor) {
@@ -98,7 +102,8 @@ public final class ActionHandler {
 
         String msg = actor + " blocked with " + blocker.getName() + " — impulse window closed";
         return new CommandResult(game, msg,
-                new CommandLogData.AttemptBlockLog(actor, blocker.getName()));
+                new CommandLogData.AttemptBlockLog(actor, blocker.getName()),
+                List.of(new PendingActionChangedEffect(true), new ImpulseWindowChangedEffect(false)));
     }
 
     public static CommandResult handleResolveAction(GameData game, ResolveAction cmd, String actor) {
@@ -125,7 +130,8 @@ public final class ActionHandler {
         game.setSequencingWindow(seq);
 
         String msg = actor + " resolved the action — after-resolution sequencing window is open";
-        return new CommandResult(game, msg, new CommandLogData.ResolveActionLog(actor));
+        return new CommandResult(game, msg, new CommandLogData.ResolveActionLog(actor),
+                List.of(new PendingActionChangedEffect(true), new SequencingWindowChangedEffect(true)));
     }
 
     public static CommandResult handleAbortAction(GameData game, AbortAction cmd, String actor) {
@@ -148,6 +154,8 @@ public final class ActionHandler {
         game.setPendingAction(null);
 
         String msg = actor + " aborted the action";
-        return new CommandResult(game, msg, new CommandLogData.AbortActionLog(actor));
+        return new CommandResult(game, msg, new CommandLogData.AbortActionLog(actor),
+                List.of(new PendingActionChangedEffect(false), new ImpulseWindowChangedEffect(false),
+                        new SequencingWindowChangedEffect(false)));
     }
 }

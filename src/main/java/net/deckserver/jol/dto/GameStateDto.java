@@ -29,4 +29,6 @@ public class GameStateDto {
     public PendingActionStateDto pendingAction;
     /** Active sequencing window (AS_ANNOUNCED or AFTER_RESOLUTION), or null. */
     public SequencingWindowStateDto sequencingWindow;
+    /** Whether rules are enforced (true) or permissive free-form play (false, default). */
+    public boolean rulesEnforced;
 }

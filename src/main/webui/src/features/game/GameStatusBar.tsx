@@ -1,7 +1,7 @@
 import {createPortal} from 'react-dom';
 import {useState} from 'react';
 import type {GameState} from './types.ts';
-import {drawCard, drawCrypt, gainEdge, oustPlayer, reverseOrder, shuffleCrypt, shuffleLibrary, unlockAll} from './gameCommands.ts';
+import {drawCard, drawCrypt, gainEdge, oustPlayer, reverseOrder, setRulesMode, shuffleCrypt, shuffleLibrary, unlockAll} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
 import {ImpulsePanel, OpenImpulseButton} from './ImpulsePanel.tsx';
 import {ActionDeclarationPanel} from './ActionDeclarationPanel.tsx';
@@ -185,6 +185,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
     const eligibleToOust = gameState?.players.filter(p => p.pool > 0 && p.name !== currentUser) ?? [];
     const hasImpulse = !gameState?.impulseWindow?.active || gameState.impulseWindow.currentImpulseHolder === currentUser;
     const canAct = !isSpectator && hasImpulse;
+    const rulesEnforced = gameState?.rulesEnforced ?? false;
 
     return (
         <div className="flex flex-col pb-2 shrink-0 gap-1 min-w-0">
@@ -193,14 +194,24 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     {gameState && (
                         <>
                             <span className="text-ink-muted shrink-0">Turn {gameState.turn}</span>
-                            <PhaseTracker
-                                phase={gameState.phase}
-                                isMyTurn={isMyTurn}
-                                gameId={gameId}
-                                onCommand={onCommand}
-                                disabled={isSpectator}
-                                transfersRemaining={gameState.transfersRemaining ?? 0}
-                            />
+                            {/* Phase tracker only shown in permissive mode — in enforced mode, phase advances via protocol */}
+                            {!rulesEnforced && (
+                                <PhaseTracker
+                                    phase={gameState.phase}
+                                    isMyTurn={isMyTurn}
+                                    gameId={gameId}
+                                    onCommand={onCommand}
+                                    disabled={isSpectator}
+                                    transfersRemaining={gameState.transfersRemaining ?? 0}
+                                />
+                            )}
+                            {rulesEnforced && (
+                                <span className={[
+                                    'text-[11px] px-1.5 py-0.5 rounded leading-none bg-arcane/20 text-ink font-semibold',
+                                ].join(' ')}>
+                                    {gameState.phase}
+                                </span>
+                            )}
                             {gameState.currentPlayer && (
                                 <>
                                     <span className="text-ink-muted/40 shrink-0">·</span>
@@ -217,6 +228,21 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     )}
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
+                    {/* Mode toggle — TODO: restrict to judge/admin role when role system is implemented */}
+                    {gameState && !isSpectator && (
+                        <button
+                            className={[
+                                'text-[11px] px-2 py-0.5 rounded border transition-colors leading-none',
+                                rulesEnforced
+                                    ? 'border-gold/50 text-gold/80 bg-gold/10 hover:bg-gold/15'
+                                    : 'border-line/40 text-ink-muted hover:text-ink hover:border-line/70',
+                            ].join(' ')}
+                            onClick={() => onCommand(setRulesMode(gameId, !rulesEnforced))}
+                            title={rulesEnforced ? 'Rules enforced — click to switch to permissive mode' : 'Permissive mode — click to switch to rules-enforced mode'}
+                        >
+                            {rulesEnforced ? 'Enforced' : 'Permissive'}
+                        </button>
+                    )}
                     {gameState && !isSpectator && (
                         <button
                             className={[
@@ -248,42 +274,57 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                 </div>
             </div>
 
+            {/* Action bar — content depends on mode */}
             {gameState && (
                 <div className="flex items-center gap-1">
-                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(drawCard(gameId))} title={hasImpulse ? 'Draw a card from your library' : 'Not your impulse'}>
-                        Draw
-                    </button>
-                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(drawCrypt(gameId))} title={hasImpulse ? 'Draw a card from your crypt to uncontrolled' : 'Not your impulse'}>
-                        Draw Crypt
-                    </button>
-                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleLibrary(gameId))} title={hasImpulse ? 'Shuffle your library' : 'Not your impulse'}>
-                        ↺ Library
-                    </button>
-                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleCrypt(gameId))} title={hasImpulse ? 'Shuffle your crypt' : 'Not your impulse'}>
-                        ↺ Crypt
-                    </button>
-                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(unlockAll(gameId))} title={hasImpulse ? 'Unlock all your cards' : 'Not your impulse'}>
-                        ↺ Unlock All
-                    </button>
-                    {!hasEdge && (
-                        <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(gainEdge(gameId))} title={hasImpulse ? 'Gain the Edge' : 'Not your impulse'}>
-                            Gain Edge
-                        </button>
+                    {!rulesEnforced && (
+                        <>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(drawCard(gameId))} title={hasImpulse ? 'Draw a card from your library' : 'Not your impulse'}>
+                                Draw
+                            </button>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(drawCrypt(gameId))} title={hasImpulse ? 'Draw a card from your crypt to uncontrolled' : 'Not your impulse'}>
+                                Draw Crypt
+                            </button>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleLibrary(gameId))} title={hasImpulse ? 'Shuffle your library' : 'Not your impulse'}>
+                                ↺ Library
+                            </button>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleCrypt(gameId))} title={hasImpulse ? 'Shuffle your crypt' : 'Not your impulse'}>
+                                ↺ Crypt
+                            </button>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(unlockAll(gameId))} title={hasImpulse ? 'Unlock all your cards' : 'Not your impulse'}>
+                                ↺ Unlock All
+                            </button>
+                            {!hasEdge && (
+                                <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(gainEdge(gameId))} title={hasImpulse ? 'Gain the Edge' : 'Not your impulse'}>
+                                    Gain Edge
+                                </button>
+                            )}
+                            <button
+                                className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (!canAct || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
+                                disabled={!canAct || eligibleToOust.length === 0}
+                                onClick={() => setOustOpen(true)}
+                                title={!canAct ? 'Not your impulse' : 'Oust a player'}
+                            >
+                                Oust Player
+                            </button>
+                        </>
                     )}
-                    <button
-                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (!canAct || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
-                        disabled={!canAct || eligibleToOust.length === 0}
-                        onClick={() => setOustOpen(true)}
-                        title={!canAct ? 'Not your impulse' : 'Oust a player'}
-                    >
-                        Oust Player
-                    </button>
-                    {!isSpectator && !gameState.impulseWindow?.active && (
+                    {rulesEnforced && (
+                        <>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleLibrary(gameId))} title={hasImpulse ? 'Shuffle your library' : 'Not your impulse'}>
+                                ↺ Library
+                            </button>
+                            <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleCrypt(gameId))} title={hasImpulse ? 'Shuffle your crypt' : 'Not your impulse'}>
+                                ↺ Crypt
+                            </button>
+                        </>
+                    )}
+                    {!isSpectator && !gameState.impulseWindow?.active && rulesEnforced && (
                         <OpenImpulseButton gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
                     )}
                 </div>
             )}
-            {gameState?.impulseWindow?.active && (
+            {rulesEnforced && gameState?.impulseWindow?.active && (
                 <ImpulsePanel
                     impulse={gameState.impulseWindow}
                     currentUser={currentUser}
@@ -291,7 +332,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     onCommand={onCommand}
                 />
             )}
-            {gameState?.pendingAction && (
+            {rulesEnforced && gameState?.pendingAction && (
                 <ActionDeclarationPanel
                     pending={gameState.pendingAction}
                     currentUser={currentUser}
@@ -300,7 +341,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     onCommand={onCommand}
                 />
             )}
-            {gameState?.sequencingWindow?.active && (
+            {rulesEnforced && gameState?.sequencingWindow?.active && (
                 <SequencingPanel
                     seq={gameState.sequencingWindow}
                     currentUser={currentUser}
@@ -308,7 +349,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                     onCommand={onCommand}
                 />
             )}
-            {oustOpen && gameState && (
+            {oustOpen && gameState && !rulesEnforced && (
                 <OustPlayerModal
                     players={gameState.players}
                     currentUser={currentUser}

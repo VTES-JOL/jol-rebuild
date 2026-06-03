@@ -8,6 +8,9 @@ import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.CardCounterChangedEffect;
+import net.deckserver.jol.game.effect.CardMovedEffect;
+import net.deckserver.jol.game.effect.PlayerPoolChangedEffect;
 
 import java.util.List;
 import net.deckserver.jol.services.CommandResult;
@@ -39,7 +42,9 @@ public final class InfluenceHandler {
         String msg = amount > 0
                 ? actor + " transferred " + amount + " blood to " + label
                 : actor + " transferred " + Math.abs(amount) + " blood from " + label;
-        return new CommandResult(game, msg, new CommandLogData.TransferBloodLog(actor, logRef, amount));
+        return new CommandResult(game, msg, new CommandLogData.TransferBloodLog(actor, logRef, amount),
+                List.of(new PlayerPoolChangedEffect(controller.getName(), -amount),
+                        new CardCounterChangedEffect(card.getId(), amount)));
     }
 
     public static CommandResult handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
@@ -56,7 +61,8 @@ public final class InfluenceHandler {
         PlayerData owner = GameRules.requireOwner(card);
         owner.getRegion(RegionType.READY).addCard(card, false);
         String msg = actor + " moved " + token + " to the Ready region";
-        return new CommandResult(game, msg, new CommandLogData.InfluenceCardLog(actor, logRef));
+        return new CommandResult(game, msg, new CommandLogData.InfluenceCardLog(actor, logRef),
+                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.READY.name())));
     }
 
     public static CommandResult handleMoveToCrypt(GameData game, MoveToCrypt cmd, String actor) {
@@ -67,7 +73,8 @@ public final class InfluenceHandler {
         card.setCounters(0);
         owner.getRegion(RegionType.CRYPT).addCard(card, false);
         String msg = actor + " returned " + token + " to the Crypt";
-        return new CommandResult(game, msg, new CommandLogData.MoveToCryptLog(actor, logRef));
+        return new CommandResult(game, msg, new CommandLogData.MoveToCryptLog(actor, logRef),
+                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.CRYPT.name())));
     }
 
     public static CommandResult handleDrawCryptToUncontrolled(GameData game, DrawCryptToUncontrolled cmd, String actor) {
@@ -84,9 +91,12 @@ public final class InfluenceHandler {
         }
         game.setTransfersRemaining(game.getTransfersRemaining() - 4);
         player.setPool(player.getPool() - 1);
-        player.getRegion(RegionType.UNCONTROLLED).addCard(crypt.getFirstCard(), false);
+        CardData drawn = crypt.getFirstCard();
+        player.getRegion(RegionType.UNCONTROLLED).addCard(drawn, false);
         String msg = actor + " drew a card from crypt to the uncontrolled region (4 transfers, 1 pool)";
-        return new CommandResult(game, msg, new CommandLogData.DrawCryptToUncontrolledLog(actor));
+        return new CommandResult(game, msg, new CommandLogData.DrawCryptToUncontrolledLog(actor),
+                List.of(new PlayerPoolChangedEffect(actor, -1),
+                        new CardMovedEffect(drawn.getId(), actor, RegionType.UNCONTROLLED.name())));
     }
 
     public static CommandResult handleMergeAdvanced(GameData game, MergeAdvanced cmd, String actor) {

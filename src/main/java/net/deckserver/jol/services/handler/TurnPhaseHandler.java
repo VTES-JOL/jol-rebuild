@@ -8,6 +8,8 @@ import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.AdvancePhase;
 import net.deckserver.jol.game.command.CommandLogData;
 import net.deckserver.jol.game.command.NextTurn;
+import net.deckserver.jol.game.effect.PhaseChangedEffect;
+import net.deckserver.jol.game.effect.TurnChangedEffect;
 import net.deckserver.jol.services.CommandResult;
 
 import java.util.List;
@@ -28,7 +30,8 @@ public final class TurnPhaseHandler {
         }
         openAutoImpulse(game, game.getCurrentPlayerName());
         String msg = actor + " advanced to " + phases[next].getDescription() + " phase";
-        return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[next]));
+        return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[next]),
+                List.of(new PhaseChangedEffect(phases[next].name())));
     }
 
     public static CommandResult handleNextTurn(GameData game, NextTurn cmd, String actor) {
@@ -56,7 +59,6 @@ public final class TurnPhaseHandler {
 
         PlayerData nextPlayer = game.getPlayer(order.get(nextIndex));
         if (nextPlayer == null || nextPlayer.isOusted()) {
-            // All players are ousted — game completion is handled by the caller.
             return CommandResult.silent(game);
         }
         game.setCurrentPlayer(nextPlayer);
@@ -71,7 +73,8 @@ public final class TurnPhaseHandler {
         openAutoImpulse(game, nextPlayerName);
         String turn = major + "." + minor;
         String msg = "Turn " + turn + " — " + nextPlayerName + " begins their turn";
-        return new CommandResult(game, msg, new CommandLogData.NextTurnLog(actor, turn, nextPlayerName));
+        return new CommandResult(game, msg, new CommandLogData.NextTurnLog(actor, turn, nextPlayerName),
+                List.of(new TurnChangedEffect(turn, nextPlayerName), new PhaseChangedEffect(Phase.UNLOCK.name())));
     }
 
     static void openAutoImpulse(GameData game, String actingPlayer) {

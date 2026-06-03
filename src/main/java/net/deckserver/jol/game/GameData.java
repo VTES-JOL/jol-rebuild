@@ -35,6 +35,7 @@ public class GameData {
     private PendingActionState pendingAction;
     private SequencingWindowState sequencingWindow;
     private boolean completed = false;
+    private boolean rulesEnforced = false;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -197,6 +198,8 @@ public class GameData {
     public void setTimeoutRequestor(String timeoutRequestor) { this.timeoutRequestor = timeoutRequestor; }
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; }
+    public boolean isRulesEnforced() { return rulesEnforced; }
+    public void setRulesEnforced(boolean rulesEnforced) { this.rulesEnforced = rulesEnforced; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);
