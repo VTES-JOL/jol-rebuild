@@ -182,6 +182,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
     const [oustOpen, setOustOpen] = useState(false);
     const eligibleToOust = gameState?.players.filter(p => p.pool > 0 && p.name !== currentUser) ?? [];
     const hasImpulse = !gameState?.impulseWindow?.active || gameState.impulseWindow.currentImpulseHolder === currentUser;
+    const canAct = !isSpectator && hasImpulse;
 
     return (
         <div className="flex flex-col pb-2 shrink-0 gap-1 min-w-0">
@@ -247,31 +248,31 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
 
             {gameState && (
                 <div className="flex items-center gap-1">
-                    <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(drawCard(gameId))} title={hasImpulse ? 'Draw a card from your library' : 'Not your impulse'}>
+                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(drawCard(gameId))} title={hasImpulse ? 'Draw a card from your library' : 'Not your impulse'}>
                         Draw
                     </button>
-                    <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(drawCrypt(gameId))} title={hasImpulse ? 'Draw a card from your crypt to uncontrolled' : 'Not your impulse'}>
+                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(drawCrypt(gameId))} title={hasImpulse ? 'Draw a card from your crypt to uncontrolled' : 'Not your impulse'}>
                         Draw Crypt
                     </button>
-                    <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(shuffleLibrary(gameId))} title={hasImpulse ? 'Shuffle your library' : 'Not your impulse'}>
+                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleLibrary(gameId))} title={hasImpulse ? 'Shuffle your library' : 'Not your impulse'}>
                         ↺ Library
                     </button>
-                    <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(shuffleCrypt(gameId))} title={hasImpulse ? 'Shuffle your crypt' : 'Not your impulse'}>
+                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(shuffleCrypt(gameId))} title={hasImpulse ? 'Shuffle your crypt' : 'Not your impulse'}>
                         ↺ Crypt
                     </button>
-                    <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(unlockAll(gameId))} title={hasImpulse ? 'Unlock all your cards' : 'Not your impulse'}>
+                    <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(unlockAll(gameId))} title={hasImpulse ? 'Unlock all your cards' : 'Not your impulse'}>
                         ↺ Unlock All
                     </button>
                     {!hasEdge && (
-                        <button className={ACTION_BTN} disabled={isSpectator || !hasImpulse} onClick={() => onCommand(gainEdge(gameId))} title={hasImpulse ? 'Gain the Edge' : 'Not your impulse'}>
+                        <button className={ACTION_BTN} disabled={!canAct} onClick={() => onCommand(gainEdge(gameId))} title={hasImpulse ? 'Gain the Edge' : 'Not your impulse'}>
                             Gain Edge
                         </button>
                     )}
                     <button
-                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (isSpectator || !hasImpulse || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
-                        disabled={isSpectator || !hasImpulse || eligibleToOust.length === 0}
+                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (!canAct || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
+                        disabled={!canAct || eligibleToOust.length === 0}
                         onClick={() => setOustOpen(true)}
-                        title={!hasImpulse ? 'Not your impulse' : 'Oust a player'}
+                        title={!canAct ? 'Not your impulse' : 'Oust a player'}
                     >
                         Oust Player
                     </button>

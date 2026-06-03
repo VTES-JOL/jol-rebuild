@@ -23,8 +23,12 @@ public final class PlayerHandler {
 
         game.updatePredatorMapping();
 
+        String turnMsg = "";
         if (cmd.playerName().equals(game.getCurrentPlayerName())) {
-            TurnPhaseHandler.handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
+            CommandResult turnResult = TurnPhaseHandler.handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
+            if (turnResult.logMessage() != null) {
+                turnMsg = "; " + turnResult.logMessage();
+            }
         }
 
         List<PlayerData> survivors = game.getCurrentPlayers();
@@ -33,7 +37,7 @@ public final class PlayerHandler {
             game.setCompleted(true);
         }
 
-        String msg = actor + " ousted " + cmd.playerName();
+        String msg = actor + " ousted " + cmd.playerName() + turnMsg;
         return new CommandResult(game, msg, new CommandLogData.OustPlayerLog(actor, cmd.playerName()));
     }
 

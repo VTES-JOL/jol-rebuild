@@ -39,10 +39,10 @@ public final class InfluenceHandler {
     }
 
     public static CommandResult handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
-        GameRules.requireCardInRegion(GameRules.requireCard(game, cmd.ref()), RegionType.UNCONTROLLED);
+        CardData card = GameRules.requireCard(game, cmd.ref());
+        GameRules.requireCardInRegion(card, RegionType.UNCONTROLLED);
         GameRules.requirePhase(game, Phase.INFLUENCE);
         GameRules.requireCurrentPlayer(game, actor);
-        CardData card = GameRules.requireCard(game, cmd.ref());
         if (card.getCapacity() <= 0 || card.getCounters() < card.getCapacity()) {
             throw new net.deckserver.jol.exception.GameRuleException(
                     "Vampire requires " + card.getCapacity() + " blood to influence (has " + card.getCounters() + ")");

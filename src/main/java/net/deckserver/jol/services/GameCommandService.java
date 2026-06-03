@@ -5,15 +5,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import net.deckserver.jol.entity.Game;
-import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Status;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.services.handler.*;
 import org.jboss.logging.Logger;
-
-import java.util.Set;
 
 @ApplicationScoped
 public class GameCommandService {
@@ -40,6 +37,9 @@ public class GameCommandService {
         }
         CommandResult result;
         synchronized (game) {
+            if (game.isCompleted()) {
+                throw new net.deckserver.jol.exception.GameRuleException("This game has already ended");
+            }
             result = dispatch(game, command, actorUsername);
             persistSnapshot(command.gameId(), result.game());
             if (result.game().isCompleted()) {
@@ -51,15 +51,9 @@ public class GameCommandService {
 
     // ── Dispatch ─────────────────────────────────────────────────────────────
 
-    private static final Set<Class<? extends GameCommand>> IMPULSE_EXEMPT = Set.of(
-        AdvancePhase.class, NextTurn.class,
-        OpenImpulseWindow.class, PassImpulse.class, ClaimImpulse.class, CloseImpulseWindow.class,
-        SetGameNotes.class, SetCardNotes.class, SetChoice.class
-    );
-
     private CommandResult dispatch(GameData game, GameCommand cmd, String actor) {
         ImpulseState impulse = game.getImpulseWindow();
-        if (impulse != null && impulse.isActive() && !IMPULSE_EXEMPT.contains(cmd.getClass())) {
+        if (impulse != null && impulse.isActive() && !cmd.isImpulseExempt()) {
             if (!actor.equals(impulse.getCurrentImpulseHolder())) {
                 throw new net.deckserver.jol.exception.GameRuleException(
                         "It is not your impulse — " + impulse.getCurrentImpulseHolder() + " holds the impulse");
@@ -112,6 +106,7 @@ public class GameCommandService {
             }
         } catch (Exception e) {
             LOG.errorf(e, "Failed to persist game snapshot for %s", gameId);
+            throw new IllegalStateException("Failed to save game state for " + gameId, e);
         }
     }
 

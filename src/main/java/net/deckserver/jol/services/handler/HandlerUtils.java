@@ -8,7 +8,7 @@ import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.CardRef;
 
-import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 final class HandlerUtils {
@@ -59,7 +59,7 @@ final class HandlerUtils {
                 .collect(java.util.stream.Collectors.toList());
         if (!active.contains(actingPlayer)) return List.of(actingPlayer);
 
-        List<String> order = new ArrayList<>();
+        LinkedHashSet<String> order = new LinkedHashSet<>();
         order.add(actingPlayer);
 
         int actingIdx = active.indexOf(actingPlayer);
@@ -73,25 +73,16 @@ final class HandlerUtils {
             case UNDIRECTED -> {
                 if (prey != null && active.contains(prey)) order.add(prey);
                 if (predator != null && active.contains(predator)) order.add(predator);
-                for (int i = 1; i < n; i++) {
-                    String name = active.get((actingIdx + i) % n);
-                    if (!order.contains(name)) order.add(name);
-                }
+                for (int i = 1; i < n; i++) order.add(active.get((actingIdx + i) % n));
             }
             case DIRECTED_SINGLE, COMBAT -> {
                 if (targetPlayerName != null && active.contains(targetPlayerName)) order.add(targetPlayerName);
-                for (int i = 1; i < n; i++) {
-                    String name = active.get((actingIdx + i) % n);
-                    if (!order.contains(name)) order.add(name);
-                }
+                for (int i = 1; i < n; i++) order.add(active.get((actingIdx + i) % n));
             }
             case DIRECTED_MULTI -> {
-                for (int i = 1; i < n; i++) {
-                    String name = active.get((actingIdx + i) % n);
-                    if (!order.contains(name)) order.add(name);
-                }
+                for (int i = 1; i < n; i++) order.add(active.get((actingIdx + i) % n));
             }
         }
-        return order;
+        return List.copyOf(order);
     }
 }

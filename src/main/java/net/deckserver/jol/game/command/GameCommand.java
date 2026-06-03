@@ -57,4 +57,6 @@ public sealed interface GameCommand
             OpenImpulseWindow, PassImpulse, ClaimImpulse, CloseImpulseWindow {
 
     String gameId();
+
+    default boolean isImpulseExempt() { return false; }
 }

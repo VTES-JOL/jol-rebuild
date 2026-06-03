@@ -18,6 +18,9 @@ export function ImpulsePanel({impulse, currentUser, gameId, onCommand}: {
     const isHolder = impulse.currentImpulseHolder === currentUser;
     const holderIdx = impulse.passOrder.indexOf(impulse.currentImpulseHolder);
     const contextLabel = CONTEXT_LABELS[impulse.context] ?? impulse.context;
+    // Players who have passed in the current sub-round (since last open or claim) sit between
+    // [holderIdx - consecutivePasses, holderIdx - 1] in passOrder.
+    const passStart = holderIdx - impulse.consecutivePasses;
 
     return (
         <div className="flex flex-wrap items-center gap-1.5 px-2 py-1 rounded border border-arcane/30 bg-arcane/5 text-xs">
@@ -31,7 +34,7 @@ export function ImpulsePanel({impulse, currentUser, gameId, onCommand}: {
             <div className="flex items-center gap-0.5 flex-wrap">
                 {impulse.passOrder.map((name, i) => {
                     const isCurrent = name === impulse.currentImpulseHolder;
-                    const hasPassed = i < holderIdx;
+                    const hasPassed = impulse.consecutivePasses > 0 && i >= passStart && i < holderIdx;
                     return (
                         <span
                             key={name}

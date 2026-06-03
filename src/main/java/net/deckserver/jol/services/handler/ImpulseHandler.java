@@ -55,6 +55,9 @@ public final class ImpulseHandler {
         if (!cmd.playerName().equals(state.getCurrentImpulseHolder())) {
             throw new GameRuleException("It is not your impulse to claim");
         }
+        if (cmd.playerName().equals(state.getActingPlayer())) {
+            throw new GameRuleException("You are the acting player — pass or act, do not claim your own impulse");
+        }
         state.setConsecutivePasses(0);
         state.setCurrentImpulseHolder(state.getActingPlayer());
         String msg = actor + " used their impulse — impulse returns to " + state.getActingPlayer();

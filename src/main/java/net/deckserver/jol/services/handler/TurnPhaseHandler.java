@@ -55,6 +55,10 @@ public final class TurnPhaseHandler {
         game.setTurn(major + "." + minor);
 
         PlayerData nextPlayer = game.getPlayer(order.get(nextIndex));
+        if (nextPlayer == null || nextPlayer.isOusted()) {
+            // All players are ousted — game completion is handled by the caller.
+            return CommandResult.silent(game);
+        }
         game.setCurrentPlayer(nextPlayer);
         game.setPhase(Phase.UNLOCK);
         game.setTransfersRemaining(0);

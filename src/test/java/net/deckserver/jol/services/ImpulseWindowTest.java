@@ -176,6 +176,27 @@ class ImpulseWindowTest {
                 () -> gameCommandService.execute("Bob", new ClaimImpulse(gameId, "Bob"))); // Bob doesn't hold it
     }
 
+    @Test
+    void claimImpulse_byActingPlayer_throwsGameRuleException() {
+        openUndirected("Alice");
+        // Alice is both actingPlayer and currentImpulseHolder — self-claim must be rejected
+        // to prevent resetting consecutivePasses and blocking auto-close
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Alice", new ClaimImpulse(gameId, "Alice")));
+    }
+
+    @Test
+    void claimImpulse_byActingPlayerAfterReturn_throwsGameRuleException() {
+        openUndirected("Alice");
+        // Bob claims (valid) → impulse returns to Alice; Alice cannot immediately self-claim
+        gameCommandService.execute("Alice", new PassImpulse(gameId, "Alice"));
+        gameCommandService.execute("Bob", new ClaimImpulse(gameId, "Bob"));
+        assertEquals("Alice", game.getImpulseWindow().getCurrentImpulseHolder());
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Alice", new ClaimImpulse(gameId, "Alice")));
+    }
+
     // ── Close window ──────────────────────────────────────────────────────────
 
     @Test
