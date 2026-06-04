@@ -1,0 +1,64 @@
+{
+  "id": "fixture-1p-minions-00000000003",
+  "name": "1-Player with Minions",
+  "playerOrder": ["Alice"],
+  "orderOfPlayReversed": false,
+  "turn": "1.1",
+  "phase": "MINION",
+  "cards": {
+    "aa000000-0000-0000-0000-000000000001": {
+      "id": "aa000000-0000-0000-0000-000000000001",
+      "region": "Alice-Ready region",
+      "owner": "Alice",
+      "controller": "Alice",
+      "cardId": "vamp-001",
+      "name": "Dima",
+      "type": "VAMPIRE",
+      "minion": true
+    },
+    "aa000000-0000-0000-0000-000000000002": {
+      "id": "aa000000-0000-0000-0000-000000000002",
+      "region": "Alice-Torpor",
+      "owner": "Alice",
+      "controller": "Alice",
+      "cardId": "vamp-002",
+      "name": "Elena",
+      "type": "VAMPIRE",
+      "minion": true
+    }
+  },
+  "players": {
+    "Alice": {
+      "name": "Alice",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Alice",
+      "predator": "Alice",
+      "regions": {
+        "READY": {
+          "id": "Alice-Ready region",
+          "cards": ["aa000000-0000-0000-0000-000000000001"],
+          "player": "Alice",
+          "type": "READY"
+        },
+        "TORPOR": {
+          "id": "Alice-Torpor",
+          "cards": ["aa000000-0000-0000-0000-000000000002"],
+          "player": "Alice",
+          "type": "TORPOR"
+        },
+        "UNCONTROLLED":     { "id": "Alice-Uncontrolled region","player": "Alice", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Alice-Ash heap",           "player": "Alice", "type": "ASH_HEAP" },
+        "HAND":             { "id": "Alice-Hand",               "player": "Alice", "type": "HAND" },
+        "LIBRARY":          { "id": "Alice-Library",            "player": "Alice", "type": "LIBRARY" },
+        "CRYPT":            { "id": "Alice-Crypt",              "player": "Alice", "type": "CRYPT" },
+        "REMOVED_FROM_GAME":{ "id": "Alice-Removed from Game",  "player": "Alice", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Alice-Research Area",      "player": "Alice", "type": "RESEARCH" }
+      }
+    }
+  },
+  "currentPlayer": "Alice",
+  "rulesEnforced": false,
+  "transfersRemaining": 0,
+  "completed": false
+}

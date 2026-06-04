@@ -1,0 +1,109 @@
+{
+  "id": "fixture-2p-cards-000000000004",
+  "name": "2-Player with Cards",
+  "playerOrder": ["Alice", "Bob"],
+  "orderOfPlayReversed": false,
+  "turn": "1.1",
+  "phase": "MINION",
+  "cards": {
+    "aa000000-0000-0000-0000-000000000010": {
+      "id": "aa000000-0000-0000-0000-000000000010",
+      "region": "Alice-Hand",
+      "owner": "Alice",
+      "controller": "Alice",
+      "cardId": "lib-001",
+      "name": "Govern the Unaligned",
+      "type": "ACTION"
+    },
+    "aa000000-0000-0000-0000-000000000001": {
+      "id": "aa000000-0000-0000-0000-000000000001",
+      "region": "Alice-Ready region",
+      "owner": "Alice",
+      "controller": "Alice",
+      "cardId": "vamp-001",
+      "name": "Dima",
+      "type": "VAMPIRE",
+      "minion": true
+    },
+    "aa000000-0000-0000-0000-000000000002": {
+      "id": "aa000000-0000-0000-0000-000000000002",
+      "region": "Alice-Ready region",
+      "owner": "Alice",
+      "controller": "Alice",
+      "cardId": "vamp-002",
+      "name": "Elena",
+      "type": "VAMPIRE",
+      "minion": true
+    },
+    "aa000000-0000-0000-0000-000000000020": {
+      "id": "aa000000-0000-0000-0000-000000000020",
+      "region": "Alice-Crypt",
+      "owner": "Alice",
+      "controller": "Alice",
+      "cardId": "vamp-003",
+      "name": "New Vampire",
+      "type": "VAMPIRE",
+      "minion": true
+    }
+  },
+  "players": {
+    "Alice": {
+      "name": "Alice",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Bob",
+      "predator": "Bob",
+      "regions": {
+        "READY": {
+          "id": "Alice-Ready region",
+          "cards": [
+            "aa000000-0000-0000-0000-000000000001",
+            "aa000000-0000-0000-0000-000000000002"
+          ],
+          "player": "Alice",
+          "type": "READY"
+        },
+        "HAND": {
+          "id": "Alice-Hand",
+          "cards": ["aa000000-0000-0000-0000-000000000010"],
+          "player": "Alice",
+          "type": "HAND"
+        },
+        "CRYPT": {
+          "id": "Alice-Crypt",
+          "cards": ["aa000000-0000-0000-0000-000000000020"],
+          "player": "Alice",
+          "type": "CRYPT"
+        },
+        "UNCONTROLLED":     { "id": "Alice-Uncontrolled region","player": "Alice", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Alice-Ash heap",           "player": "Alice", "type": "ASH_HEAP" },
+        "LIBRARY":          { "id": "Alice-Library",            "player": "Alice", "type": "LIBRARY" },
+        "TORPOR":           { "id": "Alice-Torpor",             "player": "Alice", "type": "TORPOR" },
+        "REMOVED_FROM_GAME":{ "id": "Alice-Removed from Game",  "player": "Alice", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Alice-Research Area",      "player": "Alice", "type": "RESEARCH" }
+      }
+    },
+    "Bob": {
+      "name": "Bob",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Alice",
+      "predator": "Alice",
+      "regions": {
+        "READY":            { "id": "Bob-Ready region",         "player": "Bob", "type": "READY" },
+        "UNCONTROLLED":     { "id": "Bob-Uncontrolled region",  "player": "Bob", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Bob-Ash heap",             "player": "Bob", "type": "ASH_HEAP" },
+        "HAND":             { "id": "Bob-Hand",                 "player": "Bob", "type": "HAND" },
+        "LIBRARY":          { "id": "Bob-Library",              "player": "Bob", "type": "LIBRARY" },
+        "CRYPT":            { "id": "Bob-Crypt",                "player": "Bob", "type": "CRYPT" },
+        "TORPOR":           { "id": "Bob-Torpor",               "player": "Bob", "type": "TORPOR" },
+        "REMOVED_FROM_GAME":{ "id": "Bob-Removed from Game",    "player": "Bob", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Bob-Research Area",        "player": "Bob", "type": "RESEARCH" }
+      }
+    }
+  },
+  "currentPlayer": "Alice",
+  "rulesEnforced": false,
+  "transfersRemaining": 0,
+  "completed": false
+}

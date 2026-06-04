@@ -1,0 +1,87 @@
+{
+  "id": "fixture-4p-minion-000000000001",
+  "name": "4-Player Minion Phase",
+  "playerOrder": ["Alice", "Bob", "Carol", "Dave"],
+  "orderOfPlayReversed": false,
+  "turn": "1.1",
+  "phase": "MINION",
+  "cards": {},
+  "players": {
+    "Alice": {
+      "name": "Alice",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Bob",
+      "predator": "Dave",
+      "regions": {
+        "READY":            { "id": "Alice-Ready region",       "player": "Alice", "type": "READY" },
+        "UNCONTROLLED":     { "id": "Alice-Uncontrolled region","player": "Alice", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Alice-Ash heap",           "player": "Alice", "type": "ASH_HEAP" },
+        "HAND":             { "id": "Alice-Hand",               "player": "Alice", "type": "HAND" },
+        "LIBRARY":          { "id": "Alice-Library",            "player": "Alice", "type": "LIBRARY" },
+        "CRYPT":            { "id": "Alice-Crypt",              "player": "Alice", "type": "CRYPT" },
+        "TORPOR":           { "id": "Alice-Torpor",             "player": "Alice", "type": "TORPOR" },
+        "REMOVED_FROM_GAME":{ "id": "Alice-Removed from Game",  "player": "Alice", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Alice-Research Area",      "player": "Alice", "type": "RESEARCH" }
+      }
+    },
+    "Bob": {
+      "name": "Bob",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Carol",
+      "predator": "Alice",
+      "regions": {
+        "READY":            { "id": "Bob-Ready region",         "player": "Bob", "type": "READY" },
+        "UNCONTROLLED":     { "id": "Bob-Uncontrolled region",  "player": "Bob", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Bob-Ash heap",             "player": "Bob", "type": "ASH_HEAP" },
+        "HAND":             { "id": "Bob-Hand",                 "player": "Bob", "type": "HAND" },
+        "LIBRARY":          { "id": "Bob-Library",              "player": "Bob", "type": "LIBRARY" },
+        "CRYPT":            { "id": "Bob-Crypt",                "player": "Bob", "type": "CRYPT" },
+        "TORPOR":           { "id": "Bob-Torpor",               "player": "Bob", "type": "TORPOR" },
+        "REMOVED_FROM_GAME":{ "id": "Bob-Removed from Game",    "player": "Bob", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Bob-Research Area",        "player": "Bob", "type": "RESEARCH" }
+      }
+    },
+    "Carol": {
+      "name": "Carol",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Dave",
+      "predator": "Bob",
+      "regions": {
+        "READY":            { "id": "Carol-Ready region",       "player": "Carol", "type": "READY" },
+        "UNCONTROLLED":     { "id": "Carol-Uncontrolled region","player": "Carol", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Carol-Ash heap",           "player": "Carol", "type": "ASH_HEAP" },
+        "HAND":             { "id": "Carol-Hand",               "player": "Carol", "type": "HAND" },
+        "LIBRARY":          { "id": "Carol-Library",            "player": "Carol", "type": "LIBRARY" },
+        "CRYPT":            { "id": "Carol-Crypt",              "player": "Carol", "type": "CRYPT" },
+        "TORPOR":           { "id": "Carol-Torpor",             "player": "Carol", "type": "TORPOR" },
+        "REMOVED_FROM_GAME":{ "id": "Carol-Removed from Game",  "player": "Carol", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Carol-Research Area",      "player": "Carol", "type": "RESEARCH" }
+      }
+    },
+    "Dave": {
+      "name": "Dave",
+      "pool": 30,
+      "victoryPoints": 0.0,
+      "prey": "Alice",
+      "predator": "Carol",
+      "regions": {
+        "READY":            { "id": "Dave-Ready region",        "player": "Dave", "type": "READY" },
+        "UNCONTROLLED":     { "id": "Dave-Uncontrolled region", "player": "Dave", "type": "UNCONTROLLED" },
+        "ASH_HEAP":         { "id": "Dave-Ash heap",            "player": "Dave", "type": "ASH_HEAP" },
+        "HAND":             { "id": "Dave-Hand",                "player": "Dave", "type": "HAND" },
+        "LIBRARY":          { "id": "Dave-Library",             "player": "Dave", "type": "LIBRARY" },
+        "CRYPT":            { "id": "Dave-Crypt",               "player": "Dave", "type": "CRYPT" },
+        "TORPOR":           { "id": "Dave-Torpor",              "player": "Dave", "type": "TORPOR" },
+        "REMOVED_FROM_GAME":{ "id": "Dave-Removed from Game",   "player": "Dave", "type": "REMOVED_FROM_GAME" },
+        "RESEARCH":         { "id": "Dave-Research Area",       "player": "Dave", "type": "RESEARCH" }
+      }
+    }
+  },
+  "currentPlayer": "Alice",
+  "rulesEnforced": true,
+  "transfersRemaining": 0,
+  "completed": false
+}
