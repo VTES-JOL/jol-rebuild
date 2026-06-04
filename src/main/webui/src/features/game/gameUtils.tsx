@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 import type {CardData, PlayerState, RegionState, RegionType} from './types.ts';
-import type {GameCommand, CardRef} from './gameCommands.ts';
+import type {CardRef, GameCommand} from './gameCommands.ts';
 import {attachCard, cardRef, moveCard} from './gameCommands.ts';
 import type {CompactRegionConfig, FieldRegionConfig} from './FieldRegion.tsx';
 

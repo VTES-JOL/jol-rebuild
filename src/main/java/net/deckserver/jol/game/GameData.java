@@ -15,8 +15,8 @@ public class GameData {
     private String name;
 
     private List<String> playerOrder = new ArrayList<>();
-    private Map<String, PlayerData> players = new HashMap<>();
-    private Map<String, CardData> cards = new HashMap<>();
+    private final Map<String, PlayerData> players = new HashMap<>();
+    private final Map<String, CardData> cards = new HashMap<>();
 
     @JsonIdentityReference(alwaysAsId = true)
     private PlayerData currentPlayer;

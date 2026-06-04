@@ -5,6 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
@@ -12,8 +13,6 @@ import net.deckserver.jol.game.command.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import net.deckserver.jol.exception.GameRuleException;
 
 import java.util.List;
 

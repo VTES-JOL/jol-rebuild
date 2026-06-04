@@ -20,7 +20,7 @@ public class PlayerData {
     @JsonIdentityReference(alwaysAsId = true)
     private PlayerData predator;
 
-    private Map<RegionType, RegionData> regions = new HashMap<>();
+    private final Map<RegionType, RegionData> regions = new HashMap<>();
 
     private String notes;
     private String choice;

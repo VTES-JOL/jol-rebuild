@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { applyOptimisticReaction } from '@/shared/utils/reactionUtils';
-import type { ChatMsg } from '@/hooks/useWebSocket';
+import {describe, expect, it} from 'vitest';
+import {applyOptimisticReaction} from '@/shared/utils/reactionUtils';
+import type {ChatMsg} from '@/hooks/useWebSocket';
 
 function chatMsg(id: string, reactions: ChatMsg['reactions'] = []): ChatMsg {
     return { type: 'CHAT', id, sender: 'alice', content: 'hi', timestamp: '2024-01-01T00:00:00Z', reactions };

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { initials, hueFromName } from '@/shared/utils/avatarUtils';
+import {describe, expect, it} from 'vitest';
+import {hueFromName, initials} from '@/shared/utils/avatarUtils';
 
 describe('initials', () => {
     it('returns the first letter of a single word', () => {

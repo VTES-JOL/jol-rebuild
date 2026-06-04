@@ -8,7 +8,10 @@ import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.AdvancePhase;
 import net.deckserver.jol.game.command.CommandLogData;
 import net.deckserver.jol.game.command.NextTurn;
-import net.deckserver.jol.game.effect.*;
+import net.deckserver.jol.game.effect.GameEffect;
+import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
+import net.deckserver.jol.game.effect.PhaseChangedEffect;
+import net.deckserver.jol.game.effect.TurnChangedEffect;
 import net.deckserver.jol.services.CommandResult;
 
 import java.util.ArrayList;

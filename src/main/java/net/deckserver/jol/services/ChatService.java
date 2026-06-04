@@ -12,7 +12,6 @@ import net.deckserver.jol.dto.ReplySnapshotDto;
 import net.deckserver.jol.entity.ChatMessage;
 import net.deckserver.jol.entity.ChatMessageReaction;
 import net.deckserver.jol.game.command.CommandContext;
-import net.deckserver.jol.game.command.CommandLogData;
 import org.jboss.logging.Logger;
 
 import java.util.List;

@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { regionToStacks } from '@/features/game/gameUtils';
-import type { RegionState, CardData } from '@/features/game/types';
+import {describe, expect, it} from 'vitest';
+import {regionToStacks} from '@/features/game/gameUtils';
+import type {CardData, RegionState} from '@/features/game/types';
 
 function region(overrides: Partial<RegionState> = {}): RegionState {
     return {

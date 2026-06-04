@@ -1,6 +1,6 @@
 import type {SequencingWindowState} from './types.ts';
-import {closeSequencingWindow, passSequencing} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
+import {closeSequencingWindow, passSequencing} from './gameCommands.ts';
 
 const WINDOW_LABELS: Record<string, string> = {
     AS_ANNOUNCED:    'As Announced',

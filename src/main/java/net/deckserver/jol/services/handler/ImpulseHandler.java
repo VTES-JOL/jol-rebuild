@@ -1,6 +1,5 @@
 package net.deckserver.jol.services.handler;
 
-import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;

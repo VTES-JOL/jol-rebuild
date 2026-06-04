@@ -1,7 +1,6 @@
 package net.deckserver.jol.services.handler;
 
 import net.deckserver.jol.enums.RegionType;
-import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;

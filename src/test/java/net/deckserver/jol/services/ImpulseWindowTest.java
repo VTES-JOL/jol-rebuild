@@ -4,19 +4,13 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Phase;
+import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
-import net.deckserver.jol.game.command.AdvancePhase;
-import net.deckserver.jol.game.command.ClaimImpulse;
-import net.deckserver.jol.game.command.CloseImpulseWindow;
-import net.deckserver.jol.game.command.DrawCard;
-import net.deckserver.jol.game.command.OpenImpulseWindow;
-import net.deckserver.jol.game.command.PassImpulse;
+import net.deckserver.jol.game.command.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import net.deckserver.jol.exception.GameRuleException;
 
 import static org.junit.jupiter.api.Assertions.*;
 

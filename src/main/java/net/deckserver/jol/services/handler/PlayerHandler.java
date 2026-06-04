@@ -4,12 +4,12 @@ import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.game.effect.*;
+import net.deckserver.jol.services.CommandResult;
+import net.deckserver.jol.services.GameRules;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import net.deckserver.jol.services.CommandResult;
-import net.deckserver.jol.services.GameRules;
 
 public final class PlayerHandler {
     private PlayerHandler() {}

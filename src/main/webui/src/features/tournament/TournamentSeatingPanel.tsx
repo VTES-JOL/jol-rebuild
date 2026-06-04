@@ -1,7 +1,16 @@
 import {useCallback, useEffect, useState} from 'react';
 import {ChevronDown, ChevronRight, GripVertical, PlusCircle, Users, X} from 'lucide-react';
 import type {DragEndEvent, Modifier} from '@dnd-kit/core';
-import {DndContext, DragOverlay, MouseSensor, TouchSensor, useDraggable, useDroppable, useSensor, useSensors} from '@dnd-kit/core';
+import {
+    DndContext,
+    DragOverlay,
+    MouseSensor,
+    TouchSensor,
+    useDraggable,
+    useDroppable,
+    useSensor,
+    useSensors
+} from '@dnd-kit/core';
 import Button from '@/shared/components/Button';
 import Spinner from '@/shared/components/Spinner';
 import type {Seat, SeatingDto, Tournament, UnseatedPlayer} from './types';

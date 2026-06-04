@@ -1,8 +1,18 @@
 import {createPortal} from 'react-dom';
 import {useState} from 'react';
 import type {GameState} from './types.ts';
-import {drawCard, drawCrypt, gainEdge, oustPlayer, reverseOrder, setRulesMode, shuffleCrypt, shuffleLibrary, unlockAll} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
+import {
+    drawCard,
+    drawCrypt,
+    gainEdge,
+    oustPlayer,
+    reverseOrder,
+    setRulesMode,
+    shuffleCrypt,
+    shuffleLibrary,
+    unlockAll
+} from './gameCommands.ts';
 import {ImpulsePanel, OpenImpulseButton} from './ImpulsePanel.tsx';
 import {ActionDeclarationPanel} from './ActionDeclarationPanel.tsx';
 import {SequencingPanel} from './SequencingPanel.tsx';

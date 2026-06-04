@@ -1,6 +1,6 @@
 import type {ImpulseState} from './types.ts';
-import {claimImpulse, closeImpulseWindow, openImpulseWindow, passImpulse} from './gameCommands.ts';
 import type {GameCommand, ImpulseContext} from './gameCommands.ts';
+import {claimImpulse, closeImpulseWindow, openImpulseWindow, passImpulse} from './gameCommands.ts';
 
 const CONTEXT_LABELS: Record<string, string> = {
     UNDIRECTED: 'Undirected Action',

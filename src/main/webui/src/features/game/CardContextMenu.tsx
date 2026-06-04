@@ -4,10 +4,23 @@ import {createPortal} from 'react-dom';
 import type {CardData} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {
-    addCounter, burnMinion, contestCard, discardCard, transferBloodOff, transferBloodOn,
-    lockCard, moveToTorpor, moveToCrypt, playCard, removeCounter, rescueFromTorpor,
-    setCardNotes, setTitle, influenceCard,
-    clearContestCard, unlockCard,
+    addCounter,
+    burnMinion,
+    clearContestCard,
+    contestCard,
+    discardCard,
+    influenceCard,
+    lockCard,
+    moveToCrypt,
+    moveToTorpor,
+    playCard,
+    removeCounter,
+    rescueFromTorpor,
+    setCardNotes,
+    setTitle,
+    transferBloodOff,
+    transferBloodOn,
+    unlockCard,
 } from './gameCommands.ts';
 import Input from '@/shared/components/Input.tsx';
 import {ClanIcon} from '@/shared/components/ClanIcon.tsx';

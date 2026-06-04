@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import {describe, expect, it} from 'vitest';
 import {
-    groupEntries,
     computeSummary,
-    parseSummary,
+    enrichEntry,
+    extractKrcgCards,
     formatSummaryCompact,
     getBannedEntries,
-    extractKrcgCards,
-    enrichEntry,
+    groupEntries,
+    parseSummary,
 } from '@/features/deck/deckUtils';
-import type { DeckEntry, KrcgContents, CardDetailData } from '@/features/deck/types';
+import type {CardDetailData, DeckEntry, KrcgContents} from '@/features/deck/types';
 
 function entry(overrides: Partial<DeckEntry> & { name: string; isCrypt: boolean }): DeckEntry {
     return {

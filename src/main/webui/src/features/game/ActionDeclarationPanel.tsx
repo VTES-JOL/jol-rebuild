@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import type {CardRef, PendingActionState, PlayerState} from './types.ts';
-import {abortAction, attemptBlock, resolveAction} from './gameCommands.ts';
 import type {GameCommand} from './gameCommands.ts';
+import {abortAction, attemptBlock, resolveAction} from './gameCommands.ts';
 
 const ACTION_LABELS: Record<string, string> = {
     BLEED: 'Bleed',

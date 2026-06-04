@@ -1,9 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import {
-    parseMessageTokens,
-    encodedToDisplay,
-    mapEncodedToDisplayIndex,
-} from '@/shared/utils/parseMessageTokens';
+import {describe, expect, it} from 'vitest';
+import {encodedToDisplay, mapEncodedToDisplayIndex, parseMessageTokens,} from '@/shared/utils/parseMessageTokens';
 
 describe('parseMessageTokens', () => {
     it('returns a single text segment for plain text', () => {

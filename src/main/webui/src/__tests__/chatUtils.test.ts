@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { groupMessages } from '@/features/chat/chatUtils';
-import type { ChatMsg } from '@/hooks/useWebSocket';
+import {describe, expect, it} from 'vitest';
+import {groupMessages} from '@/features/chat/chatUtils';
+import type {ChatMsg} from '@/hooks/useWebSocket';
 
 function msg(id: string, sender: string, timestamp: string, content = 'hi', replyTo?: ChatMsg['replyTo']): ChatMsg {
     return { type: 'CHAT', id, sender, content, timestamp, reactions: [], replyTo };
