@@ -109,7 +109,8 @@ public final class GameEffectApplicator {
         PlayerData player = game.getPlayer(e.playerName());
         if (player == null) return null;
         player.addVictoryPoints(e.delta());
-        return e.playerName() + " gained " + e.delta() + " VP";
+        String dir = e.delta() > 0 ? "gained " + e.delta() : "lost " + Math.abs(e.delta());
+        return e.playerName() + " " + dir + " VP";
     }
 
     private static String applyEdgeChanged(GameData game, EdgeChangedEffect e) {

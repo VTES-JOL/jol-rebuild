@@ -17,6 +17,15 @@ public class ImpulseState {
 
     public ImpulseState() {}
 
+    public ImpulseState(ImpulseState src) {
+        this.active = src.active;
+        this.context = src.context;
+        this.actingPlayer = src.actingPlayer;
+        this.currentImpulseHolder = src.currentImpulseHolder;
+        this.passOrder = src.passOrder;
+        this.consecutivePasses = src.consecutivePasses;
+    }
+
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 

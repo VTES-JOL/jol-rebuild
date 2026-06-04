@@ -7,7 +7,10 @@ import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.CardRef;
+import net.deckserver.jol.game.effect.CardLockedEffect;
+import net.deckserver.jol.game.effect.GameEffect;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -39,18 +42,18 @@ final class HandlerUtils {
         return type == RegionType.UNCONTROLLED || RegionType.OTHER_HIDDEN_REGIONS.contains(type);
     }
 
-    static void unlockPlayerCards(GameData game, String playerName) {
-        PlayerData player = game.getPlayer(playerName);
-        if (player == null) return;
+    static List<GameEffect> buildUnlockEffects(PlayerData player) {
+        List<GameEffect> effects = new ArrayList<>();
         for (RegionType type : RegionType.IN_PLAY_REGIONS) {
             RegionData region = player.getRegion(type);
             for (CardData card : region.getCards()) {
-                card.setLocked(false);
+                if (card.isLocked()) effects.add(new CardLockedEffect(card.getId(), false));
                 for (CardData child : card.getCards()) {
-                    child.setLocked(false);
+                    if (child.isLocked()) effects.add(new CardLockedEffect(child.getId(), false));
                 }
             }
         }
+        return effects;
     }
 
     static List<String> buildPassOrder(GameData game, ImpulseContext context, String actingPlayer, String targetPlayerName) {

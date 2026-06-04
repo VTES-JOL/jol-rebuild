@@ -15,6 +15,20 @@ public class PendingActionState {
 
     public PendingActionState() {}
 
+    public PendingActionState(PendingActionState src) {
+        this.actorRef = src.actorRef;
+        this.actionType = src.actionType;
+        this.targetPlayerName = src.targetPlayerName;
+        this.status = src.status;
+        this.blockerRef = src.blockerRef;
+    }
+
+    public PendingActionState withStatus(ActionStatus newStatus) {
+        PendingActionState copy = new PendingActionState(this);
+        copy.status = newStatus;
+        return copy;
+    }
+
     public CardRef getActorRef() { return actorRef; }
     public void setActorRef(CardRef actorRef) { this.actorRef = actorRef; }
 

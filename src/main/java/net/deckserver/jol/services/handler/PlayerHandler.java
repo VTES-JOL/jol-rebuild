@@ -40,16 +40,11 @@ public final class PlayerHandler {
         }
 
         // Check game completion: count active players minus the one being ousted
-        long survivors = game.getCurrentPlayers().stream()
+        List<PlayerData> survivors = game.getCurrentPlayers().stream()
                 .filter(p -> !p.getName().equals(cmd.playerName()))
-                .count();
-        if (survivors == 1) {
-            String lastPlayer = game.getCurrentPlayers().stream()
-                    .filter(p -> !p.getName().equals(cmd.playerName()))
-                    .findFirst().map(PlayerData::getName).orElse(null);
-            if (lastPlayer != null) {
-                effects.add(new PlayerVictoryPointsChangedEffect(lastPlayer, 1.0f));
-            }
+                .toList();
+        if (survivors.size() == 1) {
+            effects.add(new PlayerVictoryPointsChangedEffect(survivors.getFirst().getName(), 1.0f));
             effects.add(new GameCompletedEffect());
         }
 

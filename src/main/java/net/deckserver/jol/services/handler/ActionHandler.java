@@ -91,11 +91,7 @@ public final class ActionHandler {
             throw new GameRuleException("The acting player cannot block their own action");
         }
 
-        PendingActionState updated = new PendingActionState();
-        updated.setActorRef(pending.getActorRef());
-        updated.setActionType(pending.getActionType());
-        updated.setTargetPlayerName(pending.getTargetPlayerName());
-        updated.setStatus(ActionStatus.BLOCKED);
+        PendingActionState updated = pending.withStatus(ActionStatus.BLOCKED);
         updated.setBlockerRef(cmd.blockerRef());
 
         String msg = actor + " blocked with " + blocker.getName() + " — impulse window closed";
@@ -116,12 +112,7 @@ public final class ActionHandler {
             throw new GameRuleException("The impulse window must close before the action can be resolved");
         }
 
-        PendingActionState resolved = new PendingActionState();
-        resolved.setActorRef(pending.getActorRef());
-        resolved.setActionType(pending.getActionType());
-        resolved.setTargetPlayerName(pending.getTargetPlayerName());
-        resolved.setBlockerRef(pending.getBlockerRef());
-        resolved.setStatus(ActionStatus.AFTER_RESOLUTION);
+        PendingActionState resolved = pending.withStatus(ActionStatus.AFTER_RESOLUTION);
 
         String actingPlayer = pending.getActorRef() != null ? pending.getActorRef().playerName() : actor;
         List<String> passOrder = HandlerUtils.buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null);

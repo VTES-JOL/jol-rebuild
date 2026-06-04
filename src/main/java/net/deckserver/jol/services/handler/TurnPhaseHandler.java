@@ -2,12 +2,9 @@ package net.deckserver.jol.services.handler;
 
 import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Phase;
-import net.deckserver.jol.enums.RegionType;
-import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.PlayerData;
-import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.AdvancePhase;
 import net.deckserver.jol.game.command.CommandLogData;
 import net.deckserver.jol.game.command.NextTurn;
@@ -33,7 +30,10 @@ public final class TurnPhaseHandler {
         Phase nextPhase = phases[next];
         List<GameEffect> effects = new ArrayList<>();
         effects.add(new PhaseChangedEffect(nextPhase.name()));
-        effects.add(buildAutoImpulseEffect(game, game.getCurrentPlayerName()));
+        String currentPlayerName = game.getCurrentPlayerName();
+        if (currentPlayerName != null) {
+            effects.add(buildAutoImpulseEffect(game, currentPlayerName));
+        }
         String msg = actor + " advanced to " + nextPhase.getDescription() + " phase";
         return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, nextPhase), effects);
     }
@@ -78,15 +78,7 @@ public final class TurnPhaseHandler {
         List<GameEffect> effects = new ArrayList<>();
         effects.add(new TurnChangedEffect(turn, nextPlayer.getName()));
         effects.add(new PhaseChangedEffect(Phase.UNLOCK.name()));
-        for (RegionType type : RegionType.IN_PLAY_REGIONS) {
-            RegionData region = nextPlayer.getRegion(type);
-            for (CardData card : region.getCards()) {
-                if (card.isLocked()) effects.add(new CardLockedEffect(card.getId(), false));
-                for (CardData child : card.getCards()) {
-                    if (child.isLocked()) effects.add(new CardLockedEffect(child.getId(), false));
-                }
-            }
-        }
+        effects.addAll(HandlerUtils.buildUnlockEffects(nextPlayer));
         effects.add(buildAutoImpulseEffect(game, nextPlayer.getName()));
         return effects;
     }

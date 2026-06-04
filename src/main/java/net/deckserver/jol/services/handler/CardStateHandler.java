@@ -1,10 +1,8 @@
 package net.deckserver.jol.services.handler;
 
-import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
-import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.game.effect.CardCounterChangedEffect;
 import net.deckserver.jol.game.effect.CardLockedEffect;
@@ -12,7 +10,6 @@ import net.deckserver.jol.game.effect.GameEffect;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class CardStateHandler {
@@ -33,16 +30,7 @@ public final class CardStateHandler {
     public static CommandResult handleUnlockAll(GameData game, UnlockAll cmd, String actor) {
         PlayerData player = game.getPlayer(cmd.playerName());
         if (player == null) return CommandResult.silent(game);
-        List<GameEffect> effects = new ArrayList<>();
-        for (RegionType type : RegionType.IN_PLAY_REGIONS) {
-            RegionData region = player.getRegion(type);
-            for (CardData card : region.getCards()) {
-                if (card.isLocked()) effects.add(new CardLockedEffect(card.getId(), false));
-                for (CardData child : card.getCards()) {
-                    if (child.isLocked()) effects.add(new CardLockedEffect(child.getId(), false));
-                }
-            }
-        }
+        List<GameEffect> effects = HandlerUtils.buildUnlockEffects(player);
         String msg = actor + " unlocked all cards for " + cmd.playerName();
         return new CommandResult(game, msg, null, effects);
     }

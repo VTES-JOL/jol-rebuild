@@ -69,7 +69,7 @@ public class PlayerData {
         this.name = newPlayer;
     }
 
-    public void setPool(int pool) { this.pool = pool; }
+    public void setPool(int pool) { this.pool = Math.max(0, pool); }
     public float getVictoryPoints() { return victoryPoints; }
     public void setVictoryPoints(float victoryPoints) { this.victoryPoints = victoryPoints; }
     public String getNotes() { return notes; }

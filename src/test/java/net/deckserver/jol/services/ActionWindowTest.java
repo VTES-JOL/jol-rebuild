@@ -60,11 +60,13 @@ class ActionWindowTest {
         aCard.setName("Dima");
         aCard.setMinion(true);
         alice.getRegion(RegionType.READY).addCard(aCard, false);
+        game.registerCard(aCard);
 
         CardData bCard = new CardData("vamp-002", bob);
         bCard.setName("Brunhilde");
         bCard.setMinion(true);
         bob.getRegion(RegionType.READY).addCard(bCard, false);
+        game.registerCard(bCard);
 
         aliceMinion = new CardRef("Alice", RegionType.READY, 0, -1);
         bobMinion   = new CardRef("Bob",   RegionType.READY, 0, -1);

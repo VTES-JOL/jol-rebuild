@@ -37,7 +37,7 @@ public final class ImpulseHandler {
 
         int passes = current.getConsecutivePasses() + 1;
         if (passes >= current.getPassOrder().size()) {
-            ImpulseState closed = copyState(current);
+            ImpulseState closed = new ImpulseState(current);
             closed.setActive(false);
             closed.setConsecutivePasses(passes);
             String msg = actor + " passed — all players have passed; impulse window closes";
@@ -49,7 +49,7 @@ public final class ImpulseHandler {
         int idx = order.indexOf(current.getCurrentImpulseHolder());
         String nextHolder = order.get((idx + 1) % order.size());
 
-        ImpulseState updated = copyState(current);
+        ImpulseState updated = new ImpulseState(current);
         updated.setCurrentImpulseHolder(nextHolder);
         updated.setConsecutivePasses(passes);
 
@@ -68,24 +68,13 @@ public final class ImpulseHandler {
             throw new GameRuleException("You are the acting player — pass or act, do not claim your own impulse");
         }
 
-        ImpulseState updated = copyState(current);
+        ImpulseState updated = new ImpulseState(current);
         updated.setCurrentImpulseHolder(current.getActingPlayer());
         updated.setConsecutivePasses(0);
 
         String msg = actor + " used their impulse — impulse returns to " + current.getActingPlayer();
         return new CommandResult(game, msg, new CommandLogData.ClaimImpulseLog(actor),
                 List.of(new ImpulseWindowChangedEffect(true, updated)));
-    }
-
-    private static ImpulseState copyState(ImpulseState src) {
-        ImpulseState copy = new ImpulseState();
-        copy.setActive(src.isActive());
-        copy.setContext(src.getContext());
-        copy.setActingPlayer(src.getActingPlayer());
-        copy.setCurrentImpulseHolder(src.getCurrentImpulseHolder());
-        copy.setConsecutivePasses(src.getConsecutivePasses());
-        copy.setPassOrder(src.getPassOrder());
-        return copy;
     }
 
     public static CommandResult handleCloseImpulseWindow(GameData game, CloseImpulseWindow cmd, String actor) {

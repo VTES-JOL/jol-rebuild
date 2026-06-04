@@ -70,20 +70,7 @@ public class GameData {
 
     @JsonIgnore
     public CardData getCard(String id) {
-        CardData fromMap = this.cards.get(id);
-        if (fromMap != null) return fromMap;
-        // Fallback for games where cards weren't registered in the map (e.g. test fixtures).
-        for (PlayerData player : players.values()) {
-            for (RegionData region : player.getRegions().values()) {
-                for (CardData card : region.getCards()) {
-                    if (id.equals(card.getId())) return card;
-                    for (CardData child : card.getCards()) {
-                        if (id.equals(child.getId())) return child;
-                    }
-                }
-            }
-        }
-        return null;
+        return this.cards.get(id);
     }
 
     @JsonIgnore
@@ -141,6 +128,10 @@ public class GameData {
                 .map(this.players::get)
                 .filter(playerData -> playerData.getPool() > 0)
                 .toList();
+    }
+
+    public void registerCard(CardData card) {
+        cards.put(card.getId(), card);
     }
 
     public void initRegion(RegionData crypt, List<CardData> cryptCards) {
