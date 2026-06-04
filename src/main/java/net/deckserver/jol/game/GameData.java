@@ -130,6 +130,7 @@ public class GameData {
                 .toList();
     }
 
+    /** For use during game initialisation only — mid-game card additions must go through a GameEffect. */
     public void registerCard(CardData card) {
         cards.put(card.getId(), card);
     }

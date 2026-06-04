@@ -543,6 +543,74 @@ class GameCommandStateTest {
         assertFalse(gameStateStore.contains(gameId));
     }
 
+    // ── Edge ──────────────────────────────────────────────────────────────────
+
+    @Test
+    void gainEdge_setsEdgeHolderToPlayer() {
+        assertNull(gameData.getEdge());
+
+        gameCommandService.execute(ACTOR, new GainEdge(gameId, ACTOR));
+
+        assertEquals(gameData.getPlayer(ACTOR), gameData.getEdge());
+    }
+
+    @Test
+    void gainEdge_transfersEdgeToNewHolder() {
+        gameCommandService.execute("Player5", new GainEdge(gameId, "Player5"));
+        assertEquals(gameData.getPlayer("Player5"), gameData.getEdge());
+
+        gameCommandService.execute(ACTOR, new GainEdge(gameId, ACTOR));
+
+        assertEquals(gameData.getPlayer(ACTOR), gameData.getEdge());
+    }
+
+    // ── ReverseOrder / SetChoice ──────────────────────────────────────────────
+
+    @Test
+    void reverseOrder_togglesFlag() {
+        assertFalse(gameData.isOrderOfPlayReversed());
+
+        gameCommandService.execute(ACTOR, new ReverseOrder(gameId));
+        assertTrue(gameData.isOrderOfPlayReversed());
+
+        gameCommandService.execute(ACTOR, new ReverseOrder(gameId));
+        assertFalse(gameData.isOrderOfPlayReversed());
+    }
+
+    @Test
+    void setChoice_storesPlayerChoice() {
+        assertNull(gameData.getPlayer(ACTOR).getChoice());
+
+        gameCommandService.execute(ACTOR, new SetChoice(gameId, ACTOR, "yes"));
+
+        assertEquals("yes", gameData.getPlayer(ACTOR).getChoice());
+    }
+
+    @Test
+    void setChoice_overwritesPreviousChoice() {
+        gameCommandService.execute(ACTOR, new SetChoice(gameId, ACTOR, "yes"));
+        gameCommandService.execute(ACTOR, new SetChoice(gameId, ACTOR, "no"));
+
+        assertEquals("no", gameData.getPlayer(ACTOR).getChoice());
+    }
+
+    // ── Pool clamp ────────────────────────────────────────────────────────────
+
+    @Test
+    void setPool_clampedAtZero_whenAmountIsNegative() {
+        gameCommandService.execute(ACTOR, new SetPool(gameId, ACTOR, -5));
+
+        assertEquals(0, gameData.getPlayer(ACTOR).getPool());
+    }
+
+    @Test
+    void setPool_clampedAtZero_whenDeltaWouldGoNegative() {
+        int current = gameData.getPlayer(ACTOR).getPool();
+        gameCommandService.execute(ACTOR, new SetPool(gameId, ACTOR, current - 1000));
+
+        assertEquals(0, gameData.getPlayer(ACTOR).getPool());
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private CardData firstUncontrolled(String playerName) {

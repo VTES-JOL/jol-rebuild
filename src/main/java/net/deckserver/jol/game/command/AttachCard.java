@@ -4,4 +4,6 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 
 /** Attaches a card as a child of another card (e.g. retainer/equipment on a vampire, or merge). */
 @RegisterForReflection
-public record AttachCard(String gameId, CardRef ref, CardRef targetRef) implements GameCommand {}
+public record AttachCard(String gameId, CardRef ref, CardRef targetRef) implements GameCommand {
+    @Override public boolean isPermissiveOnly() { return true; }
+}

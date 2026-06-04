@@ -6,4 +6,5 @@ import net.deckserver.jol.enums.ImpulseContext;
 @RegisterForReflection
 public record OpenImpulseWindow(String gameId, ImpulseContext context, String actingPlayer, String targetPlayerName) implements GameCommand {
     @Override public boolean isImpulseExempt() { return true; }
+    @Override public boolean isEnforcedOnly() { return true; }
 }

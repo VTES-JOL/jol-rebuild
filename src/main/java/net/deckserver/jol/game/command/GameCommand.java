@@ -72,4 +72,6 @@ public sealed interface GameCommand
 
     default boolean isImpulseExempt()    { return false; }
     default boolean isSequencingExempt() { return false; }
+    default boolean isPermissiveOnly()   { return false; }
+    default boolean isEnforcedOnly()     { return false; }
 }

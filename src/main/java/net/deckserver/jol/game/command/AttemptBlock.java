@@ -9,4 +9,5 @@ public record AttemptBlock(
 ) implements GameCommand {
     // Not impulse-exempt: player must hold the impulse to attempt a block.
     @Override public boolean isSequencingExempt() { return true; }
+    @Override public boolean isEnforcedOnly() { return true; }
 }

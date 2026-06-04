@@ -33,6 +33,10 @@ public class GameCommandService {
      * and returns the result including an optional structured log entry.
      * Synchronized on the GameData instance so concurrent commands for the same game are serialized.
      * Throws GameRuleException if a rule precondition fails — callers should convert this to an error response.
+     *
+     * Note: @Transactional opens the Hibernate transaction before the synchronized block, so the
+     * transaction boundary intentionally spans wider than the critical section. If persistSnapshot is
+     * ever extracted to a separate service, ensure the Panache flush stays inside the synchronized block.
      */
     @Transactional
     public CommandResult execute(String actorUsername, GameCommand command) {
@@ -63,11 +67,11 @@ public class GameCommandService {
 
     private CommandResult dispatch(GameData game, GameCommand cmd, String actor) {
         // Mode enforcement — applied before impulse/sequencing checks
-        if (game.isRulesEnforced() && isPermissiveOnly(cmd)) {
+        if (game.isRulesEnforced() && cmd.isPermissiveOnly()) {
             throw new net.deckserver.jol.exception.GameRuleException(
                     "This command is not available in rules-enforced mode");
         }
-        if (!game.isRulesEnforced() && isEnforcedOnly(cmd)) {
+        if (!game.isRulesEnforced() && cmd.isEnforcedOnly()) {
             throw new net.deckserver.jol.exception.GameRuleException(
                     "This command is not available in permissive mode");
         }
@@ -130,33 +134,13 @@ public class GameCommandService {
             case AbortAction c          -> ActionHandler.handleAbortAction(game, c, actor);
             case PassSequencing c       -> SequencingHandler.handlePassSequencing(game, c, actor);
             case CloseSequencingWindow c -> SequencingHandler.handleCloseSequencingWindow(game, c, actor);
-            case SetRulesMode c         -> {
+            case SetRulesMode c         -> { // available in both modes — intentionally not permissive-only or enforced-only
                 String label = c.enforced() ? "rules-enforced" : "permissive";
                 yield new CommandResult(game, actor + " switched the game to " + label + " mode",
                         new net.deckserver.jol.game.command.CommandLogData.SetRulesModeLog(actor, c.enforced()),
                         List.of(new net.deckserver.jol.game.effect.GameModeChangedEffect(c.enforced())));
             }
         };
-    }
-
-    private static boolean isPermissiveOnly(GameCommand command) {
-        return command instanceof MoveCard || command instanceof DrawCard || command instanceof DrawCrypt
-                || command instanceof DrawCryptToUncontrolled || command instanceof DiscardCard
-                || command instanceof PlayCard || command instanceof AttachCard
-                || command instanceof SetPool || command instanceof GainEdge
-                || command instanceof TransferBlood || command instanceof InfluenceCard
-                || command instanceof MoveToCrypt || command instanceof MoveToTorpor
-                || command instanceof RescueFromTorpor || command instanceof BurnMinion
-                || command instanceof MergeAdvanced || command instanceof OustPlayer
-                || command instanceof AdvancePhase || command instanceof NextTurn;
-    }
-
-    private static boolean isEnforcedOnly(GameCommand command) {
-        return command instanceof OpenImpulseWindow || command instanceof CloseImpulseWindow
-                || command instanceof PassImpulse || command instanceof ClaimImpulse
-                || command instanceof DeclareAction || command instanceof AttemptBlock
-                || command instanceof ResolveAction || command instanceof AbortAction
-                || command instanceof PassSequencing || command instanceof CloseSequencingWindow;
     }
 
     private void persistSnapshot(String gameId, GameData gameData) {
