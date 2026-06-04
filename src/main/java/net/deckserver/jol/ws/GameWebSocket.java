@@ -149,6 +149,10 @@ public class GameWebSocket {
                 ChatMessageDto log = chatService.save(gameId, userName(), result.logMessage(), null);
                 connection.broadcast().sendTextAndAwait(log);
             }
+            for (String effectMsg : result.effectLogMessages()) {
+                ChatMessageDto effectLog = chatService.save(gameId, "system", effectMsg, null);
+                connection.broadcast().sendTextAndAwait(effectLog);
+            }
             broadcaster.broadcastState(gameId, result.game());
         } catch (GameRuleException | IllegalStateException e) {
             sendSafely(GameMessageDto.error(e.getMessage()));

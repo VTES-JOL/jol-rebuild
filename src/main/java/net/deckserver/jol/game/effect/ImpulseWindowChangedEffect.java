@@ -1,4 +1,10 @@
 package net.deckserver.jol.game.effect;
 
-/** The impulse window was opened, updated, or closed. active reflects the new state. */
-public record ImpulseWindowChangedEffect(boolean active) implements GameEffect {}
+import net.deckserver.jol.game.ImpulseState;
+
+/** The impulse window was opened, updated, or closed. state is null when active=false. */
+public record ImpulseWindowChangedEffect(boolean active, ImpulseState state) implements GameEffect {
+    public ImpulseWindowChangedEffect(boolean active) {
+        this(active, null);
+    }
+}

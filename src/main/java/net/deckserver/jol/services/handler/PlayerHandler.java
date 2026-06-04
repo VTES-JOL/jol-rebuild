@@ -3,13 +3,11 @@ package net.deckserver.jol.services.handler;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
-import net.deckserver.jol.game.effect.GameCompletedEffect;
-import net.deckserver.jol.game.effect.GameEffect;
-import net.deckserver.jol.game.effect.PlayerOustedEffect;
-import net.deckserver.jol.game.effect.PlayerPoolChangedEffect;
+import net.deckserver.jol.game.effect.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
 
@@ -18,33 +16,40 @@ public final class PlayerHandler {
 
     public static CommandResult handleOustPlayer(GameData game, OustPlayer cmd, String actor) {
         PlayerData ousted = GameRules.requirePlayer(game, cmd.playerName());
-        ousted.setPool(0);
 
         List<GameEffect> effects = new ArrayList<>();
+        effects.add(new PlayerPoolChangedEffect(cmd.playerName(), -ousted.getPool()));
         effects.add(new PlayerOustedEffect(cmd.playerName()));
 
         PlayerData predator = ousted.getPredator();
         if (predator != null) {
-            predator.addVictoryPoints(1.0f);
-            predator.setPool(predator.getPool() + 6);
+            effects.add(new PlayerVictoryPointsChangedEffect(predator.getName(), 1.0f));
             effects.add(new PlayerPoolChangedEffect(predator.getName(), 6));
         }
 
-        game.updatePredatorMapping();
-
+        // Compute next-turn effects before state is mutated, skipping the ousted player
         String turnMsg = "";
         if (cmd.playerName().equals(game.getCurrentPlayerName())) {
-            CommandResult turnResult = TurnPhaseHandler.handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
-            if (turnResult.logMessage() != null) {
-                turnMsg = "; " + turnResult.logMessage();
+            List<GameEffect> turnEffects = TurnPhaseHandler.computeNextTurnEffects(
+                    game, cmd.gameId(), Set.of(cmd.playerName()), actor);
+            if (!turnEffects.isEmpty()) {
+                TurnChangedEffect te = (TurnChangedEffect) turnEffects.getFirst();
+                turnMsg = "; turn " + te.turn() + " — " + te.currentPlayerName() + " begins";
             }
-            effects.addAll(turnResult.effects());
+            effects.addAll(turnEffects);
         }
 
-        List<PlayerData> survivors = game.getCurrentPlayers();
-        if (survivors.size() == 1) {
-            survivors.getFirst().addVictoryPoints(1.0f);
-            game.setCompleted(true);
+        // Check game completion: count active players minus the one being ousted
+        long survivors = game.getCurrentPlayers().stream()
+                .filter(p -> !p.getName().equals(cmd.playerName()))
+                .count();
+        if (survivors == 1) {
+            String lastPlayer = game.getCurrentPlayers().stream()
+                    .filter(p -> !p.getName().equals(cmd.playerName()))
+                    .findFirst().map(PlayerData::getName).orElse(null);
+            if (lastPlayer != null) {
+                effects.add(new PlayerVictoryPointsChangedEffect(lastPlayer, 1.0f));
+            }
             effects.add(new GameCompletedEffect());
         }
 
@@ -59,13 +64,14 @@ public final class PlayerHandler {
     }
 
     public static CommandResult handleReverseOrder(GameData game, ReverseOrder cmd, String actor) {
-        game.setOrderOfPlayReversed(!game.isOrderOfPlayReversed());
+        boolean newState = !game.isOrderOfPlayReversed();
         String msg = actor + " reversed the order of play";
-        return new CommandResult(game, msg, new CommandLogData.ReverseOrderLog(actor));
+        return new CommandResult(game, msg, new CommandLogData.ReverseOrderLog(actor),
+                List.of(new OrderOfPlayReversedEffect(newState)));
     }
 
     public static CommandResult handleSetGameNotes(GameData game, SetGameNotes cmd) {
-        game.setNotes(cmd.notes());
-        return CommandResult.silent(game);
+        return new CommandResult(game, null, null,
+                List.of(new GameNotesChangedEffect(cmd.notes())));
     }
 }

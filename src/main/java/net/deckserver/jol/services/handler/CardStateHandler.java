@@ -1,45 +1,66 @@
 package net.deckserver.jol.services.handler;
 
+import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.PlayerData;
+import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.CardCounterChangedEffect;
+import net.deckserver.jol.game.effect.CardLockedEffect;
+import net.deckserver.jol.game.effect.GameEffect;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class CardStateHandler {
     private CardStateHandler() {}
 
     public static CommandResult handleLockCard(GameData game, LockCard cmd) {
         CardData card = GameRules.requireCard(game, cmd.ref());
-        card.setLocked(true);
-        return CommandResult.silent(game);
+        return new CommandResult(game, null, null,
+                List.of(new CardLockedEffect(card.getId(), true)));
     }
 
     public static CommandResult handleUnlockCard(GameData game, UnlockCard cmd) {
         CardData card = GameRules.requireCard(game, cmd.ref());
-        card.setLocked(false);
-        return CommandResult.silent(game);
+        return new CommandResult(game, null, null,
+                List.of(new CardLockedEffect(card.getId(), false)));
     }
 
-    public static CommandResult handleUnlockAll(GameData game, UnlockAll cmd) {
-        HandlerUtils.unlockPlayerCards(game, cmd.playerName());
-        return CommandResult.silent(game);
+    public static CommandResult handleUnlockAll(GameData game, UnlockAll cmd, String actor) {
+        PlayerData player = game.getPlayer(cmd.playerName());
+        if (player == null) return CommandResult.silent(game);
+        List<GameEffect> effects = new ArrayList<>();
+        for (RegionType type : RegionType.IN_PLAY_REGIONS) {
+            RegionData region = player.getRegion(type);
+            for (CardData card : region.getCards()) {
+                if (card.isLocked()) effects.add(new CardLockedEffect(card.getId(), false));
+                for (CardData child : card.getCards()) {
+                    if (child.isLocked()) effects.add(new CardLockedEffect(child.getId(), false));
+                }
+            }
+        }
+        String msg = actor + " unlocked all cards for " + cmd.playerName();
+        return new CommandResult(game, msg, null, effects);
     }
 
     public static CommandResult handleAddCounter(GameData game, AddCounter cmd, String actor) {
         CardData card = GameRules.requireCard(game, cmd.ref());
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), HandlerUtils.isHidden(card));
-        card.setCounters(card.getCounters() + cmd.amount());
         String msg = actor + " added " + cmd.amount() + " counter(s) to " + HandlerUtils.cardLabel(card, cmd.ref());
-        return new CommandResult(game, msg, new CommandLogData.AddCounterLog(actor, logRef, cmd.amount()));
+        return new CommandResult(game, msg, new CommandLogData.AddCounterLog(actor, logRef, cmd.amount()),
+                List.of(new CardCounterChangedEffect(card.getId(), cmd.amount())));
     }
 
     public static CommandResult handleRemoveCounter(GameData game, RemoveCounter cmd, String actor) {
         CardData card = GameRules.requireCard(game, cmd.ref());
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), HandlerUtils.isHidden(card));
-        card.setCounters(Math.max(0, card.getCounters() - cmd.amount()));
         String msg = actor + " removed " + cmd.amount() + " counter(s) from " + HandlerUtils.cardLabel(card, cmd.ref());
-        return new CommandResult(game, msg, new CommandLogData.RemoveCounterLog(actor, logRef, cmd.amount()));
+        return new CommandResult(game, msg, new CommandLogData.RemoveCounterLog(actor, logRef, cmd.amount()),
+                List.of(new CardCounterChangedEffect(card.getId(), -cmd.amount())));
     }
 
     public static CommandResult handleSetCardNotes(GameData game, SetCardNotes cmd) {

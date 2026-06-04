@@ -2,17 +2,21 @@ package net.deckserver.jol.services.handler;
 
 import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Phase;
+import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.PlayerData;
+import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.AdvancePhase;
 import net.deckserver.jol.game.command.CommandLogData;
 import net.deckserver.jol.game.command.NextTurn;
-import net.deckserver.jol.game.effect.PhaseChangedEffect;
-import net.deckserver.jol.game.effect.TurnChangedEffect;
+import net.deckserver.jol.game.effect.*;
 import net.deckserver.jol.services.CommandResult;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public final class TurnPhaseHandler {
     private TurnPhaseHandler() {}
@@ -22,19 +26,30 @@ public final class TurnPhaseHandler {
         int current = game.getPhase() != null ? game.getPhase().ordinal() : 0;
         int next = (current + 1) % phases.length;
         if (next == 0) {
-            return handleNextTurn(game, new NextTurn(cmd.gameId()), actor);
+            List<GameEffect> effects = computeNextTurnEffects(game, cmd.gameId(), Set.of(), actor);
+            String msg = "Turn advanced past " + phases[current].getDescription();
+            return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[0]), effects);
         }
-        game.setPhase(phases[next]);
-        if (phases[next] == Phase.INFLUENCE) {
-            game.setTransfersRemaining(computeTransferBudget(game));
-        }
-        openAutoImpulse(game, game.getCurrentPlayerName());
-        String msg = actor + " advanced to " + phases[next].getDescription() + " phase";
-        return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, phases[next]),
-                List.of(new PhaseChangedEffect(phases[next].name())));
+        Phase nextPhase = phases[next];
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new PhaseChangedEffect(nextPhase.name()));
+        effects.add(buildAutoImpulseEffect(game, game.getCurrentPlayerName()));
+        String msg = actor + " advanced to " + nextPhase.getDescription() + " phase";
+        return new CommandResult(game, msg, new CommandLogData.AdvancePhaseLog(actor, nextPhase), effects);
     }
 
     public static CommandResult handleNextTurn(GameData game, NextTurn cmd, String actor) {
+        List<GameEffect> effects = computeNextTurnEffects(game, cmd.gameId(), Set.of(), actor);
+        if (effects.isEmpty()) return CommandResult.silent(game);
+        TurnChangedEffect turnEffect = (TurnChangedEffect) effects.getFirst();
+        String msg = "Turn " + turnEffect.turn() + " — " + turnEffect.currentPlayerName() + " begins their turn";
+        return new CommandResult(game, msg,
+                new CommandLogData.NextTurnLog(actor, turnEffect.turn(), turnEffect.currentPlayerName()),
+                effects);
+    }
+
+    /** Computes next-turn effects without mutating game state. skipPlayers is excluded when finding the next player. */
+    static List<GameEffect> computeNextTurnEffects(GameData game, String gameId, Set<String> skipPlayers, String actor) {
         List<String> order = game.getPlayerOrder();
         String currentName = game.getCurrentPlayerName();
         int currentIndex = currentName != null ? order.indexOf(currentName) : -1;
@@ -43,41 +58,40 @@ public final class TurnPhaseHandler {
         int nextIndex = currentIndex;
         for (int i = 1; i <= size; i++) {
             nextIndex = (currentIndex + i) % size;
-            PlayerData candidate = game.getPlayer(order.get(nextIndex));
-            if (candidate != null && !candidate.isOusted()) break;
+            String candidateName = order.get(nextIndex);
+            PlayerData candidate = game.getPlayer(candidateName);
+            if (candidate != null && !candidate.isOusted() && !skipPlayers.contains(candidateName)) break;
         }
 
         String[] parts = game.getTurn() != null ? game.getTurn().split("\\.") : new String[]{"1", "0"};
         int major = Integer.parseInt(parts[0]);
         int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
         minor++;
-        if (minor > size) {
-            major++;
-            minor = 1;
-        }
-        game.setTurn(major + "." + minor);
+        if (minor > size) { major++; minor = 1; }
+        String turn = major + "." + minor;
 
         PlayerData nextPlayer = game.getPlayer(order.get(nextIndex));
-        if (nextPlayer == null || nextPlayer.isOusted()) {
-            return CommandResult.silent(game);
-        }
-        game.setCurrentPlayer(nextPlayer);
-        game.setPhase(Phase.UNLOCK);
-        game.setTransfersRemaining(0);
-
-        if (nextPlayer != null) {
-            HandlerUtils.unlockPlayerCards(game, nextPlayer.getName());
+        if (nextPlayer == null || nextPlayer.isOusted() || skipPlayers.contains(nextPlayer.getName())) {
+            return List.of();
         }
 
-        String nextPlayerName = nextPlayer != null ? nextPlayer.getName() : "unknown";
-        openAutoImpulse(game, nextPlayerName);
-        String turn = major + "." + minor;
-        String msg = "Turn " + turn + " — " + nextPlayerName + " begins their turn";
-        return new CommandResult(game, msg, new CommandLogData.NextTurnLog(actor, turn, nextPlayerName),
-                List.of(new TurnChangedEffect(turn, nextPlayerName), new PhaseChangedEffect(Phase.UNLOCK.name())));
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new TurnChangedEffect(turn, nextPlayer.getName()));
+        effects.add(new PhaseChangedEffect(Phase.UNLOCK.name()));
+        for (RegionType type : RegionType.IN_PLAY_REGIONS) {
+            RegionData region = nextPlayer.getRegion(type);
+            for (CardData card : region.getCards()) {
+                if (card.isLocked()) effects.add(new CardLockedEffect(card.getId(), false));
+                for (CardData child : card.getCards()) {
+                    if (child.isLocked()) effects.add(new CardLockedEffect(child.getId(), false));
+                }
+            }
+        }
+        effects.add(buildAutoImpulseEffect(game, nextPlayer.getName()));
+        return effects;
     }
 
-    static void openAutoImpulse(GameData game, String actingPlayer) {
+    static ImpulseWindowChangedEffect buildAutoImpulseEffect(GameData game, String actingPlayer) {
         ImpulseState state = new ImpulseState();
         state.setActive(true);
         state.setContext(ImpulseContext.UNDIRECTED);
@@ -85,14 +99,6 @@ public final class TurnPhaseHandler {
         state.setCurrentImpulseHolder(actingPlayer);
         state.setConsecutivePasses(0);
         state.setPassOrder(HandlerUtils.buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null));
-        game.setImpulseWindow(state);
-    }
-
-    private static int computeTransferBudget(GameData game) {
-        String[] parts = game.getTurn().split("\\.");
-        int major = Integer.parseInt(parts[0]);
-        if (major >= 2) return 4;
-        int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
-        return Math.min(minor, 4);
+        return new ImpulseWindowChangedEffect(true, state);
     }
 }

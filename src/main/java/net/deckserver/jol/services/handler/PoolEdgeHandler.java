@@ -18,15 +18,13 @@ public final class PoolEdgeHandler {
     public static CommandResult handleSetPool(GameData game, SetPool cmd, String actor) {
         PlayerData player = GameRules.requirePlayer(game, cmd.playerName());
         int delta = cmd.amount() - player.getPool();
-        player.setPool(cmd.amount());
         String msg = actor + " set " + cmd.playerName() + "'s pool to " + cmd.amount();
         return new CommandResult(game, msg, new CommandLogData.SetPoolLog(actor, cmd.playerName(), cmd.amount()),
                 List.of(new PlayerPoolChangedEffect(cmd.playerName(), delta)));
     }
 
     public static CommandResult handleGainEdge(GameData game, GainEdge cmd, String actor) {
-        PlayerData player = GameRules.requirePlayer(game, cmd.playerName());
-        game.setEdge(player);
+        GameRules.requirePlayer(game, cmd.playerName());
         String msg = actor + " gained the Edge";
         return new CommandResult(game, msg, new CommandLogData.GainEdgeLog(actor),
                 List.of(new EdgeChangedEffect(cmd.playerName())));

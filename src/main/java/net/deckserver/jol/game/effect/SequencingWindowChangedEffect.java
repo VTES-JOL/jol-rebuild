@@ -1,4 +1,10 @@
 package net.deckserver.jol.game.effect;
 
-/** The sequencing window was opened, updated, or closed. active reflects the new state. */
-public record SequencingWindowChangedEffect(boolean active) implements GameEffect {}
+import net.deckserver.jol.game.SequencingWindowState;
+
+/** The sequencing window was opened, updated, or closed. state is null when active=false. */
+public record SequencingWindowChangedEffect(boolean active, SequencingWindowState state) implements GameEffect {
+    public SequencingWindowChangedEffect(boolean active) {
+        this(active, null);
+    }
+}

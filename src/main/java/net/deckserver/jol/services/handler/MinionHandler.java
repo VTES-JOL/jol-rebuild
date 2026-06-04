@@ -19,7 +19,6 @@ public final class MinionHandler {
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = HandlerUtils.cardToken(card);
         PlayerData owner = GameRules.requireOwner(card);
-        owner.getRegion(RegionType.TORPOR).addCard(card, false);
         String msg = actor + " sent " + token + " to Torpor";
         return new CommandResult(game, msg, new CommandLogData.MoveToTorporLog(actor, logRef),
                 List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.TORPOR.name())));
@@ -30,7 +29,6 @@ public final class MinionHandler {
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = HandlerUtils.cardToken(card);
         PlayerData owner = GameRules.requireOwner(card);
-        owner.getRegion(RegionType.READY).addCard(card, false);
         String msg = actor + " rescued " + token + " from Torpor";
         return new CommandResult(game, msg, new CommandLogData.RescueFromTorporLog(actor, logRef),
                 List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.READY.name())));
@@ -41,7 +39,6 @@ public final class MinionHandler {
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = HandlerUtils.cardToken(card);
         PlayerData owner = GameRules.requireOwner(card);
-        owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
         String msg = actor + " burned " + token;
         return new CommandResult(game, msg, new CommandLogData.BurnMinionLog(actor, logRef),
                 List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.ASH_HEAP.name())));

@@ -10,10 +10,12 @@ import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.SequencingWindowState;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.GameEffectApplicator;
 import net.deckserver.jol.services.handler.*;
 import org.jboss.logging.Logger;
 
 import java.util.List;
+import java.util.Objects;
 
 @ApplicationScoped
 public class GameCommandService {
@@ -43,7 +45,12 @@ public class GameCommandService {
             if (game.isCompleted()) {
                 throw new net.deckserver.jol.exception.GameRuleException("This game has already ended");
             }
-            result = dispatch(game, command, actorUsername);
+            CommandResult raw = dispatch(game, command, actorUsername);
+            List<String> effectLogs = raw.effects().stream()
+                    .map(e -> GameEffectApplicator.apply(game, e))
+                    .filter(Objects::nonNull)
+                    .toList();
+            result = new CommandResult(game, raw.logMessage(), raw.commandLog(), raw.effects(), effectLogs);
             persistSnapshot(command.gameId(), result.game());
             if (result.game().isCompleted()) {
                 finishGame(command.gameId());
@@ -92,7 +99,7 @@ public class GameCommandService {
             case AttachCard c           -> CardMovementHandler.handleAttachCard(game, c, actor);
             case LockCard c             -> CardStateHandler.handleLockCard(game, c);
             case UnlockCard c           -> CardStateHandler.handleUnlockCard(game, c);
-            case UnlockAll c            -> CardStateHandler.handleUnlockAll(game, c);
+            case UnlockAll c            -> CardStateHandler.handleUnlockAll(game, c, actor);
             case AddCounter c           -> CardStateHandler.handleAddCounter(game, c, actor);
             case RemoveCounter c        -> CardStateHandler.handleRemoveCounter(game, c, actor);
             case SetCardNotes c         -> CardStateHandler.handleSetCardNotes(game, c);
@@ -124,7 +131,6 @@ public class GameCommandService {
             case PassSequencing c       -> SequencingHandler.handlePassSequencing(game, c, actor);
             case CloseSequencingWindow c -> SequencingHandler.handleCloseSequencingWindow(game, c, actor);
             case SetRulesMode c         -> {
-                game.setRulesEnforced(c.enforced());
                 String label = c.enforced() ? "rules-enforced" : "permissive";
                 yield new CommandResult(game, actor + " switched the game to " + label + " mode",
                         new net.deckserver.jol.game.command.CommandLogData.SetRulesModeLog(actor, c.enforced()),

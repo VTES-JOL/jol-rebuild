@@ -21,10 +21,9 @@ public final class CardMovementHandler {
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = HandlerUtils.cardToken(card);
         PlayerData owner = GameRules.requireOwner(card);
-        owner.getRegion(RegionType.ASH_HEAP).addCard(card, true);
         String msg = actor + " discarded " + token;
         return new CommandResult(game, msg, new CommandLogData.DiscardCardLog(actor, logRef),
-                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.ASH_HEAP.name())));
+                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.ASH_HEAP.name(), 0)));
     }
 
     public static CommandResult handlePlayCard(GameData game, PlayCard cmd, String actor) {
@@ -34,15 +33,12 @@ public final class CardMovementHandler {
         String token = HandlerUtils.cardToken(card);
         if (cmd.targetPlayerName() == null || cmd.targetRegionType() == null) {
             PlayerData owner = card.getOwner();
-            if (owner != null) owner.getRegion(RegionType.ASH_HEAP).addCard(card, false);
-            String msg = actor + " played " + token;
             String targetPlayer = owner != null ? owner.getName() : actor;
+            String msg = actor + " played " + token;
             return new CommandResult(game, msg, new CommandLogData.PlayCardLog(actor, logRef),
                     List.of(new CardMovedEffect(card.getId(), targetPlayer, RegionType.ASH_HEAP.name())));
         }
-        PlayerData targetPlayer = GameRules.requirePlayer(game, cmd.targetPlayerName());
-        RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
-        if (target != null) target.addCard(card, false);
+        GameRules.requirePlayer(game, cmd.targetPlayerName());
         String msg = actor + " played " + token;
         return new CommandResult(game, msg, new CommandLogData.PlayCardLog(actor, logRef),
                 List.of(new CardMovedEffect(card.getId(), cmd.targetPlayerName(), cmd.targetRegionType().name())));
@@ -56,14 +52,11 @@ public final class CardMovementHandler {
         boolean hidden = !(sourceVisible || destVisible);
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), hidden);
         String label = hidden ? HandlerUtils.cardLabel(card, cmd.ref()) : HandlerUtils.cardToken(card);
-        PlayerData targetPlayer = GameRules.requirePlayer(game, cmd.targetPlayerName());
-        RegionData target = targetPlayer.getRegion(cmd.targetRegionType());
-        if (target == null) throw new net.deckserver.jol.exception.GameRuleException("Target region not found");
-        target.addCard(card, cmd.position());
+        GameRules.requirePlayer(game, cmd.targetPlayerName());
         String msg = actor + " moved " + label + " to " + cmd.targetPlayerName() + "'s " + cmd.targetRegionType().description();
         return new CommandResult(game, msg,
                 new CommandLogData.MoveCardLog(actor, logRef, cmd.targetPlayerName(), cmd.targetRegionType().name()),
-                List.of(new CardMovedEffect(card.getId(), cmd.targetPlayerName(), cmd.targetRegionType().name())));
+                List.of(new CardMovedEffect(card.getId(), cmd.targetPlayerName(), cmd.targetRegionType().name(), cmd.position())));
     }
 
     public static CommandResult handleAttachCard(GameData game, AttachCard cmd, String actor) {
@@ -73,7 +66,6 @@ public final class CardMovementHandler {
         LogCardRef targetRef = LogCardRef.of(target, cmd.targetRef(), false);
         String cardToken = HandlerUtils.cardToken(card);
         String targetToken = HandlerUtils.cardToken(target);
-        target.add(card, false);
         String msg = actor + " attached " + cardToken + " to " + targetToken;
         return new CommandResult(game, msg, new CommandLogData.AttachCardLog(actor, cardRef, targetRef),
                 List.of(new CardAttachedEffect(card.getId(), target.getId())));

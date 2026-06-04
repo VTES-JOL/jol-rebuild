@@ -242,7 +242,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 |--------------------|---------------------------|-------------------------------|---------------------------------------|----------|
 | `LockCard`         | `ref`                     | any                           | Lock (tap) a card                     | Any      |
 | `UnlockCard`       | `ref`                     | any                           | Unlock (untap) a card                 | Any      |
-| `UnlockAll`        | `playerName`              | — (affects `READY`, `TORPOR`) | Unlock all in-play cards for a player | 'UNLOCK' |
+| `UnlockAll`        | `playerName`              | — (affects `READY`, `TORPOR`) | Unlock all in-play cards for a player (player-triggered; not automatic on turn advance) | Any |
 | `AddCounter`       | `ref`, `amount`           | any                           | Increment a card's counter            | Any      |
 | `RemoveCounter`    | `ref`, `amount`           | any                           | Decrement a card's counter (floor 0)  | Any      |
 | `SetCardNotes`     | `ref`, `notes`            | any                           | Set freeform notes on a card          | Any      |

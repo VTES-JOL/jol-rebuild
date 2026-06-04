@@ -6,12 +6,10 @@ import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
-import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
-import net.deckserver.jol.game.effect.CardCounterChangedEffect;
-import net.deckserver.jol.game.effect.CardMovedEffect;
-import net.deckserver.jol.game.effect.PlayerPoolChangedEffect;
+import net.deckserver.jol.game.effect.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
@@ -25,26 +23,23 @@ public final class InfluenceHandler {
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), HandlerUtils.isHidden(card));
         int amount = cmd.amount();
 
-        // Transfers to/from UNCONTROLLED vampires are only valid during the current player's
-        // influence phase and consume the transfer budget.
-        // Pool → card costs 1 transfer per blood; card → pool costs 2 transfers per blood.
+        List<GameEffect> effects = new ArrayList<>();
         if (cmd.ref().regionType() == RegionType.UNCONTROLLED) {
             GameRules.requirePhase(game, Phase.INFLUENCE);
             GameRules.requireCurrentPlayer(game, actor);
             int cost = amount > 0 ? amount : Math.abs(amount) * 2;
             GameRules.requireTransferBudget(game, cost);
-            game.setTransfersRemaining(game.getTransfersRemaining() - cost);
+            effects.add(new TransfersRemainingChangedEffect(game.getTransfersRemaining() - cost));
         }
 
-        controller.setPool(Math.max(0, controller.getPool() - amount));
-        card.setCounters(Math.max(0, card.getCounters() + amount));
+        effects.add(new PlayerPoolChangedEffect(controller.getName(), -amount));
+        effects.add(new CardCounterChangedEffect(card.getId(), amount));
+
         String label = HandlerUtils.cardLabel(card, cmd.ref());
         String msg = amount > 0
                 ? actor + " transferred " + amount + " blood to " + label
                 : actor + " transferred " + Math.abs(amount) + " blood from " + label;
-        return new CommandResult(game, msg, new CommandLogData.TransferBloodLog(actor, logRef, amount),
-                List.of(new PlayerPoolChangedEffect(controller.getName(), -amount),
-                        new CardCounterChangedEffect(card.getId(), amount)));
+        return new CommandResult(game, msg, new CommandLogData.TransferBloodLog(actor, logRef, amount), effects);
     }
 
     public static CommandResult handleInfluenceCard(GameData game, InfluenceCard cmd, String actor) {
@@ -53,13 +48,12 @@ public final class InfluenceHandler {
         GameRules.requirePhase(game, Phase.INFLUENCE);
         GameRules.requireCurrentPlayer(game, actor);
         if (card.getCapacity() <= 0 || card.getCounters() < card.getCapacity()) {
-            throw new net.deckserver.jol.exception.GameRuleException(
+            throw new GameRuleException(
                     "Vampire requires " + card.getCapacity() + " blood to influence (has " + card.getCounters() + ")");
         }
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = HandlerUtils.cardToken(card);
         PlayerData owner = GameRules.requireOwner(card);
-        owner.getRegion(RegionType.READY).addCard(card, false);
         String msg = actor + " moved " + token + " to the Ready region";
         return new CommandResult(game, msg, new CommandLogData.InfluenceCardLog(actor, logRef),
                 List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.READY.name())));
@@ -70,32 +64,29 @@ public final class InfluenceHandler {
         LogCardRef logRef = LogCardRef.of(card, cmd.ref(), false);
         String token = HandlerUtils.cardToken(card);
         PlayerData owner = GameRules.requireOwner(card);
-        card.setCounters(0);
-        owner.getRegion(RegionType.CRYPT).addCard(card, false);
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new CardCounterChangedEffect(card.getId(), -card.getCounters()));
+        effects.add(new CardMovedEffect(card.getId(), owner.getName(), RegionType.CRYPT.name()));
         String msg = actor + " returned " + token + " to the Crypt";
-        return new CommandResult(game, msg, new CommandLogData.MoveToCryptLog(actor, logRef),
-                List.of(new CardMovedEffect(card.getId(), owner.getName(), RegionType.CRYPT.name())));
+        return new CommandResult(game, msg, new CommandLogData.MoveToCryptLog(actor, logRef), effects);
     }
 
     public static CommandResult handleDrawCryptToUncontrolled(GameData game, DrawCryptToUncontrolled cmd, String actor) {
         GameRules.requirePhase(game, Phase.INFLUENCE);
         GameRules.requireCurrentPlayer(game, actor);
         PlayerData player = GameRules.requirePlayer(game, actor);
-        RegionData crypt = player.getRegion(RegionType.CRYPT);
-        if (crypt.getCards().isEmpty()) {
+        if (player.getRegion(RegionType.CRYPT).getCards().isEmpty()) {
             throw new GameRuleException("Crypt is empty");
         }
         GameRules.requireTransferBudget(game, 4);
         if (player.getPool() < 1) {
             throw new GameRuleException("Insufficient pool to draw from crypt (costs 1 pool)");
         }
-        game.setTransfersRemaining(game.getTransfersRemaining() - 4);
-        player.setPool(player.getPool() - 1);
-        CardData drawn = crypt.getFirstCard();
-        player.getRegion(RegionType.UNCONTROLLED).addCard(drawn, false);
+        CardData drawn = player.getRegion(RegionType.CRYPT).getFirstCard();
         String msg = actor + " drew a card from crypt to the uncontrolled region (4 transfers, 1 pool)";
         return new CommandResult(game, msg, new CommandLogData.DrawCryptToUncontrolledLog(actor),
-                List.of(new PlayerPoolChangedEffect(actor, -1),
+                List.of(new TransfersRemainingChangedEffect(game.getTransfersRemaining() - 4),
+                        new PlayerPoolChangedEffect(actor, -1),
                         new CardMovedEffect(drawn.getId(), actor, RegionType.UNCONTROLLED.name())));
     }
 
@@ -116,14 +107,15 @@ public final class InfluenceHandler {
         LogCardRef targetRef = LogCardRef.of(target, cmd.targetRef(), false);
         String cardToken = HandlerUtils.cardToken(card);
         String targetToken = HandlerUtils.cardToken(target);
-        // Burn counters and attached cards on the incoming uncontrolled card
-        card.setCounters(0);
         PlayerData owner = GameRules.requireOwner(card);
-        RegionData ashHeap = owner.getRegion(RegionType.ASH_HEAP);
-        List.copyOf(card.getCards()).forEach(child -> ashHeap.addCard(child, false));
-        // Attach the uncontrolled card to the ready card; target's counters and attachments are untouched
-        target.add(card, false);
+
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new CardCounterChangedEffect(card.getId(), -card.getCounters()));
+        List.copyOf(card.getCards()).forEach(child ->
+                effects.add(new CardMovedEffect(child.getId(), owner.getName(), RegionType.ASH_HEAP.name())));
+        effects.add(new CardAttachedEffect(card.getId(), target.getId()));
+
         String msg = actor + " merged " + cardToken + " with " + targetToken;
-        return new CommandResult(game, msg, new CommandLogData.MergeAdvancedLog(actor, cardRef, targetRef));
+        return new CommandResult(game, msg, new CommandLogData.MergeAdvancedLog(actor, cardRef, targetRef), effects);
     }
 }
