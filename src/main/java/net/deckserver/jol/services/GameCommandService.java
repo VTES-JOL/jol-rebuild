@@ -33,7 +33,6 @@ public class GameCommandService {
      * and returns the result including an optional structured log entry.
      * Synchronized on the GameData instance so concurrent commands for the same game are serialized.
      * Throws GameRuleException if a rule precondition fails — callers should convert this to an error response.
-     *
      * Note: @Transactional opens the Hibernate transaction before the synchronized block, so the
      * transaction boundary intentionally spans wider than the critical section. If persistSnapshot is
      * ever extracted to a separate service, ensure the Panache flush stays inside the synchronized block.

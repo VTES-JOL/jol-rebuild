@@ -59,7 +59,7 @@ final class HandlerUtils {
     static List<String> buildPassOrder(GameData game, ImpulseContext context, String actingPlayer, String targetPlayerName) {
         List<String> active = game.getCurrentPlayers().stream()
                 .map(PlayerData::getName)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
         if (!active.contains(actingPlayer)) return List.of(actingPlayer);
 
         LinkedHashSet<String> order = new LinkedHashSet<>();
