@@ -1,15 +1,13 @@
 package net.deckserver.jol.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.ActionType;
-import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.exception.GameRuleException;
-import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,35 +25,18 @@ class SequencingWindowTest {
 
     @Inject GameCommandService gameCommandService;
     @Inject GameStateStore gameStateStore;
+    @Inject ObjectMapper mapper;
 
     private GameData game;
     private String gameId;
     private CardRef aliceMinion;
 
     @BeforeEach
-    void setup() {
-        game = new GameData("seq-test", "Sequencing Test");
-        PlayerData alice = new PlayerData("Alice");
-        PlayerData bob   = new PlayerData("Bob");
-        PlayerData carol = new PlayerData("Carol");
-        PlayerData dave  = new PlayerData("Dave");
-        game.addPlayer(alice);
-        game.addPlayer(bob);
-        game.addPlayer(carol);
-        game.addPlayer(dave);
-        game.updatePredatorMapping();
-        game.setCurrentPlayer(alice);
-        game.setPhase(Phase.MINION);
-        game.setTurn("1.1");
-        game.setRulesEnforced(true);
-
-        CardData aCard = new CardData("vamp-001", alice);
-        aCard.setName("Dima");
-        aCard.setMinion(true);
-        alice.getRegion(RegionType.READY).addCard(aCard, false);
-
+    void setup() throws Exception {
+        try (var is = getClass().getResourceAsStream("/game-4p-with-minions.json")) {
+            game = mapper.readValue(is, GameData.class);
+        }
         aliceMinion = new CardRef("Alice", RegionType.READY, 0, -1);
-
         gameId = game.getId();
         gameStateStore.put(gameId, game);
     }

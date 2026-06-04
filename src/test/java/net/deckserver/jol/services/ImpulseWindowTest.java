@@ -1,12 +1,11 @@
 package net.deckserver.jol.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.deckserver.jol.enums.ImpulseContext;
-import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,26 +23,16 @@ class ImpulseWindowTest {
 
     @Inject GameCommandService gameCommandService;
     @Inject GameStateStore gameStateStore;
+    @Inject ObjectMapper mapper;
 
     private GameData game;
     private String gameId;
 
     @BeforeEach
-    void setup() {
-        game = new GameData("impulse-test", "Impulse Test");
-        PlayerData alice = new PlayerData("Alice");
-        PlayerData bob   = new PlayerData("Bob");
-        PlayerData carol = new PlayerData("Carol");
-        PlayerData dave  = new PlayerData("Dave");
-        game.addPlayer(alice);
-        game.addPlayer(bob);
-        game.addPlayer(carol);
-        game.addPlayer(dave);
-        game.updatePredatorMapping();
-        game.setCurrentPlayer(alice);
-        game.setPhase(Phase.MINION);
-        game.setTurn("1.1");
-        game.setRulesEnforced(true);
+    void setup() throws Exception {
+        try (var is = getClass().getResourceAsStream("/game-4p-minion-phase.json")) {
+            game = mapper.readValue(is, GameData.class);
+        }
         gameId = game.getId();
         gameStateStore.put(gameId, game);
     }

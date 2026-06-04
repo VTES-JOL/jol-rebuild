@@ -1,8 +1,8 @@
 package net.deckserver.jol.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.CardData;
@@ -24,6 +24,7 @@ class MinionContestTest {
 
     @Inject GameCommandService gameCommandService;
     @Inject GameStateStore gameStateStore;
+    @Inject ObjectMapper mapper;
 
     private GameData game;
     private String gameId;
@@ -33,30 +34,14 @@ class MinionContestTest {
     private CardRef torporRef;
 
     @BeforeEach
-    void setup() {
-        game = new GameData("minion-test", "Minion Test");
-        PlayerData alice = new PlayerData("Alice");
-        game.addPlayer(alice);
-        game.updatePredatorMapping();
-        game.setCurrentPlayer(alice);
-        game.setPhase(Phase.MINION);
-        game.setTurn("1.1");
-
-        readyCard = new CardData("vamp-001", alice);
-        readyCard.setName("Dima");
-        readyCard.setMinion(true);
-        alice.getRegion(RegionType.READY).addCard(readyCard, false);
-        game.registerCard(readyCard);
-
-        torporCard = new CardData("vamp-002", alice);
-        torporCard.setName("Elena");
-        torporCard.setMinion(true);
-        alice.getRegion(RegionType.TORPOR).addCard(torporCard, false);
-        game.registerCard(torporCard);
-
-        readyRef  = new CardRef("Alice", RegionType.READY,  0, -1);
-        torporRef = new CardRef("Alice", RegionType.TORPOR, 0, -1);
-
+    void setup() throws Exception {
+        try (var is = getClass().getResourceAsStream("/game-1p-with-minions.json")) {
+            game = mapper.readValue(is, GameData.class);
+        }
+        readyCard  = game.getPlayer("Alice").getRegion(RegionType.READY).getCard(0);
+        torporCard = game.getPlayer("Alice").getRegion(RegionType.TORPOR).getCard(0);
+        readyRef   = new CardRef("Alice", RegionType.READY,  0, -1);
+        torporRef  = new CardRef("Alice", RegionType.TORPOR, 0, -1);
         gameId = game.getId();
         gameStateStore.put(gameId, game);
     }

@@ -1,8 +1,8 @@
 package net.deckserver.jol.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.CardData;
@@ -24,6 +24,7 @@ class CardMovementTest {
 
     @Inject GameCommandService gameCommandService;
     @Inject GameStateStore gameStateStore;
+    @Inject ObjectMapper mapper;
 
     private GameData game;
     private String gameId;
@@ -37,44 +38,18 @@ class CardMovementTest {
     private CardRef crypt0Ref;
 
     @BeforeEach
-    void setup() {
-        game = new GameData("movement-test", "Movement Test");
-        PlayerData alice = new PlayerData("Alice");
-        PlayerData bob   = new PlayerData("Bob");
-        game.addPlayer(alice);
-        game.addPlayer(bob);
-        game.updatePredatorMapping();
-        game.setCurrentPlayer(alice);
-        game.setPhase(Phase.MINION);
-        game.setTurn("1.1");
-
-        handCard = new CardData("lib-001", alice);
-        handCard.setName("Govern the Unaligned");
-        alice.getRegion(RegionType.HAND).addCard(handCard, false);
-        game.registerCard(handCard);
-
-        readyCard1 = new CardData("vamp-001", alice);
-        readyCard1.setName("Dima");
-        readyCard1.setMinion(true);
-        alice.getRegion(RegionType.READY).addCard(readyCard1, false);
-        game.registerCard(readyCard1);
-
-        readyCard2 = new CardData("vamp-002", alice);
-        readyCard2.setName("Elena");
-        readyCard2.setMinion(true);
-        alice.getRegion(RegionType.READY).addCard(readyCard2, false);
-        game.registerCard(readyCard2);
-
-        cryptCard = new CardData("vamp-003", alice);
-        cryptCard.setName("New Vampire");
-        alice.getRegion(RegionType.CRYPT).addCard(cryptCard, false);
-        game.registerCard(cryptCard);
-
+    void setup() throws Exception {
+        try (var is = getClass().getResourceAsStream("/game-2p-with-cards.json")) {
+            game = mapper.readValue(is, GameData.class);
+        }
+        handCard   = game.getPlayer("Alice").getRegion(RegionType.HAND).getCard(0);
+        readyCard1 = game.getPlayer("Alice").getRegion(RegionType.READY).getCard(0);
+        readyCard2 = game.getPlayer("Alice").getRegion(RegionType.READY).getCard(1);
+        cryptCard  = game.getPlayer("Alice").getRegion(RegionType.CRYPT).getCard(0);
         handRef   = new CardRef("Alice", RegionType.HAND,  0, -1);
         ready0Ref = new CardRef("Alice", RegionType.READY, 0, -1);
         ready1Ref = new CardRef("Alice", RegionType.READY, 1, -1);
         crypt0Ref = new CardRef("Alice", RegionType.CRYPT, 0, -1);
-
         gameId = game.getId();
         gameStateStore.put(gameId, game);
     }
