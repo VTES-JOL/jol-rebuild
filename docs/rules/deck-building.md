@@ -2,8 +2,6 @@
 
 Defines how VTES decks are constructed. These rules apply regardless of whether playing on a physical table or online.
 
-See [JOL Implementation — Deck Building](../implementation/deck-building.md) for import formats, storage schema, and the online validation service.
-
 ---
 
 ## Crypt Group Restriction

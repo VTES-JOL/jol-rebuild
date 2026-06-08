@@ -4,8 +4,6 @@ Defines the full combat system: how combat is initiated, how each round proceeds
 
 See [Actions](./actions.md) for the broader action lifecycle and [Card Timing and Card Types](./card-play.md) for generic card-play timing.
 
-See [JOL Implementation — Combat](../implementation/combat.md) for current implementation status.
-
 ---
 
 ## Initiating Combat
@@ -295,7 +293,7 @@ Diablerie may occur when a ready vampire has a torpored vampire at their mercy. 
 2. The diablerist may take any equipment on the victim.
 3. The victim is burned and sent to their owner's ash heap. Any cards and counters on the victim are burned, except equipment taken by the diablerist.
 4. If the victim's capacity is strictly greater than the diablerist's capacity, the diablerist's controller may search their hand, library, and/or ash heap for a master: Discipline card to put on the diablerist, then reshuffle or draw back to hand size as necessary. This can increase the diablerist's capacity by 1, but does not add blood to fill that new capacity.
-5. If the victim was a Red List minion burned in combat or as a directed action, including diablerie, Trophy awards are resolved now (before the blood hunt; see [Mechanics Gaps § Minion Traits](../implementation/mechanics-gaps.md#14-minion-traits)). The diablerist's controller may search their hand, library, and/or ash heap for a master Trophy card to put on the diablerist, then reshuffle or draw back to hand size as necessary. Other unawarded Trophies in play may also be moved to the diablerist at each Trophy controller's discretion.
+5. If the victim was a Red List minion burned in combat or as a directed action, including diablerie, Trophy awards are resolved now before the blood hunt. See [Game Flow § Minion Traits](./game-flow.md#minion-traits) for Red List and Trophy rules. The diablerist's controller may search their hand, library, and/or ash heap for a master Trophy card to put on the diablerist, then reshuffle or draw back to hand size as necessary. Other unawarded Trophies in play may also be moved to the diablerist at each Trophy controller's discretion.
 6. A blood hunt referendum is automatically called. See [Referendums § Blood Hunt Referendum](./referendums.md#blood-hunt-referendum).
 
 Diablerie is resolved as a single unit. No effects can interrupt the middle of the diablerie sequence; effects are used before or after the diablerie as card text permits.

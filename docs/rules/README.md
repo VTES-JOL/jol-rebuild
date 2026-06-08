@@ -1,14 +1,17 @@
 # VTES Rules
 
-These documents describe Vampire: The Eternal Struggle rules from a tabletop perspective. Anyone familiar with the physical card game can read these and relate them to their experience at the table.
+These documents describe Vampire: The Eternal Struggle rules from a tabletop perspective. Anyone familiar with the
+physical card game can read these and relate them to their experience at the table.
 
-For how these rules are implemented in JOL, see the corresponding links in each file, or browse the [JOL Implementation](../implementation/README.md) index.
+For the official source material, see the [VEKN Rulebook](https://www.vekn.net/rulebook)
+and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary).
 
 ---
 
 ## Play Modes
 
-VTES can be played casually (players self-police rules) or formally (a referee or software enforces protocol). JOL supports both modes; see [Game Modes](../implementation/game-modes.md) for how this is implemented.
+VTES can be played casually, where players self-police rules and shortcuts, or formally, where a referee or rules engine
+enforces protocol exactly.
 
 ---
 

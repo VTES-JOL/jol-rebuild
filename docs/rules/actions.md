@@ -4,8 +4,6 @@ Use this document when deciding what an acting minion may do, how an action proc
 
 For block eligibility and stealth/intercept exchanges, see [Blocking](./blocking.md). For referendum polling and votes, see [Referendums](./referendums.md). For combat after a block or rush action, see [Combat](./combat.md). For generic card declaration, replacement, and cancellation rules, see [Card Timing and Card Types](./card-play.md).
 
-See [JOL Implementation - Card Play](../implementation/card-play.md) for current enforcement status.
-
 ---
 
 ## Minion Readiness

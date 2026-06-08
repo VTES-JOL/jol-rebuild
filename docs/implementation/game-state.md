@@ -213,7 +213,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 
 ### Turn / phase
 
-| Command        | Description                                                                                                                                                                  |
+| Command        | Description                                                                                                                                                  |
 |----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `AdvancePhase` | Move to the next phase; wraps to next turn after DISCARD. When entering `INFLUENCE`, sets `transfersRemaining` to the current player's budget for this turn. |
 | `NextTurn`     | Advance to the next non-ousted player's turn directly. Resets `transfersRemaining` to 0.                                                                     |
@@ -242,34 +242,200 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 
 ### Card state
 
-| Command            | Fields (besides `gameId`) | Valid `ref` region(s)         | Description                           | Phase    |
-|--------------------|---------------------------|-------------------------------|---------------------------------------|----------|
-| `LockCard`         | `ref`                     | any                           | Lock (tap) a card                     | Any      |
-| `UnlockCard`       | `ref`                     | any                           | Unlock (untap) a card                 | Any      |
-| `UnlockAll`        | `playerName`              | — (affects `READY`, `TORPOR`) | Unlock all in-play cards controlled by a player. `NextTurn` auto-unlocks cards controlled by the incoming player; this command is the manual equivalent for mid-game effects or permissive-mode use. | Any |
-| `AddCounter`       | `ref`, `amount`           | any                           | Increment a card's counter            | Any      |
-| `RemoveCounter`    | `ref`, `amount`           | any                           | Decrement a card's counter (floor 0)  | Any      |
-| `SetCardNotes`     | `ref`, `notes`            | any                           | Set freeform notes on a card          | Any      |
-| `ContestCard`      | `ref`                     | any                           | Mark a card as contested              | Any      |
-| `ClearContestCard` | `ref`                     | any                           | Clear the contested flag              | Any      |
-| `SetTitle`         | `ref`, `title`            | any (typically `READY`)       | Set or clear a vampire's title        | Any      |
+| Command            | Fields (besides `gameId`) | Valid `ref` region(s)         | Description                                                                                                                                                                                          | Phase |
+|--------------------|---------------------------|-------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------|
+| `LockCard`         | `ref`                     | any                           | Lock (tap) a card                                                                                                                                                                                    | Any   |
+| `UnlockCard`       | `ref`                     | any                           | Unlock (untap) a card                                                                                                                                                                                | Any   |
+| `UnlockAll`        | `playerName`              | — (affects `READY`, `TORPOR`) | Unlock all in-play cards controlled by a player. `NextTurn` auto-unlocks cards controlled by the incoming player; this command is the manual equivalent for mid-game effects or permissive-mode use. | Any   |
+| `AddCounter`       | `ref`, `amount`           | any                           | Increment a card's counter                                                                                                                                                                           | Any   |
+| `RemoveCounter`    | `ref`, `amount`           | any                           | Decrement a card's counter (floor 0)                                                                                                                                                                 | Any   |
+| `SetCardNotes`     | `ref`, `notes`            | any                           | Set freeform notes on a card                                                                                                                                                                         | Any   |
+| `ContestCard`      | `ref`                     | any                           | Mark a card as contested                                                                                                                                                                             | Any   |
+| `ClearContestCard` | `ref`                     | any                           | Clear the contested flag                                                                                                                                                                             | Any   |
+| `SetTitle`         | `ref`, `title`            | any (typically `READY`)       | Set or clear a vampire's title                                                                                                                                                                       | Any   |
 
 ### Player state
 
-| Command         | Fields (besides `gameId`) | Description                                                                                                                                                                                                                               | Phase       |
-|-----------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| `SetPool`       | `playerName`, `amount`    | Set a player's pool to an absolute value                                                                                                                                                                                                  |             |
-| `TransferBlood` | `ref`, `amount`           | Transfer blood between controller's pool and a card. For `UNCONTROLLED` cards: restricted to the current player only; pool → card costs 1 transfer/blood; card → pool costs 2 transfers/blood. Silently no-ops if budget is insufficient. | `INFLUENCE` |
-| `GainEdge`      | `playerName`              | Award the edge to a player                                                                                                                                                                                                                |             |
-| `OustPlayer`    | `playerName`              | Mark a player as ousted; zeros their pool; awards predator 1 VP + 6 pool. If only one player remains, awards that survivor +1 VP and completes the game. See [Mechanics Gaps §11](./mechanics-gaps.md#11-game-end-detection) for remaining gaps (simultaneous oust, timeout, GW recording). |             |
-| `SetChoice`     | `playerName`, `choice`    | Set a player's choice flag                                                                                                                                                                                                                |             |
-| `ReverseOrder`  | —                         | Toggle the order-of-play reversal flag                                                                                                                                                                                                    |             |
+| Command         | Fields (besides `gameId`) | Description                                                                                                                                                                                                                                                                                                         | Phase       |
+|-----------------|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `SetPool`       | `playerName`, `amount`    | Set a player's pool to an absolute value                                                                                                                                                                                                                                                                            |             |
+| `TransferBlood` | `ref`, `amount`           | Transfer blood between controller's pool and a card. For `UNCONTROLLED` cards: restricted to the current player only; pool → card costs 1 transfer/blood; card → pool costs 2 transfers/blood. Silently no-ops if budget is insufficient.                                                                           | `INFLUENCE` |
+| `GainEdge`      | `playerName`              | Award the edge to a player                                                                                                                                                                                                                                                                                          |             |
+| `OustPlayer`    | `playerName`              | Mark a player as ousted; zeros their pool; awards predator 1 VP + 6 pool. If only one player remains, awards that survivor +1 VP and completes the game. See [Mechanics Gaps — Implementation Priority](./mechanics-gaps.md#implementation-priority) for remaining gaps (simultaneous oust, timeout, GW recording). |             |
+| `SetChoice`     | `playerName`, `choice`    | Set a player's choice flag                                                                                                                                                                                                                                                                                          |             |
+| `ReverseOrder`  | —                         | Toggle the order-of-play reversal flag                                                                                                                                                                                                                                                                              |             |
 
 ### Game state
 
 | Command         | Description                       |
 |-----------------|-----------------------------------|
 | `SetGameNotes`  | Set freeform notes on the game    |
+
+### Impulse and sequencing commands
+
+| Command                 | Fields                    | Description                                                                                         |
+|-------------------------|---------------------------|-----------------------------------------------------------------------------------------------------|
+| `OpenImpulseWindow`     | `context`, `actingPlayer` | Start an impulse window; computes `passOrder` from current seating and context                      |
+| `PassImpulse`           | `playerName`              | Player declines to play; advances `currentImpulseHolder`. Auto-closes when all pass consecutively   |
+| `ClaimImpulse`          | `playerName`              | Player plays a card/effect; returns impulse to the acting Methuselah and resets `consecutivePasses` |
+| `CloseImpulseWindow`    | —                         | Explicitly close the window                                                                         |
+| `PassSequencing`        | `playerName`              | Pass in a sequencing window (After Resolution, AS_ANNOUNCED, etc.)                                  |
+| `CloseSequencingWindow` | —                         | Close the open sequencing window                                                                    |
+
+---
+
+## Implementation Gaps
+
+### Turn and Phase Protocol
+
+Rules-enforced mode currently has impulse/sequencing commands and the basic action skeleton, but most phase and state mutation commands are permissive-only. A complete enforced turn protocol is still missing.
+
+| Mechanic                                                                                          | Notes                                                                                                                                                               |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Legal phase progression in rules-enforced mode                                                    | `AdvancePhase` / `NextTurn` are permissive-only                                                                                                                     |
+| UNLOCK phase automatic effects without opening a generic impulse window                           | `TurnPhaseHandler` currently opens an undirected impulse window on every `AdvancePhase` / `NextTurn`; impulse is opened by protocol events, not by entering a phase |
+| MASTER phase action accounting and legal master-card play                                         | `masterActionsRemaining` not on `GameData` — see [Card Play](./card-play.md)                                                                                        |
+| MINION phase action loop until the current player has finished all legal minion actions           | Not enforced                                                                                                                                                        |
+| INFLUENCE phase transfer budget and influence actions in rules-enforced mode                      | `TransferBlood` and `InfluenceCard` are permissive-only                                                                                                             |
+| DISCARD phase draw-to-hand-size, event play, or discard action in rules-enforced mode             | Not enforced                                                                                                                                                        |
+| Phase advancement blocked while action, combat, referendum, impulse, or sequencing window is open | Not enforced                                                                                                                                                        |
+
+**Proposed work:** Remove phase-level auto impulse windows; open impulse only from protocol events (action/block exchanges, combat steps, referendum polling, card/effect timing conflicts). Add phase-specific enforced commands or server transitions for each phase.
+
+### Influence Phase
+
+**Implemented (permissive mode):**
+
+| Mechanic                                                                                | Implementation                                                         | Remaining gap                                                        |
+|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Transfer budget: 1/2/3/4 by seat in round 1; always 4 from round 2                      | `GameData.transfersRemaining` set by `AdvancePhase` on INFLUENCE entry | `AdvancePhase` is permissive-only; rules-enforced equivalent missing |
+| Pool → UNCONTROLLED costs 1 transfer/blood; UNCONTROLLED → pool costs 2 transfers/blood | `TransferBlood` guard                                                  | Permissive-only                                                      |
+| `DrawCryptToUncontrolled` — 4 transfers + 1 pool to pull from crypt                     | Implemented (permissive)                                               | Enforced-mode equivalent missing                                     |
+| `MergeAdvanced` — merge base + advanced vampire                                         | Implemented (permissive; validates name + one advanced)                | Enforced-mode equivalent missing                                     |
+
+### Unlock Phase — Automatic Effects
+
+| Mechanic                                                                    | Notes                                                                    |
+|-----------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| Edge holder may choose to gain +1 pool during unlock phase                  | Manual only; proposed `CollectEdgePool` command                          |
+| Contested unique cards cost 1 pool per unlock phase (auto-pay or yield)     | Manual only; proposed `YieldContest` command                             |
+| Contested titles cost 1 blood per unlock phase                              | Manual only                                                              |
+| Infernal vampire — controller pays 1 pool to unlock, or minion stays locked | `CardData.infernal` field exists; enforcement in `AdvancePhase` not done |
+
+**Proposed commands:** `YieldContest` (`ref`) — yield a contested card to ash heap; `CollectEdgePool` (`playerName`) — optional claim of +1 pool from holding the Edge.
+
+### Master Phase — Action Accounting
+
+| Mechanic                                                                           | Notes        |
+|------------------------------------------------------------------------------------|--------------|
+| Playing a Trifle master card grants one additional master phase action             | Not tracked  |
+| Out-of-turn master uses the playing Methuselah's next master phase action          | Not enforced |
+| No Methuselah may play more than one out-of-turn master between two of their turns | Not enforced |
+
+**Proposed additions:** Add `masterActionsRemaining` to `GameData` (default 1 on MASTER phase entry); add `ExtraMasterAction` command when a trifle is played.
+
+### Withdrawal
+
+| Mechanic                                                                                                    | Notes           |
+|-------------------------------------------------------------------------------------------------------------|-----------------|
+| Announce withdrawal during unlock phase only if library is exhausted                                        | Not implemented |
+| Survive to next unlock phase without losing pool/blood, spending pool/blood, or having minions enter combat | Not implemented |
+| Gain 1 VP on confirmation                                                                                   | Not implemented |
+
+**Proposed commands:**
+
+| Command              | Fields       | Description                                                         |
+|----------------------|--------------|---------------------------------------------------------------------|
+| `AnnounceWithdrawal` | `playerName` | Flags player as attempting withdrawal                               |
+| `ConfirmWithdrawal`  | `playerName` | Confirms survival; awards 1 VP; marks player withdrawn (not ousted) |
+| `CancelWithdrawal`   | `playerName` | Cancels withdrawal flag (player took a prohibited action)           |
+
+### Sequencing and Impulse
+
+Partially implemented. `ImpulseState` and impulse commands exist; `SequencingWindowState`, `PassSequencing`, and `CloseSequencingWindow` are implemented; `ResolveAction` opens the `AFTER_RESOLUTION` window.
+
+**Known mismatches:**
+
+- `AdvancePhase` and `NextTurn` currently open a generic undirected impulse window. This must be removed once enforced phase protocol exists — impulse is opened by protocol events, not by entering a phase.
+- The `AS_ANNOUNCED` window type is defined in the enum but no command opens it — "as it is played" cancellers (e.g. Direct Intervention) have no dedicated engine window.
+- Full integration with combat and referendum protocols is still incomplete.
+
+**Relationship to other systems:**
+- `DeclareAction` should open an action/block impulse window with the appropriate context (`DIRECTED_SINGLE` or `UNDIRECTED`) — see [Actions](./actions.md).
+- Combat timing steps should open context-specific windows; combat is not a generic phase-level window — see [Combat](./combat.md).
+- Referendum polling should use referendum sequencing rules — see [Referendums](./referendums.md).
+
+### Anarch Conversion
+
+| Mechanic                                                                                                | Notes           |
+|---------------------------------------------------------------------------------------------------------|-----------------|
+| Converting a ready vampire to Anarch costs 2 blood, or 1 if controller already has another ready Anarch | Not implemented |
+| Converted vampire becomes Anarch independent                                                            | Not implemented |
+
+**Proposed command:** `ConvertToAnarch` (`ref`) — pay blood cost (checking for existing Anarch discount); update vampire sect to `ANARCH`.
+
+### Game End Detection
+
+`OustPlayer` awards predator 1 VP + 6 pool and awards the last survivor +1 VP; `GameCompletedEffect` fires when one player remains. The following remain missing:
+
+| Mechanic                                                                                                    | Notes                                                                                      |
+|-------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| Automatic oust detection when pool reaches 0 from any effect                                                | `PlayerData.isOusted()` derives from pool ≤ 0 but no rules-enforced transition triggers it |
+| Simultaneous oust — predators whose prey was ousted receive VP; those also ousted do not receive the 6 pool | Not checked                                                                                |
+| Timeout scoring — all surviving players gain 0.5 VP; no GW awarded                                          | No mechanism                                                                               |
+| GW winner recording — player with most VP at game end (even if ousted) should be written to the game record | `GameCompletedEffect` fires but no GW field is written                                     |
+| Tournament result propagation — completed game results not ingested back into tournament standings          | Not implemented                                                                            |
+
+### Named Counter Types
+
+`AddCounter` / `RemoveCounter` are generic. Several counter types have specific semantics:
+
+| Counter type                                          | Mechanic                                                                                |
+|-------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| **Corruption**                                        | Cross-player ownership — belongs to the placing Methuselah, not the target's controller |
+| **Disease / Surge / Oath / Riddle / Phobia / Poison** | Named counter types used by specific cards; must not be confused with blood counters    |
+
+**Proposed work:** Add a `counterType` field to `AddCounter` / `RemoveCounter` (or a per-type counter map on `CardState`) so cards can query and spend counters by name.
+
+**Aye and Orun (Laibon conviction cards)** are master cards placed on a Laibon Imbued via `AttachCard` — not counters. The attachment mechanism already works; the gap is in card-text parsing for effects that count attached Aye or Orun cards.
+
+### Minion Traits
+
+Traits are attributes that allow a minion to play cards requiring that trait, or make the minion subject to specific automatic rules. None of the following are modeled or detected at build time except `infernal`.
+
+| Trait            | Rule                                                                                                                                                                      |
+|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Black Hand**   | Allows use of cards requiring a Black Hand minion                                                                                                                         |
+| **Blood Cursed** | Cannot commit diablerie                                                                                                                                                   |
+| **Circle**       | Blood Brothers: each belongs to a circle parsed from card text; cards requiring "same circle" compare this value                                                          |
+| **Flight**       | Allows use of cards requiring Flight                                                                                                                                      |
+| **Infernal**     | Does not unlock normally; controller pays 1 pool during unlock phase to unlock (field exists; enforcement missing)                                                        |
+| **Red List**     | Any Methuselah may use a master phase action to mark a Red List minion; any ready vampire may then enter combat with them as a +1 stealth directed action costing 1 blood |
+| **Scarce**       | Moving to ready costs 3 pool per same-clan vampire already controlled in the ready region                                                                                 |
+| **Slave**        | Cannot perform directed actions without a ready member of the slave clan; may redirect combat to a Slave when the master clan vampire is blocked                          |
+| **Sterile**      | Cannot perform actions to put other vampires in play                                                                                                                      |
+
+**Proposed work:**
+- Add boolean flags `blackHand`, `bloodCursed`, `flight`, `redList`, `scarce`, `sterile` to `CardData`; populate by detecting keywords in card text at build time.
+- Add `slaveClan` (nullable String) to `CardData`; populate by parsing `"Slave: [clan]"`.
+- Add `circle` (nullable String) to `CardData`; populate from Blood Brothers crypt card text.
+- Enforce `infernal` unlock cost in `AdvancePhase` when entering UNLOCK.
+- Enforce `scarce` pool cost in `InfluenceCard`.
+- Block directed actions for `slave` minions when no ready clan member is controlled.
+- Block "put vampire in play" for `sterile` vampires.
+- Block diablerie for `bloodCursed` vampires.
+
+### Card Control Transfer
+
+`CardData.controller` (a `PlayerData` reference, distinct from `owner`) already exists and is transmitted as `controllerName` in `GameStateDto`. It is initialised to the owner when cards are built. No command can change controller mid-game.
+
+**Proposed command:** `TransferControl` (`playerName`, `ref`, `newControllerName`) — explicitly reassign control of an in-play card to a different Methuselah.
+
+### Blood Capacity Overflow
+
+`AddCounter` and `RemoveCounter` are generic and do not enforce a capacity ceiling. In rules-enforced mode, any blood gain that would push a vampire above their current capacity should silently cap at capacity and return excess to the bank.
+
+**Proposed work:** Add a capacity-overflow check in `CardStateHandler.handleAddCounter` (and in the `InfluenceCard` / `RescueFromTorpor` handlers) that trims `counters` to `capacity` when `capacity > 0` and the card type is `VAMPIRE` or `IMBUED`.
 
 ---
 

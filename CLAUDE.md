@@ -12,30 +12,25 @@ Documentation is split into two folders:
 - **[VTES Rules](docs/rules/README.md)** — tabletop game rules any VTES player would recognise
 - **[JOL Implementation](docs/implementation/README.md)** — data structures, commands, import formats, and gap analysis specific to the online client
 
-When updating game rules documentation in `docs/rules/`, review the corresponding docs in `docs/implementation/` and update any affected gap analysis, command descriptions, or implementation status notes.
+Each topic has a paired rules doc and implementation doc. When editing either side, review and update the corresponding doc on the other side.
 
-### VTES Rules
-- [Deck Building](docs/rules/deck-building.md)
-- [Game Flow](docs/rules/game-flow.md)
-- [Actions](docs/rules/actions.md)
-- [Blocking](docs/rules/blocking.md)
-- [Referendums](docs/rules/referendums.md)
-- [Combat](docs/rules/combat.md)
-- [Card Timing and Card Types](docs/rules/card-play.md)
-- [Tournament](docs/rules/tournament.md)
+### Documentation Map
 
-### JOL Implementation
-- [Cards Import and Searching](docs/implementation/cards.md)
-- [Deck Building and Importing](docs/implementation/deck-building.md)
-- [Game Lobby](docs/implementation/game-lobby.md)
-- [Tournament Lobby](docs/implementation/tournament-lobby.md)
-- [Game State](docs/implementation/game-state.md)
-- [Board Layouts](docs/implementation/board-layouts.md)
-- [Chat System](docs/implementation/chat.md)
-- [Mechanics Gaps](docs/implementation/mechanics-gaps.md)
-- [Card Play](docs/implementation/card-play.md)
-- [Combat](docs/implementation/combat.md)
-- [Game Modes](docs/implementation/game-modes.md)
+| VTES Rules                                            | JOL Implementation                                                                           |
+|-------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| [Deck Building](docs/rules/deck-building.md)          | [Deck Building](docs/implementation/deck-building.md), [Cards](docs/implementation/cards.md) |
+| [Game Flow](docs/rules/game-flow.md)                  | [Game State](docs/implementation/game-state.md)                                              |
+| [Actions](docs/rules/actions.md)                      | [Actions](docs/implementation/actions.md)                                                    |
+| [Blocking](docs/rules/blocking.md)                    | [Blocking](docs/implementation/blocking.md)                                                  |
+| [Referendums](docs/rules/referendums.md)              | [Referendums](docs/implementation/referendums.md)                                            |
+| [Combat](docs/rules/combat.md)                        | [Combat](docs/implementation/combat.md)                                                      |
+| [Card Timing and Card Types](docs/rules/card-play.md) | [Card Play](docs/implementation/card-play.md)                                                |
+| [Tournament](docs/rules/tournament.md)                | [Tournament Lobby](docs/implementation/tournament-lobby.md)                                  |
+| —                                                     | [Game Lobby](docs/implementation/game-lobby.md)                                              |
+| —                                                     | [Game Modes](docs/implementation/game-modes.md)                                              |
+| —                                                     | [Board Layouts](docs/implementation/board-layouts.md)                                        |
+| —                                                     | [Chat System](docs/implementation/chat.md)                                                   |
+| —                                                     | [Mechanics Gaps](docs/implementation/mechanics-gaps.md)                                      |
 
 ## Commands
 

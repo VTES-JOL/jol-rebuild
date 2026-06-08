@@ -2,8 +2,6 @@
 
 Describes the VTES tournament format options, table structure, and scoring.
 
-See [JOL Implementation — Tournament Lobby](../implementation/tournament-lobby.md) for the tournament lifecycle, seating administration, and game creation logic.
-
 ---
 
 ## Deck Format Options

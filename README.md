@@ -48,5 +48,6 @@ It will proxy API calls to the Quarkus backend.
 For more detailed information, please refer to:
 - [CLAUDE.md](CLAUDE.md): Development guidelines and quick commands.
 - [Architecture Guide](docs/architecture/README.md): Detailed technical overview.
-- [Logical Model](docs/logic/README.md): Documentation on game rules and implementation.
+- [VTES Rules](docs/rules/README.md): Tabletop game rules any VTES player would recognise.
+- [JOL Implementation](docs/implementation/README.md): Data structures, commands, and gap analysis specific to the online client.
 - [Improvement Roadmap](docs/architecture/improvement-roadmap.md): Planned features and enhancements.

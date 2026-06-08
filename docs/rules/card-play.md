@@ -4,8 +4,6 @@ Use this document when deciding whether a card can be played, who may play it, w
 
 For action execution, see [Actions](./actions.md). For blocking and reaction timing during block attempts, see [Blocking](./blocking.md). For combat cards during combat, see [Combat](./combat.md).
 
-See [JOL Implementation - Card Play](../implementation/card-play.md) for current enforcement status.
-
 See [Rulebook](https://www.vekn.net/rulebook) and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) for the official reference. The golden rule of VTES is that rules on the card overwrite rules in the rulebook.
 
 ---
