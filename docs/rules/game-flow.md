@@ -10,7 +10,7 @@ See [JOL Implementation — Game State](../implementation/game-state.md) for the
 
 | Format   | Players |
 |----------|---------|
-| STANDARD | 2–5     |
+| STANDARD | 4–5     |
 | DUEL     | 2       |
 | V5       | 2–5     |
 
@@ -49,7 +49,7 @@ UNLOCK → MASTER → MINION → INFLUENCE → DISCARD
 | **MASTER** | This player may play one master card from their hand, plus any extras gained from trifle effects. |
 | **MINION** | Each ready, unlocked minion may take one action. Block attempts, stealth/intercept exchanges, referendums, and combat all occur during this phase. |
 | **INFLUENCE** | This player may spend transfer tokens to move blood between their pool and uncontrolled crypt cards, and may move a fully influenced vampire into play. |
-| **DISCARD** | This player draws back up to their current maximum hand size and receives one discard phase action by default. A discard phase action may discard one card from hand or play one Event card; effects may grant more discard phase actions, but no more than one Event card may be played per discard phase. |
+| **DISCARD** | This player receives one discard phase action by default. A discard phase action may discard one card from hand and replace it, or play one Event card; effects may grant more discard phase actions, but no more than one Event card may be played per discard phase. |
 
 ---
 
@@ -57,8 +57,12 @@ UNLOCK → MASTER → MINION → INFLUENCE → DISCARD
 
 During the INFLUENCE phase, the current player has a limited number of transfers available:
 
-- **Round 1:** transfers equal the player's seat position (seat 1 → 1, seat 2 → 2, seat 3 → 3, seat 4+ → 4).
-- **Round 2 and later:** always 4 transfers per turn.
+- The first Methuselah to take a turn receives **1 transfer** on their first influence phase.
+- The second Methuselah to take a turn receives **2 transfers** on their first influence phase.
+- The third Methuselah to take a turn receives **3 transfers** on their first influence phase.
+- All later influence phases receive **4 transfers**.
+
+In a standard 4- or 5-player game with normal seating order, this means seat 1 starts with 1 transfer, seat 2 with 2, seat 3 with 3, and seat 4+ with 4. The two-player variant uses its own starting-transfer exception.
 
 Moving pool to an uncontrolled vampire costs 1 transfer per blood. Moving blood back from an uncontrolled vampire to pool costs 2 transfers per blood.
 
@@ -91,7 +95,7 @@ If any player plays a card or effect, the acting player regains impulse and the 
 
 The Edge is a game token held by at most one player at a time. It starts the game unowned.
 
-- The acting player takes the Edge whenever their bleed action deals 1 or more pool damage to their prey.
+- The acting player takes the Edge whenever their successful bleed action has a bleed amount of 1 or more, taking it from the Methuselah who has it, if any.
 - During a referendum, the Edge-holder may burn the Edge to gain 1 vote.
 
 ---
@@ -120,7 +124,7 @@ Each player has nine regions. Cards move between them as the game progresses.
 
 Opponents can observe the blood counter amounts on a player's uncontrolled vampires (to track influence progress) without seeing which vampire is being influenced.
 
-Newly recruited allies are temporarily placed in the uncontrolled region to show they cannot act this turn. Unlike face-down crypt cards, recruited allies are visible to all players.
+Newly recruited allies are placed in the ready region with their starting life counters, but they cannot act on the turn they are recruited.
 
 ---
 
@@ -145,14 +149,14 @@ The maximum total Victory Points available equals the number of players at the t
 
 ### Winner and Game Win
 
-The player with the most Victory Points at game end is the winner, **even if they have been ousted**. The winner receives a **Game Win (GW)**.
+The player with the most Victory Points at game end is the winner, **even if they have been ousted**. In the case of a tie, there is no winner.
 
-In tournament standings, Game Wins take priority over Victory Points.
+In VEKN tournaments, a **Game Win (GW)** is awarded only if a player has at least 2 VP and more VP than every other player at the table. Tournament standings rank Game Wins before Victory Points.
 
 ### Timeout
 
-When a game times out without a natural conclusion, all surviving players receive **0.5 VP** each. No GW is awarded.
+When a tournament game times out without a natural conclusion, all surviving players receive **0.5 VP** each, except that the last surviving player receives the normal full survivor VP. A tournament Game Win is awarded only if the timed result leaves one player with at least 2 VP and more VP than every other player.
 
 ### Withdrawal
 
-A player may announce withdrawal during their UNLOCK phase. If they survive through their next UNLOCK phase without transferring pool, playing cards, using retainers, blocking, or initiating combat, they receive 1 VP and leave the game without being ousted.
+A player may announce withdrawal during their UNLOCK phase only if they begin the turn with less than a full hand because their library is exhausted. If the player reaches their next UNLOCK phase without losing pool or blood, spending pool or blood, or having any of their minions enter combat, they receive 1 VP and leave the game without being ousted.

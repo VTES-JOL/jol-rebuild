@@ -31,7 +31,7 @@ When the number of registered players cannot be evenly divided into tables of 4 
 
 ## Rounds and Finals
 
-A tournament consists of one or more preliminary rounds, optionally followed by a final round. The number of rounds is set by the tournament administrator.
+VEKN tournaments consist of at least three rounds. After the preliminary rounds, the five highest-ranked players advance to a final round unless the event is using an announced no-final structure. In very small tournaments with fewer than 8 players, the organizer may omit the final or run an additional preliminary round instead.
 
 ### Predator-Prey Constraints
 
@@ -43,7 +43,8 @@ To ensure varied play across rounds, the same predator-prey relationship (Player
 
 Tournament standings are determined by:
 
-1. **Game Win (GW)** — awarded to the player with the most Victory Points at game end (see [Game Flow § Winner and Game Win](./game-flow.md#winner-and-game-win)).
+1. **Game Win (GW)** — awarded only to a player who receives at least 2 VP and has more VP than every other player at the table.
 2. **Victory Points (VP)** — used as the tiebreaker when players have equal Game Wins.
+3. **Tournament Points (TP)** — used when players are still tied after Game Wins and Victory Points.
 
-In the event of a timeout, surviving players each receive 0.5 VP and no GW is awarded for that game.
+In the event of a timeout, surviving players each receive 0.5 VP, except that the last surviving player still receives the normal full survivor VP. A Game Win is awarded only if the 2 VP and sole-leader requirements are met.
