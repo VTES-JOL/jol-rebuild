@@ -6,10 +6,10 @@
 
 JOL has two independent chat contexts sharing a single `ChatService`:
 
-| Context | WebSocket path | `gameId` in DB |
-|---------|---------------|----------------|
-| Lobby   | `/ws/lobby`   | `null`         |
-| In-game | `/ws/game/{gameId}` | the game UUID |
+| Context | WebSocket path      | `gameId` in DB |
+|---------|---------------------|----------------|
+| Lobby   | `/ws/lobby`         | `null`         |
+| In-game | `/ws/game/{gameId}` | the game UUID  |
 
 Both contexts support the same features: threaded replies, emoji reactions, and history-on-connect. The lobby also receives `LOBBY_UPDATE` events for game registration changes.
 

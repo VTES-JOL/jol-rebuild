@@ -8,10 +8,10 @@ See [JOL Implementation — Tournament Lobby](../implementation/tournament-lobby
 
 ## Deck Format Options
 
-| Format | Description |
-|---|---|
-| **SINGLE_DECK** | Each player submits one deck and uses it for every round of the tournament. |
-| **MULTI_DECK** | Each player submits one deck per round, allowing different decks for different rounds. |
+| Format          | Description                                                                            |
+|-----------------|----------------------------------------------------------------------------------------|
+| **SINGLE_DECK** | Each player submits one deck and uses it for every round of the tournament.            |
+| **MULTI_DECK**  | Each player submits one deck per round, allowing different decks for different rounds. |
 
 All decks submitted must be valid for the tournament's game format (STANDARD, DUEL, or V5).
 

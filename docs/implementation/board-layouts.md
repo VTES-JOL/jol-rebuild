@@ -16,17 +16,17 @@ READY | UNCONTROLLED | TORPOR | RESEARCH | HAND | LIBRARY | CRYPT | ASH_HEAP | R
 
 These rules apply across all layouts. Each `RegionState` carries a `visible` flag from the server; client code enforces additional display rules on top.
 
-| Region | Always shown? | Hidden when empty | Visibility of card content |
-|---|---|---|---|
-| READY | Yes | No | Always visible |
-| UNCONTROLLED | Yes (Strip/Circular); hidden when empty (Text) | Text only | Hidden — slots shown with counter/lock state, no card UUID |
-| TORPOR | Only when `count > 0` | Yes | Always visible |
-| RESEARCH | Only when `count > 0` | Yes | Visible to owner; hidden from opponents |
-| HAND | Yes | No | Hidden (`faceDown`) — shown as face-down stack; top card draggable |
-| LIBRARY | Yes | No | Hidden — shown as face-down compact stack |
-| CRYPT | Yes | No | Hidden — shown as face-down compact stack |
-| ASH_HEAP | Context-dependent (see per-layout rules below) | No | Visible when `region.visible === true`; otherwise `RegionBadge` count |
-| REMOVED_FROM_GAME | Only when `count > 0` | Yes | Text layout: visible; Compact layouts: `RegionBadge` count |
+| Region            | Always shown?                                  | Hidden when empty | Visibility of card content                                                                  |
+|-------------------|------------------------------------------------|-------------------|---------------------------------------------------------------------------------------------|
+| READY             | Yes                                            | No                | Always visible                                                                              |
+| UNCONTROLLED      | Yes (Strip/Circular); hidden when empty (Text) | Text only         | Visible to owner; Hidden from opponents — slots shown with counter/lock state, no card UUID |
+| TORPOR            | Only when `count > 0`                          | Yes               | Always visible                                                                              |
+| RESEARCH          | Only when `count > 0`                          | Yes               | Visible to owner; Hidden from opponents                                                     |
+| HAND              | Yes                                            | No                | Visible to owner; Hidden from opponents — shown as face-down compact stack                  |
+| LIBRARY           | Yes                                            | No                | Hidden — shown as face-down compact stack                                                   |
+| CRYPT             | Yes                                            | No                | Hidden — shown as face-down compact stack                                                   |
+| ASH_HEAP          | Context-dependent (see per-layout rules below) | No                | Visible when `region.visible === true`; otherwise `RegionBadge` count                       |
+| REMOVED_FROM_GAME | Only when `count > 0`                          | Yes               | Text layout: visible; Compact layouts: `RegionBadge` count                                  |
 
 **Hidden card rendering**: when `region.visible === false` or `card.faceDown === true`, card rows render as `***********` (Text) or a blank card image (Strip/Circular), with no card identity information exposed.
 
