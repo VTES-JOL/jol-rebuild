@@ -14,10 +14,13 @@ VTES can be played casually (players self-police rules) or formally (a referee o
 
 ## Documents
 
-| Document | Description |
-|---|---|
-| [Deck Building](./deck-building.md) | Crypt group restrictions, format size limits, and banned card rules |
-| [Game Flow](./game-flow.md) | Turn phases, predator-prey circle, starting state, influence, VP scoring, and game end |
-| [Card Play](./card-play.md) | Minion readiness, action lifecycle, blocking, sequencing, referendums, NRA, and hand management |
-| [Combat](./combat.md) | 7-step combat round, strike types, damage resolution, torpor, and diablerie |
-| [Tournament](./tournament.md) | SINGLE_DECK vs MULTI_DECK formats, table sizes, rounds, byes, and tournament scoring |
+| Document                                     | Description                                                                                            |
+|----------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [Deck Building](./deck-building.md)          | Deck size, crypt group restrictions, and format legality                                               |
+| [Game Flow](./game-flow.md)                  | Table setup, turn phases, influence, regions, Edge, VP scoring, and game end                           |
+| [Actions](./actions.md)                      | Minion readiness, basic actions, action lifecycle, action success, NRA, and after-resolution effects   |
+| [Blocking](./blocking.md)                    | Directed/undirected actions, block attempts, stealth/intercept, redirects, reactions, and wake effects |
+| [Referendums](./referendums.md)              | Political action referendums, vote sources, Prisci ballots, blood hunts, and Edge votes                |
+| [Combat](./combat.md)                        | Combat initiation, round sequence, strikes, damage resolution, torpor, and diablerie                   |
+| [Card Timing and Card Types](./card-play.md) | Card declaration, replacement, cancellation, phase constraints, type-specific rules, and destinations  |
+| [Tournament](./tournament.md)                | SINGLE_DECK vs MULTI_DECK formats, table sizes, rounds, byes, and tournament scoring                   |

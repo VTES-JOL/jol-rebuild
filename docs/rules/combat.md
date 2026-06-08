@@ -2,7 +2,7 @@
 
 Defines the full combat system: how combat is initiated, how each round proceeds, how damage and torpor are resolved, and how combat ends.
 
-See [Card Play](./card-play.md) for when combat cards are legal to play within the broader action lifecycle.
+See [Actions](./actions.md) for the broader action lifecycle and [Card Timing and Card Types](./card-play.md) for generic card-play timing.
 
 See [JOL Implementation — Combat](../implementation/combat.md) for current implementation status.
 
@@ -266,7 +266,7 @@ Card text and rulings also create timing around combat ending:
 
 Combat cards cannot be played after combat unless their card text explicitly permits that timing. "End of round" effects such as Taste of Vitae and Disarm are played in Step 7, after presses are handled, including when combat ended prematurely.
 
-After all applicable end-of-round, end-of-combat, and after-combat effects have resolved, the action lifecycle moves to **After Resolution** (or **Action Continuing** if a continue-the-action effect fires). See [Card Play § After Resolution](./card-play.md#after-resolution).
+After all applicable end-of-round, end-of-combat, and after-combat effects have resolved, the action lifecycle moves to **After Resolution** (or **Action Continuing** if a continue-the-action effect fires). See [Actions § After Resolution](./actions.md#after-resolution).
 
 ---
 
@@ -296,7 +296,7 @@ Diablerie may occur when a ready vampire has a torpored vampire at their mercy. 
 3. The victim is burned and sent to their owner's ash heap. Any cards and counters on the victim are burned, except equipment taken by the diablerist.
 4. If the victim's capacity is strictly greater than the diablerist's capacity, the diablerist's controller may search their hand, library, and/or ash heap for a master: Discipline card to put on the diablerist, then reshuffle or draw back to hand size as necessary. This can increase the diablerist's capacity by 1, but does not add blood to fill that new capacity.
 5. If the victim was a Red List minion burned in combat or as a directed action, including diablerie, Trophy awards are resolved now (before the blood hunt; see [Mechanics Gaps § Minion Traits](../implementation/mechanics-gaps.md#14-minion-traits)). The diablerist's controller may search their hand, library, and/or ash heap for a master Trophy card to put on the diablerist, then reshuffle or draw back to hand size as necessary. Other unawarded Trophies in play may also be moved to the diablerist at each Trophy controller's discretion.
-6. A blood hunt referendum is automatically called. See [Card Play § Blood hunt referendum](./card-play.md#blood-hunt-referendum).
+6. A blood hunt referendum is automatically called. See [Referendums § Blood Hunt Referendum](./referendums.md#blood-hunt-referendum).
 
 Diablerie is resolved as a single unit. No effects can interrupt the middle of the diablerie sequence; effects are used before or after the diablerie as card text permits.
 

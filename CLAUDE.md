@@ -17,8 +17,11 @@ When updating game rules documentation in `docs/rules/`, review the correspondin
 ### VTES Rules
 - [Deck Building](docs/rules/deck-building.md)
 - [Game Flow](docs/rules/game-flow.md)
-- [Card Play](docs/rules/card-play.md)
+- [Actions](docs/rules/actions.md)
+- [Blocking](docs/rules/blocking.md)
+- [Referendums](docs/rules/referendums.md)
 - [Combat](docs/rules/combat.md)
+- [Card Timing and Card Types](docs/rules/card-play.md)
 - [Tournament](docs/rules/tournament.md)
 
 ### JOL Implementation
