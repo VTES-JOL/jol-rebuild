@@ -1,4 +1,12 @@
-# Game Modes
+# Game Modes — Implementation
+
+Documents the Permissive / Rules-Enforced mode setting, command availability, UI differences, and the effect architecture.
+
+See [VTES Rules — README](../rules/README.md) for the tabletop distinction between casual and formal play that this implements.
+
+---
+
+## Mode Setting
 
 JOL supports two operating modes that control which commands are available during a game.
 
@@ -77,10 +85,12 @@ Protocol-driven play. Players use higher-level commands that enforce VTES rules 
 ## UI Differences by Mode
 
 ### Status Bar Action Buttons
+
 - **Permissive**: Draw, Draw Crypt, Shuffle Library, Shuffle Crypt, Unlock All, Gain Edge, Oust Player. No Impulse controls shown.
 - **Enforced**: Shuffle Library, Shuffle Crypt. Phase tracker replaced by phase label (no advance button). Impulse, ImpulsePanel, ActionDeclarationPanel, and SequencingPanel controls shown.
 
 ### Card Context Menu
+
 - **Permissive**: All card actions shown (Play, Discard, Move to Torpor, Rescue, Burn, Influence, Return to Crypt, blood transfer).
 - **Enforced**: Raw manipulation hidden. Available: Lock/Unlock, Blood counters (display/adjust), Contest, Set Title, Set Notes.
 
@@ -88,7 +98,7 @@ Protocol-driven play. Players use higher-level commands that enforce VTES rules 
 
 ## Architecture: Command → Effect
 
-Commands are dispatched by `GameCommandService` and produce `CommandResult`, which now carries:
+Commands are dispatched by `GameCommandService` and produce `CommandResult`, which carries:
 - `logMessage` — human-readable log string
 - `commandLog` — structured `CommandLogData` for the command log panel
 - `effects` — list of `GameEffect` records describing what state changed
@@ -101,4 +111,4 @@ Commands are dispatched by `GameCommandService` and produce `CommandResult`, whi
 
 Effects are currently co-produced alongside direct mutations (handlers still mutate `GameData` directly). The future CQRS step is to make handlers pure functions returning only effects, with a `GameEffectApplier` doing all mutations.
 
-See [vtes-mechanics-gaps.md](vtes-mechanics-gaps.md) for which enforced-mode commands are fully rules-aware vs partially implemented.
+See [Mechanics Gaps](./mechanics-gaps.md) for which enforced-mode commands are fully rules-aware vs partially implemented.

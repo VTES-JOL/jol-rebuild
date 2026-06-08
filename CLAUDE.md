@@ -8,18 +8,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Logical Model
 JOL is a representation of the Vampire: The Eternal Struggle card game.  As such it tries to mimic the logic and constraints that apply in a real-world game.
 
-Below is the detailed documentation for the logical constraints each domain model works under:
-- [Cards Import and Searching](/docs/logic/cards.md)
-- [Deck Building and Importing](/docs/logic/deck-building.md)
-- [Game lobby](docs/logic/game-lobby.md)
-- [Tournament lobby](docs/logic/tournament-lobby.md)
-- [Game State](docs/logic/game-state.md)
-- [Board Layouts](docs/logic/board-layouts.md)
-- [Chat System](docs/logic/chat.md)
-- [VTES Mechanics Gap Analysis](docs/logic/vtes-mechanics-gaps.md)
-- [Card Play Rules](docs/logic/card-play-rules.md)
-- [Combat Mechanics](docs/logic/combat.md)
-- [Game Modes](docs/logic/game-modes.md)
+Documentation is split into two folders:
+- **[VTES Rules](docs/rules/README.md)** — tabletop game rules any VTES player would recognise
+- **[JOL Implementation](docs/implementation/README.md)** — data structures, commands, import formats, and gap analysis specific to the online client
+
+When updating game rules documentation in `docs/rules/`, review the corresponding docs in `docs/implementation/` and update any affected gap analysis, command descriptions, or implementation status notes.
+
+### VTES Rules
+- [Deck Building](docs/rules/deck-building.md)
+- [Game Flow](docs/rules/game-flow.md)
+- [Card Play](docs/rules/card-play.md)
+- [Combat](docs/rules/combat.md)
+- [Tournament](docs/rules/tournament.md)
+
+### JOL Implementation
+- [Cards Import and Searching](docs/implementation/cards.md)
+- [Deck Building and Importing](docs/implementation/deck-building.md)
+- [Game Lobby](docs/implementation/game-lobby.md)
+- [Tournament Lobby](docs/implementation/tournament-lobby.md)
+- [Game State](docs/implementation/game-state.md)
+- [Board Layouts](docs/implementation/board-layouts.md)
+- [Chat System](docs/implementation/chat.md)
+- [Mechanics Gaps](docs/implementation/mechanics-gaps.md)
+- [Card Play](docs/implementation/card-play.md)
+- [Combat](docs/implementation/combat.md)
+- [Game Modes](docs/implementation/game-modes.md)
 
 ## Commands
 

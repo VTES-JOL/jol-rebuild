@@ -1,11 +1,11 @@
 # Card Play Rules
 
-Defines when each card type can be played, who may play it, valid source regions, and where cards end up after resolution. These are the rules that `PlayCard` will enforce once phase gating is implemented.
+Defines when each card type can be played, who may play it, and how actions, blocking, and card effects resolve.
 
-See [vtes-mechanics-gaps.md](vtes-mechanics-gaps.md) for current enforcement status.
+See [JOL Implementation — Card Play](../implementation/card-play.md) for current enforcement status.
 
-See [Rulebook](https://www.vekn.net/rulebook) and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) for the official reference
-The golden rule of VTES is that rules on the card overwrite rules in the rulebook
+See [Rulebook](https://www.vekn.net/rulebook) and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) for the official reference.
+The golden rule of VTES is that rules on the card overwrite rules in the rulebook.
 
 ---
 
@@ -65,7 +65,7 @@ When a "continue the action" effect fires after a blocked combat (e.g. Form of M
 
 ## Impulse Window and Card Play
 
-Card and effect plays occur within timing windows governed by impulse or sequencing. A player may only play a card when they hold the relevant impulse or sequencing priority. The pass order and return-to-acting-player-after-play rules are defined in [game-state.md § Impulse and sequencing windows](game-state.md#impulse-and-sequencing-windows).
+Card and effect plays occur within timing windows governed by impulse or sequencing. A player may only play a card when they hold the relevant impulse or sequencing priority. The pass order and return-to-acting-player-after-play rules are defined in [Game Flow § Impulse and Sequencing](./game-flow.md#impulse-and-sequencing).
 
 ---
 
@@ -160,17 +160,17 @@ All action modifiers and reactions that affect the action accumulate over the **
 
 - **Stealth** — the acting minion's stealth total carries forward through all block windows, including after a redirect.
 - **Intercept** — a minion's intercept total carries forward, even if the action was redirected away from their controller and then back.
-- **Bleed amount** — increases and decreases applied by modifiers and reactions persist. A modifier that increased the bleed to 4 is still in effect when a later reaction tries to reduce it.
+- **Bleed amount** — increases and decreases applied by modifiers and reactions persist.
 - **Other modifiers** — any other action modifier or reaction already played remains in effect regardless of redirects or additional block windows.
 
 The "only when needed" rule applies to each new block attempt based on the **current accumulated totals**, not the starting values.
 
 ### Action redirects
 
-Some reaction cards allow a Methuselah to redirect an action to a different target (e.g. redirect a bleed from Player 2 to Player 3). When a redirect occurs:
+Some reaction cards allow a Methuselah to redirect an action to a different target. When a redirect occurs:
 
 - All accumulated modifiers (stealth, intercept, bleed amount, etc.) **carry over** — nothing resets.
-- A new block window opens with the **new target** Methuselah. Block attempts proceed normally for that new target.
+- A new block window opens with the **new target** Methuselah.
 - Any Methuselah who passed on blocking during a **previous** block window for this action is **not** automatically excluded from the new window. If the action is redirected back to a player who previously passed, all of that player's eligible minions may attempt to block again — the prior pass applies only to the window in which it was made.
 - The exception is any minion that carries an explicit "cannot attempt to block" restriction from a card effect — that restriction persists for the duration of the action.
 
@@ -179,10 +179,10 @@ Some reaction cards allow a Methuselah to redirect an action to a different targ
 1. Player 1 declares a directed bleed at Player 2 with 1 stealth.
 2. Minion A (Player 2) wakes and declines to block — no longer eligible in this block window.
 3. Minion B (Player 2) attempts to block with 1 intercept; Player 1 plays +1 stealth (now 2 stealth); Player 2 passes — block window closes, action proceeds.
-4. Player 2 plays a reaction redirecting the bleed to Player 3. The action is now directed at Player 3; accumulated stealth is 2, accumulated bleed modifier is still in effect.
+4. Player 2 plays a reaction redirecting the bleed to Player 3. Accumulated stealth is 2.
 5. Player 3 declines to block; plays a reaction redirecting the bleed back to Player 2.
-6. A new block window opens for Player 2. **Both Minion A and Minion B are eligible again.** Minion B still has 1 intercept (retained); the acting minion still has 2 stealth. Player 2 may play reactions to add intercept to reach the threshold.
-7. Modifiers (including additional bleed increases, subject to the limited rule) may still be played during this new block window by their respective players.
+6. A new block window opens for Player 2. **Both Minion A and Minion B are eligible again.** Minion B still has 1 intercept (retained); the acting minion still has 2 stealth.
+7. Modifiers (including additional bleed increases, subject to the limited rule) may still be played during this new block window.
 
 ### Stealth and intercept — "only when needed"
 
@@ -206,13 +206,13 @@ Based on [Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summar
 3. This opens a narrow window for **"as it is played" / "as announced" cancellers only** (e.g. Direct Intervention). No other cards or effects may be played at this step.
 4. If the card is cancelled here → see [Cancelled Cards](#cancelled-cards) below.
 
-> **Interrupt Layer note:** These cancellers form an independent interrupt layer that is orthogonal to the action state machine and to impulse/sequencing. They intercept card play at the moment of declaration, regardless of which action state is active or who holds priority. They do not interact with the impulse loop and do not consume or transfer sequencing priority.
+> **Interrupt Layer note:** These cancellers form an independent interrupt layer that is orthogonal to the action state machine and to impulse/sequencing. They intercept card play at the moment of declaration, regardless of which action state is active or who holds priority.
 
 ### C — Replace card
 
 - The card is replaced (the player draws back up to max hand size) **after** all "as played" effects finish resolving.
 - If the card text says the card is not replaced until later, the hand size remains reduced until that condition is met.
-- Cancellation voids any "do not replace" clause — a cancelled card is replaced normally (via the draw-to-max rule).
+- Cancellation voids any "do not replace" clause — a cancelled card is replaced normally.
 
 ### D — Pay costs and resolve
 
@@ -232,21 +232,21 @@ An action card exists in a limbo state (neither in play nor in the ash heap) fro
 
 A card cancelled "as it is played" (Section B):
 
-- **Is** considered "played" by **card name** for any rule that limits how often a card can be played (e.g. "once per turn", "once per game" — tracked per card name, not UUID).
-- **Does not** reduce hand size permanently — the card goes to the ash heap and the draw-to-max rule replaces it at the end of the play attempt.
+- **Is** considered "played" by **card name** for any rule that limits how often a card can be played.
+- **Does not** reduce hand size permanently — the card goes to the ash heap and the draw-to-max rule replaces it.
 - **Does not** pay any cost.
-- **Does not** trigger the NRA lock (see below) — the same action type may be attempted again this turn.
+- **Does not** trigger the NRA lock — the same action type may be attempted again this turn.
 - No other effects propagate. The play attempt simply ends.
 
 ---
 
 ## Hand Size and Draw-to-Max
 
-Maximum hand size is **7**. Whenever a player's hand falls below a maximum, they draw back up at the next replacement opportunity. This is what drives all card replacements — after Section C completes, after a cancelled card resolves, etc.
+Maximum hand size is **7**. Whenever a player's hand falls below the maximum, they draw back up at the next replacement opportunity — after Section C completes, after a cancelled card resolves, etc.
 
 ### "Do Not Replace" Conditions
 
-Some cards delay the replacement draw. The condition is stated in the card text and is one of the following:
+Some cards delay the replacement draw. The condition is stated in the card text:
 
 | Card text pattern | Replacement trigger |
 |---|---|
@@ -255,8 +255,8 @@ Some cards delay the replacement draw. The condition is stated in the card text 
 | `"Do not replace until after the current turn."` | At the end of the current player's turn |
 | `"Do not replace until your next discard phase."` | At the start of the playing player's next DISCARD phase |
 | `"Do not replace until your next unlock phase."` | At the start of the playing player's next UNLOCK phase |
-| `"Do not replace until [game event]."` | When the named event occurs (e.g. a vampire commits diablerie, a vampire successfully hunts, a Methuselah is ousted) |
-| `"Do not replace as long as this card is in play."` | Never (card stays unreplaced while the card remains in play) |
+| `"Do not replace until [game event]."` | When the named event occurs |
+| `"Do not replace as long as this card is in play."` | Never (card stays unreplaced while in play) |
 
 Cancellation voids any "do not replace" clause — a cancelled card is always replaced normally.
 
@@ -292,7 +292,7 @@ NRA is triggered at the **Complete Action** step — after block attempts are re
 1. NRA fires — acting minion is locked out of this action type for the rest of the turn.
 2. Then:
    - **Not blocked** → pay cost → resolve action.
-   - **Blocked** → action card burned (cost not paid) → blocker locks → combat begins (exception: if the acting minion is in torpor, there is no combat — the blocking player may choose to diablerize instead; see Leave Torpor).
+   - **Blocked** → action card burned (cost not paid) → blocker locks → combat begins (exception: if the acting minion is in torpor, there is no combat — the blocking player may choose to diablerize instead; see Leave Torpor in [Combat](./combat.md)).
 
 ### Two separate tracking mechanisms
 
@@ -307,7 +307,7 @@ NRA is triggered at the **Complete Action** step — after block attempts are re
 
 Source: VEKN Rulebook — Bleed and Additional Strikes.
 
-Some cumulative effects are forbidden by the rules. A card is "limited" if it cannot stack with another card or effect of the same limited type. The card text marks this with `"(limited)"`.
+Some cumulative effects are forbidden. A card is "limited" if it cannot stack with another card or effect of the same limited type. The card text marks this with `"(limited)"`.
 
 Two specific limited categories exist:
 
@@ -316,9 +316,7 @@ Two specific limited categories exist:
 | **Bleed increase (limited)** | During a bleed action, at most one action modifier may increase the bleed amount via a "limited" source. A second "(limited)" bleed modifier cannot be played if the bleed is already being increased by another "(limited)" modifier. |
 | **Additional strikes (limited)** | A minion cannot gain additional strikes per round from more than one "(limited)" source. |
 
-A card that does **not** include `"(limited)"` in its text does not count against these limits and may be played alongside a limited card.
-
-Implementation note: the engine must track per-action whether a limited bleed modifier has already been played, and per-combat-round whether a limited additional-strike source has already been used.
+A card that does **not** include `"(limited)"` in its text does not count against these limits.
 
 ---
 
@@ -346,23 +344,25 @@ Implementation note: the engine must track per-action whether a limited bleed mo
 ## Special Rules
 
 ### Out-of-Turn Masters
+
 A Master card is out-of-turn if its card text contains the string `"out-of-turn"` (case-insensitive). Examples: `Archon Investigation`, `Sudden Reversal`, `Wash`.
 
 - Cannot be played during the owning player's own turn.
 - Can be played only during another Methuselah's turn and only when the card's own timing condition is satisfied.
-- Uses the current legal timing window: some out-of-turn masters are played as a card is played, while others are played in response to a specific action or effect.
 - **Cost:** Uses the playing player's next master phase action.
 - **Limit:** A Methuselah cannot play more than one out-of-turn master card between two of their turns, even if they later regain a master phase action.
 - **Trifle exception:** If the out-of-turn card is also a Trifle, apply the card's own text and the master-action accounting rules for trifles; do not grant a generic extra master phase action just because the card was played out of turn.
 
 ### Event Cards
+
 - Playing an Event card replaces the current player's discard action for that turn — they do not also draw a replacement card.
 - Events stay in play permanently after being played.
 
 ### Conviction Cards
-- Conviction cards are the only card type playable from ASH_HEAP (in addition to HAND).
+
+- Conviction cards are the only card type playable from the Ash Heap (in addition to hand).
 - Playing a Conviction card attaches that card onto a ready Imbued the player controls.
-- When an Imbued enters play with no conviction, then that player may search their hand, library, or ash heap for a conviction card to attach to that Imbued.
+- When an Imbued enters play with no conviction, that player may search their hand, library, or ash heap for a conviction card to attach to that Imbued.
 
 ### Locked Minion Reaction Exception
 
@@ -372,20 +372,23 @@ The default rule is that only **ready** (unlocked) minions may play reaction car
 
 A **wake effect** is a special reaction card (e.g. On the Qui Vive, Forced Awakening) that allows a locked minion to become temporarily ready during another Methuselah's action:
 
-- Wake cards are played in the "as played" interrupt layer — the same narrow window as cancellers — allowing them to be played by a locked minion as soon as an eligible action is declared.
+- Wake cards are played in the "as played" interrupt layer, allowing them to be played by a locked minion as soon as an eligible action is declared.
 - Once awake, the minion is treated as ready for the duration of that action: they may play further reaction cards and attempt to block.
 - If the minion blocks and combat results, they remain engaged in combat normally.
-- At the end of the action (when the action lifecycle closes), a woken minion locks again if the wake card's text specifies it (most wake cards specify "until the end of the action" or similar).
+- At the end of the action, a woken minion locks again if the wake card's text specifies it.
 
 ### Action Modifiers vs Reactions
+
 These two types are explicitly asymmetric:
 - **Action Modifier** — only the **acting player** may play these. They supplement the action their minion is taking (add stealth, change target, etc.).
 - **Reaction** — any player **except** the acting player may play these in response to the declared action.
 
 ### Combat Cards
-Combat cards can only be played during an active combat (`pendingCombat` state). Both the attacking and the defending players may play them. The combat system is not yet formally implemented; see [vtes-mechanics-gaps.md](vtes-mechanics-gaps.md).
+
+Combat cards can only be played during an active combat. Both the attacking and the defending players may play them. See [Combat](./combat.md) for the full combat rules.
 
 ### Imbued Powers (`POWER` type)
+
 Powers are Imbued-specific minion phase cards. Individual powers may further restrict timing via card-text subtypes:
 - `[COMBAT]` — playable during combat only (same rules as `COMBAT` type above).
 - `[REACTION]` — playable as a reaction (same rules as `REACTION` above).
@@ -413,8 +416,6 @@ Where a card ends up after being played is determined by its card text, not its 
 | Contains `"put this card on [target]"`                            | Attached to the target as a child card        |
 | Neither pattern                                                   | Moves to the owner's `ASH_HEAP`               |
 
-This applies to all card types. `CardType.permanentTypes()` is a coarse approximation used for UI hints; card text is the authoritative source.
-
 ---
 
 ## After Resolution
@@ -438,7 +439,7 @@ A player may freely choose the order in which their eligible After Resolution ef
 
 ### Triggered abilities check their preconditions at trigger time
 
-An "after resolution" triggered ability (e.g. Lutz von Hohenzollern's special) verifies its preconditions **at the moment it would fire**, not at the moment the action resolved. If the triggering condition is no longer true when the After Resolution window opens (e.g. the vampire is no longer ready because the referendum ousted its controller), the ability does not trigger.
+An "after resolution" triggered ability verifies its preconditions **at the moment it would fire**, not at the moment the action resolved. If the triggering condition is no longer true when the After Resolution window opens, the ability does not trigger.
 
 ### Typical effects that fire in this window
 
@@ -461,13 +462,13 @@ A referendum is initiated by a successful political action. It proceeds through 
 
 ### Step 1 — Choose Terms
 
-The terms of the referendum are chosen by the acting vampire's controller **after** the action is confirmed unblocked (not at announcement). If the political action card offers choices (e.g. which player to affect), those choices are made here.
+The terms are chosen by the acting vampire's controller **after** the action is confirmed unblocked. If the political action card offers choices (e.g. which player to affect), those choices are made here.
 
 ### Step 2 — Polling
 
-1. **"Before votes and ballots are cast" effects** — a distinct sub-window fires first. Cards with this explicit trigger are played now, before any votes are cast, following ABC sequencing.
+1. **"Before votes and ballots are cast" effects** — a distinct sub-window fires first, following ABC sequencing.
 2. **Votes and ballots are cast** — any Methuselah may cast their available votes/ballots in any order. There is no obligation to vote. Votes are irreversible once cast.
-3. Cards marked **"only usable during a political action"** are legal only during this polling step (they cannot be played after polling closes).
+3. Cards marked **"only usable during a political action"** are legal only during this polling step.
 
 ### Step 3 — Resolution
 
@@ -486,14 +487,14 @@ The terms of the referendum are chosen by the acting vampire's controller **afte
 | The Edge | 1 (burn the Edge to gain it) |
 | Card effects | As specified |
 
-Torpored vampires cannot cast votes (they must abstain).
+Torpored vampires cannot cast votes.
 
 ### Prisci block
 
-Priscus is a collective Sabbat title. A ready Priscus provides **one ballot**, not ordinary votes. The Prisci block provides three votes in the main referendum, and the way those three votes are cast is decided by a Prisci-only sub-referendum.
+Priscus is a collective Sabbat title. A ready Priscus provides **one ballot**, not ordinary votes. The Prisci block provides three votes in the main referendum, decided by a Prisci-only sub-referendum.
 
 1. During polling, each ready Priscus may cast one ballot in the Prisci sub-referendum.
-2. Only Prisci ballots participate in this sub-referendum; other Methuselahs do not cast votes in it.
+2. Only Prisci ballots participate in this sub-referendum.
 3. The Prisci block contributes three votes to the main referendum according to the current result of the Prisci ballots.
 4. As more Prisci cast ballots, the block may shift between for, against, or no contribution if the ballots are tied.
 
@@ -501,18 +502,18 @@ The Prisci block is resolved as part of polling before the main referendum outco
 
 ### Blood hunt referendum
 
-A blood hunt referendum is automatically called after any diablerie occurs. It differs from a political action referendum in the following ways:
+A blood hunt referendum is automatically called after any diablerie occurs. It differs from a political action referendum:
 
-- It is **not** initiated by a political action card — no card is played; no card is burned.
-- The **acting Methuselah** for purposes of impulse and sequencing is the Methuselah whose vampire was diablerized (the victim's controller). The diablerist's controller is not the acting player for this referendum.
-- The terms are fixed: the referendum targets the diablerist. If it passes, the diablerist is burned (sent to the ash heap, not torpor).
-- The blood hunt referendum follows the same three-step structure (Choose Terms → Polling → Resolution) and the same vote sources as any other referendum.
-- Trophy awards (for Red List minions, if applicable) are resolved **before** the blood hunt referendum is called. See the Red List trait in [vtes-mechanics-gaps.md § Minion Traits](vtes-mechanics-gaps.md#14-minion-traits).
+- It is **not** initiated by a political action card — no card is played.
+- The **acting Methuselah** for impulse and sequencing is the Methuselah whose vampire was diablerized (the victim's controller).
+- The terms are fixed: the referendum targets the diablerist. If it passes, the diablerist is burned.
+- The blood hunt referendum follows the same three-step structure and the same vote sources as any other referendum.
+- Trophy awards (for Red List minions, if applicable) are resolved **before** the blood hunt referendum is called. See the Red List trait in [Mechanics Gaps § Minion Traits](../implementation/mechanics-gaps.md#14-minion-traits).
 
 ### The Edge
 
 The Edge is a game token that passes between players during bleed actions:
-- The acting player takes the Edge whenever their bleed action resolves for 1 or more pool damage (whether successful or the Edge is already held by another player).
+- The acting player takes the Edge whenever their bleed action resolves for 1 or more pool damage.
 - During referendum polling the Edge-holder may burn the Edge to gain 1 vote.
 - Only one player holds the Edge at a time; it starts the game with no owner.
 
@@ -520,20 +521,10 @@ The Edge is a game token that passes between players during bleed actions:
 
 ## Combat
 
-Combat occurs when a block attempt succeeds (or a rush action resolves). Full combat mechanics — round sequence, range, strike types, damage, torpor, Leave Torpor, and diablerie — are documented in [combat.md](combat.md).
+Combat occurs when a block attempt succeeds (or a rush action resolves). Full combat mechanics — round sequence, range, strike types, damage, torpor, Leave Torpor, and diablerie — are documented in [Combat](./combat.md).
 
 **Summary relevant to card play timing:**
 - The acting minion has first priority (ABC: A) at every combat step.
 - Steps 1 (Before Range) and 2 (Determine Range) are each passed independently per player; Step 3 (Before Strikes) is passed implicitly.
 - Default at end of each round: combat ends. A press-to-continue card forces another round; a press-to-end cancels it.
 - Combat must fully resolve before the action lifecycle leaves the Resolution state and enters After Resolution.
-
----
-
-## Implementation Status
-
-Phase enforcement is not yet implemented. `PlayCard` currently accepts any card from `HAND` in any phase. See [vtes-mechanics-gaps.md](vtes-mechanics-gaps.md) §11 for the full gap list and proposed work.
-
-Missing enum values that must be added before enforcement can be implemented:
-- `CardType.CONVICTION` — currently maps to `CardType.NONE` in `GameInitService.toCardType()`
-- `CardType.POWER` — currently maps to `CardType.NONE` in `GameInitService.toCardType()`

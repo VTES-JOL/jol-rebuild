@@ -1,5 +1,7 @@
 # Chat System
 
+> No corresponding rules document — chat is a JOL-specific feature.
+
 ## Overview
 
 JOL has two independent chat contexts sharing a single `ChatService`:
@@ -136,7 +138,7 @@ The `content` in `replyTo` is truncated to 100 characters (with `…` appended) 
 ```json
 {
   "type": "HISTORY",
-  "history": [ <CHAT message objects> ]
+  "history": [ "<CHAT message objects>" ]
 }
 ```
 

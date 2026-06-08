@@ -1,5 +1,7 @@
 # Board Layouts
 
+> No corresponding rules document — board layouts are JOL-specific UI features.
+
 `GamePage` offers three interchangeable board layouts controlled by the `boardLayout` state. The selector in the top-right cycles between **Strip** (`linear`), **Table** (`circular`), and **Text** (`text`).
 
 All three layouts receive the same `GameState` and render the same nine `RegionType` values:

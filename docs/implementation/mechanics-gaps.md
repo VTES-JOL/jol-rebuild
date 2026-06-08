@@ -1,5 +1,7 @@
 # VTES Mechanics Gap Analysis
 
+> For the VTES rules that these gaps relate to, see [VTES Rules](../rules/README.md) for the corresponding rules documentation.
+
 Cross-reference of the [VEKN Rulebook](https://www.vekn.net/rulebook) and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) against the current JOL implementation. Source of truth for prioritising new commands and UI features.
 
 ---
@@ -321,7 +323,7 @@ A post-`OustPlayer` hook should check remaining player count and, if one player 
 
 ### 12. Card Play Phase Gating
 
-`PlayCard` currently has no phase or card-type validation. Any card in `HAND` can be played in any phase by whoever holds impulse. The full rules are defined in [card-play-rules.md](card-play-rules.md).
+`PlayCard` currently has no phase or card-type validation. Any card in `HAND` can be played in any phase by whoever holds impulse. The full rules are defined in [Card Play Rules](../rules/card-play.md).
 
 **Missing mechanics:**
 
@@ -399,7 +401,7 @@ Traits are attributes a minion can have that interact with other game effects. T
 
 Three master card subtypes have distinct in-play rules that are not yet specified or implemented.
 
-| Subtype        | Rule                                                                                                                                                                                                                                  |
+| Subtype        | Rule                                                                                                                                                                                                                                                                  |
 |----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Trophy**     | Trophy master cards are awarded through Red List rules when a qualifying vampire burns a Red List minion in combat or as a directed action, including diablerie; Trophy handling must follow each Trophy card's text. |
 | **Investment** | Enters play with a supply of blood counters drawn from the blood bank. During the controller's master phase they may move blood from the Investment to a qualifying vampire. The Investment is burned when it has no blood remaining. |
@@ -456,7 +458,7 @@ This gap is coupled with Gap §2 (Hunt action is listed as an `actionType` in `D
 | **P3**   | Combat system                                                       | Complex; most tables already manage manually through counter adjustments                                                                                                                                                                                                                                                                                       |
 | **P3**   | Minion traits: Black Hand, Flight, Red List, Circle (§14)           | Parse-time flags; required for card requirement checks and Red List mark-and-hunt mechanic                                                                                                                                                                                                                                                                     |
 | **P3**   | Named counter types (§13)                                           | Corruption counters have cross-player semantics; Aye/Orun are attached cards counted by name                                                                                                                                                                                                                                                                   |
-| **P3**   | Limited effect enforcement (§12 / card-play-rules.md)               | Requires per-action and per-combat-round tracking of whether a limited source has been used                                                                                                                                                                                                                                                                    |
+| **P3**   | Limited effect enforcement (§12 / [card-play.md](../rules/card-play.md)) | Requires per-action and per-combat-round tracking of whether a limited source has been used                                                                                                                                                                                                                                                                    |
 | **P3**   | Trophy / Investment / Path subtypes (§15)                           | Master subtype parsing is prerequisite for correct in-play behavior                                                                                                                                                                                                                                                                                            |
 | **P4**   | Anarch conversion command                                           | Convenience; achievable today via manual counter + SetTitle                                                                                                                                                                                                                                                                                                    |
 | **P4**   | Card control transfer (§16)                                         | Affects only a handful of cards; owner/controller split is a prerequisite                                                                                                                                                                                                                                                                                      |

@@ -2,7 +2,9 @@
 
 Defines the full combat system: how combat is initiated, how each round proceeds, how damage and torpor are resolved, and how combat ends.
 
-See [card-play-rules.md](card-play-rules.md) for when combat cards are legal to play within the broader action lifecycle.
+See [Card Play](./card-play.md) for when combat cards are legal to play within the broader action lifecycle.
+
+See [JOL Implementation — Combat](../implementation/combat.md) for current implementation status.
 
 ---
 
@@ -76,7 +78,7 @@ Each combatant announces their strike: the acting minion announces first, then t
 
 A strike declaration names the **type** and, where relevant, the **strength or damage value**:
 - Hand strike strength equals the minion's current strength and must be stated explicitly when above 1 (e.g. "hand strike for 2"). Default vampire strength is 1.
-- Weapon strikes use the formula defined in the weapon's card text (see Weapon strikes below).
+- Weapon strikes use the formula defined in the weapon's card text.
 - Special strikes (dodge, Combat Ends, steal blood) are named by type.
 
 #### Strike types
@@ -147,14 +149,14 @@ Bundi is a special case — its card text explicitly states it is both a hand st
 
 #### Combat cards that become weapons
 
-Some cards have type `Combat` but transform into equipment weapon cards when played during combat. They are played from hand like any combat card, then placed on the minion as an equipment card and function as a weapon for the remainder of combat (and potentially after).
+Some cards have type `Combat` but transform into equipment weapon cards when played during combat. They are played from hand like any combat card, then placed on the minion as an equipment card and function as a weapon for the remainder of combat.
 
 | Card | Played | Becomes | Strike | Duration |
 |---|---|---|---|---|
 | Weighted Walking Stick | Before range, first round only | Melee weapon equipment with 5 counters | strength+1 damage; burns 1 counter per damage inflicted | Burns when counters reach 0 |
 | Zip Gun | Before range is determined | Gun equipment (does not count as a combat card while in play) | 1R damage + optional maneuver each combat; bearer takes 1 damage per combat when striking | Kept as normal equipment after combat ends |
 
-Implementation note: once placed, these cards occupy the equipment zone and obey equipment rules (one Weighted Walking Stick per minion; Zip Gun is kept post-combat and is not discarded). The `CardType` changes from `COMBAT` to `EQUIPMENT` when the card is placed on the minion.
+Once placed, these cards occupy the equipment zone and obey equipment rules. The card type changes from `COMBAT` to `EQUIPMENT` when the card is placed on the minion.
 
 #### Strike resolution order
 
@@ -166,7 +168,7 @@ If the opposing minion is burned or sent to torpor by a first strike, their norm
 
 #### Additional strikes
 
-After the initial strikes and damage prevention/resolution for those strikes, combatants have the option to gain additional strikes for the same round. Additional strikes do **not** resolve simultaneously with the initial strikes.
+After the initial strikes and damage prevention/resolution, combatants have the option to gain additional strikes for the same round. Additional strikes do **not** resolve simultaneously with the initial strikes.
 
 - Additional strikes are resolved by repeating strike announcement and strike resolution for each additional strike.
 - Additional strikes use the same range as the initial strikes for that round.
@@ -234,7 +236,7 @@ Combat ends when:
 - A Combat Ends strike resolves.
 - One or both combatants are no longer ready (burned or in torpor).
 
-When combat ends, the action lifecycle moves to **After Resolution** (or **Action Continuing** if a continue-the-action effect fires). See [card-play-rules.md § After Resolution](card-play-rules.md#after-resolution).
+When combat ends, the action lifecycle moves to **After Resolution** (or **Action Continuing** if a continue-the-action effect fires). See [Card Play § After Resolution](./card-play.md#after-resolution).
 
 ---
 
@@ -254,20 +256,19 @@ A vampire who cannot mend all their wounds at the end of damage resolution goes 
 - **Blockable:** yes.
 - **If unblocked and cost paid:** vampire moves to the ready region.
 - **If blocked:** no combat. The blocking player's controller may choose to **diablerize** the torpored vampire. If they decline, the acting vampire stays in torpor and the action fails.
-- After-resolution effects tied to successfully leaving torpor fire normally.
 
 ### Diablerie
 
-Diablerie may occur when a ready vampire has a torpored vampire at their mercy (either after combat drives a vampire to torpor, or by blocking a Leave Torpor action). The diablerist drinks the blood of the torpored vampire:
+Diablerie may occur when a ready vampire has a torpored vampire at their mercy. The diablerist drinks the blood of the torpored vampire:
 
 1. The victim's remaining blood transfers to the diablerist; excess over the diablerist's capacity is burned.
 2. The diablerist may take any equipment on the victim.
 3. If the victim's capacity is strictly greater than the diablerist's capacity, the diablerist may gain one of the victim's discipline cards.
 4. The victim is burned (removed from the game, not sent to torpor again).
-5. If the victim was a Red List minion, Trophy awards are resolved now (before the blood hunt; see [vtes-mechanics-gaps.md § Minion Traits](vtes-mechanics-gaps.md#14-minion-traits)).
-6. A blood hunt referendum is automatically called. See [card-play-rules.md § Blood hunt referendum](card-play-rules.md#blood-hunt-referendum).
+5. If the victim was a Red List minion, Trophy awards are resolved now (before the blood hunt; see [Mechanics Gaps § Minion Traits](../implementation/mechanics-gaps.md#14-minion-traits)).
+6. A blood hunt referendum is automatically called. See [Card Play § Blood hunt referendum](./card-play.md#blood-hunt-referendum).
 
-A Blood Cursed vampire cannot commit diablerie (see Minion Traits in vtes-mechanics-gaps.md).
+A Blood Cursed vampire cannot commit diablerie.
 
 ---
 
@@ -280,9 +281,3 @@ The default rule is that combat cards are played only by minions involved in the
 ## Environmental Damage
 
 Environmental damage has no minion source and cannot be attributed to a specific attacker. It is still resolved through the normal/aggravated damage framework: unless card text says the damage is aggravated or otherwise modifies prevention/resolution, treat it as normal damage.
-
----
-
-## Implementation Status
-
-Combat is not yet formally enforced. The game engine tracks `pendingCombat` state but does not step through the seven-round sequence. See [vtes-mechanics-gaps.md](vtes-mechanics-gaps.md) for the full gap list.
