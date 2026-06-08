@@ -255,10 +255,14 @@ A vampire who cannot mend all their wounds at the end of damage resolution goes 
 
 Diablerie may occur when a ready vampire has a torpored vampire at their mercy (either after combat drives a vampire to torpor, or by blocking a Leave Torpor action). The diablerist drinks the blood of the torpored vampire:
 
-- The diablerist may gain a discipline card from the victim (per card text and game rules).
-- The victim is removed from the game (burned).
-- The diablerist may gain or lose pool depending on other card effects.
-- Diablerie has social consequences (Anathema, Hunt the Witch rules) tracked separately.
+1. The victim's remaining blood transfers to the diablerist up to the diablerist's capacity; excess is burned.
+2. The diablerist may take any of the victim's equipment.
+3. If the victim's capacity is strictly greater than the diablerist's capacity, the diablerist may gain one of the victim's discipline cards.
+4. The victim is burned (removed from the game, not sent to torpor again).
+5. If the victim was a Red List minion, Trophy awards are resolved now (before the blood hunt; see [vtes-mechanics-gaps.md § Minion Traits](vtes-mechanics-gaps.md#14-minion-traits)).
+6. A blood hunt referendum is automatically called. See [card-play-rules.md § Blood hunt referendum](card-play-rules.md#blood-hunt-referendum).
+
+A Blood Cursed vampire cannot commit diablerie (see Minion Traits in vtes-mechanics-gaps.md).
 
 ---
 

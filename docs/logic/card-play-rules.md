@@ -69,6 +69,41 @@ Most card plays occur within an **impulse window**. The exception is the As Anno
 
 ---
 
+## Action Success and Failure
+
+An action has multiple layers of success that card effects may reference independently.
+
+### Action-level success
+
+An action is **successful** if it reaches the resolution phase — i.e. it was not blocked. A blocked action is **unsuccessful** at the action level, regardless of any other outcome.
+
+### Bleed success
+
+A bleed action is **a successful bleed** if and only if it deals 1 or more pool damage to the prey at resolution. A bleed that reaches resolution but is reduced to zero (or below) before damage is applied is **not** a successful bleed.
+
+Consequences that depend on bleed success (e.g. Edge movement, trigger conditions on cards) use this definition. The Edge moves to the acting player only after a successful bleed.
+
+### Referendum success
+
+A referendum is **successful** if it passes — that is, more votes are cast for it than against it. A failed referendum is not a successful referendum even if the political action itself was successful (reached the referendum step unblocked).
+
+### Combining definitions
+
+These three layers are orthogonal:
+
+| Scenario | Action successful? | Bleed successful? | Referendum successful? |
+|---|---|---|---|
+| Bleed for 3 reaches resolution, prey loses 3 pool | Yes | Yes | — |
+| Bleed for 3 reaches resolution, reduced to 0 by reaction | Yes | No | — |
+| Bleed blocked | No | No | — |
+| Political action reaches referendum, referendum passes | Yes | — | Yes |
+| Political action reaches referendum, referendum fails | Yes | — | No |
+| Political action blocked | No | — | No |
+
+Card effects that say "after a successful action" trigger on any action-level success. Effects that say "after a successful bleed" or "after a successful referendum" use the narrower definitions above.
+
+---
+
 ## Basic Minion Actions
 
 Any minion may perform these actions without an action card. All actions except bleed default to +1 stealth.
@@ -76,13 +111,17 @@ Any minion may perform these actions without an action card. All actions except 
 | Action | Who | Default stealth | Effect |
 |---|---|---|---|
 | **Bleed** | Any minion | +0 | Target prey burns pool equal to bleed amount (default 1). Acting player gains (or keeps) the Edge if they bleed for 1+ pool. |
-| **Hunt** | Vampires only | +1 | Vampire gains 1 blood from the bank (excess burned if over capacity). |
+| **Hunt** | Vampires only | +1 | Vampire gains 1 blood from the bank up to their capacity. Any blood gained beyond capacity is burned (returned to the bank). |
 | **Equip** | Any minion | +1 | Move an equipment card from hand or from another minion the player controls onto this minion. |
 | **Employ Retainer** | Any minion | +1 | Place a retainer card from hand onto this minion with life counters as specified. |
 | **Recruit Ally** | Any minion | +1 | Place an ally card from hand into the uncontrolled region with life counters as specified. |
 | **Political Action** | Vampires only | +1 | Requires a political action card. Initiates a referendum; see [Referendum](#referendum). |
 
 Basic actions other than bleed are repeatable by the same minion in a turn (NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers).
+
+### Blood capacity overflow
+
+A vampire's blood total can never exceed their current capacity. Any effect that would bring a vampire above capacity instead brings them to capacity — the excess blood is returned to the bank. This applies to hunt, blood gain from card effects, and any other source of blood.
 
 ---
 
@@ -97,7 +136,13 @@ Every action is either directed (targets a specific Methuselah or cards they con
 | **Directed** | Only the targeted Methuselah's ready, unlocked minions |
 | **Undirected** | Prey first; if prey passes, predator may attempt; others clockwise if applicable |
 
-Once a Methuselah decides not to make any further block attempts against a given action, that decision is final — they cannot re-enter the block attempt sequence for that action.
+**Determining action direction:**
+
+- **Bleed** is always directed toward the prey by default. A small number of card effects can redirect a bleed to a different Methuselah; the card text specifies the new target.
+- **Other actions** — the card text determines direction. If the card text names a specific player, player-controlled card, or player-controlled minion as the target, the action is directed toward that player. The blocking player is the controller of the targeted card or minion.
+- If the card text does not specify a particular Methuselah or their cards as a target, the action is undirected.
+
+Once a Methuselah decides not to make any further block attempts against a given action **within the current block window**, that decision is final — they cannot re-enter that block window. See [Action redirects](#action-redirects) below for what happens when the action is redirected to a new target.
 
 ### Block attempt protocol
 
@@ -108,6 +153,36 @@ Once a Methuselah decides not to make any further block attempts against a given
 5. If all eligible Methuselahs pass without a successful block → the action succeeds and enters Resolution.
 
 A single Methuselah may make multiple successive attempts with different minions.
+
+### Modifier persistence
+
+All action modifiers and reactions that affect the action accumulate over the **entire action lifecycle** and are never reset while the action is in progress. This includes:
+
+- **Stealth** — the acting minion's stealth total carries forward through all block windows, including after a redirect.
+- **Intercept** — a minion's intercept total carries forward, even if the action was redirected away from their controller and then back.
+- **Bleed amount** — increases and decreases applied by modifiers and reactions persist. A modifier that increased the bleed to 4 is still in effect when a later reaction tries to reduce it.
+- **Other modifiers** — any other action modifier or reaction already played remains in effect regardless of redirects or additional block windows.
+
+The "only when needed" rule applies to each new block attempt based on the **current accumulated totals**, not the starting values.
+
+### Action redirects
+
+Some reaction cards allow a Methuselah to redirect an action to a different target (e.g. redirect a bleed from Player 2 to Player 3). When a redirect occurs:
+
+- All accumulated modifiers (stealth, intercept, bleed amount, etc.) **carry over** — nothing resets.
+- A new block window opens with the **new target** Methuselah. Block attempts proceed normally for that new target.
+- Any Methuselah who passed on blocking during a **previous** block window for this action is **not** automatically excluded from the new window. If the action is redirected back to a player who previously passed, all of that player's eligible minions may attempt to block again — the prior pass applies only to the window in which it was made.
+- The exception is any minion that carries an explicit "cannot attempt to block" restriction from a card effect — that restriction persists for the duration of the action.
+
+**Example sequence (bleed redirected away and back):**
+
+1. Player 1 declares a directed bleed at Player 2 with 1 stealth.
+2. Minion A (Player 2) wakes and declines to block — no longer eligible in this block window.
+3. Minion B (Player 2) attempts to block with 1 intercept; Player 1 plays +1 stealth (now 2 stealth); Player 2 passes — block window closes, action proceeds.
+4. Player 2 plays a reaction redirecting the bleed to Player 3. The action is now directed at Player 3; accumulated stealth is 2, accumulated bleed modifier is still in effect.
+5. Player 3 declines to block; plays a reaction redirecting the bleed back to Player 2.
+6. A new block window opens for Player 2. **Both Minion A and Minion B are eligible again.** Minion B still has 1 intercept (retained); the acting minion still has 2 stealth. Player 2 may play reactions to add intercept to reach the threshold.
+7. Modifiers (including additional bleed increases, subject to the limited rule) may still be played during this new block window by their respective players.
 
 ### Stealth and intercept — "only when needed"
 
@@ -411,6 +486,27 @@ The terms of the referendum are chosen by the acting vampire's controller **afte
 | Card effects | As specified |
 
 Torpored vampires cannot cast votes (they must abstain).
+
+### Priscus block
+
+Priscus is a collective Sabbat title. During the polling step of any referendum, the Prisci as a group may exercise a collective block:
+
+1. Any Methuselah who controls a ready Priscus may call for a Priscus block. This is announced during the polling step before final votes are tallied.
+2. The Prisci controllers hold a **sub-referendum** among themselves only — no other Methuselahs vote. Each ready Priscus contributes their normal votes (Priscus = 3 votes). Methuselahs without a ready Priscus do not participate.
+3. If the sub-referendum passes (more for than against among Prisci), the group casts 3 votes **as a block** — direction (for or against) is determined by the sub-referendum result. These 3 votes replace the individual votes each participating Priscus would otherwise cast.
+4. If the sub-referendum fails (tied or more against), the Prisci cast their votes individually as normal.
+
+The Priscus block sub-referendum is resolved before the main referendum tallies its final result.
+
+### Blood hunt referendum
+
+A blood hunt referendum is automatically called after any diablerie occurs. It differs from a political action referendum in the following ways:
+
+- It is **not** initiated by a political action card — no card is played; no card is burned.
+- The **acting Methuselah** for purposes of impulse and sequencing is the Methuselah whose vampire was diablerized (the victim's controller). The diablerist's controller is not the acting player for this referendum.
+- The terms are fixed: the referendum targets the diablerist. If it passes, the diablerist is burned (sent to the ash heap, not torpor).
+- The blood hunt referendum follows the same three-step structure (Choose Terms → Polling → Resolution) and the same vote sources as any other referendum.
+- Trophy awards (for Red List minions, if applicable) are resolved **before** the blood hunt referendum is called. See the Red List trait in [vtes-mechanics-gaps.md § Minion Traits](vtes-mechanics-gaps.md#14-minion-traits).
 
 ### The Edge
 
