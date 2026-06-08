@@ -38,7 +38,7 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 
 | State                 | Impulse? | Priority system              | Notes                                                                              |
 |-----------------------|----------|------------------------------|------------------------------------------------------------------------------------|
-| **As Announced**      | No       | Sequencing (ABC)             | Restricted window; only "as played" cancellers legal                               |
+| **As Played**         | No       | Sequencing (ABC)             | Restricted window; only "as played" cancellers legal, no redraw                    |
 | **During Action**     | Yes      | Impulse (resets on any play) | Stealth/intercept subject to "only when needed" rule; see Blocking                 |
 | **Resolution**        | No       | Deterministic                | No player interaction; two branches (see below)                                    |
 | **Action Continuing** | No       | Sequencing (ABC)             | Fires when a "continue the action" effect (e.g. Form of Mist) is played; see below |
