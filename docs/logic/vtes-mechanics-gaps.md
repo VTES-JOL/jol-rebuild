@@ -111,7 +111,7 @@ Combat has no formal structure in JOL. Players simulate it through counter adjus
 |---------------------------------------------------------------------------------------------------------------------|-----------------------|
 | Close vs. long range; default is close                                                                              | Combat — Range        |
 | Maneuvers to change range                                                                                           | Combat — Maneuvers    |
-| Simultaneous strike selection (hand strike, dodge, combat ends, steal blood, first strike, destroy/steal equipment) | Combat — Strikes      |
+| Strike declaration and resolution order (combat ends, first strike, normal strikes; simultaneous only within the same strike class) | Combat — Strikes      |
 | First-strike resolution before normal strikes                                                                       | Combat — First Strike |
 | Normal damage (burns blood to mend) vs. aggravated damage (cannot mend, forces torpor)                              | Combat — Damage       |
 | Press to continue or end combat                                                                                     | Combat — Press        |
@@ -124,7 +124,7 @@ Combat has no formal structure in JOL. Players simulate it through counter adjus
 | `EnterCombat`    | `attackerRef`, `defenderRef`                                                                                                                   | Begin a combat between two ready minions; sets `pendingCombat` |
 | `Maneuver`       | `playerName`, `direction` (CLOSE \| LONG)                                                                                                      | Adjust range during the range-determination step               |
 | `DeclareStrike`  | `playerName`, `strikeType` (HAND \| DODGE \| COMBAT_ENDS \| STEAL_BLOOD \| FIRST_STRIKE \| DESTROY_EQUIPMENT \| STEAL_EQUIPMENT), `targetRef?` | Commit a strike for this round                                 |
-| `ResolveStrikes` | —                                                                                                                                              | Apply both strikes simultaneously; deal damage                 |
+| `ResolveStrikes` | —                                                                                                                                              | Resolve declared strikes in official strike-class order and apply damage/effects |
 | `ApplyDamage`    | `targetRef`, `amount`, `aggravated`                                                                                                            | Explicit damage step (for card effects mid-combat)             |
 | `Press`          | `playerName`, `decision` (CONTINUE \| END)                                                                                                     | Press decision at end of a combat round                        |
 | `EndCombat`      | —                                                                                                                                              | Close the combat; clean up `pendingCombat` state               |
@@ -390,7 +390,7 @@ Three master card subtypes have distinct in-play rules that are not yet specifie
 
 | Subtype        | Rule                                                                                                                                                                                                                                  |
 |----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Trophy**     | When a Methuselah ousts their prey, they may place a Trophy card on a minion controlled by the ousted player's predator. That predator receives the trophy's benefit when they next oust their own prey.                              |
+| **Trophy**     | Trophy master cards are awarded through Red List rules when a qualifying vampire burns a Red List minion in combat or as a directed action, including diablerie; Trophy handling must follow each Trophy card's text. |
 | **Investment** | Enters play with a supply of blood counters drawn from the blood bank. During the controller's master phase they may move blood from the Investment to a qualifying vampire. The Investment is burned when it has no blood remaining. |
 | **Path**       | Represents a vampire's moral path. A vampire can only have one Path attached. Some paths affect costs, abilities, or sect status of the vampire they are attached to.                                                                 |
 

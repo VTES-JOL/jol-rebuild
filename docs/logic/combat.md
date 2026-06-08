@@ -54,8 +54,9 @@ Cards with explicit "before range is determined" timing may be played here. Each
 Default range is **close**. Either combatant may play a maneuver card to change range to long, or to return it to close.
 
 **Maneuver rules:**
-- A minion cannot play two maneuvers in a row within a single Determine Range step.
-- After one minion maneuvers, the other may counter-maneuver, then the first may maneuver again, and so on — alternating until both pass.
+- A minion cannot use maneuvers both to go to long range and to go to close range in the same round.
+- Either minion may maneuver to change the range; the acting minion gets the first opportunity.
+- Only one weapon or strike card may be used to maneuver by a minion in a round.
 - The final declared range stands for this round's strikes.
 - Some cards prevent maneuvers entirely (e.g. Immortal Grapple).
 
@@ -69,7 +70,7 @@ Cards with "before strikes are chosen" timing may be played here. This step is i
 
 ### Step 4 — Strike
 
-Each combatant **announces** their strike simultaneously (acting minion declares first, then defending minion). Strikes are then **resolved** in the order below.
+Each combatant announces their strike: the acting minion announces first, then the defending minion. Strikes are then resolved in the order below. If both strikes are in the same resolution class, their effects are applied simultaneously.
 
 #### Announcing a strike
 
@@ -251,7 +252,7 @@ A vampire who cannot mend all their wounds at the end of damage resolution goes 
 - **Cost:** 2 blood, paid by the torpored vampire at resolution.
 - **Stealth:** +1 (standard action default).
 - **Blockable:** yes.
-- **If unblocked and cost paid:** vampire moves to the ready region and unlocks immediately.
+- **If unblocked and cost paid:** vampire moves to the ready region.
 - **If blocked:** no combat. The blocking player's controller may choose to **diablerize** the torpored vampire. If they decline, the acting vampire stays in torpor and the action fails.
 - After-resolution effects tied to successfully leaving torpor fire normally.
 
@@ -259,8 +260,8 @@ A vampire who cannot mend all their wounds at the end of damage resolution goes 
 
 Diablerie may occur when a ready vampire has a torpored vampire at their mercy (either after combat drives a vampire to torpor, or by blocking a Leave Torpor action). The diablerist drinks the blood of the torpored vampire:
 
-1. The victim's remaining blood transfers to the diablerist up to the diablerist's capacity; excess is burned.
-2. The diablerist may take any of the victim's equipment.
+1. The victim's remaining blood transfers to the diablerist; excess over the diablerist's capacity is burned.
+2. The diablerist may take any equipment on the victim.
 3. If the victim's capacity is strictly greater than the diablerist's capacity, the diablerist may gain one of the victim's discipline cards.
 4. The victim is burned (removed from the game, not sent to torpor again).
 5. If the victim was a Red List minion, Trophy awards are resolved now (before the blood hunt; see [vtes-mechanics-gaps.md § Minion Traits](vtes-mechanics-gaps.md#14-minion-traits)).
@@ -272,13 +273,13 @@ A Blood Cursed vampire cannot commit diablerie (see Minion Traits in vtes-mechan
 
 ## Minions Not in the Current Combat
 
-Some combat cards specify "usable by a minion not in the current combat." Any ready minion controlled by any Methuselah may play such a card, subject to normal impulse/sequencing rules for who holds priority.
+The default rule is that combat cards are played only by minions involved in the current combat. Some combat cards explicitly override this with text such as "usable by a minion not in the current combat"; when a card has such text, follow that card's controller, readiness, timing, and target restrictions.
 
 ---
 
 ## Environmental Damage
 
-Environmental damage has no minion source. It cannot be attributed to a specific attacker. Normal prevention cards still apply unless the card text specifies otherwise. Environmental damage is neither normal nor aggravated by default unless the card specifies a type.
+Environmental damage has no minion source and cannot be attributed to a specific attacker. It is still resolved through the normal/aggravated damage framework: unless card text says the damage is aggravated or otherwise modifies prevention/resolution, treat it as normal damage.
 
 ---
 

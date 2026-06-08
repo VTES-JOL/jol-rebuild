@@ -11,14 +11,14 @@ The golden rule of VTES is that rules on the card overwrite rules in the ruleboo
 
 ## Minion Readiness
 
-A minion must be **ready** to take an action or attempt to block. Ready means all four conditions are true:
+A **ready minion** is a minion in the ready region. Most minion activity also requires the minion to be unlocked and uncontested:
 
-- **Unlocked** — not locked (tapped).
-- **Not in torpor** — vampires sent to torpor are not ready; allies reduced to 0 life are burned.
+- **Ready region** — vampires in torpor are not ready; allies reduced to 0 life are burned.
+- **Unlocked** — a locked minion normally cannot take actions, attempt blocks, or play reaction cards.
+- **Not contested** — a contested unique card is out of play until the contest resolves; a contested title means the vampire is treated as having no title while the contest lasts.
 - **Not burned** — the card is still in play.
-- **Not contested** — if the card is a unique card or titled vampire whose title is currently contested, it is not ready until the contest resolves.
 
-Only ready minions may declare actions, attempt blocks, or play reaction cards (with the wake-effect exception documented in Special Rules).
+Ready, unlocked minions may take actions, attempt blocks, and play reaction cards. Exceptions are card-text driven: wake effects can let locked minions react/block for an action, and a vampire in torpor may take the special Leave Torpor action.
 
 ---
 
@@ -65,7 +65,7 @@ When a "continue the action" effect fires after a blocked combat (e.g. Form of M
 
 ## Impulse Window and Card Play
 
-Most card plays occur within an **impulse window**. The exception is the As Announced window (Section B below), which uses **sequencing** (ABC priority) — impulse does not exist until the During Action state begins. A player may only play a card when they hold the impulse or sequencing priority. The pass order and return-to-acting-player-after-play rules are defined in [game-state.md § Impulse and sequencing windows](game-state.md#impulse-and-sequencing-windows).
+Card and effect plays occur within timing windows governed by impulse or sequencing. A player may only play a card when they hold the relevant impulse or sequencing priority. The pass order and return-to-acting-player-after-play rules are defined in [game-state.md § Impulse and sequencing windows](game-state.md#impulse-and-sequencing-windows).
 
 ---
 
@@ -77,11 +77,11 @@ An action has multiple layers of success that card effects may reference indepen
 
 An action is **successful** if it reaches the resolution phase — i.e. it was not blocked. A blocked action is **unsuccessful** at the action level, regardless of any other outcome.
 
-### Bleed success
+### Bleed action and Edge movement
 
-A bleed action is **a successful bleed** if and only if it deals 1 or more pool damage to the prey at resolution. A bleed that reaches resolution but is reduced to zero (or below) before damage is applied is **not** a successful bleed.
+A bleed action is successful if the action is not blocked. Edge movement uses a separate rule: the acting Methuselah takes the Edge only when the bleed burns 1 or more pool.
 
-Consequences that depend on bleed success (e.g. Edge movement, trigger conditions on cards) use this definition. The Edge moves to the acting player only after a successful bleed.
+Card text that refers to a "successful bleed" should be interpreted according to the current VEKN wording/rulings for that card. Do not use Edge movement as the generic definition of bleed-action success.
 
 ### Referendum success
 
@@ -93,14 +93,14 @@ These three layers are orthogonal:
 
 | Scenario | Action successful? | Bleed successful? | Referendum successful? |
 |---|---|---|---|
-| Bleed for 3 reaches resolution, prey loses 3 pool | Yes | Yes | — |
-| Bleed for 3 reaches resolution, reduced to 0 by reaction | Yes | No | — |
+| Bleed for 3 reaches resolution, prey loses 3 pool | Yes | Yes; Edge moves | — |
+| Bleed for 3 reaches resolution, reduced to 0 by reaction | Yes | No; Edge does not move | — |
 | Bleed blocked | No | No | — |
 | Political action reaches referendum, referendum passes | Yes | — | Yes |
 | Political action reaches referendum, referendum fails | Yes | — | No |
 | Political action blocked | No | — | No |
 
-Card effects that say "after a successful action" trigger on any action-level success. Effects that say "after a successful bleed" or "after a successful referendum" use the narrower definitions above.
+Card effects that say "after a successful action" trigger on any action-level success. Effects that say "after a successful bleed" or "after a successful referendum" use their specific card-text/rules context.
 
 ---
 
@@ -115,7 +115,7 @@ Any minion may perform these actions without an action card. All actions except 
 | **Equip** | Any minion | +1 | Move an equipment card from hand or from another minion the player controls onto this minion. |
 | **Employ Retainer** | Any minion | +1 | Place a retainer card from hand onto this minion with life counters as specified. |
 | **Recruit Ally** | Any minion | +1 | Place an ally card from hand into the uncontrolled region with life counters as specified to indicate that it cannot act this turn. During the acting Methuselah's discard phase, new allies move to the ready region. Recruited allies are public cards, unlike face-down uncontrolled crypt cards. |
-| **Political Action** | Vampires only | +1 | Requires a political action card. Initiates a referendum; see [Referendum](#referendum). |
+| **Political Action** | Vampires only | +1 | Requires a political action card or an option from a card in play. Initiates a referendum; see [Referendum](#referendum). |
 
 Basic actions other than bleed are repeatable by the same minion in a turn (NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers).
 
@@ -478,7 +478,7 @@ The terms of the referendum are chosen by the acting vampire's controller **afte
 
 | Source | Votes |
 |---|---|
-| Political action card | 1 per Methuselah (burn the card) |
+| Political action card | The card that called the referendum gives 1 vote to the acting vampire's controller. Other Methuselahs may burn one political action card from hand for 1 vote; each Methuselah can use only one political action card for votes in a referendum. |
 | Primogen / Bishop | 1 per ready vampire |
 | Prince / Baron / Archbishop | 2 per ready vampire |
 | Justicar / Cardinal | 3 per ready vampire |
