@@ -9,6 +9,19 @@ The golden rule of VTES is that rules on the card overwrite rules in the ruleboo
 
 ---
 
+## Minion Readiness
+
+A minion must be **ready** to take an action or attempt to block. Ready means all four conditions are true:
+
+- **Unlocked** — not locked (tapped).
+- **Not in torpor** — vampires sent to torpor are not ready; allies reduced to 0 life are burned.
+- **Not burned** — the card is still in play.
+- **Not contested** — if the card is a unique card or titled vampire whose title is currently contested, it is not ready until the contest resolves.
+
+Only ready minions may declare actions, attempt blocks, or play reaction cards (with the wake-effect exception documented in Special Rules).
+
+---
+
 ## Action Lifecycle State Machine
 
 Every action follows this state sequence:
@@ -25,11 +38,13 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 
 | State | Impulse? | Priority system | Notes |
 |---|---|---|---|
-| **As Announced** | No | Sequencing (clockwise) | Restricted window; only "as played" cancellers legal |
-| **During Action** | Yes | Impulse (resets on any play) | Fully interactive; stealth/intercept/modifiers/reactions |
+| **As Announced** | No | Sequencing (ABC) | Restricted window; only "as played" cancellers legal |
+| **During Action** | Yes | Impulse (resets on any play) | Stealth/intercept subject to "only when needed" rule; see Blocking |
 | **Resolution** | No | Deterministic | No player interaction; two branches (see below) |
-| **Action Continuing** | No | Sequencing (clockwise) | Fires when a "continue the action" effect (e.g. Form of Mist) is played; see below |
-| **After Resolution** | No | Sequencing (clockwise) | One effect at a time; Freak Drive, Voter Captivation, etc. |
+| **Action Continuing** | No | Sequencing (ABC) | Fires when a "continue the action" effect (e.g. Form of Mist) is played; see below |
+| **After Resolution** | No | Sequencing (ABC) | One effect at a time; Freak Drive, Voter Captivation, etc. |
+
+**ABC sequencing rule:** When multiple players may act simultaneously, priority goes: **A**cting/active player first → **B**locking/defending player → others **C**lockwise from the acting player. The window resets to A after each play.
 
 **Resolution branches:**
 - Action not blocked → pay cost → apply effect → enter After Resolution
@@ -50,7 +65,58 @@ When a "continue the action" effect fires after a blocked combat (e.g. Form of M
 
 ## Impulse Window and Card Play
 
-Most card plays occur within an **impulse window**. The exception is the As Announced window (Section B below), which uses **sequencing** (clockwise priority) — impulse does not exist until the During Action state begins. A player may only play a card when they hold the impulse or sequencing priority. The pass order and return-to-current-player-after-resolution rules are defined in [game-state.md § Impulse window](game-state.md#impulse-window-phase-level).
+Most card plays occur within an **impulse window**. The exception is the As Announced window (Section B below), which uses **sequencing** (ABC priority) — impulse does not exist until the During Action state begins. A player may only play a card when they hold the impulse or sequencing priority. The pass order and return-to-current-player-after-resolution rules are defined in [game-state.md § Impulse window](game-state.md#impulse-window-phase-level).
+
+---
+
+## Basic Minion Actions
+
+Any minion may perform these actions without an action card. All actions except bleed default to +1 stealth.
+
+| Action | Who | Default stealth | Effect |
+|---|---|---|---|
+| **Bleed** | Any minion | +0 | Target prey burns pool equal to bleed amount (default 1). Acting player gains (or keeps) the Edge if they bleed for 1+ pool. |
+| **Hunt** | Vampires only | +1 | Vampire gains 1 blood from the bank (excess burned if over capacity). |
+| **Equip** | Any minion | +1 | Move an equipment card from hand or from another minion the player controls onto this minion. |
+| **Employ Retainer** | Any minion | +1 | Place a retainer card from hand onto this minion with life counters as specified. |
+| **Recruit Ally** | Any minion | +1 | Place an ally card from hand into the uncontrolled region with life counters as specified. |
+| **Political Action** | Vampires only | +1 | Requires a political action card. Initiates a referendum; see [Referendum](#referendum). |
+
+Basic actions other than bleed are repeatable by the same minion in a turn (NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers).
+
+---
+
+## Blocking
+
+### Directed vs undirected actions
+
+Every action is either directed (targets a specific Methuselah or cards they control) or undirected (no specific Methuselah target).
+
+| Action type | Who may attempt to block |
+|---|---|
+| **Directed** | Only the targeted Methuselah's ready, unlocked minions |
+| **Undirected** | Prey first; if prey passes, predator may attempt; others clockwise if applicable |
+
+Once a Methuselah decides not to make any further block attempts against a given action, that decision is final — they cannot re-enter the block attempt sequence for that action.
+
+### Block attempt protocol
+
+1. A Methuselah declares one of their ready, unlocked minions as the blocker.
+2. Stealth and intercept modifiers may be played (subject to the "only when needed" rule below).
+3. If the blocker's final intercept ≥ the acting minion's final stealth → the action is **blocked**; the blocker locks.
+4. If stealth exceeds intercept → the block attempt fails; the blocker does **not** lock; next eligible Methuselah may attempt.
+5. If all eligible Methuselahs pass without a successful block → the action succeeds and enters Resolution.
+
+A single Methuselah may make multiple successive attempts with different minions.
+
+### Stealth and intercept — "only when needed"
+
+Stealth and intercept can only be added **when they are needed** — the current totals must make it necessary:
+
+- **Stealth** (action modifier) — may only be played when a block attempt is active **and** the blocker's current intercept ≥ the actor's current stealth (i.e. the block would currently succeed).
+- **Intercept** (reaction) — may only be played during a block attempt **and** the actor's current stealth > the blocker's current intercept (i.e. the block would currently fail).
+
+Default stealth and intercept are both 0, unless the action has an inherent stealth bonus (see Basic Minion Actions above).
 
 ---
 
@@ -192,6 +258,7 @@ Implementation note: the engine must track per-action whether a limited bleed mo
 | `MODIFIER` (Action Modifier) | `MINION`                                                  | **Acting player only**                  | HAND                 |
 | `REACTION`                   | `MINION`                                                  | Any player **except** the acting player | HAND                 |
 | `COMBAT`                     | `MINION` (combat step only)                               | Acting or defending player only         | HAND                 |
+| `POLITICAL` (polling only)   | `MINION` — referendum polling step only                   | Any Methuselah with votes/ballots       | HAND                 |
 | `ALLY`                       | `MINION`                                                  | Current player only                     | HAND                 |
 | `RETAINER`                   | `MINION`                                                  | Current player only                     | HAND                 |
 | `POLITICAL`                  | `MINION`                                                  | Current player only                     | HAND                 |
@@ -222,6 +289,15 @@ A Master card is out-of-turn if its card text contains the string `"out-of-turn"
 ### Locked Minion Reaction Exception
 
 The default rule is that only **ready** (unlocked) minions may play reaction cards. Some reaction cards explicitly override this with the text `"Usable by a locked minion."` When that text is present the locked minion may play the reaction despite not being ready. No other reaction card may be played by a locked minion.
+
+### Wake Effects
+
+A **wake effect** is a special reaction card (e.g. On the Qui Vive, Forced Awakening) that allows a locked minion to become temporarily ready during another Methuselah's action:
+
+- Wake cards are played in the "as played" interrupt layer — the same narrow window as cancellers — allowing them to be played by a locked minion as soon as an eligible action is declared.
+- Once awake, the minion is treated as ready for the duration of that action: they may play further reaction cards and attempt to block.
+- If the minion blocks and combat results, they remain engaged in combat normally.
+- At the end of the action (when the action lifecycle closes), a woken minion locks again if the wake card's text specifies it (most wake cards specify "until the end of the action" or similar).
 
 ### Action Modifiers vs Reactions
 These two types are explicitly asymmetric:
@@ -267,7 +343,7 @@ This applies to all card types. `CardType.permanentTypes()` is a coarse approxim
 
 After an action fully resolves (or is blocked and combat ends), the game enters the **After Resolution** state before the action lifecycle closes.
 
-- Uses **sequencing** (clockwise priority), not impulse — the impulse loop has already ended.
+- Uses **sequencing (ABC priority)**, not impulse — the impulse loop has already ended.
 - One card or effect resolves at a time; this is not an open loop.
 - Only "after successful action" or "after resolution" effects are legal here.
 
@@ -298,6 +374,105 @@ An "after resolution" triggered ability (e.g. Lutz von Hohenzollern's special) v
 | "After this action" effects | Any card text specifying this window |
 
 No further block attempts, stealth/intercept plays, or action modifiers are legal here — those windows have closed.
+
+---
+
+## Referendum
+
+A referendum is initiated by a successful political action. It proceeds through three mandatory steps.
+
+### Step 1 — Choose Terms
+
+The terms of the referendum are chosen by the acting vampire's controller **after** the action is confirmed unblocked (not at announcement). If the political action card offers choices (e.g. which player to affect), those choices are made here.
+
+### Step 2 — Polling
+
+1. **"Before votes and ballots are cast" effects** — a distinct sub-window fires first. Cards with this explicit trigger are played now, before any votes are cast, following ABC sequencing.
+2. **Votes and ballots are cast** — any Methuselah may cast their available votes/ballots in any order. There is no obligation to vote. Votes are irreversible once cast.
+3. Cards marked **"only usable during a political action"** are legal only during this polling step (they cannot be played after polling closes).
+
+### Step 3 — Resolution
+
+- More votes **for** than **against** → referendum passes; effects take place.
+- Tied or more votes **against** → referendum fails; no effect.
+
+### Vote sources
+
+| Source | Votes |
+|---|---|
+| Political action card | 1 per Methuselah (burn the card) |
+| Primogen / Bishop | 1 per ready vampire |
+| Prince / Baron / Archbishop | 2 per ready vampire |
+| Justicar / Cardinal | 3 per ready vampire |
+| Inner Circle / Regent | 4 per ready vampire |
+| The Edge | 1 (burn the Edge to gain it) |
+| Card effects | As specified |
+
+Torpored vampires cannot cast votes (they must abstain).
+
+### The Edge
+
+The Edge is a game token that passes between players during bleed actions:
+- The acting player takes the Edge whenever their bleed action resolves for 1 or more pool damage (whether successful or the Edge is already held by another player).
+- During referendum polling the Edge-holder may burn the Edge to gain 1 vote.
+- Only one player holds the Edge at a time; it starts the game with no owner.
+
+---
+
+## Combat
+
+Combat occurs when a block attempt succeeds. The acting minion and the blocking minion fight.
+
+### Combat round sequence
+
+Each round of combat follows these seven steps in order:
+
+| Step | Legal plays |
+|---|---|
+| **1. Before Range** | Combat cards with "before range is determined" timing |
+| **2. Determine Range** | Maneuvers (close or long); either combatant may play; a minion cannot play two maneuvers in a row |
+| **3. Before Strikes** | Combat cards with "before strikes are chosen" timing |
+| **4. Strike** | Each combatant announces one strike (acting minion first); see Strike Types below |
+| **5. Damage Resolution** | Prevention cards; then mending; damage is applied one point at a time |
+| **6. Press** | Press cards (continue or end combat); a minion cannot play two presses in a row |
+| **7. End of Round** | "End of round" cards and effects; fires even if combat ended prematurely |
+
+The acting minion has first sequencing opportunity (ABC: A) at every combat step.
+
+### Strike types
+
+| Strike | Notes |
+|---|---|
+| **Hand strike** | Default; damage = minion's strength (vampires default to 1) |
+| **Dodge** | No damage dealt; protects self and all attached cards from the opposing strike; effective at any range |
+| **First Strike** | Resolves before normal strikes; if both combatants use first strike they resolve simultaneously |
+| **Combat Ends** | Always resolves first — before first strike, before normal strikes; ends combat immediately; no other strikes or strike-resolution effects resolve |
+| **Steal Blood** | Moves blood/life counters from target to striker; not damage and cannot be prevented |
+| **Other** | Weapons, special abilities — per card text |
+
+Strikes are announced simultaneously (acting minion first), then resolved: Combat Ends → First Strike → Normal (simultaneously).
+
+### Damage types
+
+| Type | Mending | Effect on wounded vampire |
+|---|---|---|
+| **Normal** | 1 blood per point | Vampire becomes wounded if damage is not fully mended |
+| **Aggravated** | Cannot be mended | Burns a wounded vampire unless they spend 1 blood to prevent destruction |
+| **Environmental** | Normal rules | No minion source; cannot be attributed to a specific attacker |
+
+When a vampire receives both normal and aggravated damage simultaneously, normal damage is resolved first.
+
+### Torpor
+
+A vampire who cannot mend all their wounds goes to **torpor**:
+
+- Placed in the torpor area adjacent to their controller's uncontrolled region.
+- May only take the **"leave torpor"** action.
+- Cannot block, play reactions, or vote.
+- Is **not ready** but is still controlled; equipment and retainers remain attached.
+- Still passes through the unlock phase normally (unlocks unless infernal or other restriction).
+
+A torpored vampire targeted by an opposing vampire (in the case of diablerie) follows the diablerie rules, not standard combat.
 
 ---
 
