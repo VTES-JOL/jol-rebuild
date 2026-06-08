@@ -65,7 +65,7 @@ When a "continue the action" effect fires after a blocked combat (e.g. Form of M
 
 ## Impulse Window and Card Play
 
-Most card plays occur within an **impulse window**. The exception is the As Announced window (Section B below), which uses **sequencing** (ABC priority) — impulse does not exist until the During Action state begins. A player may only play a card when they hold the impulse or sequencing priority. The pass order and return-to-current-player-after-resolution rules are defined in [game-state.md § Impulse window](game-state.md#impulse-window-phase-level).
+Most card plays occur within an **impulse window**. The exception is the As Announced window (Section B below), which uses **sequencing** (ABC priority) — impulse does not exist until the During Action state begins. A player may only play a card when they hold the impulse or sequencing priority. The pass order and return-to-acting-player-after-play rules are defined in [game-state.md § Impulse and sequencing windows](game-state.md#impulse-and-sequencing-windows).
 
 ---
 
@@ -114,7 +114,7 @@ Any minion may perform these actions without an action card. All actions except 
 | **Hunt** | Vampires only | +1 | Vampire gains 1 blood from the bank up to their capacity. Any blood gained beyond capacity is burned (returned to the bank). |
 | **Equip** | Any minion | +1 | Move an equipment card from hand or from another minion the player controls onto this minion. |
 | **Employ Retainer** | Any minion | +1 | Place a retainer card from hand onto this minion with life counters as specified. |
-| **Recruit Ally** | Any minion | +1 | Place an ally card from hand into the uncontrolled region with life counters as specified. |
+| **Recruit Ally** | Any minion | +1 | Place an ally card from hand into the uncontrolled region with life counters as specified to indicate that it cannot act this turn. During the acting Methuselah's discard phase, new allies move to the ready region. Recruited allies are public cards, unlike face-down uncontrolled crypt cards. |
 | **Political Action** | Vampires only | +1 | Requires a political action card. Initiates a referendum; see [Referendum](#referendum). |
 
 Basic actions other than bleed are repeatable by the same minion in a turn (NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers).
@@ -133,12 +133,12 @@ Every action is either directed (targets a specific Methuselah or cards they con
 
 | Action type | Who may attempt to block |
 |---|---|
-| **Directed** | Only the targeted Methuselah's ready, unlocked minions |
-| **Undirected** | Prey first; if prey passes, predator may attempt; others clockwise if applicable |
+| **Directed** | Only the target Methuselah's ready, unlocked minions may attempt to block, unless card text explicitly allows another Methuselah to attempt. |
+| **Undirected** | Prey first, then predator; no other Methuselahs may attempt unless card text explicitly allows it. |
 
 **Determining action direction:**
 
-- **Bleed** is always directed toward the prey by default. A small number of card effects can redirect a bleed to a different Methuselah; the card text specifies the new target.
+- **Bleed** is directed toward the prey by default. A small number of card effects can redirect a bleed to a different Methuselah; the card text specifies the new target.
 - **Other actions** — the card text determines direction. If the card text names a specific player, player-controlled card, or player-controlled minion as the target, the action is directed toward that player. The blocking player is the controller of the targeted card or minion.
 - If the card text does not specify a particular Methuselah or their cards as a target, the action is undirected.
 
@@ -152,7 +152,7 @@ Once a Methuselah decides not to make any further block attempts against a given
 4. If stealth exceeds intercept → the block attempt fails; the blocker does **not** lock; next eligible Methuselah may attempt.
 5. If all eligible Methuselahs pass without a successful block → the action succeeds and enters Resolution.
 
-A single Methuselah may make multiple successive attempts with different minions.
+A single Methuselah may make multiple successive attempts with different minions while that Methuselah's block opportunity remains open.
 
 ### Modifier persistence
 
@@ -327,7 +327,7 @@ Implementation note: the engine must track per-action whether a limited bleed mo
 | Card Type                    | Valid Phase                                               | Who can play                            | Source Regions       |
 |------------------------------|-----------------------------------------------------------|-----------------------------------------|----------------------|
 | `MASTER` (standard)          | `MASTER`                                                  | Current player only                     | HAND                 |
-| `MASTER` (out-of-turn)       | Any phase of another player's turn except their `DISCARD` | Any player with impulse                 | HAND                 |
+| `MASTER` (out-of-turn)       | Another player's turn, only when the card text/timing permits | Any eligible player with sequencing/impulse | HAND                 |
 | `EVENT`                      | `DISCARD`                                                 | Current player only                     | HAND                 |
 | `CONVICTION`                 | `UNLOCK`                                                  | Current player only                     | HAND **or ASH_HEAP** |
 | `POWER` (Imbued)             | `MINION`                                                  | Current player's imbued only            | HAND                 |
@@ -349,10 +349,11 @@ Implementation note: the engine must track per-action whether a limited bleed mo
 A Master card is out-of-turn if its card text contains the string `"out-of-turn"` (case-insensitive). Examples: `Archon Investigation`, `Sudden Reversal`, `Wash`.
 
 - Cannot be played during the owning player's own turn.
-- Playable during any phase of another Methuselah's turn **except** their `DISCARD` phase.
-- Requires an active impulse window; dispatches `ClaimImpulse` before the effect applies.
-- **Cost:** Consumes the playing player's next master phase action — they begin their next `MASTER` phase with zero actions available.
-- **Trifle exception:** If the out-of-turn card is also a Trifle, it consumes the trifle use instead of the regular master action (the regular action is preserved; no bonus action is granted).
+- Can be played only during another Methuselah's turn and only when the card's own timing condition is satisfied.
+- Uses the current legal timing window: some out-of-turn masters are played as a card is played, while others are played in response to a specific action or effect.
+- **Cost:** Uses the playing player's next master phase action.
+- **Limit:** A Methuselah cannot play more than one out-of-turn master card between two of their turns, even if they later regain a master phase action.
+- **Trifle exception:** If the out-of-turn card is also a Trifle, apply the card's own text and the master-action accounting rules for trifles; do not grant a generic extra master phase action just because the card was played out of turn.
 
 ### Event Cards
 - Playing an Event card replaces the current player's discard action for that turn — they do not also draw a replacement card.
@@ -487,16 +488,16 @@ The terms of the referendum are chosen by the acting vampire's controller **afte
 
 Torpored vampires cannot cast votes (they must abstain).
 
-### Priscus block
+### Prisci block
 
-Priscus is a collective Sabbat title. During the polling step of any referendum, the Prisci as a group may exercise a collective block:
+Priscus is a collective Sabbat title. A ready Priscus provides **one ballot**, not ordinary votes. The Prisci block provides three votes in the main referendum, and the way those three votes are cast is decided by a Prisci-only sub-referendum.
 
-1. Any Methuselah who controls a ready Priscus may call for a Priscus block. This is announced during the polling step before final votes are tallied.
-2. The Prisci controllers hold a **sub-referendum** among themselves only — no other Methuselahs vote. Each ready Priscus contributes their normal votes (Priscus = 3 votes). Methuselahs without a ready Priscus do not participate.
-3. If the sub-referendum passes (more for than against among Prisci), the group casts 3 votes **as a block** — direction (for or against) is determined by the sub-referendum result. These 3 votes replace the individual votes each participating Priscus would otherwise cast.
-4. If the sub-referendum fails (tied or more against), the Prisci cast their votes individually as normal.
+1. During polling, each ready Priscus may cast one ballot in the Prisci sub-referendum.
+2. Only Prisci ballots participate in this sub-referendum; other Methuselahs do not cast votes in it.
+3. The Prisci block contributes three votes to the main referendum according to the current result of the Prisci ballots.
+4. As more Prisci cast ballots, the block may shift between for, against, or no contribution if the ballots are tied.
 
-The Priscus block sub-referendum is resolved before the main referendum tallies its final result.
+The Prisci block is resolved as part of polling before the main referendum outcome is finalized.
 
 ### Blood hunt referendum
 

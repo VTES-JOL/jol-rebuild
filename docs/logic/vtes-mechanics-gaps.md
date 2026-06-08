@@ -76,7 +76,7 @@ VTES action resolution is a structured handshake: declare → block window → r
 | Stealth vs. intercept comparison determining whether a block succeeds                                                                                                   | Stealth & Intercept              |
 | Out-of-turn reaction cards (played during another player's minion phase)                                                                                                | Reaction Cards                   |
 | Acting minion goes to torpor instead of combat if it was acting from torpor                                                                                             | Combat — Torpor exception        |
-| Directed `(D)` action block priority — the targeted Methuselah's minions must attempt to block before other Methuselahs' minions may                                    | Minion Phase — Directed Actions  |
+| Directed `(D)` action blocking — only the target Methuselah's minions may attempt to block unless card text explicitly allows another Methuselah to attempt             | Minion Phase — Directed Actions  |
 | Stealth/intercept accumulation — bonuses from action modifiers and reactions stack numerically during the impulse window; comparison is resolved once the window closes | Stealth & Intercept              |
 
 **Stealth / intercept notes:**
@@ -182,13 +182,13 @@ These could also be automated server-side as part of `AdvancePhase` when leaving
 | Mechanic                                                                                              | Rulebook reference |
 |-------------------------------------------------------------------------------------------------------|--------------------|
 | Playing a Trifle master card grants one additional master phase action                                | Master Phase       |
-| Playing an out-of-turn master card against a player reduces their next master phase action count to 0 | Master Phase       |
+| Playing an out-of-turn master card uses the playing Methuselah's next master phase action; no Methuselah may play more than one out-of-turn master between two of their turns | Master Phase       |
 
 **Proposed additions:**
 
 - Add `masterActionsRemaining` to `GameData` (default 1 at start of MASTER phase).
 - Add `ExtraMasterAction` command (dispatched when a trifle is played).
-- Add `ReduceMasterActions` command (dispatched when an out-of-turn master card is played against a player).
+- Add out-of-turn master accounting to mark the playing Methuselah's next master phase action as already used.
 
 ---
 
@@ -231,11 +231,12 @@ These could also be automated server-side as part of `AdvancePhase` when leaving
 
 ### 9. Sequencing and Impulse
 
-VTES uses a layered priority system to resolve multiple players wanting to play cards or effects at the same time. **Sequencing** is the underlying clockwise priority mechanism. **Impulse** is the active form of sequencing used specifically during the During Action state.
+VTES uses a layered priority system to resolve multiple players wanting to play cards or effects at the same time. **Impulse** is the opportunity to play the next card or effect inside a specific timing window. **Sequencing** is the structured ordering used by windows that do not use the reset-on-play impulse loop.
 
 Key distinction:
-- **Impulse** exists only during the During Action (interactive) state. It resets to the acting player whenever anyone plays a card or effect. Impulse does **not** exist in: As Announced, Resolution, After Resolution, combat, or referendum steps.
-- **Sequencing** governs the As Announced window (before impulse opens) and the After Resolution window (after the impulse loop closes). In these windows players act in clockwise priority order with no reset-on-play; it is a restricted, one-pass window. Referendum voting is also governed by sequencing, not impulse.
+- **Impulse is not phase-level.** Entering a phase does not open an impulse window, and a table-wide pass does not advance the phase.
+- **Impulse windows** are opened by concrete protocol events, such as action/block exchanges, combat timing windows, or card/effect timing conflicts. If any Methuselah plays a card or effect in such a window, the acting Methuselah regains impulse and the pass sequence restarts.
+- **Sequencing windows** govern restricted timing points such as As Announced, After Resolution, and referendum polling where the engine should not use the generic phase-level impulse model.
 
 This is a **cross-cutting mechanic** required by Voting (§1), Action/Blocking (§2), and Combat (§3).
 
@@ -251,9 +252,9 @@ This is a **cross-cutting mechanic** required by Voting (§1), Action/Blocking (
 
 This creates a "round-robin until all pass, with reset on any play" loop — conceptually similar to a stack/priority system in other card games.
 
-**Current state:** Not implemented. Players handle sequencing disputes verbally through chat.
+**Current state:** Partially implemented. `ImpulseState` and impulse commands exist, but formal action, combat, referendum, and sequencing integration is incomplete. Permissive mode still relies on players to manage many timing disputes verbally through chat.
 
-**Proposed state model (`ImpulseState` on `GameData`):**
+**State model (`ImpulseState` on `GameData`):**
 
 | Field                  | Type                                                              | Description                                         |
 |------------------------|-------------------------------------------------------------------|-----------------------------------------------------|
@@ -264,7 +265,7 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 | `passOrder`            | List\<String\>                                                    | Resolved clockwise sequence for the current context |
 | `consecutivePasses`    | int                                                               | Resets to 0 whenever any player uses a card/effect  |
 
-**Proposed commands:**
+**Commands:**
 
 | Command              | Fields                    | Description                                                                                                                                     |
 |----------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -274,10 +275,10 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 | `CloseImpulseWindow` | —                         | Explicitly close the window when all players have passed (or server auto-closes after `PassImpulse` when `consecutivePasses == passOrder.size`) |
 
 **Relationship to other systems:**
-- `DeclareAction` (§2) should open an impulse window with context `DIRECTED_SINGLE` or `UNDIRECTED`.
-- `CallReferendum` (§1) should open a window with context `DIRECTED_MULTI` (all players).
-- `EnterCombat` (§3) should open a window with context `COMBAT`.
-- Card plays during an open window should dispatch `ClaimImpulse` before applying their effect.
+- `DeclareAction` (§2) should open the appropriate action/block timing window with context `DIRECTED_SINGLE` or `UNDIRECTED`.
+- Combat timing steps should open context-specific windows as needed; combat is not a generic phase-level window.
+- Referendum polling should use referendum sequencing rules rather than the phase-level impulse model.
+- Card plays during an open impulse window should dispatch `ClaimImpulse` before applying their effect.
 
 ---
 
@@ -434,7 +435,7 @@ This gap is coupled with Gap §2 (Hunt action is listed as an `actionType` in `D
 | **P1**   | Game end auto-detection (survivor VP)                               | Needed for accurate game records                                                                                                                                                                                                                                                                                                                               |
 | **P2**   | Formal action / block declaration                                   | Adds structure; currently relies entirely on player honesty and chat                                                                                                                                                                                                                                                                                           |
 | **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth and intercept must be tracked as running totals on `PendingActionState`                                                                                                                                                                                                                                 |
-| **P2**   | Directed `(D)` action block priority (§2 extension)                 | Needed alongside formal action declaration; targeted Methuselah must get first block opportunity                                                                                                                                                                                                                                                               |
+| **P2**   | Directed `(D)` action blocking (§2 extension)                       | Needed alongside formal action declaration; only the target Methuselah's minions may normally attempt to block a directed action                                                                                                                                                                                                                                  |
 | **P2**   | Card play phase gating                                              | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                                             |
 | **P2**   | Withdrawal mechanic                                                 | Common end-game scenario                                                                                                                                                                                                                                                                                                                                       |
 | **P2**   | Diablerie full resolution                                           | Currently requires many manual steps                                                                                                                                                                                                                                                                                                                           |

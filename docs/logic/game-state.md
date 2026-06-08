@@ -48,40 +48,52 @@ UNLOCK → MASTER → MINION → INFLUENCE → DISCARD
 
 It is reset to 0 on `NextTurn`. It is sent to clients via `GameStateDto.transfersRemaining`.
 
-### Impulse window (phase-level)
+### Impulse and sequencing windows
 
-> **Not in the official VTES rulebook.  Defined via external resources** The impulse window is a global timing mechanism that controls who may act at any point during a phase. It is how JOL formalises the "does anyone want to do anything?" moments that happen continuously during a real game.
+Impulse is the opportunity to play the next card or effect inside a specific VTES timing window. It is **not** a phase-level gate: entering `UNLOCK`, `MASTER`, `MINION`, `INFLUENCE`, or `DISCARD` does not automatically open an impulse window, and a full pass around the table does not automatically advance the phase.
 
-Every time a new phase begins — either via `AdvancePhase` or `NextTurn` — the server **automatically opens an impulse window** (`ImpulseState`) for the current player using an `UNDIRECTED` context. The current player starts as both the `actingPlayer` and `currentImpulseHolder`.
+Impulse/sequencing windows are opened by protocol events such as:
+- Declaring or resolving an action.
+- A block attempt and its stealth/intercept exchange.
+- Combat timing steps.
+- Referendum timing steps.
+- A card/effect timing conflict where multiple Methuselahs may act.
 
-#### What a player can do with impulse
-While holding the impulse, a player may either:
-- **Act** — play a card from their hand, or use an ability on a card already in play.
-- **Pass** — decline to act and give the impulse to the next player in line.
+Phase advancement remains controlled by `AdvancePhase` / `NextTurn` in permissive mode, or by the higher-level enforced protocol once its current pending action, combat, referendum, or sequencing window has closed.
 
-#### Pass order
-When the current impulse holder passes, the impulse moves in this fixed sequence:
+#### Window state
 
-1. Current player's **prey**
-2. Current player's **predator**
-3. The remaining players **clockwise** around the table from the predator
+When a protocol step opens an impulse window (`ImpulseState`), the window records:
+- `actingPlayer` — the Methuselah whose action, combat, referendum, or effect created the window.
+- `currentImpulseHolder` — the Methuselah currently allowed to play the next eligible card/effect.
+- `context` — the timing context used to compute pass order.
+- `passOrder` and `consecutivePasses` — used to close the window after all eligible Methuselahs decline to act.
 
-#### After an action resolves
-As soon as any player's card or ability fully resolves, the impulse **automatically returns to the current player** (the player whose turn it is). The pass sequence restarts from there.
+The acting Methuselah starts with impulse and may play any number of legal cards/effects before passing. If any Methuselah plays a card or effect, impulse returns to the acting Methuselah and the pass sequence restarts.
 
-#### Phase advance on full pass
-If every player passes consecutively without anyone acting, the phase ends and `AdvancePhase` fires automatically.
+#### Pass order by context
+
+Pass order depends on the timing context:
+
+| Context | Order after acting Methuselah passes |
+|---|---|
+| `COMBAT` | Defending Methuselah, then other Methuselahs clockwise |
+| `DIRECTED_SINGLE` | Target/defending Methuselah, then other Methuselahs clockwise |
+| `DIRECTED_MULTI` | Targeted Methuselahs clockwise, then other Methuselahs clockwise |
+| `UNDIRECTED` | Prey, then predator, then other Methuselahs clockwise |
+
+The window closes when all eligible Methuselahs pass consecutively without anyone playing a card/effect. Closing an impulse window advances the enclosing protocol step only; it does not by itself advance the game phase.
 
 #### Command gating
-While an impulse window is active, **game action commands are gated**: only the player whose name matches `currentImpulseHolder` may execute them. Commands that are exempt from this gate (i.e. always allowed regardless of impulse):
 
-| Command                                                                     | Reason                                               |
-|-----------------------------------------------------------------------------|------------------------------------------------------|
-| `AdvancePhase` / `NextTurn`                                                 | Phase management — current player can always advance |
-| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself                                |
-| `SetGameNotes` / `SetCardNotes` / `SetChoice`                               | Administrative / meta                                |
+While an impulse window is active, protocol-level game action commands are gated: only the player whose name matches `currentImpulseHolder` may execute commands that represent playing a card or using an effect in that window. Commands that are exempt from this gate (i.e. always allowed regardless of impulse):
 
-When `AdvancePhase` is called, any open window is replaced by a fresh window for the incoming phase's current player. Manually closing the window (✕ button) removes gating for that phase; the window reopens automatically on the next phase advance.
+| Command                                                                     | Reason                |
+|-----------------------------------------------------------------------------|-----------------------|
+| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself |
+| `SetGameNotes` / `SetCardNotes` / `SetChoice`                               | Administrative / meta |
+
+`AdvancePhase` and `NextTurn` do not create replacement impulse windows. In enforced mode, they should not be used to bypass an open protocol window; the enclosing action/combat/referendum flow should close or abort first.
 
 ### Edge
 The **edge** is a single `PlayerData` reference indicating which player currently holds it. It is transferred via the `GainEdge` command and starts as unset.
@@ -112,7 +124,7 @@ Each player has exactly one instance of every region type. Region IDs are format
 | Region              | Owner visible | Others visible | Notes                                     |
 |---------------------|:-------------:|:--------------:|-------------------------------------------|
 | `READY`             |       ✓       |       ✓        | In-play minions and locations             |
-| `UNCONTROLLED`      |       ✓       |       ✗        | Face-down crypt cards not yet influenced  |
+| `UNCONTROLLED`      |       ✓       |       ✗        | Face-down crypt cards not yet influenced; public newly recruited allies are an exception |
 | `ASH_HEAP`          |       ✓       |       ✓        | Discard pile                              |
 | `HAND`              |       ✓       |       ✗        | Current hand                              |
 | `LIBRARY`           |       ✗       |       ✗        | Library deck (face-down to everyone)      |
@@ -126,6 +138,7 @@ Each player has exactly one instance of every region type. Region IDs are format
 - Cards in regions hidden to the viewer are **omitted entirely** from the card map — no UUID is sent to non-owners.
 - The card's **owner** still receives a stub for their own hidden cards (e.g. hand, library), which carries `id`, `regionId`, `ownerName`, `parentId`, `locked`, `counters`, `notes`, and `childCardIds`.
 - For the `UNCONTROLLED` region specifically, non-owning viewers receive **positional slot data** (`slots`) on the `RegionState` in place of card UUIDs. Each slot has `{index, counters, locked, childCount}`, allowing opponents to observe blood counter amounts on face-down vampires (as per the VTES influence rules) without learning the card's identity.
+- Newly recruited allies are public even while temporarily placed in the uncontrolled region to show that they cannot act this turn. The projection must reveal those ally cards to all players while continuing to hide face-down uncontrolled crypt cards.
 - `RegionState.cardIds` is populated only when the region is visible to the viewer; otherwise it is an empty list.
 
 Cards in `LIBRARY` and `CRYPT` are hidden even to their owner; count is always sent but `cardIds` is always empty.

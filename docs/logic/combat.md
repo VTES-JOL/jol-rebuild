@@ -82,13 +82,13 @@ A strike declaration names the **type** and, where relevant, the **strength or d
 
 | Strike | Range | Notes |
 |---|---|---|
-| **Hand strike** | Any | Damage = minion's current strength (vampires default to 1) |
+| **Hand strike** | Close by default | Damage = minion's current strength (vampires default to 1). A strike is only effective at close range unless card text or the strike type says otherwise. |
 | **Melee weapon strike** | Close (default) | Damage = bearer's strength ± weapon bonus; see Weapon strikes below |
 | **Firearm strike** | Long | Fixed ranged (R) damage per weapon card; weapon usually provides an optional maneuver to reach long range |
 | **Other ranged weapon strike** | Long | Fixed ranged damage, not classed as a gun; no built-in maneuver unless stated |
 | **Fixed-damage weapon strike** | Per weapon | Specific damage value unrelated to strength (e.g. Bomb, Talbot's Chainsaw) |
 | **Special weapon strike** | Per weapon | Unique effects (e.g. torpor, combat ends, burn) defined entirely by card text |
-| **Dodge** | Any | No damage dealt; protects self and all attached cards from the opposing strike, including Steal Blood |
+| **Dodge** | Any | No damage dealt; cancels the opposing strike's effect on the dodging minion and non-retainer cards on that minion, including Steal Blood. Retainers are not protected. |
 | **First Strike** | Any | Resolves before normal strikes; if both use first strike they resolve simultaneously |
 | **Combat Ends** | Any | Always resolves first — before first strike and normal strikes; ends combat before any other strikes resolve |
 | **Steal Blood** | Close | Moves blood/life counters from target to striker; not damage, cannot be prevented, cancelled by a dodge |
@@ -165,8 +165,10 @@ If the opposing minion is burned or sent to torpor by a first strike, their norm
 
 #### Additional strikes
 
-A combat card may grant a minion an additional strike in the same round. Additional strikes resolve simultaneously with the minion's other strikes unless they specify a different timing.
+After the initial strikes and damage prevention/resolution for those strikes, combatants have the option to gain additional strikes for the same round. Additional strikes do **not** resolve simultaneously with the initial strikes.
 
+- Additional strikes are resolved by repeating strike announcement and strike resolution for each additional strike.
+- Additional strikes use the same range as the initial strikes for that round.
 - A minion may gain additional strikes from multiple sources, subject to the **limited** rule: at most one `(limited)` additional-strike source may be used per minion per round. Non-limited sources stack freely.
 
 ### Step 5 — Damage Resolution
@@ -185,13 +187,15 @@ When a vampire receives both normal and aggravated damage simultaneously, **norm
 
 #### Wounded state
 
-A vampire is **wounded** if they have taken damage they have not fully mended. Wounded vampires are still ready and may act normally, but are vulnerable to aggravated damage.
+A vampire is **wounded** if they have unhealed damage, is in torpor, or is on the way to torpor. Unhealed damage is checked during damage resolution; after damage resolution, a vampire with unhealed damage is placed in torpor unless the damage caused destruction instead.
 
 #### Aggravated damage and burning
 
-- Aggravated damage cannot be mended.
-- If an aggravated damage point is inflicted on an already-**wounded** vampire, the vampire must spend 1 blood to prevent being burned. If they cannot pay, they are burned.
-- Aggravated damage inflicted on an **unwounded** vampire is still "taken" but does not immediately burn them — it leaves them wounded (since it cannot be mended).
+- Aggravated damage cannot be mended, so it remains unhealed unless it is prevented.
+- Normal damage is resolved before aggravated damage.
+- Aggravated damage dealt to a vampire that already has unhealed damage can burn that vampire. The vampire may spend 1 blood to prevent destruction from that aggravated damage point.
+- If the vampire does not prevent destruction from aggravated damage, the vampire is burned without going to torpor.
+- If the vampire has unhealed damage but was not burned by aggravated damage, the vampire is placed in torpor.
 
 #### Damage prevention
 
@@ -203,7 +207,7 @@ Prevention cards may be played during Step 5 to reduce incoming damage. Key rule
 
 #### Mending
 
-After prevention, vampires mend normal damage by spending 1 blood per point of normal damage remaining. Aggravated damage cannot be mended. Any damage that is neither prevented nor mended causes the vampire to enter torpor (vampires) or be burned (allies).
+After prevention, vampires mend normal damage by spending 1 blood per point of normal damage remaining. Aggravated damage cannot be mended. After damage resolution, a vampire with unhealed damage is placed in torpor unless aggravated damage burned it; an ally or retainer with zero life counters is burned.
 
 ### Step 6 — Press
 
