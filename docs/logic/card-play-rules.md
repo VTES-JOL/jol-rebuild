@@ -206,6 +206,8 @@ A minion cannot perform the same action again this turn once it **reaches resolu
 
 Actions not on this list (hunting, rescue, equip with different equipment, recruit different allies/retainers) may be repeated.
 
+The NRA lock **persists through mid-turn unlocks**. If a vampire unlocks during the turn (via Freak Drive, As the Crow, or any other effect) and takes another action, it still cannot use the same action card it already resolved earlier that turn.
+
 ### When the NRA locks in
 
 NRA is triggered at the **Complete Action** step — after block attempts are resolved, before paying cost. Cancellation before resolution does **not** trigger NRA; the minion may attempt the same action again.
@@ -215,7 +217,7 @@ NRA is triggered at the **Complete Action** step — after block attempts are re
 1. NRA fires — acting minion is locked out of this action type for the rest of the turn.
 2. Then:
    - **Not blocked** → pay cost → resolve action.
-   - **Blocked** → action card burned (cost not paid) → blocker locks → combat begins (or diablerize if acting minion is in torpor and blocker is a vampire).
+   - **Blocked** → action card burned (cost not paid) → blocker locks → combat begins (exception: if the acting minion is in torpor, there is no combat — the blocking player may choose to diablerize instead; see Leave Torpor).
 
 ### Two separate tracking mechanisms
 
@@ -421,58 +423,13 @@ The Edge is a game token that passes between players during bleed actions:
 
 ## Combat
 
-Combat occurs when a block attempt succeeds. The acting minion and the blocking minion fight.
+Combat occurs when a block attempt succeeds (or a rush action resolves). Full combat mechanics — round sequence, range, strike types, damage, torpor, Leave Torpor, and diablerie — are documented in [combat.md](combat.md).
 
-### Combat round sequence
-
-Each round of combat follows these seven steps in order:
-
-| Step | Legal plays |
-|---|---|
-| **1. Before Range** | Combat cards with "before range is determined" timing |
-| **2. Determine Range** | Maneuvers (close or long); either combatant may play; a minion cannot play two maneuvers in a row |
-| **3. Before Strikes** | Combat cards with "before strikes are chosen" timing |
-| **4. Strike** | Each combatant announces one strike (acting minion first); see Strike Types below |
-| **5. Damage Resolution** | Prevention cards; then mending; damage is applied one point at a time |
-| **6. Press** | Press cards (continue or end combat); a minion cannot play two presses in a row |
-| **7. End of Round** | "End of round" cards and effects; fires even if combat ended prematurely |
-
-The acting minion has first sequencing opportunity (ABC: A) at every combat step.
-
-### Strike types
-
-| Strike | Notes |
-|---|---|
-| **Hand strike** | Default; damage = minion's strength (vampires default to 1) |
-| **Dodge** | No damage dealt; protects self and all attached cards from the opposing strike; effective at any range |
-| **First Strike** | Resolves before normal strikes; if both combatants use first strike they resolve simultaneously |
-| **Combat Ends** | Always resolves first — before first strike, before normal strikes; ends combat immediately; no other strikes or strike-resolution effects resolve |
-| **Steal Blood** | Moves blood/life counters from target to striker; not damage and cannot be prevented |
-| **Other** | Weapons, special abilities — per card text |
-
-Strikes are announced simultaneously (acting minion first), then resolved: Combat Ends → First Strike → Normal (simultaneously).
-
-### Damage types
-
-| Type | Mending | Effect on wounded vampire |
-|---|---|---|
-| **Normal** | 1 blood per point | Vampire becomes wounded if damage is not fully mended |
-| **Aggravated** | Cannot be mended | Burns a wounded vampire unless they spend 1 blood to prevent destruction |
-| **Environmental** | Normal rules | No minion source; cannot be attributed to a specific attacker |
-
-When a vampire receives both normal and aggravated damage simultaneously, normal damage is resolved first.
-
-### Torpor
-
-A vampire who cannot mend all their wounds goes to **torpor**:
-
-- Placed in the torpor area adjacent to their controller's uncontrolled region.
-- May only take the **"leave torpor"** action.
-- Cannot block, play reactions, or vote.
-- Is **not ready** but is still controlled; equipment and retainers remain attached.
-- Still passes through the unlock phase normally (unlocks unless infernal or other restriction).
-
-A torpored vampire targeted by an opposing vampire (in the case of diablerie) follows the diablerie rules, not standard combat.
+**Summary relevant to card play timing:**
+- The acting minion has first priority (ABC: A) at every combat step.
+- Steps 1 (Before Range) and 2 (Determine Range) are each passed independently per player; Step 3 (Before Strikes) is passed implicitly.
+- Default at end of each round: combat ends. A press-to-continue card forces another round; a press-to-end cancels it.
+- Combat must fully resolve before the action lifecycle leaves the Resolution state and enters After Resolution.
 
 ---
 
