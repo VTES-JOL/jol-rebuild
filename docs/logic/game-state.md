@@ -118,6 +118,51 @@ Each player has the following tracked values:
 
 ---
 
+## Victory Points and Game End
+
+### Ousting a prey
+
+When a player's prey is ousted (by any means, including effects initiated by other players), the predator receives:
+
+- **1 Victory Point**
+- **6 pool** from the blood bank (not from the ousted player's remaining pool)
+
+This applies regardless of who or what caused the oust. The 6 pool comes from the central blood bank.
+
+**Exception — simultaneous oust:** If multiple players are ousted simultaneously as the result of the same action or effect, all players whose prey is among those ousted receive a Victory Point. However, a player who is themselves ousted in the same event does **not** receive the 6 pool reward (they do still receive the Victory Point if their prey was also ousted).
+
+### Last survivor
+
+The last surviving Methuselah receives **1 additional Victory Point**.
+
+### Maximum Victory Points
+
+The maximum total Victory Points available in a game equals the number of players at the table. In a 5-player game, the maximum is 5 VP (4 from ousting each prey, 1 for last survivor).
+
+### Winner and Game Win (GW)
+
+The winner is the Methuselah with the most Victory Points at game end, **even if they have been ousted**. The winner is credited with a **Game Win (GW)**.
+
+In tournament scoring, standings are determined by GW first, then VP, then table points (not yet defined).
+
+Example final scores from a 5-player game:
+
+| Player   | VP  | GW  |
+|----------|-----|-----|
+| Player 1 | 3   | Yes |
+| Player 2 | 0   | —   |
+| Player 3 | 1   | —   |
+| Player 4 | 1   | —   |
+| Player 5 | 0   | —   |
+
+### Timeout
+
+When a game times out without reaching a natural conclusion, all surviving (non-ousted) players receive **0.5 VP** each. No GW is awarded on a timeout.
+
+In physical VTES, the timeout threshold is typically 2 hours of play. In JOL, where games are played asynchronously, the timeout period is defined per game or tournament in terms of calendar time (typically weeks).
+
+---
+
 ## Regions
 Each player has exactly one instance of every region type. Region IDs are formatted as `"{playerName}-{regionType}"`.
 

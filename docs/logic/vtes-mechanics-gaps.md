@@ -299,12 +299,23 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 
 ### 11. Game End Detection
 
-| Mechanic                                                     | Rulebook reference |
-|--------------------------------------------------------------|--------------------|
-| Last surviving player gains +1 VP                            | Victory Conditions |
-| Library exhaustion withdrawal — specific conditions required | Withdrawal         |
+| Mechanic                                                                                                             | Rulebook reference |
+|----------------------------------------------------------------------------------------------------------------------|--------------------|
+| Predator gains 1 VP + 6 pool from blood bank when prey is ousted                                                    | Victory Conditions |
+| Simultaneous oust: all predators whose prey was ousted gain 1 VP; those who were themselves ousted do not gain pool  | Victory Conditions |
+| Last surviving player gains +1 VP                                                                                    | Victory Conditions |
+| Game Win (GW) awarded to the player with the most VP at game end (even if ousted)                                    | Victory Conditions |
+| Timeout: all surviving players gain 0.5 VP each; no GW awarded                                                      | Tournament Rules   |
+| Library exhaustion withdrawal — specific conditions required                                                         | Withdrawal         |
 
-Currently `OustPlayer` marks players ousted but does not detect when only one player remains or auto-apply the survivor VP. A post-`OustPlayer` hook should check remaining player count and, if one player remains, award +1 VP and transition game to `COMPLETED`.
+Currently `OustPlayer` marks players ousted but does not:
+- Award 1 VP and 6 pool to the predator automatically.
+- Handle the simultaneous oust edge case (VP awarded, pool withheld for simultaneously-ousted predators).
+- Detect when only one player remains to award the survivor +1 VP and transition game to `COMPLETED`.
+- Record a GW on the game record.
+- Handle timeout scoring (0.5 VP to all survivors).
+
+A post-`OustPlayer` hook should check remaining player count and, if one player remains, award +1 VP and transition game to `COMPLETED` with a GW recorded for the winner.
 
 ---
 

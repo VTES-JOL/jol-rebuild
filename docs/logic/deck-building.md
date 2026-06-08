@@ -27,6 +27,9 @@ Decks are validated on import or save against the following criteria.
 Satisfying the criteria will allow that deck to be registered in a game created with the same format.
 Any errors will be reported back to the user in a way that explains the reason for the error.
 
+### Crypt group restriction (all formats)
+All crypt cards (except those with group `ANY`) must belong to a single group or two consecutive groups (e.g. groups 2 and 3, or groups 5 and 6). Mixing non-adjacent groups is not allowed. `ANY`-group vampires may be included in any crypt regardless of the groups used.
+
 ### Standard format rules
 - Crypt must have a minimum of 12 cards, no maximum size
 - Library must be between 60–90 cards
