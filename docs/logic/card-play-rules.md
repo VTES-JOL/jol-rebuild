@@ -17,18 +17,34 @@ Every action follows this state sequence:
 Idle → As Announced → During Action (Impulse Loop) → Resolution → After Resolution → End
 ```
 
+For blocked actions that are continued (e.g. Form of Mist), the sequence expands:
+
+```
+... → Resolution → Action Continuing → Block Attempts → Resolution → After Resolution → End
+```
+
 | State | Impulse? | Priority system | Notes |
 |---|---|---|---|
 | **As Announced** | No | Sequencing (clockwise) | Restricted window; only "as played" cancellers legal |
 | **During Action** | Yes | Impulse (resets on any play) | Fully interactive; stealth/intercept/modifiers/reactions |
 | **Resolution** | No | Deterministic | No player interaction; two branches (see below) |
+| **Action Continuing** | No | Sequencing (clockwise) | Fires when a "continue the action" effect (e.g. Form of Mist) is played; see below |
 | **After Resolution** | No | Sequencing (clockwise) | One effect at a time; Freak Drive, Voter Captivation, etc. |
 
 **Resolution branches:**
 - Action not blocked → pay cost → apply effect → enter After Resolution
-- Action blocked → combat subsystem (FIFO queue) → when combat fully resolves → enter After Resolution
+- Action blocked → combat subsystem (FIFO queue) → when combat fully resolves → enter After Resolution (or Action Continuing if a continue-the-action effect fires)
 
 Combat must fully resolve before the lifecycle leaves Resolution.
+
+### Action Continuing state
+
+When a "continue the action" effect fires after a blocked combat (e.g. Form of Mist), the game enters **Action Continuing** before returning to Block Attempts:
+
+- "After combat ends" and "after block resolution" effects triggered by the **preceding** block are playable in this window, alongside the continue-the-action effect — no mandatory ordering between them.
+- The game remembers the action was already blocked. Cards that trigger on block resolution (e.g. Cats' Guidance) remain valid after continuation, because the prior block already occurred.
+- Returning to Block Attempts does **not** re-open the As Announced or During Action windows from scratch — it resumes only at the block-attempt step.
+- If the continued action is blocked again, combat resolves again and another Action Continuing window may open.
 
 ---
 
@@ -255,12 +271,30 @@ After an action fully resolves (or is blocked and combat ends), the game enters 
 - One card or effect resolves at a time; this is not an open loop.
 - Only "after successful action" or "after resolution" effects are legal here.
 
-Typical effects that fire in this window:
+### All "after \[X\] resolution" phrases map to this window
 
-| Card / Effect       | Trigger condition                       |
-|---------------------|-----------------------------------------|
-| Freak Drive         | After the acting minion's action resolves (success or block) |
-| Voter Captivation   | After a successful political action     |
+The following card-text phrases are all equivalent and refer to the same After Resolution window:
+- "after action resolution" / "after this action"
+- "after bleed resolution"
+- "after referendum resolution"
+- "after block resolution" (valid only when a block occurred)
+- "after combat ends, if blocked" (valid only when a block occurred)
+
+A player may freely choose the order in which their eligible After Resolution effects resolve. Order matters only when one effect would cancel or invalidate another.
+
+### Triggered abilities check their preconditions at trigger time
+
+An "after resolution" triggered ability (e.g. Lutz von Hohenzollern's special) verifies its preconditions **at the moment it would fire**, not at the moment the action resolved. If the triggering condition is no longer true when the After Resolution window opens (e.g. the vampire is no longer ready because the referendum ousted its controller), the ability does not trigger.
+
+### Typical effects that fire in this window
+
+| Card / Effect | Trigger condition |
+|---|---|
+| Freak Drive | After the acting minion's action resolves (success or block) |
+| Voter Captivation | After a successful political action |
+| Form of Mist | After combat ends, if this vampire was blocked |
+| Cats' Guidance | After block resolution (remains valid after action continuation) |
+| Lutz von Hohenzollern | After a successful referendum (checks readiness at trigger time) |
 | "After this action" effects | Any card text specifying this window |
 
 No further block attempts, stealth/intercept plays, or action modifiers are legal here — those windows have closed.
