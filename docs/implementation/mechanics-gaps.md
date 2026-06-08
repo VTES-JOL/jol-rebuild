@@ -4,43 +4,74 @@
 
 Cross-reference of the [VEKN Rulebook](https://www.vekn.net/rulebook) and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) against the current JOL implementation. Source of truth for prioritising new commands and UI features.
 
+**Status note:** many commands listed as implemented are currently **manual / permissive-mode support**, not full rules-enforced automation. Rules-enforced mode currently has a much smaller protocol surface: impulse/sequencing commands plus the basic action commands. Outstanding gaps below distinguish "state or utility command exists" from "the official rule is enforced by the engine."
+
 ---
 
 ## Already Implemented
 
-| Mechanic                                                                                                                            | Implementation                                                                                    |
-|-------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
-| Five-phase turn cycle (UNLOCK → MASTER → MINION → INFLUENCE → DISCARD)                                                              | `AdvancePhase`, `NextTurn`                                                                        |
-| 30-pool start, pool adjustment                                                                                                      | `SetPool`, `TransferBlood`                                                                        |
-| Blood counters on cards                                                                                                             | `AddCounter` / `RemoveCounter`                                                                    |
-| All nine region types (READY, UNCONTROLLED, TORPOR, HAND, LIBRARY, CRYPT, ASH_HEAP, RESEARCH, REMOVED_FROM_GAME)                    | `RegionType` enum, visibility rules                                                               |
-| Influence system — counters on UNCONTROLLED, promote to READY                                                                       | `InfluenceCard`, `MoveToCrypt`, `TransferBlood`                                                   |
-| Influence transfer budget (1/2/3/4 per turn, capped at 4) enforced; extraction costs 2T/blood                                       | `GameData.transfersRemaining`, `TransferBlood` guard, `AdvancePhase` budget set, `NextTurn` reset |
-| `InfluenceCard` restricted to current player, INFLUENCE phase only, requires counters ≥ capacity > 0                                | `GameCommandService.handleInfluenceCard`                                                          |
-| Torpor — enter and leave                                                                                                            | `MoveToTorpor`, `RescueFromTorpor`, `BurnMinion`                                                  |
-| Edge tracking                                                                                                                       | `GainEdge`                                                                                        |
-| Ousting and victory points                                                                                                          | `OustPlayer`, `victoryPoints` field                                                               |
-| Card lock / unlock                                                                                                                  | `LockCard`, `UnlockCard`, `UnlockAll`                                                             |
-| Unique card contesting                                                                                                              | `ContestCard`, `ClearContestCard`                                                                 |
-| Vampire title assignment                                                                                                            | `SetTitle`                                                                                        |
-| All card types (VAMPIRE, IMBUED, MASTER, ACTION, MODIFIER, REACTION, COMBAT, ALLY, RETAINER, POLITICAL, EQUIPMENT, EVENT, LOCATION) | `CardType` enum                                                                                   |
-| Attached cards (retainers, equipment)                                                                                               | `AttachCard`                                                                                      |
-| Draw / discard / shuffle                                                                                                            | `DrawCard`, `DiscardCard`, `ShuffleLibrary`, `ShuffleCrypt`                                       |
-| General card movement between any regions                                                                                           | `MoveCard`, `PlayCard`                                                                            |
-| Order-of-play reversal                                                                                                              | `ReverseOrder`                                                                                    |
-| Crypt group deck-building restrictions (single or two consecutive)                                                                  | `DeckValidatorService`                                                                            |
-| Sect and discipline fields on cards                                                                                                 | `CardState` fields                                                                                |
-| Predator / prey circle derivation                                                                                                   | `GameInitService`                                                                                 |
-| Formal action declaration — DeclareAction / AttemptBlock / ResolveAction / AbortAction; `PendingActionState` on `GameData`          | `ActionHandler`, `PendingActionState`                                                             |
-| `ActionType` enum (BLEED, HUNT, EQUIP, EMPLOY_RETAINER, RECRUIT_ALLY, POLITICAL, LEAVE_TORPOR, RESCUE, DIABLERISE, CUSTOM)          | `ActionType`                                                                                      |
-| After-Resolution sequencing window — `SequencingWindowState` / `PassSequencing` / `CloseSequencingWindow`; opened by `ResolveAction` | `SequencingHandler`, `SequencingWindowState`                                                      |
-| `OustPlayer` awards predator 1 VP + 6 pool; last survivor +1 VP; `GameCompletedEffect` when one player remains                      | `PlayerHandler.handleOustPlayer`                                                                  |
-| `CardData.controller` field (distinct from `owner`)                                                                                 | `CardData`                                                                                        |
-| `CardData.infernal` boolean                                                                                                         | `CardData`                                                                                        |
+| Mechanic                                                                                                                            | Implementation                                                                                    | Mode / status |
+|-------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|---------------|
+| Five-phase turn cycle (UNLOCK → MASTER → MINION → INFLUENCE → DISCARD)                                                              | `AdvancePhase`, `NextTurn`                                                                        | Permissive utility; full enforced phase protocol still missing |
+| 30-pool start, pool adjustment                                                                                                      | `SetPool`, `TransferBlood`                                                                        | Initial pool automatic; pool commands mostly permissive/manual |
+| Blood counters on cards                                                                                                             | `AddCounter` / `RemoveCounter`                                                                    | Generic counters only; named counters and capacity ceiling missing |
+| All nine region types (READY, UNCONTROLLED, TORPOR, HAND, LIBRARY, CRYPT, ASH_HEAP, RESEARCH, REMOVED_FROM_GAME)                    | `RegionType` enum, visibility rules                                                               | Implemented |
+| Influence system — counters on UNCONTROLLED, promote to READY                                                                       | `InfluenceCard`, `MoveToCrypt`, `TransferBlood`                                                   | Permissive utility; enforced influence protocol still incomplete |
+| Influence transfer budget (1/2/3/4 per turn, capped at 4) enforced; extraction costs 2T/blood                                       | `GameData.transfersRemaining`, `TransferBlood` guard, `AdvancePhase` budget set, `NextTurn` reset | Permissive command path; enforced-mode equivalent missing |
+| `InfluenceCard` restricted to current player, INFLUENCE phase only, requires counters ≥ capacity > 0                                | `GameCommandService.handleInfluenceCard`                                                          | Permissive command path; scarce and capacity overflow missing |
+| Torpor — enter and leave                                                                                                            | `MoveToTorpor`, `RescueFromTorpor`, `BurnMinion`                                                  | Manual movement only; combat / leave-torpor / diablerie rules missing |
+| Edge tracking                                                                                                                       | `GainEdge`                                                                                        | Manual token assignment only; bleed and vote integration missing |
+| Ousting and victory points                                                                                                          | `OustPlayer`, `victoryPoints` field                                                               | Permissive command path; simultaneous oust, timeout, GW missing |
+| Card lock / unlock                                                                                                                  | `LockCard`, `UnlockCard`, `UnlockAll`                                                             | Manual / utility; infernal and contest unlock rules missing |
+| Unique card contesting                                                                                                              | `ContestCard`, `ClearContestCard`                                                                 | Manual flag only; upkeep / yield prompts missing |
+| Vampire title assignment                                                                                                            | `SetTitle`                                                                                        | Manual field only; title contest and vote calculation missing |
+| All card types (VAMPIRE, IMBUED, MASTER, ACTION, MODIFIER, REACTION, COMBAT, ALLY, RETAINER, POLITICAL, EQUIPMENT, EVENT, LOCATION) | `CardType` enum                                                                                   | `CONVICTION` and `POWER` missing; `LOCATION` not normally imported |
+| Attached cards (retainers, equipment)                                                                                               | `AttachCard`                                                                                      | Manual attachment; retainer/equipment play and upkeep rules missing |
+| Draw / discard / shuffle                                                                                                            | `DrawCard`, `DiscardCard`, `ShuffleLibrary`, `ShuffleCrypt`                                       | Manual / utility; replacement timing missing |
+| General card movement between any regions                                                                                           | `MoveCard`, `PlayCard`                                                                            | Manual movement; `PlayCard` has no rule validation |
+| Order-of-play reversal                                                                                                              | `ReverseOrder`                                                                                    | Implemented |
+| Crypt group deck-building restrictions (single or two consecutive)                                                                  | `DeckValidatorService`                                                                            | Implemented |
+| Sect and discipline fields on cards                                                                                                 | `CardData` fields                                                                                 | Fields only; many trait / requirement checks missing |
+| Predator / prey circle derivation                                                                                                   | `GameInitService`                                                                                 | Implemented |
+| Formal action declaration — DeclareAction / AttemptBlock / ResolveAction / AbortAction; `PendingActionState` on `GameData`          | `ActionHandler`, `PendingActionState`                                                             | Basic enforced protocol only; action effects and block legality incomplete |
+| `ActionType` enum (BLEED, HUNT, EQUIP, EMPLOY_RETAINER, RECRUIT_ALLY, POLITICAL, LEAVE_TORPOR, RESCUE, DIABLERISE, CUSTOM)          | `ActionType`                                                                                      | Enum only; per-action resolution missing |
+| After-Resolution sequencing window — `SequencingWindowState` / `PassSequencing` / `CloseSequencingWindow`; opened by `ResolveAction` | `SequencingHandler`, `SequencingWindowState`                                                      | Partially implemented; AS_ANNOUNCED and referendum/combat integration missing |
+| `OustPlayer` awards predator 1 VP + 6 pool; last survivor +1 VP; `GameCompletedEffect` when one player remains                      | `PlayerHandler.handleOustPlayer`                                                                  | Permissive command path; simultaneous oust / timeout / GW missing |
+| `CardData.controller` field (distinct from `owner`)                                                                                 | `CardData`                                                                                        | Field and projection exist; transfer command missing |
+| `CardData.infernal` boolean                                                                                                         | `CardData`                                                                                        | Field exists; unlock enforcement missing |
 
 ---
 
 ## Gaps by Category
+
+### 0. Rules-Enforced Turn and Phase Protocol
+
+Rules-enforced mode currently has impulse/sequencing commands and the basic action commands, but most phase and state mutation commands are permissive-only. A complete enforced turn protocol is still missing.
+
+**Missing mechanics:**
+
+| Mechanic                                                                                  | Rulebook reference |
+|-------------------------------------------------------------------------------------------|--------------------|
+| Legal phase progression in rules-enforced mode                                             | Turn Structure     |
+| UNLOCK phase automatic effects without opening a generic impulse window                    | Unlock Phase       |
+| MASTER phase action accounting and legal master-card play                                  | Master Phase       |
+| MINION phase action loop until the current player is done taking legal minion actions      | Minion Phase       |
+| INFLUENCE phase transfer budget and influence actions available in rules-enforced mode     | Influence Phase    |
+| DISCARD phase draw-to-hand-size, event play, or discard action in rules-enforced mode      | Discard Phase      |
+| Phase advancement blocked while action, combat, referendum, impulse, or sequencing is open | Game Flow          |
+
+**Current implementation mismatch:**
+
+`TurnPhaseHandler` currently opens an undirected impulse window on every `AdvancePhase` / `NextTurn`. This contradicts [Game Flow § Impulse and Sequencing](../rules/game-flow.md#impulse-and-sequencing): entering a phase should not open impulse, and a table-wide pass should not advance the phase.
+
+**Proposed work:**
+
+- Move phase advancement out of permissive-only command handling into an enforced turn protocol.
+- Remove phase-level auto impulse windows; open impulse only from protocol events such as action/block exchanges, combat timing steps, referendum polling, or card/effect timing conflicts.
+- Add phase-specific enforced commands or server transitions for unlock, master, minion, influence, and discard phases.
+- Require all pending action/combat/referendum/window state to be closed before the turn advances.
+
+---
 
 ### 1. Voting & Referendums
 
@@ -73,14 +104,15 @@ A `ReferendumState` object should be added to `GameData` containing: `type`, `ca
 
 ### 2. Formal Action Declaration & Blocking
 
-VTES action resolution is a structured handshake: declare → block window → resolve or fight. JOL currently has no first-class representation of an in-progress action; players manage this entirely through chat.
+VTES action resolution is a structured handshake: declare → as announced → block window → resolve or fight → after resolution. JOL now has a first-class `PendingActionState` and basic commands for declaring, blocking, resolving, and aborting an action, but the engine still does not enforce most action-specific effects or block legality.
 
 **Missing mechanics:**
 
 | Mechanic                                                                                                                                                                | Rulebook reference               |
 |-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| Declaring an action (locks acting minion, opens a block window)                                                                                                         | Minion Phase — Action Resolution |
-| Block attempts by ready minions of other players                                                                                                                        | Stealth & Intercept              |
+| As Announced sequencing window for "as it is played" cancellation                                                                                                       | Card Play — Declaration          |
+| Action-specific resolution for bleed, hunt, equip, employ retainer, recruit ally, political action, leave torpor, rescue, diablerie, rush, and custom actions           | Minion Phase — Action Resolution |
+| Block eligibility by directed / undirected action type                                                                                                                  | Minion Phase — Directed Actions  |
 | Stealth vs. intercept comparison determining whether a block succeeds                                                                                                   | Stealth & Intercept              |
 | Out-of-turn reaction cards (played during another player's minion phase)                                                                                                | Reaction Cards                   |
 | Acting minion goes to torpor instead of combat if it was acting from torpor                                                                                             | Combat — Torpor exception        |
@@ -101,7 +133,7 @@ VTES action resolution is a structured handshake: declare → block window → r
 | Command         | Fields                                                                                             | Description                                                                           |
 |-----------------|----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
 | `DeclareAction` | `actorRef`, `actionType` (see `ActionType` enum), `targetPlayerName?`                              | Lock actor, set `PendingActionState` (DURING_ACTION), open impulse window             |
-| `AttemptBlock`  | `blockerRef`                                                                                       | Lock blocker, mark action BLOCKED, close impulse window                               |
+| `AttemptBlock`  | `blockerRef`                                                                                       | Lock blocker, mark action BLOCKED, close impulse window; currently treats the block as automatically successful |
 | `ResolveAction` | —                                                                                                  | Mark AFTER_RESOLUTION; open After Resolution sequencing window                        |
 | `AbortAction`   | —                                                                                                  | Cancel action; unlock actor; close impulse and sequencing windows                     |
 
@@ -122,12 +154,28 @@ VTES action resolution is a structured handshake: declare → block window → r
 
 **Still missing mechanics:**
 
+- Basic action effects — `ResolveAction` does not yet burn pool for bleed, gain Edge for successful bleed, add blood for hunt, attach equipment/retainers, recruit allies, start referendum polling, move vampires from torpor, rescue torpored vampires, or initiate diablerie / rush combat
+- Action-card lifecycle — no limbo state, cost-at-resolution handling, fizzle handling, cancellation handling, or replacement timing
+- Action success layers — no separate tracking for successful action, successful bleed, or successful referendum
 - Directed `(D)` blocking enforcement — any minion can currently block; only the target Methuselah's minions should be eligible unless card text explicitly allows others
+- Undirected blocking enforcement — prey then predator are not enforced, and other Methuselahs are not excluded by default
 - Stealth / intercept accumulation model — neither tracked on `PendingActionState`; the "only when needed" rule cannot be enforced
 - Block redirect — new block window on action redirect; modifier persistence (stealth, intercept, bleed) carried over; prior per-window passes reset
 - NRA (No Repeat Action) tracking — no per-minion record of which action types/cards have reached resolution this turn; the NRA lock persists through mid-turn unlocks
 - AS_ANNOUNCED sequencing window — no command opens it; "as it is played" cancellers (e.g. Direct Intervention) have no dedicated engine window
 - Action Continuing state — `ActionStatus` lacks `ACTION_CONTINUING`; required for continued-action effects (e.g. Form of Mist) that re-enter the block-attempt loop after combat
+
+**Proposed additional state:**
+
+| State field                 | Owner                 | Description                                                                                         |
+|-----------------------------|-----------------------|-----------------------------------------------------------------------------------------------------|
+| `actionCardRef`             | `PendingActionState`  | Card being played as the action, if any; remains in limbo until resolution                          |
+| `bleedAmount`               | `PendingActionState`  | Running bleed total for bleed actions, including modifiers and reactions                            |
+| `reachedResolution`         | `PendingActionState`  | Whether the action reached Complete Action and therefore triggers NRA                                |
+| `nraActionsByMinionRef`     | `GameData` or turn state | Per-minion, per-turn action/card names that cannot be repeated                                      |
+| `actionSuccessful`          | `PendingActionState`  | True when the action was not blocked; distinct from successful bleed / referendum                    |
+| `bleedSuccessful`           | `PendingActionState`  | True when a bleed resolves for 1+ pool damage and should move the Edge                              |
+| `referendumSuccessful`      | `ReferendumState`     | True when votes for exceed votes against                                                            |
 
 ---
 
@@ -167,22 +215,22 @@ A `PendingCombatState` on `GameData` should hold: `attackerRef`, `defenderRef`, 
 
 ### 4. Influence Phase — Transfer Tracking
 
-**Implemented:**
+**Implemented in permissive mode:**
 
-| Mechanic                                                                                          | Implementation                                                                                     |
-|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| Transfer budget: 1 (turn 1.x, seat 1), 2 (seat 2), 3 (seat 3), 4 (seat 4+); always 4 from round 2 | `GameData.transfersRemaining` set by `AdvancePhase` on INFLUENCE entry via `computeTransferBudget` |
-| Pool → UNCONTROLLED costs 1 transfer/blood; UNCONTROLLED → pool costs 2 transfers/blood           | `TransferBlood` guard in `GameCommandService`                                                      |
-| Transfers restricted to current player during INFLUENCE phase                                     | `TransferBlood` and `InfluenceCard` guards                                                         |
-| Budget shown as `nT` badge in phase tracker UI                                                    | `PhaseTracker` in `GameStatusBar`                                                                  |
-| Budget reset to 0 on `NextTurn`                                                                   | `handleNextTurn`                                                                                   |
+| Mechanic                                                                                          | Implementation                                                                                     | Remaining gap |
+|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|---------------|
+| Transfer budget: 1 (turn 1.x, seat 1), 2 (seat 2), 3 (seat 3), 4 (seat 4+); always 4 from round 2 | `GameData.transfersRemaining` set by `AdvancePhase` on INFLUENCE entry via `computeTransferBudget` | `AdvancePhase` is permissive-only; rules-enforced influence protocol missing |
+| Pool → UNCONTROLLED costs 1 transfer/blood; UNCONTROLLED → pool costs 2 transfers/blood           | `TransferBlood` guard in `GameCommandService`                                                      | `TransferBlood` is permissive-only |
+| Transfers restricted to current player during INFLUENCE phase                                     | `TransferBlood` and `InfluenceCard` guards                                                         | Command unavailable in rules-enforced mode |
+| Budget shown as `nT` badge in phase tracker UI                                                    | `PhaseTracker` in `GameStatusBar`                                                                  | UI depends on permissive phase advancement |
+| Budget reset to 0 on `NextTurn`                                                                   | `handleNextTurn`                                                                                   | `NextTurn` is permissive-only |
 
 **Previously missing (now done):**
 
 | Mechanic                                                                                                       | Implementation                                                                                                                  |
 |----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| ~~4 transfers + 1 pool to move a card from crypt to UNCONTROLLED~~                                             | `DrawCryptToUncontrolled` — enforces INFLUENCE phase, 4T + 1 pool cost                                                          |
-| ~~Advanced vampire merge: base + advanced version of the same vampire merge into one~~                         | `MergeAdvanced` — validates same name + one advanced, burns incoming counters/attachments, attaches incoming card to READY card |
+| ~~4 transfers + 1 pool to move a card from crypt to UNCONTROLLED~~                                             | `DrawCryptToUncontrolled` — permissive-only command; enforces INFLUENCE phase, 4T + 1 pool cost                                 |
+| ~~Advanced vampire merge: base + advanced version of the same vampire merge into one~~                         | `MergeAdvanced` — permissive-only command; validates same name + one advanced, burns incoming counters/attachments, attaches incoming card to READY card |
 
 ---
 
@@ -284,6 +332,8 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 
 **Current state:** Partially implemented. `ImpulseState` and impulse commands exist. `SequencingWindowState`, `PassSequencing`, and `CloseSequencingWindow` are implemented; `ResolveAction` opens the `AFTER_RESOLUTION` window. The `AS_ANNOUNCED` window type is defined in the enum but no command opens it — "as it is played" cancellers (e.g. Direct Intervention) have no dedicated engine window. Full integration with combat and referendum protocols is still incomplete. Permissive mode still relies on players to manage many timing disputes verbally through chat.
 
+**Known mismatch:** `AdvancePhase` and `NextTurn` currently open a generic undirected impulse window. This should be removed once the enforced phase protocol exists; impulse is opened by protocol events, not by entering a phase.
+
 **State model (`ImpulseState` on `GameData`):**
 
 | Field                  | Type                                                              | Description                                         |
@@ -338,7 +388,7 @@ This creates a "round-robin until all pass, with reset on any play" loop — con
 | Timeout: all surviving players gain 0.5 VP each; no GW awarded                                                      | Tournament Rules   |
 | Library exhaustion withdrawal — specific conditions required                                                         | Withdrawal         |
 
-**Partially implemented.** `OustPlayer` now zeros the ousted player's pool, awards the predator 1 VP + 6 pool, and fires `PlayerVictoryPointsChangedEffect`. When only one player remains, it awards that survivor +1 VP and fires `GameCompletedEffect`.
+**Partially implemented in permissive mode.** `OustPlayer` now zeros the ousted player's pool, awards the predator 1 VP + 6 pool, and fires `PlayerVictoryPointsChangedEffect`. When only one player remains, it awards that survivor +1 VP and fires `GameCompletedEffect`.
 
 Still missing:
 - Simultaneous oust edge case — a predator who is themselves ousted in the same event still receives 1 VP but should **not** receive the 6 pool reward; this is not checked.
@@ -349,17 +399,21 @@ Still missing:
 
 ### 12. Card Play Phase Gating
 
-`PlayCard` currently has no phase or card-type validation. Any card in `HAND` can be played in any phase by whoever holds impulse. The full rules are defined in [Card Play Rules](../rules/card-play.md).
+`PlayCard` currently has no phase, card-type, source-region, actor, timing, cost, replacement, or destination validation. It moves the referenced card to the requested target region, or to the owner's ash heap when no target is supplied. The full rules are defined in [Card Play Rules](../rules/card-play.md).
 
 **Missing mechanics:**
 
 | Mechanic                                                                               | Notes                                                            |
 |----------------------------------------------------------------------------------------|------------------------------------------------------------------|
-| `PlayCard` phase enforcement by card type (Master/Minion/Unlock/Discard)               | No phase check; any card plays in any phase                      |
+| `PlayCard` source-region enforcement                                                   | No source-region check; any referenced card can be played        |
+| `PlayCard` phase enforcement by card type (Master/Minion/Unlock/Discard)               | No phase check; any referenced card can be played in any phase   |
 | Action Modifier restricted to acting player; Reaction restricted to non-acting players | Not enforced                                                     |
 | Out-of-turn Master detection (`CardData.outOfTurn` flag)                               | Not derived from card text at build time                         |
 | Out-of-turn master action cost (next master phase action, or trifle use)               | No `masterActionsRemaining` on `GameData`                        |
-| Conviction cards playable from `ASH_HEAP`                                              | `PlayCard` restricted to `PLAYABLE_REGIONS` (HAND / RESEARCH)    |
+| Card replacement / draw-to-max timing                                                  | Not modeled                                                      |
+| Card cancellation and "as played" replacement                                          | Not modeled                                                      |
+| Card destination after play                                                            | Caller chooses region; card-text destination patterns not parsed |
+| Conviction cards playable from `ASH_HEAP`                                              | Requires card-type support and explicit source-region exception  |
 | `CONVICTION` and `POWER` card types                                                    | Both map to `CardType.NONE` in `GameInitService.toCardType()`    |
 | `LOCATION` enum value reachable                                                        | Location cards import as `MASTER`; `CardType.LOCATION` is unused |
 
@@ -368,7 +422,7 @@ Still missing:
 - Add `CONVICTION` and `POWER` to `CardType` enum; update `toCardType()` in `GameInitService.java`.
 - Add `outOfTurn` boolean to `CardData`; populate in `GameInitService.buildCard()` by checking card text for `"out-of-turn"`.
 - Add `masterActionsRemaining` to `GameData`; set to 1 on `MASTER` phase entry; deducted by each master play (including out-of-turn plays against the player's next master phase).
-- Add phase + card-type guard in `CardMovementHandler.handlePlayCard()`.
+- Add source-region, phase, card-type, actor, timing, cost, replacement, and destination guards in `CardMovementHandler.handlePlayCard()`.
 - Extend allowed source regions for Conviction: check `ASH_HEAP` in addition to `PLAYABLE_REGIONS`.
 - Update `CardContextMenu` in frontend to show Play only when phase matches card type.
 
@@ -441,14 +495,14 @@ Three master card subtypes have distinct in-play rules that are not yet specifie
 
 ### 16. Card Control Transfer
 
-A small number of cards explicitly transfer control of themselves from one Methuselah to another mid-game (e.g. a reaction that places the card in the acting player's area, or a card that tells you to "give this card to another Methuselah"). The current model conflates owner and controller — every card in a region is assumed to be controlled by that region's owner.
+A small number of cards explicitly transfer control of themselves from one Methuselah to another mid-game (e.g. a reaction that places the card in the acting player's area, or a card that tells you to "give this card to another Methuselah"). The state model already separates owner and controller, but no command or effect can change controller mid-game.
 
 | Mechanic            | Notes                                                                                                                                        |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | Owner vs controller | A card's owner is the Methuselah whose library it came from. Controller is who currently benefits from / is responsible for the card. These can differ. |
 | Transfer on play    | Some cards instruct the playing Methuselah to give the card to another specific Methuselah; that player then controls the in-play card's effects and upkeep. |
 
-**Partially implemented:** `CardData.controller` (a `PlayerData` reference, distinct from `CardData.owner`) already exists and is transmitted as `controllerName` in `GameStateDto`. Defaults to `null` (meaning controller = owner).
+**Partially implemented:** `CardData.controller` (a `PlayerData` reference, distinct from `CardData.owner`) already exists and is transmitted as `controllerName` in `GameStateDto`. It is initialized to the owner when cards are built.
 
 **Proposed work:** Add a `TransferControl` command — `playerName`, `ref`, `newControllerName` — to explicitly reassign control of an in-play card to a different Methuselah.
 
@@ -479,32 +533,55 @@ This gap is coupled with Gap §2 (Hunt action is listed as an `actionType` in `D
 
 ---
 
+### 19. Frontend Command Surface and Legal Action UI
+
+The frontend mirrors the current Java command set, but several rules-enforced commands do not exist yet. Where a command exists, the UI mostly exposes mechanical actions rather than rule-legal choices.
+
+| Area                  | Missing frontend support                                                                                         |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------|
+| Rules-enforced phases | No enforced turn/phase controls for unlock, master, minion, influence, and discard phase legal actions            |
+| Action resolution     | No UI for choosing and resolving action-type-specific effects after `DeclareAction`                               |
+| Blocking              | No block-window eligibility display, stealth/intercept totals, redirect handling, or pass-by-block-window display |
+| Referendums           | No polling UI, vote-source display, Edge-for-vote control, Prisci sub-referendum, or pass/fail resolution view    |
+| Combat                | No combat state panel, range/maneuver controls, strike declaration, damage resolution, or press controls          |
+| Card play             | Card context menu does not hide or disable `Play` based on card type, phase, actor, source region, or timing      |
+| Withdrawal / timeout  | No UI for withdrawal announcement / confirmation or timeout scoring                                               |
+| Control transfer      | No UI or command type for `TransferControl`                                                                       |
+| Named counters        | Counter controls only support a generic counter amount                                                            |
+
+**Proposed work:** add frontend command types and panels alongside the backend protocol changes, then gate context-menu actions using the same legality rules exposed by the server.
+
+---
+
 ## Implementation Priority
 
 | Priority | Area                                                                | Rationale                                                                                                                                                                                                                                                                                                                                                      |
 |----------|---------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ~~P1~~   | ~~Transfer tracking~~                                               | **Done** — `GameData.transfersRemaining` set on INFLUENCE entry (round → 1/2/3/4, capped at 4), enforced in `TransferBlood` for UNCONTROLLED (extraction costs 2T/blood), reset to 0 on `NextTurn`. Budget shown as `nT` in phase tracker UI. `DrawCryptToUncontrolled` enforces 4T + 1 pool cost to draw from crypt to UNCONTROLLED.                          |
-| ~~P1~~   | ~~Sequencing / Impulse engine~~                                     | **Done** — `ImpulseState` on `GameData`; `OpenImpulseWindow`, `PassImpulse`, `ClaimImpulse`, `CloseImpulseWindow` commands; pass-order computed from predator/prey ring per context (UNDIRECTED/DIRECTED_SINGLE/COMBAT/DIRECTED_MULTI); auto-closes when all pass consecutively; `ImpulsePanel` + `OpenImpulseButton` UI in `GameStatusBar`. `SequencingWindowState`, `PassSequencing`, `CloseSequencingWindow` implemented; `ResolveAction` opens AFTER_RESOLUTION window. Note: AS_ANNOUNCED window not yet implemented. |
-| ~~P2~~   | ~~Formal action declaration — basic structure~~                     | **Done** — `DeclareAction`, `AttemptBlock`, `ResolveAction`, `AbortAction` in `ActionHandler`; `PendingActionState` on `GameData` with actorRef, actionType, targetPlayerName, status, blockerRef. Stealth/intercept accumulation, directed blocking enforcement, NRA tracking, and block-redirect still missing (see §2). |
-| ~~P4~~   | ~~Advanced vampire merge~~                                          | **Done** — `MergeAdvanced` command; validates same name + one advanced, burns incoming counters/attachments, attaches incoming card to READY card.                                                                                                                                                                                                              |
-| **P1**   | Voting / Referendum engine                                          | Required for any political-action deck to function; blood hunt has no fallback                                                                                                                                                                                                                                                                                 |
-| **P1**   | Game end — simultaneous oust, timeout, GW recording (§11)           | Predator VP+pool and last-survivor VP are done; simultaneous oust pool-withholding, timeout scoring, and GW field on game record still missing                                                                                                                                                                                                                 |
-| **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth must be tracked as an action-wide running total, and intercept must be tracked per blocking minion on `PendingActionState`                                                                                                                                                                               |
-| **P2**   | Directed `(D)` action blocking (§2 extension)                       | Needed alongside formal action declaration; only the target Methuselah's minions may normally attempt to block a directed action                                                                                                                                                                                                                                  |
-| **P2**   | NRA tracking + block-redirect + Action Continuing (§2 extension)    | NRA lock per minion per turn; modifier persistence across block windows on redirect; ACTION_CONTINUING status for continued-action effects                                                                                                                                                                                                                       |
-| **P2**   | Card play phase gating                                              | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                                             |
-| **P2**   | Withdrawal mechanic                                                 | Common end-game scenario                                                                                                                                                                                                                                                                                                                                       |
-| **P2**   | Diablerie full resolution                                           | Currently requires many manual steps                                                                                                                                                                                                                                                                                                                           |
-| **P2**   | Minion traits: Infernal enforcement, Sterile, Blood Cursed, Slave, Scarce (§14) | `infernal` field exists; enforcement in `AdvancePhase` not done; Sterile/Blood Cursed/Slave block illegal actions; Scarce enforces pool cost on influence                                                                                                                                                      |
-| **P3**   | Master phase action accounting (trifle / out-of-turn)               | Rare edge case but rule-correct                                                                                                                                                                                                                                                                                                                                |
-| **P3**   | Unlock phase auto-effects (edge pool, contest upkeep)               | Quality-of-life automation                                                                                                                                                                                                                                                                                                                                     |
-| **P3**   | Combat system                                                       | Complex; most tables already manage manually through counter adjustments                                                                                                                                                                                                                                                                                       |
-| **P3**   | Minion traits: Black Hand, Flight, Red List, Circle (§14)           | Parse-time flags; required for card requirement checks and Red List mark-and-hunt mechanic                                                                                                                                                                                                                                                                     |
-| **P3**   | Named counter types (§13)                                           | Corruption counters have cross-player semantics; Aye/Orun are attached cards counted by name                                                                                                                                                                                                                                                                   |
-| **P3**   | Limited effect enforcement (§12 / [card-play.md](../rules/card-play.md)) | Requires per-action and per-combat-round tracking of whether a limited source has been used                                                                                                                                                                                                                                                                    |
-| **P3**   | Trophy / Investment / Path subtypes (§15)                           | Master subtype parsing is prerequisite for correct in-play behavior                                                                                                                                                                                                                                                                                            |
-| **P4**   | Anarch conversion command                                           | Convenience; achievable today via manual counter + SetTitle                                                                                                                                                                                                                                                                                                    |
-| **P4**   | Card control transfer — `TransferControl` command (§16)             | `controller` field exists; only the command to transfer it mid-game is missing                                                                                                                                                                                                                                                                                 |
-| **P4**   | Hunting ground bonus on hunt resolution (§17)                       | Dependent on formal hunt action being implemented in §2                                                                                                                                                                                                                                                                                                        |
-| **P4**   | Blood capacity overflow enforcement (§18)                           | `AddCounter` has no ceiling; needed for rules-enforced hunt and card-effect correctness                                                                                                                                                                                                                                                                        |
-| **P4**   | AS_ANNOUNCED sequencing window (§9 extension)                       | Window type defined in enum; no command opens it; needed for Direct Intervention and other "as it is played" cancellers                                                                                                                                                                                                                                         |
+| ~~P1~~   | ~~Transfer tracking data model~~                                    | **Partially done** — `GameData.transfersRemaining` exists, budget is computed in the permissive phase flow, and transfer costs are guarded on permissive `TransferBlood`. Rules-enforced influence phase support is still a P1 gap (§0 / §4).                                                                                                                   |
+| ~~P1~~   | ~~Impulse / sequencing state primitives~~                           | **Partially done** — `ImpulseState`, `SequencingWindowState`, and pass/claim/close commands exist. Protocol integration is still incomplete, AS_ANNOUNCED is missing, and phase-level auto impulse must be removed (§0 / §9).                                                                                                                                   |
+| ~~P2~~   | ~~Formal action declaration — basic structure~~                     | **Done as a skeleton** — `DeclareAction`, `AttemptBlock`, `ResolveAction`, `AbortAction`, and `PendingActionState` exist. Action-specific effects, block legality, stealth/intercept, NRA, redirect, and continuation remain open (§2).                                                                                                                          |
+| ~~P4~~   | ~~Advanced vampire merge~~                                          | **Done in permissive mode** — `MergeAdvanced` command validates same name + one advanced, burns incoming counters/attachments, and attaches incoming card to READY card.                                                                                                                                                                                        |
+| **P1**   | Rules-enforced turn and phase protocol (§0)                         | Without this, rules-enforced mode cannot run a legal full turn; most existing phase and state commands are permissive-only.                                                                                                                                                                                                                                      |
+| **P1**   | Basic action resolution by `ActionType` (§2)                        | Bleed, hunt, equip, employ retainer, recruit ally, political action, leave torpor, rescue, diablerie, and rush effects are not resolved by the engine.                                                                                                                                                                                                           |
+| **P1**   | Card play legality and lifecycle (§12)                              | Prevents illegal plays and is prerequisite for modifiers, reactions, combat cards, cancellation, replacement timing, and action-card limbo.                                                                                                                                                                                                                       |
+| **P1**   | Voting / Referendum engine (§1)                                     | Required for political-action decks and mandatory blood hunt after diablerie; no fallback exists in rules-enforced mode.                                                                                                                                                                                                                                        |
+| **P1**   | Game end — simultaneous oust, timeout, GW recording (§11)           | Predator VP+pool and last-survivor VP are partially done in permissive `OustPlayer`; simultaneous oust pool-withholding, timeout scoring, and GW field on game record are still missing.                                                                                                                                                                        |
+| **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth must be tracked as an action-wide running total, and intercept must be tracked per blocking minion on `PendingActionState`.                                                                                                                                                                              |
+| **P2**   | Directed / undirected action blocking (§2 extension)                | Only eligible Methuselahs and minions may normally attempt to block; current `AttemptBlock` accepts any non-acting unlocked ready minion.                                                                                                                                                                                                                         |
+| **P2**   | NRA tracking + block-redirect + Action Continuing (§2 extension)    | NRA lock per minion per turn; modifier persistence across block windows on redirect; ACTION_CONTINUING status for continued-action effects.                                                                                                                                                                                                                       |
+| **P2**   | Withdrawal and timeout lifecycle (§7 / §11)                         | Common end-game scenarios; timeout also affects GW assignment.                                                                                                                                                                                                                                                                                                  |
+| **P2**   | Diablerie full resolution (§8)                                      | Blood transfer, equipment choice, discipline gain, Red List timing, Blood Cursed restriction, and blood hunt are all missing.                                                                                                                                                                                                                                    |
+| **P2**   | Minion traits: Infernal enforcement, Sterile, Blood Cursed, Slave, Scarce (§14) | `infernal` field exists; enforcement in UNLOCK is not done; Sterile/Blood Cursed/Slave block illegal actions; Scarce enforces pool cost on influence.                                                                                                                                                                     |
+| **P3**   | Combat system (§3)                                                  | Complex but required for complete rules enforcement; current play relies on manual counter and torpor/burn commands.                                                                                                                                                                                                                                             |
+| **P3**   | Master phase action accounting (trifle / out-of-turn) (§6)          | Needed for legal master-card play and out-of-turn master limits.                                                                                                                                                                                                                                                                                                |
+| **P3**   | Unlock phase auto-effects (edge pool, contest upkeep) (§5)          | Needed for rule-correct automated phase handling.                                                                                                                                                                                                                                                                                                              |
+| **P3**   | Minion traits: Black Hand, Flight, Red List, Circle (§14)           | Parse-time flags; required for card requirement checks and Red List mark-and-hunt / Trophy mechanics.                                                                                                                                                                                                                                                           |
+| **P3**   | Named counter types (§13)                                           | Corruption counters have cross-player semantics; many card effects need non-blood counters.                                                                                                                                                                                                                                                                     |
+| **P3**   | Limited effect enforcement (§12 / [card-play.md](../rules/card-play.md)) | Requires per-action and per-combat-round tracking of whether a limited source has been used.                                                                                                                                                                                                                                                                    |
+| **P3**   | Trophy / Investment / Path subtypes (§15)                           | Master subtype parsing is prerequisite for correct in-play behavior.                                                                                                                                                                                                                                                                                            |
+| **P3**   | Frontend legal action UI (§19)                                      | Backend protocol changes need matching UI command types, panels, and legality gating.                                                                                                                                                                                                                                                                           |
+| **P4**   | Anarch conversion command (§10)                                     | Convenience; currently achievable via manual counter + `SetTitle` / notes, but should be explicit for rules-enforced mode.                                                                                                                                                                                                                                      |
+| **P4**   | Card control transfer — `TransferControl` command (§16)             | `controller` field exists; only the command / effect to transfer it mid-game is missing.                                                                                                                                                                                                                                                                        |
+| **P4**   | Hunting ground bonus on hunt resolution (§17)                       | Dependent on formal hunt action resolution in §2.                                                                                                                                                                                                                                                                                                              |
+| **P4**   | Blood capacity overflow enforcement (§18)                           | `AddCounter` has no ceiling; needed for rules-enforced hunt and card-effect correctness.                                                                                                                                                                                                                                                                        |
+| **P4**   | AS_ANNOUNCED sequencing window (§9 extension)                       | Window type defined in enum; no command opens it; needed for Direct Intervention and other "as it is played" cancellers.                                                                                                                                                                                                                                        |
