@@ -43,7 +43,7 @@ The turn string has the format `"<round>.<seat>"`:
 - Skips any ousted players.
 - Sets the new current player.
 - Resets phase to `UNLOCK`.
-- Auto-unlocks all cards belonging to the new current player.
+- Auto-unlocks all cards controlled by the new current player.
 
 ### Transfer budget
 
@@ -246,7 +246,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 |--------------------|---------------------------|-------------------------------|---------------------------------------|----------|
 | `LockCard`         | `ref`                     | any                           | Lock (tap) a card                     | Any      |
 | `UnlockCard`       | `ref`                     | any                           | Unlock (untap) a card                 | Any      |
-| `UnlockAll`        | `playerName`              | — (affects `READY`, `TORPOR`) | Unlock all in-play cards for a player (player-triggered; not automatic on turn advance) | Any |
+| `UnlockAll`        | `playerName`              | — (affects `READY`, `TORPOR`) | Unlock all in-play cards controlled by a player. `NextTurn` auto-unlocks cards controlled by the incoming player; this command is the manual equivalent for mid-game effects or permissive-mode use. | Any |
 | `AddCounter`       | `ref`, `amount`           | any                           | Increment a card's counter            | Any      |
 | `RemoveCounter`    | `ref`, `amount`           | any                           | Decrement a card's counter (floor 0)  | Any      |
 | `SetCardNotes`     | `ref`, `notes`            | any                           | Set freeform notes on a card          | Any      |

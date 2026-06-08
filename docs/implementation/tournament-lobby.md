@@ -54,7 +54,7 @@ Registration is only accepted while the tournament is in `REGISTRATION` status a
 
 The number of decks a player must submit depends on the tournament format:
 - **SINGLE_DECK** — 1 deck, used for every round
-- **MULTI_DECK** — one deck per round (`numberOfRounds` decks total)
+- **MULTI_DECK** — one deck per expected played game. When an extra round is added to distribute byes fairly, players may submit fewer decks than the total number of tournament rounds because they will not play every round.
 
 All submitted decks must be valid for the tournament's `gameFormat`.
 
@@ -94,7 +94,7 @@ If any constraint is violated, activation is rejected with a descriptive error.
 On activation, a private `ACTIVE` game is created for each table, named `"NAME: Round N Table M"`.
 Players are registered to their respective games with the appropriate deck:
 - **SINGLE_DECK** — the same deck is used for each game.
-- **MULTI_DECK** — the deck corresponding to the round index is used. In the case of a bye, the next unused deck is used in order.
+- **MULTI_DECK** — decks are assigned to the player's played games in submitted order, not strictly by tournament round number. A bye does not consume a deck: the player's first table uses deck 1, their second table uses deck 2, and so on, regardless of whether those tables occur in rounds 1+2, 2+3, or 1+3.
 
 ## Active Tournament Games
 

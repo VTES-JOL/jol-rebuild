@@ -14,11 +14,11 @@ The game lobby allows players to create and join games. Games have a format, a v
 
 Each format defines its own deck validation rules and player limits:
 
-| Format   | Max Players | Deck Rules                      |
-|----------|-------------|----------------------------------|
-| STANDARD | 5           | Standard deck validation         |
-| DUEL     | 2           | Duel deck validation             |
-| V5       | 5           | V5 deck validation               |
+| Format   | Players | Deck Rules                      |
+|----------|---------|----------------------------------|
+| STANDARD | 2–5     | Standard deck validation         |
+| DUEL     | 2       | Duel deck validation             |
+| V5       | 2–5     | V5 deck validation               |
 
 ## Visibility
 
@@ -27,7 +27,7 @@ Each format defines its own deck validation rules and player limits:
 
 ## Game Lifecycle
 
-Games are created in `OPEN` status and transition to `ACTIVE` automatically when the last registration fills the game to capacity. No manual start action is required.
+Games are created in `OPEN` status and transition to `ACTIVE` automatically when the last registration fills the configured capacity for that game. The configured capacity must be within the player range allowed by the selected format. No manual start action is required.
 
 - A game can only be **deleted** by its owner while it is `OPEN`.
 - Format can only be changed by the owner while the game is `OPEN` and **no players have registered with decks**.
@@ -52,7 +52,7 @@ Players register for a game by submitting one of their decks. The following cond
 - For `PRIVATE` games, the player must have been invited by the owner.
 - The deck must belong to the registering player.
 - The deck must be marked valid for the game's format.
-- The game must not already be full (at capacity for its format).
+- The game must not already be full (at the configured capacity for that game).
 
 Players can withdraw their registration at any time while the game remains `OPEN`.
 

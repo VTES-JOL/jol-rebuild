@@ -84,22 +84,22 @@ VTES action resolution is a structured handshake: declare → block window → r
 **Stealth / intercept notes:**
 
 - Base stealth is 0; base intercept is 0 for most minions (some have printed intercept values).
-- Stealth bonuses are played by the acting player during the action impulse window (as action modifiers).
-- Intercept bonuses are played by blocking players (as reactions or vampire abilities).
-- A block succeeds if the blocker's total intercept ≥ the acting minion's total stealth at the moment the blocker is declared.
+- Stealth bonuses are played by the acting player as action modifiers, but only during an active block attempt and only when the blocker's current intercept ≥ the actor's current stealth ("only when needed" rule).
+- Intercept bonuses are played by blocking players (as reactions or vampire abilities), but only during an active block attempt and only when the actor's current stealth > the blocker's current intercept ("only when needed" rule).
+- A block succeeds if the blocker's **final** total intercept ≥ the acting minion's **final** total stealth — i.e. after all stealth and intercept plays for that block attempt have resolved, not at the moment the blocker is declared.
 - `"Optional intercept"` on a vampire means the vampire may use that source or choose not to; it is not automatic.
-- Stealth and intercept totals are ephemeral — they reset to 0 after the action resolves or is blocked.
+- Stealth and intercept totals are ephemeral — they reset after the action resolves or is blocked. During an action, stealth is tracked for the action as a whole, while intercept is tracked per blocking minion because a minion's accumulated intercept can carry forward across redirected block windows.
 
 **Proposed commands:**
 
 | Command         | Fields                                                                                                                                                                               | Description                                                               |
 |-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| `DeclareAction` | `actorRef`, `actionType` (BLEED \| HUNT \| EQUIP \| EMPLOY_RETAINER \| RECRUIT_ALLY \| POLITICAL \| LEAVE_TORPOR \| RESCUE \| DIABLERISE \| CUSTOM), `targetPlayerName?`, `cardRef?` | Open an action; locks the actor; sets `pendingAction` on game state       |
+| `DeclareAction` | `actorRef`, `actionType` (BLEED \| HUNT \| EQUIP \| EMPLOY_RETAINER \| RECRUIT_ALLY \| POLITICAL \| LEAVE_TORPOR \| RESCUE \| DIABLERISE \| CUSTOM), `targetPlayerName?`, `cardRef?` | Open an action; sets `pendingAction` on game state       |
 | `AttemptBlock`  | `blockerRef`                                                                                                                                                                         | Attempt to block the pending action with a ready minion                   |
 | `ResolveAction` | —                                                                                                                                                                                    | Confirm the action proceeds unblocked; pays costs, applies effects        |
 | `AbortAction`   | —                                                                                                                                                                                    | Cancel the declared action without effect (stealth/intercept negotiation) |
 
-A `PendingActionState` on `GameData` should hold: `actorRef`, `actionType`, `targetPlayerName`, `stealth`, `intercept`, `blockerRef` (null if unblocked), `status` (DECLARED / BLOCKED / RESOLVED).
+A `PendingActionState` on `GameData` should hold: `actorRef`, `actionType`, `targetPlayerName`, `stealth`, `interceptsByBlockerRef`, `currentBlockerRef` (null if no active block attempt), `passedBlockWindowsByPlayer`, `cannotBlockRefs`, `status` (DECLARED / BLOCK_ATTEMPT / BLOCKED / RESOLVED).
 
 ---
 
@@ -317,7 +317,7 @@ Currently `OustPlayer` marks players ousted but does not:
 - Record a GW on the game record.
 - Handle timeout scoring (0.5 VP to all survivors).
 
-A post-`OustPlayer` hook should check remaining player count and, if one player remains, award +1 VP and transition game to `COMPLETED` with a GW recorded for the winner.
+A post-`OustPlayer` hook should check remaining player count and, if one player remains, award that survivor +1 VP, transition the game to `COMPLETED`, then record the GW for the player with the most VP at game end. The GW winner can be an ousted player if they have the highest VP total.
 
 ---
 
@@ -447,7 +447,7 @@ This gap is coupled with Gap §2 (Hunt action is listed as an `actionType` in `D
 | **P1**   | Voting / Referendum engine                                          | Required for any political-action deck to function; blood hunt has no fallback                                                                                                                                                                                                                                                                                 |
 | **P1**   | Game end auto-detection (survivor VP)                               | Needed for accurate game records                                                                                                                                                                                                                                                                                                                               |
 | **P2**   | Formal action / block declaration                                   | Adds structure; currently relies entirely on player honesty and chat                                                                                                                                                                                                                                                                                           |
-| **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth and intercept must be tracked as running totals on `PendingActionState`                                                                                                                                                                                                                                 |
+| **P2**   | Stealth / intercept accumulation model (§2 extension)               | Required for formal action/block to be correct; stealth must be tracked as an action-wide running total, and intercept must be tracked per blocking minion on `PendingActionState`                                                                                                                                                                               |
 | **P2**   | Directed `(D)` action blocking (§2 extension)                       | Needed alongside formal action declaration; only the target Methuselah's minions may normally attempt to block a directed action                                                                                                                                                                                                                                  |
 | **P2**   | Card play phase gating                                              | Prevents illegal plays; foundation for reaction and combat windows                                                                                                                                                                                                                                                                                             |
 | **P2**   | Withdrawal mechanic                                                 | Common end-game scenario                                                                                                                                                                                                                                                                                                                                       |

@@ -21,7 +21,7 @@ These rules apply across all layouts. Each `RegionState` carries a `visible` fla
 | READY | Yes | No | Always visible |
 | UNCONTROLLED | Yes (Strip/Circular); hidden when empty (Text) | Text only | Hidden — slots shown with counter/lock state, no card UUID |
 | TORPOR | Only when `count > 0` | Yes | Always visible |
-| RESEARCH | Only when `count > 0` | Yes | Always visible |
+| RESEARCH | Only when `count > 0` | Yes | Visible to owner; hidden from opponents |
 | HAND | Yes | No | Hidden (`faceDown`) — shown as face-down stack; top card draggable |
 | LIBRARY | Yes | No | Hidden — shown as face-down compact stack |
 | CRYPT | Yes | No | Hidden — shown as face-down compact stack |
