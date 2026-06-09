@@ -34,6 +34,17 @@ Any minion may perform these actions without an action card. All actions except 
 
 Basic actions other than bleed are repeatable by the same minion in a turn. NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers.
 
+### Torpor-Related Actions
+
+Two additional basic actions involve minions in or adjacent to torpor. These are not in the table above because they have different eligibility requirements.
+
+| Action           | Who                                    | Default stealth | Effect                                                                                                                                                                                                                                                                                                      |
+|------------------|----------------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Leave Torpor** | Torpored vampire only                  | +1              | Costs 2 blood from the acting vampire. If the action succeeds, the vampire moves from torpor to the ready region. If blocked, no combat occurs — the blocking player's controller may instead choose to diablerize the torpored vampire. If they decline, the vampire stays in torpor and the action fails. |
+| **Rescue**       | Any ready minion (not the ally itself) | +1              | Moves a torpored ally controlled by this minion's controller from torpor to the ready region. No blood cost for the rescuing minion. NRA applies — a minion may rescue a given ally only once per turn.                                                                                                     |
+
+Leave Torpor is the only action a minion in torpor may take. Rescue applies only to allies (vampires in torpor cannot be rescued this way; they leave torpor through their own Leave Torpor action or via diablerie).
+
 ### Blood Capacity Overflow
 
 A vampire's blood total can never exceed their current capacity. Any effect that would bring a vampire above capacity instead brings them to capacity; the excess blood is returned to the bank. This applies to hunt, blood gain from card effects, and any other source of blood.

@@ -89,7 +89,7 @@ For odd player counts such as 6, 7, or 11, a tournament configured as 2 prelimin
 Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation, the following hard constraints are validated for preliminary rounds only:
 - Every registered player must be allocated for **every** preliminary round — either seated at a table or given a bye.
 - Every table must have exactly **4 or 5** players per preliminary round.
-- No exact predator-prey relationship (player A directly predates player B in seat order) may be duplicated across rounds.
+- No exact predator-prey relationship (player A directly predates player B in seat order) may be duplicated across rounds. *(JOL-specific constraint — not in VEKN tournament rules; enforced here to ensure varied play across rounds.)*
 
 If any constraint is violated, activation is rejected with a descriptive error.
 

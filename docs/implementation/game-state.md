@@ -221,7 +221,7 @@ Non-owning viewers receive **no entry** in the card map for cards in hidden regi
 
 `VAMPIRE`, `IMBUED`, `MASTER`, `ACTION`, `MODIFIER`, `REACTION`, `COMBAT`, `ALLY`, `RETAINER`, `POLITICAL`, `EQUIPMENT`, `EVENT`, `LOCATION`, `NONE`
 
-`CONVICTION` and `POWER` are present in the card CSV but currently map to `NONE` — enum entries are pending addition. `LOCATION` exists in the enum but is unreachable via normal CSV import (location cards are typed as `MASTER` in the data). See [Card Play Rules](../rules/card-play.md) for per-type phase constraints.
+`CONVICTION` and `POWER` exist in the `CardType` enum but `GameInitService.toCardType()` does not yet map to them — cards of these types import as `NONE`. `LOCATION` exists in the enum but is also unreachable via normal CSV import (location cards are typed as `MASTER` in the data). See [Card Play](./card-play.md#missing-enum-values) for the full list of pending mappings.
 
 ---
 

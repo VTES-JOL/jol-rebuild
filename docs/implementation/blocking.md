@@ -119,7 +119,7 @@ A locked minion is eligible to play a wake card in the AS_ANNOUNCED window ("as 
 - `passedBlockWindowsByPlayer` is cleared — players who passed in the pre-combat window may attempt again.
 - `cannotBlockRefs` remains — minions that could not block before still cannot block.
 
-This status is not yet in the `ActionStatus` enum.
+`ACTION_CONTINUING` is defined in the `ActionStatus` enum — see [Actions § ActionStatus Enum](./actions.md#actionstatus-enum). The `ACTION_CONTINUING` protocol path (detecting a continue-the-action card play after combat and re-opening the block window) is not yet wired up in the server.
 
 ---
 

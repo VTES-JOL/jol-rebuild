@@ -64,7 +64,7 @@ DeclareAction
 | `bleedAmount`                | `int`                       | Running bleed total including modifiers; starts at 1 for `BLEED` actions                                  |
 | `reachedResolution`          | `boolean`                   | NRA fires when this becomes true                                                                           |
 | `actionSuccessful`           | `boolean`                   | True if action was not blocked                                                                             |
-| `bleedSuccessful`            | `boolean`                   | True if bleed resolved for ≥ 1 pool; drives Edge movement                                                 |
+| `bleedSuccessful`            | `boolean`                   | True if bleed resolved for ≥ 1 pool; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the ≥ 1 pool condition for Edge transfer. |
 | `referendumSuccessful`       | `boolean`                   | True if referendum passed; drives "after successful referendum" effects                                    |
 | `bleedLimitedUsed`           | `boolean`                   | A `(limited)` bleed modifier has already been played this action                                          |
 | `stealth`                    | `int`                       | Running stealth total; carries across block windows and redirects — see [Blocking](./blocking.md)          |
@@ -74,7 +74,7 @@ DeclareAction
 | `currentBlockerRef`          | `CardRef?`                  | Active blocker during a current attempt; null when no attempt in progress                                 |
 | `wakePermissionByCardId`     | `Set<String>`               | Minion card IDs granted temporary wake permission — see [Blocking](./blocking.md)                         |
 
-Currently implemented: `actorRef`, `actionType`, `targetPlayerName`, `status`, `blockerRef`. All other fields are not yet on the Java class.
+> **Implementation status:** `actorRef`, `actionType`, `targetPlayerName`, `status`, and `blockerRef` are on the Java class. All other fields in the table above are part of the target design and must be added before the corresponding feature can be enforced.
 
 ---
 
@@ -97,7 +97,7 @@ If an action card is played to declare the action, a `SequencingWindowState(AS_P
 
 After `AS_PLAYED` closes, or immediately for a basic action that did not play a card, a `SequencingWindowState(AS_ANNOUNCED)` opens. This window is for effects usable as the action is announced. All players pass -> window closes -> block-attempt impulse window opens.
 
-Currently: `DeclareAction` opens the block-attempt impulse window directly, skipping these declaration layers. Both sequencing windows must be inserted before the block-attempt impulse window.
+> **Gap:** `DeclareAction` currently opens the block-attempt impulse window directly, skipping both declaration windows. Inserting `AS_PLAYED` and `AS_ANNOUNCED` before the block-attempt window is tracked in [Mechanics Gaps](./mechanics-gaps.md) (P4 — AS_ANNOUNCED sequencing window).
 
 ---
 
