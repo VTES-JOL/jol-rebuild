@@ -16,10 +16,10 @@ Based on [Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summar
 
 1. The playing player fully declares all attributes of the card: targets, modes, and cost. The cost must be payable at the time of declaration for the play to be legal.
 2. The card leaves the hand immediately, so hand size drops by 1.
-3. This opens a narrow window for **"as it is played" / "as announced" cancellers only** (e.g. Direct Intervention). No other cards or effects may be played at this step.
+3. This opens a narrow window for **"as it is played" cancellers only** (e.g. Direct Intervention) and wake effects needed to play effects in that window. No other cards or effects may be played at this step.
 4. If the card is cancelled here, see [Cancelled Cards](#cancelled-cards).
 
-These cancellers form an interrupt layer independent from action state, impulse, and sequencing. They intercept card play at declaration, regardless of which action state is active or who holds priority.
+These cancellers form a restricted card-play window before the played card is replaced. The window uses normal impulse/sequencing order, but only "as it is played" cancellers and wake effects needed to play effects in that window are legal.
 
 ### Replacement
 
