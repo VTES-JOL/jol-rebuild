@@ -14,11 +14,13 @@ The game lobby allows players to create and join games. Games have a format, a v
 
 Each format defines its own deck validation rules and player limits:
 
-| Format   | Players | Deck Rules                      |
-|----------|---------|----------------------------------|
-| STANDARD | 2–5     | Standard deck validation         |
-| DUEL     | 2       | Duel deck validation             |
-| V5       | 2–5     | V5 deck validation               |
+| Format   | Players | Deck Rules               |
+|----------|---------|--------------------------|
+| STANDARD | 4–5     | Standard deck validation |
+| DUEL     | 2       | Duel deck validation     |
+| V5       | 4–5     | V5 deck validation       |
+
+V5 and STANDARD are mechanically identical — same turn structure, influence transfers, combat, and victory conditions. They differ only in deck validation. DUEL shares the same mechanics but has a distinct starting-transfer exception; see [Game Flow — DUEL Transfer Exception](../rules/game-flow.md#duel-transfer-exception).
 
 ## Visibility
 

@@ -47,9 +47,17 @@ The turn string has the format `"<round>.<seat>"`:
 
 ### Transfer budget
 
-`transfersRemaining` is a game-level integer tracking how many influence transfers the current player has left this turn. It is set when `AdvancePhase` enters `INFLUENCE`, using the formula:
-- Round 1: `min(seat, 4)` (seat 1 → 1 Transfer, seat 2 → 2 Transfer, seat 3 → 3 Transfer, seat 4+ → 4 Transfer)
+`transfersRemaining` is a game-level integer tracking how many influence transfers the current player has left this turn. It is set when `AdvancePhase` enters `INFLUENCE`, using a formula that depends on the game format:
+
+V5 is mechanically identical to STANDARD — same formula, same phase rules, same player count (4–5). The only format-level difference is deck validation. DUEL shares the same mechanics except for the starting-transfer exception below.
+
+**STANDARD / V5:**
+- Round 1: `min(seat, 4)` (seat 1 → 1 transfer, seat 2 → 2 transfers, seat 3 → 3 transfers, seat 4+ → 4 transfers)
 - Round 2+: always 4
+
+**DUEL:**
+- Round 1, seat 1: 3 transfers
+- All other influence phases: 4 transfers
 
 It is reset to 0 on `NextTurn`. It is sent to clients via `GameStateDto.transfersRemaining`.
 
@@ -306,12 +314,12 @@ Rules-enforced mode currently has impulse/sequencing commands and the basic acti
 
 **Implemented (permissive mode):**
 
-| Mechanic                                                                                | Implementation                                                         | Remaining gap                                                        |
-|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Transfer budget: 1/2/3/4 by seat in round 1; always 4 from round 2                      | `GameData.transfersRemaining` set by `AdvancePhase` on INFLUENCE entry | `AdvancePhase` is permissive-only; rules-enforced equivalent missing |
-| Pool → UNCONTROLLED costs 1 transfer/blood; UNCONTROLLED → pool costs 2 transfers/blood | `TransferBlood` guard                                                  | Permissive-only                                                      |
-| `DrawCryptToUncontrolled` — 4 transfers + 1 pool to pull from crypt                     | Implemented (permissive)                                               | Enforced-mode equivalent missing                                     |
-| `MergeAdvanced` — merge base + advanced vampire                                         | Implemented (permissive; validates name + one advanced)                | Enforced-mode equivalent missing                                     |
+| Mechanic                                                                                                             | Implementation                                                         | Remaining gap                                                                           |
+|----------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| Transfer budget: 1/2/3/4 by seat in round 1, always 4 from round 2 (STANDARD/V5); DUEL: 3 for seat 1 round 1, then 4 | `GameData.transfersRemaining` set by `AdvancePhase` on INFLUENCE entry | `AdvancePhase` is permissive-only; DUEL exception and rules-enforced equivalent missing |
+| Pool → UNCONTROLLED costs 1 transfer/blood; UNCONTROLLED → pool costs 2 transfers/blood                              | `TransferBlood` guard                                                  | Permissive-only                                                                         |
+| `DrawCryptToUncontrolled` — 4 transfers + 1 pool to pull from crypt                                                  | Implemented (permissive)                                               | Enforced-mode equivalent missing                                                        |
+| `MergeAdvanced` — merge base + advanced vampire                                                                      | Implemented (permissive; validates name + one advanced)                | Enforced-mode equivalent missing                                                        |
 
 ### Unlock Phase — Automatic Effects
 

@@ -10,7 +10,9 @@ Describes how a game of VTES is structured: setup, turn phases, priority, victor
 |----------|---------|
 | STANDARD | 4–5     |
 | DUEL     | 2       |
-| V5       | 2–5     |
+| V5       | 4–5     |
+
+V5 uses identical game mechanics to STANDARD. The only difference is deck construction: V5 decks follow V5 deckbuilding rules (V5 card legality, clan restrictions, etc.). All turn phases, influence transfers, impulse sequencing, combat, and victory conditions are the same as STANDARD. DUEL uses a distinct transfer budget exception (see below) but is otherwise mechanically identical to STANDARD as well.
 
 ---
 
@@ -60,7 +62,14 @@ During the INFLUENCE phase, the current player has a limited number of transfers
 - The third Methuselah to take a turn receives **3 transfers** on their first influence phase.
 - All later influence phases receive **4 transfers**.
 
-In a standard 4- or 5-player game with normal seating order, this means seat 1 starts with 1 transfer, seat 2 with 2, seat 3 with 3, and seat 4+ with 4. The two-player variant uses its own starting-transfer exception.
+In a standard 4- or 5-player game with normal seating order, this means seat 1 starts with 1 transfer, seat 2 with 2, seat 3 with 3, and seat 4+ with 4.
+
+### DUEL Transfer Exception
+
+The two-player (DUEL) format uses a different starting schedule:
+
+- The first Methuselah to take a turn receives **3 transfers** on their first influence phase.
+- All later influence phases (for both players from their second turn onward) receive **4 transfers**.
 
 Moving pool to an uncontrolled vampire costs 1 transfer per blood. Moving blood back from an uncontrolled vampire to pool costs 2 transfers per blood.
 
@@ -167,4 +176,5 @@ A player may announce withdrawal during their UNLOCK phase only if they begin th
 - [VEKN Rulebook § Victory Points](https://www.vekn.net/rulebook) defines ousting rewards, survivor VP, game winner, timeouts, and withdrawal.
 - [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is the source for impulse/sequencing terminology and pass-order protocol used across action, combat, and referendum windows.
 - [VEKN Tournament Rules](https://archon.vekn.net/document/tournament-rules.html) define tournament Game Wins, Victory Points, Tournament Points, and sanctioned tournament scoring.
+- [VEKN Two-Player Variant](https://www.vekn.net/two-player-format/655-two-player-variant-for-vampire-the-eternal-struggle) defines the DUEL format transfer exception: the starting player receives 3 transfers on their first influence phase; all subsequent influence phases use the standard 4 transfers.
 - STANDARD, DUEL, and V5 table-size rows reflect this project's supported game formats; Standard tournament tables are additionally constrained by the VEKN tournament rules.
