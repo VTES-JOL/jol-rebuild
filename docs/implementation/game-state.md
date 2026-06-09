@@ -401,29 +401,9 @@ Partially implemented. `ImpulseState` and impulse commands exist; `SequencingWin
 
 ### Minion Traits
 
-Traits are attributes that allow a minion to play cards requiring that trait, or make the minion subject to specific automatic rules. None of the following are modeled or detected at build time except `infernal`.
+Minion traits are part of the general card keyword model. `CardData.infernal` exists today, but the broader parsed trait model and related enforcement hooks are missing.
 
-| Trait            | Rule                                                                                                                                                                      |
-|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Black Hand**   | Allows use of cards requiring a Black Hand minion                                                                                                                         |
-| **Blood Cursed** | Cannot commit diablerie                                                                                                                                                   |
-| **Circle**       | Blood Brothers: each belongs to a circle parsed from card text; cards requiring "same circle" compare this value                                                          |
-| **Flight**       | Allows use of cards requiring Flight                                                                                                                                      |
-| **Infernal**     | Does not unlock normally; controller pays 1 pool during unlock phase to unlock (field exists; enforcement missing)                                                        |
-| **Red List**     | Any Methuselah may use a master phase action to mark a Red List minion; any ready vampire may then enter combat with them as a +1 stealth directed action costing 1 blood |
-| **Scarce**       | Moving to ready costs 3 pool per same-clan vampire already controlled in the ready region                                                                                 |
-| **Slave**        | Cannot perform directed actions without a ready member of the slave clan; may redirect combat to a Slave when the master clan vampire is blocked                          |
-| **Sterile**      | Cannot perform actions to put other vampires in play                                                                                                                      |
-
-**Proposed work:**
-- Add boolean flags `blackHand`, `bloodCursed`, `flight`, `redList`, `scarce`, `sterile` to `CardData`; populate by detecting keywords in card text at build time.
-- Add `slaveClan` (nullable String) to `CardData`; populate by parsing `"Slave: [clan]"`.
-- Add `circle` (nullable String) to `CardData`; populate from Blood Brothers crypt card text.
-- Enforce `infernal` unlock cost in `AdvancePhase` when entering UNLOCK.
-- Enforce `scarce` pool cost in `InfluenceCard`.
-- Block directed actions for `slave` minions when no ready clan member is controlled.
-- Block "put vampire in play" for `sterile` vampires.
-- Block diablerie for `bloodCursed` vampires.
+See [Card Keywords](./card-keywords.md) for proposed `CardData` fields and parsing. Game-state enforcement still needs to apply trait-driven automatic rules during unlock, influence, action declaration, and diablerie.
 
 ### Card Control Transfer
 

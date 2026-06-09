@@ -124,34 +124,6 @@ Opponents can observe the blood counter amounts on a player's uncontrolled vampi
 
 Newly recruited allies are placed in the ready region with their starting life counters, but they cannot act on the turn they are recruited.
 
----
-
-## Minion Traits
-
-Some minions have printed traits that modify what actions they can take, how they unlock or enter play, or what card text can affect them.
-
-| Trait            | Rule                                                                                                                                                                                                                                           |
-|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Black Hand**   | Allows the minion to use cards requiring a Black Hand minion.                                                                                                                                                                                  |
-| **Blood Cursed** | A Blood Cursed vampire cannot commit diablerie.                                                                                                                                                                                                |
-| **Circle**       | Blood Brothers belong to a named circle. Cards requiring the same circle compare that printed circle.                                                                                                                                          |
-| **Flight**       | Allows the minion to use cards requiring Flight.                                                                                                                                                                                               |
-| **Infernal**     | An infernal minion does not unlock normally. During their unlock phase, the controller may pay 1 pool to unlock that minion. If they do not, it remains locked.                                                                                |
-| **Red List**     | Any Methuselah may use a master phase action to mark a Red List minion. A ready vampire may enter combat with a marked Red List minion as a +1 stealth directed action costing 1 blood.                                                        |
-| **Scarce**       | When a scarce vampire moves to the ready region, its controller burns 3 pool for each ready vampire of the same clan they already control.                                                                                                     |
-| **Slave**        | A slave vampire cannot perform directed actions unless its controller controls a ready member of the matching master clan. Slave rules can also redirect combat from a blocked master-clan vampire to an eligible slave, as card text permits. |
-| **Sterile**      | A sterile vampire cannot take actions to put other vampires in play.                                                                                                                                                                           |
-
-### Red List and Trophies
-
-When a Red List minion is burned in combat or as a directed action controlled by another Methuselah, including diablerie, Trophy awards are resolved immediately after the burn. If the burn involved diablerie, Trophy awards happen before the blood hunt referendum.
-
-The acting vampire's controller may search their hand, library, and ash heap for a master Trophy card to put on the acting vampire, then reshuffle or draw back to hand size as necessary. Unawarded Trophy cards already in play may also be moved to that vampire at each Trophy controller's discretion.
-
-Trophies cannot be awarded for burning a Red List minion you control.
-
----
-
 ## Victory Points and Game End
 
 ### Ousting

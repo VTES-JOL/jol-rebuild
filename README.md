@@ -1,11 +1,11 @@
 # JOL - Vampire: The Eternal Struggle Online
 
-JOL is a digital representation of the **Vampire: The Eternal Struggle (VTES)** card game. It aims to accurately mimic the logic, constraints, and mechanics of the real-world game in an online environment.
+JOL is an online platform for **Vampire: The Eternal Struggle (VTES)**. It supports deck management, game lobbies, tabletop-style play, chat, and tournament administration while rules-enforced gameplay is being built out incrementally.
 
 ## Overview
 
 The project provides a platform for:
-- **Game Play**: Online implementation of VTES mechanics and card play rules.
+- **Game Play**: A permissive tabletop simulator mode plus a growing rules-enforced mode for formal action sequencing.
 - **Deck Management**: Tools for building, importing, and validating decks (Standard, Duel, and V5 formats).
 - **Lobby & Social**: Game and tournament lobbies with a comprehensive chat system.
 - **Card Database**: Full registry of VTES cards (Crypt and Library) with fuzzy search capabilities.
@@ -33,6 +33,11 @@ To build the application:
 ./mvnw package
 ```
 
+To run backend tests:
+```bash
+./mvnw test
+```
+
 ### Frontend (React)
 
 The frontend is located in `src/main/webui/`. In dev mode, you can run it separately for Vite's HMR:
@@ -42,6 +47,13 @@ npm install
 npm run dev
 ```
 It will proxy API calls to the Quarkus backend.
+
+To check the frontend:
+```bash
+cd src/main/webui/
+npm run build
+npm run lint
+```
 
 ## Documentation
 

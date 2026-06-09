@@ -78,9 +78,9 @@ A crash in `CardContextMenu` currently unmounts the entire game view. Wrap each 
 
 ---
 
-## New Mechanic UI Patterns
+## Mechanic UI Patterns
 
-These are prerequisites for implementing the three major missing subsystems (voting, actions, combat).
+These UI patterns support the mechanics prioritised in [Mechanics Gaps](../implementation/mechanics-gaps.md#implementation-priority). Backend rules work remains the source of truth for priority; frontend work should land alongside the backend protocol it exposes.
 
 ### A. Phase-Contextual Action Panel
 
@@ -127,16 +127,32 @@ Current `ImpulsePanel` shows pass order and Claim/Pass buttons only. Should also
 
 ---
 
-## Missing UI for Existing Commands
+## Frontend Command Parity and Controls
 
-Several backend commands have no frontend path:
+Current command parity status for existing backend commands that need either TypeScript command coverage, a visible UI control, or both:
 
-| Command | Where to add |
-|---|---|
-| `ReverseOrder` | Game Controls panel or status bar |
-| `UnlockAll` | Game Controls panel |
-| `MoveToCrypt` | Card context menu (UNCONTROLLED region) |
-| `SetChoice` | Player info panel |
+| Command                      | TypeScript command status                   | Visible control status                         | Notes                                                                             |
+|------------------------------|---------------------------------------------|------------------------------------------------|-----------------------------------------------------------------------------------|
+| `GAIN_EDGE`                  | Present but missing Java `playerName` field | Present in permissive status bar               | Align `GainEdgeCommand` with `GainEdge(String gameId, String playerName)`.        |
+| `UNLOCK_ALL`                 | Present but missing Java `playerName` field | Present in permissive status bar               | Align `UnlockAllCommand` with `UnlockAll(String gameId, String playerName)`.      |
+| `DRAW_CRYPT_TO_UNCONTROLLED` | Missing                                     | Missing                                        | Add a paid influence-phase control distinct from permissive `DRAW_CRYPT`.         |
+| `MERGE_ADVANCED`             | Missing                                     | Missing                                        | Add target-selection flow for base/advanced vampire merge in uncontrolled region. |
+| `SET_GAME_NOTES`             | Present                                     | Missing                                        | Add game notes editing in a game controls or notes panel.                         |
+| `REVERSE_ORDER`              | Present                                     | Present in status bar                          | No immediate roadmap work unless UX changes.                                      |
+| `MOVE_TO_CRYPT`              | Present                                     | Present in uncontrolled card context menu      | No immediate roadmap work unless UX changes.                                      |
+| `SET_CHOICE`                 | Present                                     | Present in player board / column choice editor | No immediate roadmap work unless UX changes.                                      |
+
+Rules-enforced features also need new command types and controls as their backend protocols are added:
+
+| Feature area                  | Missing command surface                                                                          | Missing visible control                                                            |
+|-------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| Rules-enforced phase protocol | Phase-specific enforced commands for unlock, master, influence, discard, withdrawal, and timeout | Phase-contextual action panel that replaces direct phase skipping                  |
+| Action resolution             | Action-type-specific resolution commands and payloads                                            | Action declaration, target selection, and resolution panels                        |
+| Card play lifecycle           | Legal card-play command shape with source, timing, replacement, cost, and destination handling   | Contextual playable-card lists and phase/type legality gating                      |
+| Referendums                   | `CallReferendum`, `CastVotes`, `ResolveReferendum`, Prisci and blood-hunt payloads               | Referendum modal with vote sources, Edge vote, Prisci result, and pass/fail result |
+| Blocking                      | Stealth/intercept play, block-pass, redirect, wake, and action-continuing commands               | Block-window display with eligible Methuselahs/minions and totals                  |
+| Combat                        | Combat range, maneuver, strike, prevention, press, and diablerie commands                        | Combat panel for range, strike selection, damage, press, torpor, and diablerie     |
+| Traits / keywords / counters  | Trait enforcement commands where explicit choices are needed; typed counter commands             | UI for named counters, keyword-derived eligibility, and required trait choices     |
 
 ---
 
@@ -144,7 +160,12 @@ Several backend commands have no frontend path:
 
 1. ~~Backend refactor (handlers + GameRules)~~ — **Done 2026-05**
 2. ~~Game end detection~~ — **Done 2026-05**
-3. Voting/Referendum engine + Referendum Modal UI
-4. Phase-contextual action panel + card targeting mode
-5. Formal action/blocking (integrates with existing impulse engine)
-6. Combat system (most complex, plan last)
+3. Rules-enforced turn and phase protocol + phase-contextual action panel
+4. Basic action resolution by `ActionType` + card targeting mode
+5. Card play legality and lifecycle + contextual playable-card controls
+6. Voting / referendum engine + referendum modal
+7. Game end completion gaps: simultaneous oust, timeout, GW recording, tournament result propagation
+8. Blocking correctness: stealth/intercept, directed/undirected eligibility, redirects, wake effects, action continuation
+9. Diablerie full resolution and rule-bearing minion trait enforcement
+10. Combat system and combat panel
+11. Remaining P3/P4 mechanics from [Mechanics Gaps](../implementation/mechanics-gaps.md#implementation-priority): master action accounting, unlock-phase automatic effects, named counters, keyword/subtype parsing, anarch conversion, control transfer, hunting-ground effects, blood capacity overflow, and AS_ANNOUNCED.

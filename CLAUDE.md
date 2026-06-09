@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 * When documenting, make sure all markdown documents are formatted correctly
 
 ## Logical Model
-JOL is a representation of the Vampire: The Eternal Struggle card game.  As such it tries to mimic the logic and constraints that apply in a real-world game.
+JOL is a representation of the Vampire: The Eternal Struggle card game.As such it tries to mimic the logic and constraints that apply in a real-world game.
 
 Documentation is split into two folders:
 - **[VTES Rules](docs/rules/README.md)** — tabletop game rules any VTES player would recognise
 - **[JOL Implementation](docs/implementation/README.md)** — data structures, commands, import formats, and gap analysis specific to the online client
 
-Each topic has a paired rules doc and implementation doc. When editing either side, review and update the corresponding doc on the other side.
+Each topic has a paired rules doc and implementation doc. Rules docs explain tabletop rules and should not rely on implementation docs to clarify rules. Implementation docs may refer back to rules docs and should use the implementation-side reference for JOL-specific parsing or storage details.
 
 ### Documentation Map
 
@@ -25,6 +25,7 @@ Each topic has a paired rules doc and implementation doc. When editing either si
 | [Referendums](docs/rules/referendums.md)              | [Referendums](docs/implementation/referendums.md)                                            |
 | [Combat](docs/rules/combat.md)                        | [Combat](docs/implementation/combat.md)                                                      |
 | [Card Timing and Card Types](docs/rules/card-play.md) | [Card Play](docs/implementation/card-play.md)                                                |
+| [Card Keywords](docs/rules/card-keywords.md)          | [Card Keywords](docs/implementation/card-keywords.md)                                        |
 | [Tournament](docs/rules/tournament.md)                | [Tournament Lobby](docs/implementation/tournament-lobby.md)                                  |
 | —                                                     | [Game Lobby](docs/implementation/game-lobby.md)                                              |
 | —                                                     | [Game Modes](docs/implementation/game-modes.md)                                              |
@@ -37,20 +38,20 @@ Each topic has a paired rules doc and implementation doc. When editing either si
 ### Backend (Quarkus / Maven)
 
 ```bash
-./mvnw quarkus:dev          # Dev mode with live reload; Dev UI at http://localhost:8080/q/dev/
-./mvnw test                 # Run all backend tests
-./mvnw test -Dtest=GameControllerTest              # Run a single test class
-./mvnw test -Dtest=GameControllerTest#createGame   # Run a single test method
-./mvnw package              # Build JAR (output: target/quarkus-app/)
+./mvnw quarkus:dev # Dev mode with live reload; Dev UI at http://localhost:8080/q/dev/
+./mvnw test # Run all backend tests
+./mvnw test -Dtest=GameControllerTest # Run a single test class
+./mvnw test -Dtest=GameControllerTest#createGame # Run a single test method
+./mvnw package # Build JAR (output: target/quarkus-app/)
 ```
 
 ### Frontend (React / Vite — run from `src/main/webui/`)
 
 ```bash
-npm run dev          # Vite dev server on port 5173
-npm run build        # TypeScript check then Vite build to dist/
-npm run lint         # ESLint
-npm run storybook    # Storybook on port 6006 (also runs component tests via vitest)
+npm run dev # Vite dev server on port 5173
+npm run build # TypeScript check then Vite build to dist/
+npm run lint # ESLint
+npm run storybook # Storybook on port 6006 (also runs component tests via vitest)
 ```
 
 ## Architecture

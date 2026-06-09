@@ -6,12 +6,14 @@ Describes the VTES tournament format options, table structure, and scoring.
 
 ## Deck Format Options
 
-| Format          | Description                                                                            |
-|-----------------|----------------------------------------------------------------------------------------|
-| **SINGLE_DECK** | Each player submits one deck and uses it for every round of the tournament.            |
-| **MULTI_DECK**  | Each player submits one deck per round, allowing different decks for different rounds. |
+| Format          | Description                                                                          |
+|-----------------|--------------------------------------------------------------------------------------|
+| **SINGLE_DECK** | Each player submits one deck and uses it for every played game in the tournament.    |
+| **MULTI_DECK**  | Each player submits one deck per played game, allowing different decks across games. |
 
 All decks submitted must be valid for the tournament's game format (STANDARD, DUEL, or V5).
+
+A tournament round is a scheduled seating slot. A played game is a table appearance by a player in that round. Byes do not consume decks, so a player in a multi-deck tournament needs decks for the games they are expected to play, not for rounds where they have a bye.
 
 ---
 
@@ -29,7 +31,9 @@ When the number of registered players cannot be evenly divided into tables of 4 
 
 ## Rounds and Finals
 
-VEKN tournaments consist of at least three rounds. After the preliminary rounds, the five highest-ranked players advance to a final round unless the event is using an announced no-final structure. In very small tournaments with fewer than 8 players, the organizer may omit the final or run an additional preliminary round instead.
+VTES tournaments may be run as a no-final event or as preliminary rounds followed by a final. A no-final event can use three regular rounds, with the tournament winner determined by standings: Game Wins, then Victory Points, then Tournament Points. A final event may use a minimum of two preliminary rounds followed by a final table for the top five players.
+
+When odd player counts would otherwise leave uneven numbers of games played, the organizer may add a preliminary round and assign byes so each player plays the same number of preliminary games. For example, a two-preliminary-round plus final event with 6, 7, or 11 players may be run as three preliminary rounds, with each player playing two games and receiving one bye, before the final.
 
 ### Predator-Prey Constraints
 

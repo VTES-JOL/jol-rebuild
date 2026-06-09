@@ -12,20 +12,20 @@ Tournaments are multi-round events administered by users with the `TOURNAMENT_AD
 
 ## Tournament Fields
 
-| Field               | Description                                                    |
-|---------------------|----------------------------------------------------------------|
-| name                | Display name of the tournament                                 |
-| registrationStart   | Timestamp when player registration opens                       |
-| registrationEnd     | Timestamp when player registration closes                      |
-| playingStart        | Timestamp when play begins                                     |
-| playingEnd          | Timestamp when play ends                                       |
-| format              | `SINGLE_DECK` or `MULTI_DECK` (see Registration below)        |
-| gameFormat          | The game format applied to all tables (`STANDARD`, `DUEL`, `V5`) |
-| numberOfRounds      | How many rounds will be played (max 3)                         |
-| finalRound          | Whether a final round is included                              |
-| requiresId          | Whether players must present identification                    |
-| rules               | List of rule objects (`text`, optional `conditionId` reference) |
-| conditions          | List of condition objects (`id`, `text`)                       |
+| Field             | Description                                                      |
+|-------------------|------------------------------------------------------------------|
+| name              | Display name of the tournament                                   |
+| registrationStart | Timestamp when player registration opens                         |
+| registrationEnd   | Timestamp when player registration closes                        |
+| playingStart      | Timestamp when play begins                                       |
+| playingEnd        | Timestamp when play ends                                         |
+| format            | `SINGLE_DECK` or `MULTI_DECK` (see Registration below)           |
+| gameFormat        | The game format applied to all tables (`STANDARD`, `DUEL`, `V5`) |
+| numberOfRounds    | How many preliminary rounds will be seated (max 3 by default)    |
+| finalRound        | Whether a separate final round is included after preliminaries   |
+| requiresId        | Whether players must present identification                      |
+| rules             | List of rule objects (`text`, optional `conditionId` reference)  |
+| conditions        | List of condition objects (`id`, `text`)                         |
 
 Tournament fields can only be edited while the tournament is in `SETUP` status.
 
@@ -53,7 +53,7 @@ Registration is only accepted while the tournament is in `REGISTRATION` status a
 ### Deck Submission
 
 The number of decks a player must submit depends on the tournament format:
-- **SINGLE_DECK** — 1 deck, used for every round
+- **SINGLE_DECK** — 1 deck, used for every played game
 - **MULTI_DECK** — one deck per expected played game. When an extra round is added to distribute byes fairly, players may submit fewer decks than the total number of tournament rounds because they will not play every round.
 
 All submitted decks must be valid for the tournament's `gameFormat`.
@@ -62,7 +62,7 @@ Players can unregister at any time while the tournament remains in `REGISTRATION
 
 ## Seating (admin only)
 
-Seating is managed during `SEATING` status. The admin arranges all registered players into tables and byes for each round.
+Seating is managed during `SEATING` status. The admin arranges all registered players into tables and byes for each preliminary round. If `finalRound` is enabled, the final is not seated during this phase; it is created after preliminary standings identify the top five players.
 
 ### Tables
 
@@ -80,20 +80,22 @@ Seating is managed during `SEATING` status. The admin arranges all registered pl
 
 ### Extra Rounds
 
-While in `SEATING` status, an admin can increment `numberOfRounds` by one, subject to two limits: it cannot exceed `originalNumberOfRounds + 1`, and it cannot exceed the global maximum (`maxRounds`, default 3). If the tournament was originally configured at the global maximum, no extra round is possible.
+While in `SEATING` status, an admin can increment preliminary `numberOfRounds` by one, subject to two limits: it cannot exceed `originalNumberOfRounds + 1`, and it cannot exceed the global maximum (`maxRounds`, default 3). If the tournament was originally configured at the global maximum, no extra round is possible.
+
+For odd player counts such as 6, 7, or 11, a tournament configured as 2 preliminary rounds plus a final may be extended to 3 preliminary rounds plus a final. Seating should then allocate byes so each player plays 2 preliminary games and receives 1 bye before the final standings are calculated.
 
 ## Activation
 
-Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation, the following hard constraints are validated:
-- Every registered player must be allocated for **every** round — either seated at a table or given a bye.
-- Every table must have exactly **4 or 5** players per round.
+Activation transitions the tournament from `SEATING` to `ACTIVE`. Before activation, the following hard constraints are validated for preliminary rounds only:
+- Every registered player must be allocated for **every** preliminary round — either seated at a table or given a bye.
+- Every table must have exactly **4 or 5** players per preliminary round.
 - No exact predator-prey relationship (player A directly predates player B in seat order) may be duplicated across rounds.
 
 If any constraint is violated, activation is rejected with a descriptive error.
 
 On activation, a private `ACTIVE` game is created for each table, named `"NAME: Round N Table M"`.
 Players are registered to their respective games with the appropriate deck:
-- **SINGLE_DECK** — the same deck is used for each game.
+- **SINGLE_DECK** — the same deck is used for each played game.
 - **MULTI_DECK** — decks are assigned to the player's played games in submitted order, not strictly by tournament round number. A bye does not consume a deck: the player's first table uses deck 1, their second table uses deck 2, and so on, regardless of whether those tables occur in rounds 1+2, 2+3, or 1+3.
 
 ## Active Tournament Games

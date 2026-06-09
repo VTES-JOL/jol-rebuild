@@ -32,53 +32,53 @@ Protocol-driven play. Players use higher-level commands that enforce VTES rules 
 
 ## Command Mode Availability
 
-| Command | Permissive | Enforced | Notes |
-|---|:---:|:---:|---|
-| **Phase / Turn** | | | |
-| `ADVANCE_PHASE` | ✓ | — | Direct phase skip; not available in protocol-driven play |
-| `NEXT_TURN` | ✓ | — | Direct turn advance |
-| **Card Movement** | | | |
-| `MOVE_CARD` | ✓ | — | Arbitrary region-to-region move |
-| `DRAW_CARD` | ✓ | — | |
-| `DRAW_CRYPT` | ✓ | — | |
-| `DRAW_CRYPT_TO_UNCONTROLLED` | ✓ | — | Costs 4 transfers + 1 pool; rules checked |
-| `DISCARD_CARD` | ✓ | — | |
-| `PLAY_CARD` | ✓ | — | |
-| `ATTACH_CARD` | ✓ | — | |
-| `MOVE_TO_TORPOR` | ✓ | — | Direct; use action protocol in enforced mode |
-| `RESCUE_FROM_TORPOR` | ✓ | — | Direct |
-| `MOVE_TO_CRYPT` | ✓ | — | Direct return to crypt |
-| `BURN_MINION` | ✓ | — | Direct burn |
-| `MERGE_ADVANCED` | ✓ | — | Rules checked (name match, one must be advanced) |
-| **Economy** | | | |
-| `SET_POOL` | ✓ | — | Judge-style direct pool set |
-| `GAIN_EDGE` | ✓ | — | |
-| `TRANSFER_BLOOD` | ✓ | — | Rules checked for UNCONTROLLED (phase + budget) |
-| `INFLUENCE_CARD` | ✓ | — | Rules checked (capacity, phase, current player) |
-| `OUST_PLAYER` | ✓ | — | Direct oust |
-| **Impulse / Priority** | | | |
-| `OPEN_IMPULSE_WINDOW` | — | ✓ | Manual impulse window; part of action protocol |
-| `CLOSE_IMPULSE_WINDOW` | — | ✓ | |
-| `PASS_IMPULSE` | — | ✓ | |
-| `CLAIM_IMPULSE` | — | ✓ | |
-| **Action Protocol** | | | |
-| `DECLARE_ACTION` | — | ✓ | Rules checked: MINION phase, current player, minion not locked |
-| `ATTEMPT_BLOCK` | — | ✓ | Rules checked: minion not locked, not acting player |
-| `RESOLVE_ACTION` | — | ✓ | Requires impulse window closed |
-| `ABORT_ACTION` | — | ✓ | |
-| `PASS_SEQUENCING` | — | ✓ | |
-| `CLOSE_SEQUENCING_WINDOW` | — | ✓ | |
-| **Universal (both modes)** | | | |
-| `LOCK_CARD` / `UNLOCK_CARD` / `UNLOCK_ALL` | ✓ | ✓ | |
-| `ADD_COUNTER` / `REMOVE_COUNTER` | ✓ | ✓ | |
-| `SET_CARD_NOTES` | ✓ | ✓ | |
-| `SET_TITLE` | ✓ | ✓ | |
-| `CONTEST_CARD` / `CLEAR_CONTEST_CARD` | ✓ | ✓ | |
-| `SET_CHOICE` | ✓ | ✓ | |
-| `SET_GAME_NOTES` | ✓ | ✓ | |
-| `REVERSE_ORDER` | ✓ | ✓ | |
-| `SHUFFLE_LIBRARY` / `SHUFFLE_CRYPT` | ✓ | ✓ | |
-| `SET_RULES_MODE` | ✓ | ✓ | Mode toggle; always available |
+| Command                                    | Permissive | Enforced | Notes                                                          |
+|--------------------------------------------|:----------:|:--------:|----------------------------------------------------------------|
+| **Phase / Turn**                           |            |          |                                                                |
+| `ADVANCE_PHASE`                            |     ✓      |    —     | Direct phase skip; not available in protocol-driven play       |
+| `NEXT_TURN`                                |     ✓      |    —     | Direct turn advance                                            |
+| **Card Movement**                          |            |          |                                                                |
+| `MOVE_CARD`                                |     ✓      |    —     | Arbitrary region-to-region move                                |
+| `DRAW_CARD`                                |     ✓      |    —     |                                                                |
+| `DRAW_CRYPT`                               |     ✓      |    —     |                                                                |
+| `DRAW_CRYPT_TO_UNCONTROLLED`               |     ✓      |    —     | Costs 4 transfers + 1 pool; rules checked                      |
+| `DISCARD_CARD`                             |     ✓      |    —     |                                                                |
+| `PLAY_CARD`                                |     ✓      |    —     |                                                                |
+| `ATTACH_CARD`                              |     ✓      |    —     |                                                                |
+| `MOVE_TO_TORPOR`                           |     ✓      |    —     | Direct; use action protocol in enforced mode                   |
+| `RESCUE_FROM_TORPOR`                       |     ✓      |    —     | Direct                                                         |
+| `MOVE_TO_CRYPT`                            |     ✓      |    —     | Direct return to crypt                                         |
+| `BURN_MINION`                              |     ✓      |    —     | Direct burn                                                    |
+| `MERGE_ADVANCED`                           |     ✓      |    —     | Rules checked (name match, one must be advanced)               |
+| **Economy**                                |            |          |                                                                |
+| `SET_POOL`                                 |     ✓      |    —     | Judge-style direct pool set                                    |
+| `GAIN_EDGE`                                |     ✓      |    —     |                                                                |
+| `TRANSFER_BLOOD`                           |     ✓      |    —     | Rules checked for UNCONTROLLED (phase + budget)                |
+| `INFLUENCE_CARD`                           |     ✓      |    —     | Rules checked (capacity, phase, current player)                |
+| `OUST_PLAYER`                              |     ✓      |    —     | Direct oust                                                    |
+| **Impulse / Priority**                     |            |          |                                                                |
+| `OPEN_IMPULSE_WINDOW`                      |     —      |    ✓     | Manual impulse window; part of action protocol                 |
+| `CLOSE_IMPULSE_WINDOW`                     |     —      |    ✓     |                                                                |
+| `PASS_IMPULSE`                             |     —      |    ✓     |                                                                |
+| `CLAIM_IMPULSE`                            |     —      |    ✓     |                                                                |
+| **Action Protocol**                        |            |          |                                                                |
+| `DECLARE_ACTION`                           |     —      |    ✓     | Rules checked: MINION phase, current player, minion not locked |
+| `ATTEMPT_BLOCK`                            |     —      |    ✓     | Rules checked: minion not locked, not acting player            |
+| `RESOLVE_ACTION`                           |     —      |    ✓     | Requires impulse window closed                                 |
+| `ABORT_ACTION`                             |     —      |    ✓     |                                                                |
+| `PASS_SEQUENCING`                          |     —      |    ✓     |                                                                |
+| `CLOSE_SEQUENCING_WINDOW`                  |     —      |    ✓     |                                                                |
+| **Universal (both modes)**                 |            |          |                                                                |
+| `LOCK_CARD` / `UNLOCK_CARD` / `UNLOCK_ALL` |     ✓      |    ✓     |                                                                |
+| `ADD_COUNTER` / `REMOVE_COUNTER`           |     ✓      |    ✓     |                                                                |
+| `SET_CARD_NOTES`                           |     ✓      |    ✓     |                                                                |
+| `SET_TITLE`                                |     ✓      |    ✓     |                                                                |
+| `CONTEST_CARD` / `CLEAR_CONTEST_CARD`      |     ✓      |    ✓     |                                                                |
+| `SET_CHOICE`                               |     ✓      |    ✓     |                                                                |
+| `SET_GAME_NOTES`                           |     ✓      |    ✓     |                                                                |
+| `REVERSE_ORDER`                            |     ✓      |    ✓     |                                                                |
+| `SHUFFLE_LIBRARY` / `SHUFFLE_CRYPT`        |     ✓      |    ✓     |                                                                |
+| `SET_RULES_MODE`                           |     ✓      |    ✓     | Mode toggle; always available                                  |
 
 ---
 
@@ -105,9 +105,11 @@ Commands are dispatched by `GameCommandService` and produce `CommandResult`, whi
 
 `GameEffect` is a sealed interface in `net.deckserver.jol.game.effect` with concrete records:
 `CardMovedEffect`, `CardLockedEffect`, `CardCounterChangedEffect`, `CardAttachedEffect`,
-`PlayerPoolChangedEffect`, `PlayerOustedEffect`, `EdgeChangedEffect`, `PhaseChangedEffect`,
-`TurnChangedEffect`, `ImpulseWindowChangedEffect`, `PendingActionChangedEffect`,
-`SequencingWindowChangedEffect`, `GameNotesChangedEffect`, `GameModeChangedEffect`, `GameCompletedEffect`.
+`CardContestedEffect`, `CardTitleChangedEffect`, `PlayerPoolChangedEffect`, `PlayerOustedEffect`,
+`PlayerVictoryPointsChangedEffect`, `EdgeChangedEffect`, `PhaseChangedEffect`, `TurnChangedEffect`,
+`TransfersRemainingChangedEffect`, `ImpulseWindowChangedEffect`, `PendingActionChangedEffect`,
+`SequencingWindowChangedEffect`, `GameNotesChangedEffect`, `GameModeChangedEffect`,
+`GameCompletedEffect`, `OrderOfPlayReversedEffect`.
 
 Effects are currently co-produced alongside direct mutations (handlers still mutate `GameData` directly). The future CQRS step is to make handlers pure functions returning only effects, with a `GameEffectApplier` doing all mutations.
 

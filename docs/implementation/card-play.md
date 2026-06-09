@@ -1,6 +1,6 @@
 # Card Play — Implementation Status
 
-Documents card play enforcement: phase gating, card type lifecycle, out-of-turn masters, conviction, limited effects, and master subtypes in JOL.
+Documents card play enforcement: phase gating, card type lifecycle, out-of-turn masters, conviction, and limited effects in JOL.
 
 See [VTES Rules — Card Timing and Card Types](../rules/card-play.md) for the tabletop rules this implements.
 
@@ -21,7 +21,7 @@ The following `CardType` enum values must be added before phase enforcement can 
 | `CardType.CONVICTION` | Maps to `CardType.NONE` in `GameInitService.toCardType()` |
 | `CardType.POWER`      | Maps to `CardType.NONE` in `GameInitService.toCardType()` |
 
-`CardType.LOCATION` exists in the enum but is unreachable via normal CSV import — location cards are typed as `MASTER` in the data.
+`CardType.LOCATION` exists in the enum but is not a reliable representation of the `Location` keyword. See [Card Keywords](./card-keywords.md) for keyword parsing.
 
 ---
 
@@ -53,14 +53,6 @@ The following `CardType` enum values must be added before phase enforcement can 
 
 ---
 
-## Trophy, Investment, and Path Subtypes
+## Keyword Dependency
 
-Three master card subtypes have distinct in-play rules that are not yet specified or implemented.
-
-| Subtype        | Rule                                                                                                                                                                                          |
-|----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Trophy**     | Awarded through Red List rules when a qualifying vampire burns a Red List minion in combat or as a directed action, including diablerie. Trophy handling must follow each Trophy card's text. |
-| **Investment** | Enters play with blood counters from the bank. During the controller's master phase, blood may be moved from the Investment to a qualifying vampire. Burned when no blood remains.            |
-| **Path**       | Represents a vampire's moral path. A vampire can have at most one Path attached. Some paths affect costs, abilities, or sect status of the bearer.                                            |
-
-**Proposed work:** Add `masterSubtype` (enum: `STANDARD`, `TRIFLE`, `TROPHY`, `INVESTMENT`, `PATH`, `LOCATION`, `WATCHTOWER`, `OUT_OF_TURN`) to `CardData`; detect from card text at build time. The `Hunting ground` location subtype (relevant to hunt resolution in [Actions](./actions.md#hunting-ground-bonus)) should also be detectable via this mechanism.
+Card play legality depends on parsed card keywords for out-of-turn masters, Trifles, Conviction/Power subtype routing, and effects that refer to equipment or combat markers. See [Card Keywords](./card-keywords.md) for the implementation model and parsing scope.

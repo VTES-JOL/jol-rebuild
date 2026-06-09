@@ -26,4 +26,5 @@ enforces protocol exactly.
 | [Referendums](./referendums.md)              | Political action referendums, vote sources, Prisci ballots, blood hunts, and Edge votes                |
 | [Combat](./combat.md)                        | Combat initiation, round sequence, strikes, damage resolution, torpor, and diablerie                   |
 | [Card Timing and Card Types](./card-play.md) | Card declaration, replacement, cancellation, phase constraints, type-specific rules, and destinations  |
+| [Card Keywords](./card-keywords.md)          | Trait markers, master-card keywords, and whether each has standalone mechanical effect                 |
 | [Tournament](./tournament.md)                | SINGLE_DECK vs MULTI_DECK formats, table sizes, rounds, byes, and tournament scoring                   |

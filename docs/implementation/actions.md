@@ -74,7 +74,7 @@ Action-specific resolution (bleed pool loss, hunt blood gain, etc.), NRA trackin
 | ActionType        | Missing resolution                                                                   |
 |-------------------|--------------------------------------------------------------------------------------|
 | `BLEED`           | Burn pool from target equal to bleed amount; move Edge if bleed amount ≥ 1           |
-| `HUNT`            | Add blood to acting vampire up to capacity; apply hunting ground bonus if applicable |
+| `HUNT`            | Add blood to acting vampire up to capacity                                           |
 | `EQUIP`           | Attach equipment card from hand or from another controlled minion                    |
 | `EMPLOY_RETAINER` | Attach retainer card with life counters                                              |
 | `RECRUIT_ALLY`    | Place ally in ready region with life counters; flag as unable to act this turn       |
@@ -98,10 +98,6 @@ No separate tracking exists for action-level success, bleed success, or referend
 NRA tracking is entirely absent. There is no per-minion record of which action types or named action cards have reached resolution this turn. The NRA lock must persist through mid-turn unlocks.
 
 **Proposed state:** Add `nraActionsByMinionRef` to `GameData` (or a turn-scoped structure) as a map from `CardRef` to set of locked action names/types.
-
-### Hunting Ground Bonus
-
-A vampire at a hunting ground gains an additional blood when successfully hunting. Requires formal `HUNT` resolution above, plus detection of the `"Hunting ground"` subtype in `CardData` (see [Card Play § Trophy, Investment, and Path Subtypes](./card-play.md#trophy-investment-and-path-subtypes) for master subtype detection work).
 
 ---
 
