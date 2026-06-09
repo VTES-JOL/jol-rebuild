@@ -114,3 +114,13 @@ A **wake effect** is a special reaction card (e.g. On the Qui Vive, Forced Awake
 - A wake effect does not unlock the minion or change its ready/locked state. It grants permission for the minion to play further reaction cards and attempt to block as though unlocked for the duration specified by the card.
 - If the minion blocks and combat results, they remain engaged in combat normally.
 - At the end of the action, the permission expires. Any additional lock/unlock or penalty text on the wake card is then applied as specified.
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook § Actions](https://www.vekn.net/rulebook) defines directed and undirected actions, eligible blocking Methuselahs, ready/unlocked blocking requirements, and successful block consequences.
+- [VEKN Rulebook § Stealth and Intercept](https://www.vekn.net/rulebook) defines the "only when needed" restriction and the default comparison of stealth against intercept.
+- [VEKN Rulebook § Reaction Cards](https://www.vekn.net/rulebook) defines who may play reactions and the general restriction that reaction cards are played by Methuselahs other than the acting Methuselah.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for block-attempt pass order, impulse reset after a play, redirect windows, and accumulated action modifiers.
+- Wake-effect behavior is card-text driven; examples and exact permission durations should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists).

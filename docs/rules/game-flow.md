@@ -156,3 +156,15 @@ When a tournament game times out without a natural conclusion, all surviving pla
 ### Withdrawal
 
 A player may announce withdrawal during their UNLOCK phase only if they begin the turn with less than a full hand because their library is exhausted. If the player reaches their next UNLOCK phase without losing pool or blood, spending pool or blood, or having any of their minions enter combat, they receive 1 VP and leave the game without being ousted.
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook § Playing the Game](https://www.vekn.net/rulebook) defines setup, the predator-prey circle, starting pool, opening crypt and hand sizes, and the five turn phases.
+- [VEKN Rulebook § Influence Phase](https://www.vekn.net/rulebook) defines transfer counts, moving blood between pool and uncontrolled vampires, and the 4-transfer crypt draw option.
+- [VEKN Rulebook § The Edge](https://www.vekn.net/rulebook) defines Edge ownership from successful bleeds and burning the Edge for a referendum vote.
+- [VEKN Rulebook § Victory Points](https://www.vekn.net/rulebook) defines ousting rewards, survivor VP, game winner, timeouts, and withdrawal.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is the source for impulse/sequencing terminology and pass-order protocol used across action, combat, and referendum windows.
+- [VEKN Tournament Rules](https://archon.vekn.net/document/tournament-rules.html) define tournament Game Wins, Victory Points, Tournament Points, and sanctioned tournament scoring.
+- STANDARD, DUEL, and V5 table-size rows reflect this project's supported game formats; Standard tournament tables are additionally constrained by the VEKN tournament rules.

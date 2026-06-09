@@ -28,3 +28,12 @@ enforces protocol exactly.
 | [Card Timing and Card Types](./card-play.md) | Card declaration, replacement, cancellation, phase constraints, type-specific rules, and destinations  |
 | [Card Keywords](./card-keywords.md)          | Trait markers, master-card keywords, and whether each has standalone mechanical effect                 |
 | [Tournament](./tournament.md)                | SINGLE_DECK vs MULTI_DECK formats, table sizes, rounds, byes, and tournament scoring                   |
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook](https://www.vekn.net/rulebook) is the primary source for tabletop rules, turn structure, regions, actions, combat, referendums, card types, and glossary definitions.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used where these documents need protocol-level timing detail beyond the rulebook's shorter descriptions.
+- [VEKN Tournament Rules](https://archon.vekn.net/document/tournament-rules.html) are used for sanctioned tournament structure, deck legality, scoring, and tournament definitions.
+- [VEKN Card Lists](https://www.vekn.net/card-lists) are used for current card text and set/card-list driven legality checks.

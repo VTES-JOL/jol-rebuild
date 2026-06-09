@@ -16,10 +16,10 @@ Based on [Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summar
 
 1. The playing player fully declares all attributes of the card: targets, modes, and cost. The cost must be payable at the time of declaration for the play to be legal.
 2. The card leaves the hand immediately, so hand size drops by 1.
-3. This opens a narrow window for **"as it is played" / "as announced" cancellers only** (e.g. Direct Intervention). No other cards or effects may be played at this step.
+3. This opens a narrow window for **"as it is played" cancellers only** (e.g. Direct Intervention) and wake effects needed to play effects in that window. No other cards or effects may be played at this step.
 4. If the card is cancelled here, see [Cancelled Cards](#cancelled-cards).
 
-These cancellers form an interrupt layer independent from action state, impulse, and sequencing. They intercept card play at declaration, regardless of which action state is active or who holds priority.
+These cancellers form a restricted card-play window before the played card is replaced. The window uses normal impulse/sequencing order, but only "as it is played" cancellers and wake effects needed to play effects in that window are legal.
 
 ### Replacement
 
@@ -186,3 +186,15 @@ Where a card ends up after being played is determined by its card text, not its 
 | Contains `"put this card in play"` or `"put this card into play"` | Remains in the acting player's `READY` region |
 | Contains `"put this card on [target]"`                            | Attached to the target as a child card        |
 | Neither pattern                                                   | Moves to the owner's `ASH_HEAP`               |
+
+---
+
+## Source Notes
+
+- [VEKN Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summary) is the main source for declaration, "as played" cancellation, replacement, cost payment, and card-play completion timing.
+- [VEKN Rulebook § Cards](https://www.vekn.net/rulebook) defines card types, card text overriding rulebook text, hand size, replacement, and general card-play constraints.
+- [VEKN Rulebook § Master Cards](https://www.vekn.net/rulebook) defines standard master cards, out-of-turn masters, trifles, and master phase action accounting.
+- [VEKN Rulebook § Event Cards](https://www.vekn.net/rulebook) defines event play during the discard phase and the one-event-per-discard-phase restriction.
+- [VEKN Rulebook § Limited](https://www.vekn.net/rulebook/8-glossaries) defines limited bleed-increase and additional-strike reminder text.
+- Imbued Conviction and Power behavior is based on Nights of Reckoning card-type rules and current card text; check [VEKN Card Lists](https://www.vekn.net/card-lists) when implementing individual cards.
+- The destination table is an implementation heuristic for this project. Card text remains authoritative, so unusual cards should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists) before relying on the pattern match.

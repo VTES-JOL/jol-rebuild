@@ -45,7 +45,7 @@ A vampire's blood total can never exceed their current capacity. Any effect that
 Every action follows this state sequence:
 
 ```
-Idle -> As Announced -> During Action (Impulse Loop) -> Resolution -> After Resolution -> End
+Idle -> As Played -> As Announced -> During Action (Impulse Loop) -> Resolution -> After Resolution -> End
 ```
 
 For blocked actions that are continued (e.g. Form of Mist), the sequence expands:
@@ -54,13 +54,14 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 ... -> Resolution -> Action Continuing -> Block Attempts -> Resolution -> After Resolution -> End
 ```
 
-| State                 | Impulse? | Priority system              | Notes                                                                               |
-|-----------------------|----------|------------------------------|-------------------------------------------------------------------------------------|
-| **As Announced**      | No       | Sequencing (ABC)             | Restricted window; only "as played" cancellers legal                                |
-| **During Action**     | Yes      | Impulse (resets on any play) | Stealth/intercept subject to "only when needed" rule; see [Blocking](./blocking.md) |
-| **Resolution**        | No       | Deterministic                | No player interaction; two branches (see below)                                     |
-| **Action Continuing** | No       | Sequencing (ABC)             | Fires when a "continue the action" effect is played                                 |
-| **After Resolution**  | No       | Sequencing (ABC)             | One effect at a time; Freak Drive, Voter Captivation, etc.                          |
+| State                 | Impulse? | Priority system              | Notes                                                                                                                                         |
+|-----------------------|----------|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| **As Played**         | Yes      | Impulse (restricted)         | Only if a card is played to announce the action. Restricted window for "as played" cancellers and wake effects; the card is not replaced yet. |
+| **As Announced**      | Yes      | Impulse (resets on any play) | Only effects usable as the action is announced are legal; these resolve before regular action modifiers, reactions, and block attempts.       |
+| **During Action**     | Yes      | Impulse (resets on any play) | Stealth/intercept subject to "only when needed" rule; see [Blocking](./blocking.md)                                                           |
+| **Resolution**        | No       | Deterministic                | No player interaction; two branches (see below)                                                                                               |
+| **Action Continuing** | No       | Sequencing (ABC)             | Fires when a "continue the action" effect is played                                                                                           |
+| **After Resolution**  | No       | Sequencing (ABC)             | One effect at a time; Freak Drive, Voter Captivation, etc.                                                                                    |
 
 **ABC sequencing rule:** When multiple players may act simultaneously, priority goes: **A**cting/active player first -> **B**locking/defending player -> others **C**lockwise from the acting player. The window resets to A after each play.
 
@@ -77,7 +78,7 @@ When a "continue the action" effect fires after a blocked combat, the game enter
 
 - "After combat ends" and "after block resolution" effects triggered by the **preceding** block are playable in this window, alongside the continue-the-action effect; there is no mandatory ordering between them.
 - The game remembers the action was already blocked. Cards that trigger on block resolution (e.g. Cats' Guidance) remain valid after continuation, because the prior block already occurred.
-- Returning to Block Attempts does **not** re-open the As Announced or During Action windows from scratch; it resumes only at the block-attempt step.
+- Returning to Block Attempts does **not** re-open the As Played, As Announced, or During Action windows from scratch; it resumes only at the block-attempt step.
 - If the continued action is blocked again, combat resolves again and another Action Continuing window may open.
 
 ---
@@ -198,3 +199,14 @@ An "after resolution" triggered ability verifies its preconditions **at the mome
 | "After this action" effects | Any card text specifying this window                            |
 
 No further block attempts, stealth/intercept plays, or action modifiers are legal here; those windows have closed.
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook § Minion Phase](https://www.vekn.net/rulebook) defines basic minion actions, default action stealth, bleed, hunt, equip, employ retainer, recruit ally, rescue/leave torpor, and political action basics.
+- [VEKN Rulebook § Actions](https://www.vekn.net/rulebook) defines action declaration, blocking, successful action resolution, blocked action resolution, and the no-repeat-action rule.
+- [VEKN Rulebook § The Edge](https://www.vekn.net/rulebook) defines Edge movement from successful bleeds with a bleed amount of 1 or more.
+- [VEKN Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summary) is the basis for the card declaration, cancellation, replacement, and action-resolution timing model referenced by the lifecycle here.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for sequencing/impulse vocabulary, after-resolution timing, and continuation-after-block protocol.
+- Card-specific examples such as Freak Drive, Voter Captivation, Cats' Guidance, and Lutz von Hohenzollern should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists), because current card text can refine exact trigger wording.
