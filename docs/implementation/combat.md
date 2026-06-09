@@ -16,20 +16,20 @@ Combat has no formal structure in JOL. The game engine tracks `pendingCombat` st
 
 ### Combat System
 
-| Mechanic                                                                                                                     | Rulebook reference          |
-|------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
-| Close vs long range; default is close                                                                                        | Combat — Range              |
-| Maneuvers to change range; a minion cannot play two maneuvers in a row                                                       | Combat — Maneuvers          |
-| Strike declaration and resolution order (Combat Ends, first strike, normal strikes; simultaneous within the same class)      | Combat — Strikes            |
-| First-strike resolution before normal strikes                                                                                | Combat — First Strike       |
-| Normal damage (vampires burn blood to mend) vs aggravated damage (cannot be mended by vampires; most allies treat as normal) | Combat — Damage             |
-| Normal damage resolved before aggravated damage within the same resolution step                                              | Combat — Damage             |
-| Additional strikes and the `(limited)` rule — at most one limited additional-strike source per minion per round              | Combat — Additional Strikes |
-| Damage prevention: halving effects and flat reductions applied in play order; fractional damage rounds up                    | Combat — Damage Prevention  |
-| Steal Blood is not damage and cannot be prevented, but is cancelled by a dodge                                               | Combat — Steal Blood        |
-| Press to continue or end combat; a minion cannot play two presses in a row                                                   | Combat — Press              |
-| End of Round (Step 7) effects fire even when combat ended prematurely via Combat Ends                                        | Combat — End of Round       |
-| Excess aggravated damage on a vampire that already has unmended damage can cause destruction (spends 1 blood to prevent)     | Combat — Aggravated Damage  |
+| Mechanic                                                                                                                          | Rulebook reference          |
+|-----------------------------------------------------------------------------------------------------------------------------------|-----------------------------|
+| Close vs long range; default is close                                                                                             | Combat — Range              |
+| Maneuvers to change range; a minion cannot play two maneuvers in a row                                                            | Combat — Maneuvers          |
+| Strike declaration and resolution order (Combat Ends, first strike, normal strikes; simultaneous within the same class)           | Combat — Strikes            |
+| First-strike resolution before normal strikes                                                                                     | Combat — First Strike       |
+| Normal damage (vampires burn blood to mend) vs aggravated damage (cannot be mended by vampires; allies/retainers treat as normal) | Combat — Damage             |
+| After prevention, unprevented normal damage is handled before unprevented aggravated damage                                       | Combat — Damage             |
+| Additional strikes and the `(limited)` rule — at most one limited additional-strike source per minion per round                   | Combat — Additional Strikes |
+| Damage prevention: halving effects and flat reductions applied in play order; fractional damage rounds up                         | Combat — Damage Prevention  |
+| Steal Blood is not damage and cannot be prevented, but is cancelled by a dodge                                                    | Combat — Steal Blood        |
+| Press to continue or end combat; a minion cannot play two presses in a row                                                        | Combat — Press              |
+| End of Round (Step 7) effects fire even when combat ended prematurely via Combat Ends                                             | Combat — End of Round       |
+| Aggravated damage handled while a vampire is wounded can cause destruction (must burn 1 blood per point to prevent)               | Combat — Aggravated Damage  |
 
 ### Diablerie
 

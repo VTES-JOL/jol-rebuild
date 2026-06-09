@@ -34,7 +34,7 @@ The acting minion has first sequencing opportunity (ABC priority: A) at every st
 
 | Minion type | Resource      | At 0 resource                                | Effect of aggravated damage                              |
 |-------------|---------------|----------------------------------------------|----------------------------------------------------------|
-| Vampire     | Blood         | Remains ready; cannot mend damage with blood | Cannot be mended; burns a wounded vampire                |
+| Vampire     | Blood         | Remains ready; cannot mend damage with blood | Cannot be mended; can burn a wounded vampire             |
 | Ally        | Life counters | Burned (ash heap)                            | Treated as normal damage unless card text says otherwise |
 
 Vampires do not go to torpor just because they have 0 blood. They go to torpor when they have unmended damage at the end of damage resolution or when an effect explicitly sends them there.
@@ -202,7 +202,7 @@ Strikes resolve and damage is applied. Each point of damage is handled one at a 
 | **Aggravated**    | No for vampires; normal ally life loss unless card text says otherwise | Cannot be mended by vampires; see Burning below                                |
 | **Environmental** | Normal rules                                                           | No minion source; cannot be attributed to a specific attacker                  |
 
-When a vampire receives both normal and aggravated damage simultaneously, **normal damage is resolved first**.
+When a vampire receives both normal and aggravated damage simultaneously, **normal damage is handled first**, but this applies only after damage prevention. Prevention effects can be used against aggravated damage before normal damage is handled.
 
 #### Wounded state
 
@@ -211,10 +211,10 @@ A vampire is **wounded** if they have received damage they have not mended, are 
 #### Aggravated damage and burning
 
 - Aggravated damage to vampires cannot be mended, so it remains unmended unless it is prevented.
-- Normal damage is resolved before aggravated damage.
-- Aggravated damage dealt to a vampire that already has unmended damage can burn that vampire. The vampire may spend 1 blood to prevent destruction from that aggravated damage point.
-- If the vampire does not prevent destruction from aggravated damage, the vampire is burned without going to torpor.
-- If the vampire has unmended damage but was not burned by aggravated damage, the vampire is placed in torpor.
+- Normal damage is handled before aggravated damage, after prevention effects have been applied.
+- The first point of unprevented aggravated damage handled by an unwounded vampire makes that vampire wounded; it does not cost blood to mend.
+- Each point of unprevented aggravated damage handled while the vampire is wounded requires that vampire to burn 1 blood to prevent destruction. If the vampire cannot burn enough blood, the vampire is burned without going to torpor.
+- If the vampire has unmended damage but was not burned by aggravated damage, the vampire is placed in torpor after all damage is handled.
 - Most allies treat aggravated damage as normal damage, losing life counters instead of using the vampire wounded/torpor/destruction rules. If an ally's card text makes aggravated damage special for that ally, follow that card text.
 
 #### Damage prevention
