@@ -186,3 +186,15 @@ Where a card ends up after being played is determined by its card text, not its 
 | Contains `"put this card in play"` or `"put this card into play"` | Remains in the acting player's `READY` region |
 | Contains `"put this card on [target]"`                            | Attached to the target as a child card        |
 | Neither pattern                                                   | Moves to the owner's `ASH_HEAP`               |
+
+---
+
+## Source Notes
+
+- [VEKN Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summary) is the main source for declaration, "as played" cancellation, replacement, cost payment, and card-play completion timing.
+- [VEKN Rulebook § Cards](https://www.vekn.net/rulebook) defines card types, card text overriding rulebook text, hand size, replacement, and general card-play constraints.
+- [VEKN Rulebook § Master Cards](https://www.vekn.net/rulebook) defines standard master cards, out-of-turn masters, trifles, and master phase action accounting.
+- [VEKN Rulebook § Event Cards](https://www.vekn.net/rulebook) defines event play during the discard phase and the one-event-per-discard-phase restriction.
+- [VEKN Rulebook § Limited](https://www.vekn.net/rulebook/8-glossaries) defines limited bleed-increase and additional-strike reminder text.
+- Imbued Conviction and Power behavior is based on Nights of Reckoning card-type rules and current card text; check [VEKN Card Lists](https://www.vekn.net/card-lists) when implementing individual cards.
+- The destination table is an implementation heuristic for this project. Card text remains authoritative, so unusual cards should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists) before relying on the pattern match.

@@ -198,3 +198,14 @@ An "after resolution" triggered ability verifies its preconditions **at the mome
 | "After this action" effects | Any card text specifying this window                            |
 
 No further block attempts, stealth/intercept plays, or action modifiers are legal here; those windows have closed.
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook § Minion Phase](https://www.vekn.net/rulebook) defines basic minion actions, default action stealth, bleed, hunt, equip, employ retainer, recruit ally, rescue/leave torpor, and political action basics.
+- [VEKN Rulebook § Actions](https://www.vekn.net/rulebook) defines action declaration, blocking, successful action resolution, blocked action resolution, and the no-repeat-action rule.
+- [VEKN Rulebook § The Edge](https://www.vekn.net/rulebook) defines Edge movement from successful bleeds with a bleed amount of 1 or more.
+- [VEKN Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summary) is the basis for the card declaration, cancellation, replacement, and action-resolution timing model referenced by the lifecycle here.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for sequencing/impulse vocabulary, after-resolution timing, and continuation-after-block protocol.
+- Card-specific examples such as Freak Drive, Voter Captivation, Cats' Guidance, and Lutz von Hohenzollern should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists), because current card text can refine exact trigger wording.

@@ -85,3 +85,14 @@ The Edge is a game token that passes between players during bleed actions:
 - The acting player takes the Edge whenever their successful bleed action has a bleed amount of 1 or more.
 - During referendum polling the Edge-holder may burn the Edge to gain 1 vote.
 - Only one player holds the Edge at a time; it starts the game with no owner.
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook § Political Actions](https://www.vekn.net/rulebook) defines the referendum procedure, choosing terms after an unblocked political action, polling, and referendum pass/fail resolution.
+- [VEKN Rulebook § Votes and Ballots](https://www.vekn.net/rulebook) defines title vote values, Priscus ballots, the Prisci block, political action cards burned for votes, and the rule that torpored vampires cannot vote.
+- [VEKN Rulebook § Diablerie](https://www.vekn.net/rulebook) defines the automatic blood hunt referendum after diablerie and the fixed blood hunt outcome.
+- [VEKN Rulebook § The Edge](https://www.vekn.net/rulebook) defines burning the Edge for 1 vote during a referendum.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for the "before votes and ballots are cast" window, polling-step timing, and sequencing/impulse assumptions.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) and [Card Keywords § Minion Traits](./card-keywords.md#minion-traits) support resolving Red List Trophy awards before a blood hunt referendum.

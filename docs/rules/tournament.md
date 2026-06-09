@@ -50,3 +50,13 @@ Tournament standings are determined by:
 3. **Tournament Points (TP)** — used when players are still tied after Game Wins and Victory Points.
 
 In the event of a timeout, surviving players each receive 0.5 VP, except that the last surviving player still receives the normal full survivor VP. A Game Win is awarded only if the 2 VP and sole-leader requirements are met.
+
+---
+
+## Source Notes
+
+- [VEKN Tournament Rules §3.1.5 Multi-Deck System](https://archon.vekn.net/document/tournament-rules.html) defines when multi-deck play is allowed and how players may switch decks between rounds.
+- [VEKN Tournament Rules §3.1.6 Tournament Without Final](https://archon.vekn.net/document/tournament-rules.html) and the finals sections define preliminary rounds, no-final events, final tables, and tournament winner determination.
+- [VEKN Tournament Rules §3.1 and §4](https://archon.vekn.net/document/tournament-rules.html) define tournament responsibilities, tournament game rules, scoring records, and timeout treatment for sanctioned events.
+- [VEKN Tournament Rules §6.2 Constructed Deck Size Limits](https://archon.vekn.net/document/tournament-rules.html) defines Standard Constructed deck-size legality used by tournament deck validation.
+- Table construction, byes, predator-prey diversity, Game Win, VP, and TP are tournament-protocol assumptions aligned with VEKN tournament rules and this project's tournament lobby model.

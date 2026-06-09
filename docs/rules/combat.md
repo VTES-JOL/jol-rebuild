@@ -315,3 +315,14 @@ The default rule is that combat cards are played only by minions involved in the
 ## Environmental Damage
 
 Environmental damage has no minion source and cannot be attributed to a specific attacker. It is still resolved through the normal/aggravated damage framework: unless card text says the damage is aggravated or otherwise modifies prevention/resolution, treat it as normal damage.
+
+---
+
+## Source Notes
+
+- [VEKN Rulebook § Combat](https://www.vekn.net/rulebook) defines combat initiation after blocks and enter-combat actions, the combat round sequence, range, maneuvers, strike declaration, damage prevention, presses, and end-of-round timing.
+- [VEKN Rulebook § Strikes](https://www.vekn.net/rulebook) defines hand strikes, weapon strikes, dodge, Combat Ends, first strike, steal blood, strike resolution order, and additional strikes.
+- [VEKN Rulebook § Damage Resolution](https://www.vekn.net/rulebook) defines normal and aggravated damage, mending, wounded vampires, torpor, burning, and ally life loss.
+- [VEKN Rulebook § Torpor and Diablerie](https://www.vekn.net/rulebook) defines torpor state, leaving torpor, diablerie sequence, Discipline gains, and blood hunt calls.
+- [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for combat timing windows, ABC sequencing, queued combat resolution, end-of-round handling when combat ends early, and Red List Trophy timing before blood hunt.
+- Weapon-category examples and combat cards that become equipment are based on current card text; verify unusual weapons and transformed card types against [VEKN Card Lists](https://www.vekn.net/card-lists).
