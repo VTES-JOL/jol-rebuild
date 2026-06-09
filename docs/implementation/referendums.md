@@ -1,4 +1,4 @@
-# Referendums — Implementation Status
+# Referendums — Implementation
 
 Documents the referendum engine: political actions, vote sources, Prisci ballots, blood hunt referendums, and Edge vote integration in JOL.
 
@@ -10,50 +10,136 @@ For declaring a political action and the action lifecycle, see [Actions](./actio
 
 ## Current Status
 
-The entire referendum engine is absent. Political actions can be declared as `ActionType.POLITICAL`, but `ResolveAction` does not initiate polling. Blood hunt referendums (mandatory after diablerie) are not triggered. The Edge token is tracked by `GainEdge` but is not integrated with referendum vote-casting.
+The entire referendum engine is absent. Political actions can be declared as `ActionType.POLITICAL` and `ResolveAction` is called, but no polling is opened. Blood hunt referendums (mandatory after diablerie) are not triggered. The Edge token is tracked by `GainEdge` but is not integrated with vote-casting.
 
 ---
 
-## Missing Mechanics
+## ReferendumState
 
-| Mechanic                                                                                                                                                           | Rulebook reference              |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------|
-| Declaring a referendum (political action or blood hunt)                                                                                                            | Minion Phase — Political Action |
-| "Before votes and ballots are cast" sequencing sub-window (ABC priority)                                                                                           | Politics & Referendums          |
-| Vote sources: titled vampires — Primogen/Bishop = 1, Prince/Archbishop/Baron = 2, Justicar/Cardinal = 3, Inner Circle/Regent = 4                                   | Vampire Sects                   |
-| Vote sources: acting player's political action card grants 1 vote to the acting player's controller                                                                | Politics & Referendums          |
-| Vote sources: any Methuselah burns one political action card from hand for 1 vote (once per referendum per Methuselah)                                             | Politics & Referendums          |
-| Vote sources: Edge holder burns the Edge for 1 vote                                                                                                                | The Edge                        |
-| Vote sources: in-play card effects usable during the current referendum                                                                                            | Card text                       |
-| Priscus block — 3 collective votes decided by a Prisci-only sub-referendum using one ballot per ready Priscus                                                      | Sabbat Titles                   |
-| Pass / fail resolution (votes for > votes against = pass; tied or more against = fail)                                                                             | Politics & Referendums          |
-| Torpored vampires cannot cast votes                                                                                                                                | Referendums                     |
-| Automatic blood hunt referendum after any diablerie                                                                                                                | Diablerie                       |
-| Blood hunt rules: initiated by victim's controller; not an action; cannot be blocked; action modifiers and reactions not legal unless card text explicitly permits | Diablerie                       |
+A new `ReferendumState` object is added to `GameData`. It is set when a referendum opens and cleared after `ClosePolling` resolves.
 
----
-
-## Proposed Commands
-
-| Command             | Fields                                                                                                             | Description                                                                        |
-|---------------------|--------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| `CallReferendum`    | `type` (`BLOOD_HUNT` \| `POLITICAL`), `targetRef?` (diablerist for blood hunt), `cardRef?` (political action card) | Declare a referendum; locks the acting minion for political actions                |
-| `CastVote`          | `playerName`, `forVotes`, `againstVotes`                                                                           | Commit a player's votes for or against the open referendum; irreversible once cast |
-| `ResolveReferendum` | —                                                                                                                  | Tally votes; apply pass/fail effect; close referendum                              |
-| `BurnEdgeForVote`   | `playerName`                                                                                                       | Burn the Edge to contribute 1 vote (transfers Edge away; increments vote total)    |
+| Field              | Type                           | Description                                                                              |
+|--------------------|--------------------------------|------------------------------------------------------------------------------------------|
+| `terms`            | `String`                       | Human-readable description of what the referendum decides                                |
+| `actingPlayerName` | `String`                       | Methuselah whose action or diablerie triggered the referendum; anchor for impulse order  |
+| `isBloodHunt`      | `boolean`                      | If true: fixed terms, no action modifiers or reactions legal, target is the diablerist   |
+| `targetRef`        | `CardRef?`                     | For blood hunt: the diablerist. For political actions with a specific target: that card  |
+| `votesFor`         | `int`                          | Running total of votes cast in favour                                                    |
+| `votesAgainst`     | `int`                          | Running total of votes cast against                                                      |
+| `votesByPlayer`    | `Map<String, int[]>`           | Per-player `[for, against]` array; tracks what each Methuselah has committed             |
+| `prisciBallots`    | `Map<String, Boolean>`         | Card ID → for/against; Priscus-only sub-referendum ballots                               |
+| `cardBurnedByPlayer` | `Set<String>`                | Players who have already burned one political action card this referendum                |
+| `pollingOpen`      | `boolean`                      | False during "before votes" window; true once `OpenPolling` is called                   |
 
 ---
 
-## Proposed State
+## Referendum Procedure
 
-A `ReferendumState` object on `GameData`:
+### Step 1 — Choose Terms
 
-| Field          | Type                      | Description                                       |
-|----------------|---------------------------|---------------------------------------------------|
-| `type`         | `BLOOD_HUNT \| POLITICAL` | Referendum type                                   |
-| `callerName`   | String                    | Methuselah who called the referendum              |
-| `targetRef`    | `CardRef?`                | Diablerist ref for blood hunt; null for political |
-| `votesFor`     | int                       | Total votes cast in favour                        |
-| `votesAgainst` | int                       | Total votes cast against                          |
-| `playerVotes`  | Map\<String, int[]\>      | Per-player [for, against] tally                   |
-| `status`       | `OPEN \| RESOLVED`        | Current referendum status                         |
+Triggered by `ResolveAction` for `ActionType.POLITICAL`:
+1. Acting player chooses terms (which effects the referendum decides).
+2. `ReferendumState` is opened on `GameData` with `pollingOpen = false`.
+3. A sequencing window opens for "before votes and ballots are cast" effects (ABC priority). When the window closes, `OpenPolling` becomes available.
+
+Blood hunt referendums skip term choice — terms are fixed (`targetRef` = diablerist) and `ReferendumState` is opened automatically by the diablerie resolution.
+
+### Step 2 — Polling
+
+`OpenPolling` transitions `pollingOpen = true`. From this point:
+- Any Methuselah may `CastVotes` (titled vampires under their control).
+- Any Methuselah may `BurnCardForVote` (one political action card from hand, once per Methuselah per referendum).
+- Any Methuselah may `BurnEdgeForVote` (if they hold the Edge).
+- Priscus controllers may `CastPrisciBallot` — see Prisci Sub-Referendum below.
+- Votes are irreversible once cast.
+- Cards "only usable during political action" are legal only during this polling.
+
+Blood hunt referendums: action modifiers and reactions not legal; only vote sources (titles, Edge, one PA card per Methuselah, in-play card effects explicitly usable during blood hunt) are accepted.
+
+### Step 3 — Resolution
+
+`ClosePolling` tallies:
+- If `votesFor > votesAgainst` → referendum **passes**; apply effects.
+- Tied or `votesAgainst ≥ votesFor` → referendum **fails**; no effect.
+
+Set `PendingActionState.referendumSuccessful` accordingly. Clear `ReferendumState` from `GameData`. Resume AFTER_RESOLUTION sequencing window.
+
+---
+
+## Commands
+
+| Command             | Fields                                          | Description                                                                                     |
+|---------------------|-------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| `OpenPolling`       | —                                               | Transition from "before votes" window to active polling; sets `pollingOpen = true`              |
+| `CastVotes`         | `playerName`, `cardRef`, `amount`, `forOrAgainst` | Cast votes from a titled ready vampire; validates vote amount against title and readiness        |
+| `BurnCardForVote`   | `playerName`, `cardRef`, `forOrAgainst`         | Burn one political action card from hand for 1 vote; once per player per referendum             |
+| `BurnEdgeForVote`   | `playerName`, `forOrAgainst`                    | Burn the Edge for 1 vote; clears the Edge holder                                                |
+| `CastPrisciBallot`  | `cardRef`, `forOrAgainst`                       | Cast one ballot for a ready Priscus in the sub-referendum; recomputes Prisci block contribution |
+| `ClosePolling`      | —                                               | Tally and resolve the referendum; clear `ReferendumState`                                       |
+
+---
+
+## New Effect
+
+`ReferendumStateChangedEffect` carries the updated `ReferendumState` (or null when cleared). Applied by `GameEffectApplicator` like all other effects.
+
+---
+
+## Vote Source Calculation
+
+At `CastVotes` validation, the server computes how many votes the named `cardRef` may cast:
+
+| Title                            | Votes |
+|----------------------------------|-------|
+| Primogen / Bishop                | 1     |
+| Prince / Archbishop / Baron      | 2     |
+| Justicar / Cardinal              | 3     |
+| Inner Circle / Regent            | 4     |
+
+Validation rules:
+- Card must be in the READY region (torpored vampires cannot vote).
+- Card must be controlled by `playerName`.
+- Card must have a `title` field matching one of the titles above.
+
+A Methuselah may cast all of one vampire's votes as a single `CastVotes` call. They may also cast partial votes if they choose (e.g. one vote for and one vote against from a Prince, though unusual).
+
+The political action card itself grants the **acting player's controller** 1 vote (included automatically when `CallReferendum` / `ResolveAction(POLITICAL)` opens the referendum).
+
+---
+
+## Prisci Sub-Referendum
+
+The Priscus title is a collective Sabbat title. Each ready Priscus casts one ballot in a Priscus-only sub-referendum; the result determines how the Prisci block contributes to the main referendum.
+
+`CastPrisciBallot` adds the Priscus's card ID → `true`/`false` to `prisciBallots`. After each ballot, the server recomputes the Prisci block contribution:
+
+| Sub-referendum result | Main referendum contribution |
+|-----------------------|------------------------------|
+| Majority for          | +3 votes for                 |
+| Majority against      | +3 votes against             |
+| Tied                  | 0 votes                      |
+
+The contribution shifts dynamically as more Priscus ballots are cast. The final contribution is applied at `ClosePolling`.
+
+---
+
+## Blood Hunt Auto-Trigger
+
+After the diablerie sequence completes (step 6 of the diablerie resolution in [Combat § Diablerie](./combat.md#diablerie)), `ResolveAction` automatically opens a `ReferendumState` with:
+
+- `isBloodHunt = true`
+- `targetRef` = the diablerist
+- `actingPlayerName` = the victim's controller (anchor for impulse order)
+- `terms` = "Blood hunt against [diablerist name]"
+
+If the blood hunt passes: `CardMovedEffect(diablerist, ASH_HEAP)` — the diablerist is burned.
+
+---
+
+## Edge During Referendums
+
+`BurnEdgeForVote` is available to the current Edge holder during polling. It:
+1. Clears the Edge holder (`EdgeChangedEffect(null)`).
+2. Adds 1 vote for or against per the player's choice.
+
+The Edge moves to the acting player via `GainEdge` at the end of a successful bleed action (standard rule); this is separate from referendum Edge burning.
