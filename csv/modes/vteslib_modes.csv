@@ -1268,8 +1268,10 @@ This combat, each strike or damaging effect made against the opposing minion inf
 Put this card on a vampire with a capacity below 5. The vampire with this card burns 1 additional blood for each bleeding action he or she successfully performs (after resolving the action)."
 102314,102314:ACTION,Dance of the Dead,Action,,"+1 stealth action. Unique.
 Put this card in play with 4 counters. Once each combat, you can burn 1 counter from this card to give a wraith or zombie ally you control 1 maneuver or press. If this card has no counters, burn it."
-102315,102315:COMBAT:obf,Dance with the Devil,Combat,obf,"or [tha] Maneuver, only usable to get to close range."
-102315,102315:COMBAT:OBF,Dance with the Devil,Combat,OBF,"or [tha] Maneuver, only usable to get to close range, and once this round, this vampire can burn 1 blood to get 1 additional maneuver, only usable to get to close range."
+102315,102315:COMBAT:obf,Dance with the Devil,Combat,obf,"Maneuver, only usable to get to close range."
+102315,102315:COMBAT:tha,Dance with the Devil,Combat,tha,"Maneuver, only usable to get to close range."
+102315,102315:COMBAT:OBF,Dance with the Devil,Combat,OBF,"Maneuver, only usable to get to close range, and once this round, this vampire can burn 1 blood to get 1 additional maneuver, only usable to get to close range."
+102315,102315:COMBAT:THA,Dance with the Devil,Combat,THA,"Maneuver, only usable to get to close range, and once this round, this vampire can burn 1 blood to get 1 additional maneuver, only usable to get to close range."
 100491,100491:MASTER,Danse Macabre,Master,,"Master.
 Choose a ready Sabbat vampire you control. Once this turn, when the chosen Sabbat vampire performs a successful action, he or she may burn a blood to unlock after resolving that action."
 100492,100492:MODIFIER:for,Daring the Dawn,Action Modifier,for,Vampires cannot block this action. This vampire takes 2 unpreventable environmental aggravated damage after action resolution.
@@ -1495,8 +1497,10 @@ This vampire unlocks and attempts to block. If this vampire does not block this 
 100571,100571:MODIFIER:obf,Domain of Evernight,Action Modifier,obf,+1 stealth.
 100571,100571:MODIFIER:tem,Domain of Evernight,Action Modifier,tem,"If this action is blocked, all damage inflicted on vampires during the resulting combat is aggravated."
 100571,100571:MODIFIER:TEM,Domain of Evernight,Action Modifier,TEM,Only usable after resolution of a successful action. Unlock this vampire. A vampire can play only one Domain of Evernight at superior each turn.
-102316,102316:MODIFIER:pot,Dominant Personality,Action Modifier,pot,or [pre] Only usable if a minion attempts to block. The blocking minion gets -1 intercept.
-102316,102316:MODIFIER:POT,Dominant Personality,Action Modifier,POT,or [PRE] Only usable as the action is announced. Choose a vampire. The chosen vampire cannot block this action.
+102316,102316:MODIFIER:pot,Dominant Personality,Action Modifier,pot,Only usable if a minion attempts to block. The blocking minion gets -1 intercept.
+102316,102316:MODIFIER:pre,Dominant Personality,Action Modifier,pre,Only usable if a minion attempts to block. The blocking minion gets -1 intercept.
+102316,102316:MODIFIER:POT,Dominant Personality,Action Modifier,POT,Only usable as the action is announced. Choose a vampire. The chosen vampire cannot block this action.
+102316,102316:MODIFIER:PRE,Dominant Personality,Action Modifier,PRE,Only usable as the action is announced. Choose a vampire. The chosen vampire cannot block this action.
 100572,100572:MASTER,Dominate,Master,,"Discipline.
 Put this card on a vampire. This vampire gets +1 level of Dominate [dom] and +1 capacity. Cannot be put on a vampire with superior Dominate [DOM]."
 100573,100573:ACTION:dom,Dominate Kine,Action,dom,+1 stealth action. (D) Bleed with +1 bleed.
@@ -1713,10 +1717,14 @@ Put this card on a vampire you control. This vampire has +1 strength and may ent
 100648,100648:REACTION:VIS,Ensconced,Reaction,VIS,"Only usable during an action directed at a location. This vampire unlocks, the action fails, and the acting minion and this vampire enter combat."
 100649,100649:MODIFIER,Ensemble,Action Modifier,,"Only usable during a bleed action.
 +X bleed (limited), where X is the number of ready unlocked Daughters of Cacophony you control. Lock all ready Daughters of Cacophony you control."
-102319,102319:REACTION:ani,Ensnare a Beast,Reaction,ani,or [cel] +1 intercept.
-102319,102319:REACTION:ANI,Ensnare a Beast,Reaction,ANI,"or [cel] +1 intercept, and strike cards cost the acting minion +1 blood or life during the resulting combat if this vampire blocks."
-102320,102320:ACTION:obf,Enthrall,Action,obf,or [pre] (D) Bleed with +1 bleed.
-102320,102320:ACTION:OBF,Enthrall,Action,OBF,"or [pre] (D) Bleed with +1 bleed, and if the bleed is successful (for 1 or more), this vampire can burn 1 blood to draw 1 card from your crypt."
+102319,102319:REACTION:ani,Ensnare a Beast,Reaction,ani,+1 intercept.
+102319,102319:REACTION:cel,Ensnare a Beast,Reaction,cel,+1 intercept.
+102319,102319:REACTION:ANI,Ensnare a Beast,Reaction,ANI,"+1 intercept, and strike cards cost the acting minion +1 blood or life during the resulting combat if this vampire blocks."
+102319,102319:REACTION:CEL,Ensnare a Beast,Reaction,CEL,"+1 intercept, and strike cards cost the acting minion +1 blood or life during the resulting combat if this vampire blocks."
+102320,102320:ACTION:obf,Enthrall,Action,obf,(D) Bleed with +1 bleed.
+102320,102320:ACTION:pre,Enthrall,Action,pre,(D) Bleed with +1 bleed.
+102320,102320:ACTION:OBF,Enthrall,Action,OBF,"(D) Bleed with +1 bleed, and if the bleed is successful (for 1 or more), this vampire can burn 1 blood to draw 1 card from your crypt."
+102320,102320:ACTION:PRE,Enthrall,Action,PRE,"(D) Bleed with +1 bleed, and if the bleed is successful (for 1 or more), this vampire can burn 1 blood to draw 1 card from your crypt."
 100650,100650:ACTION:ser,Enticement,Action,ser,(D) Burn the Edge to burn 2 pool from your prey. Minions you control cannot bleed until the end of the turn.
 100650,100650:ACTION:SER,Enticement,Action,SER,"(D) Burn the Edge to burn 2 pool from your prey. Minions you control cannot bleed until the end of the turn, but your prey burns 3 pool."
 100651,100651:COMBAT:obt,Entombment,Combat,obt,Strike: burn the opposing ally.
@@ -1919,8 +1927,10 @@ Put this card in play. Once each turn, you can burn 1 pool to get +3 votes durin
 Put this card in play. Sabbat vampires get -1 stealth during hunt actions. Sabbat vampires successfully hunting gain enough blood from the blood bank to reach full capacity. During your unlock phase, burn this card."
 100724,100724:MASTER,Fetish Club Hunting Ground,Master,,"Master: unique location. Hunting Ground.
 During your unlock phase, you may move 1 blood from the blood bank to a ready vampire you control. A vampire can gain blood from only one hunting ground card each turn."
-102321,102321:MODIFIER:for,Fever Pitch,Action Modifier,for,or [pre] +1 bleed (limited).
-102321,102321:MODIFIER:FOR,Fever Pitch,Action Modifier,FOR,"or [pre] +1 bleed (limited), and if the bleed is successful (for 1 or more), you can put this card on this vampire after action resolution. This vampire can burn this card during a bleed action they perform to have a block attempt fail; the blocking minion cannot attempt to block this action again. A vampire can have only one Fever Pitch."
+102321,102321:MODIFIER:for,Fever Pitch,Action Modifier,for,+1 bleed (limited).
+102321,102321:MODIFIER:pre,Fever Pitch,Action Modifier,pre,+1 bleed (limited).
+102321,102321:MODIFIER:FOR,Fever Pitch,Action Modifier,FOR,"+1 bleed (limited), and if the bleed is successful (for 1 or more), you can put this card on this vampire after action resolution. This vampire can burn this card during a bleed action they perform to have a block attempt fail; the blocking minion cannot attempt to block this action again. A vampire can have only one Fever Pitch."
+102321,102321:MODIFIER:PRE,Fever Pitch,Action Modifier,PRE,"+1 bleed (limited), and if the bleed is successful (for 1 or more), you can put this card on this vampire after action resolution. This vampire can burn this card during a bleed action they perform to have a block attempt fail; the blocking minion cannot attempt to block this action again. A vampire can have only one Fever Pitch."
 100725,100725:ACTION,Field Training,Action,,"+1 stealth action. Requires an Anarch.
 Unlock this vampire, choose a Discipline they have at superior, and put this card on another ready non-titled vampire you control. The attached vampire is considered Anarch and gets +1 level of the chosen Discipline. If the attached vampire changes sect, burn this card. A vampire can have only one Field Training."
 100726,100726:ACTION,Fiendish Tongue,Action,,"Requires a Sabbat vampire.
@@ -2093,9 +2103,13 @@ Only usable if the action was successful. Unlock this vampire."
 100788,100788:MODIFIER:FOR,Freak Drive,Action Modifier,FOR,"Only usable after action resolution.
 Only usable if the action was blocked. Unlock this vampire."
 102324,102324:ALLY:obl,Freakish Conglomeration,Ally,obl,"Zombie with 3 life. 3 strength, 1 bleed.
-or [tha] During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action."
+During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action."
+102324,102324:ALLY:tha,Freakish Conglomeration,Ally,tha,"Zombie with 3 life. 3 strength, 1 bleed.
+During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action."
 102324,102324:ALLY:OBL,Freakish Conglomeration,Ally,OBL,"Zombie with 3 life. 3 strength, 1 bleed.
-or [tha] During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action, but this ally has 4 life."
+During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action, but this ally has 4 life."
+102324,102324:ALLY:THA,Freakish Conglomeration,Ally,THA,"Zombie with 3 life. 3 strength, 1 bleed.
+During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action, but this ally has 4 life."
 100789,100789:COMBAT:san,Free Fight,Combat,san,"Only usable before range is determined.
 Lock this Blood Brother and any number of ready unlocked members you control of this circle. Once each round before range is determined, or whenever your combatant leaves the ready region, you may choose one of these ready Blood Brothers to become the combatant instead (and combat continues)."
 100789,100789:COMBAT:SAN,Free Fight,Combat,SAN,"Only usable before range is determined.
@@ -2198,9 +2212,13 @@ Put this card on this Gangrel with any number of cards requiring Protean [pro] f
 100828,100828:REACTION:obe,Gift of Sleep,Reaction,obe,Only usable if this vampire is about to enter combat with an ally. Lock that ally and end the action. (Do not lock this vampire if they are blocking.)
 100828,100828:MODIFIER:OBE,Gift of Sleep,Action Modifier,OBE,+1 stealth.
 102325,102325:MODIFIER:dom,Gifts From Hereafter,Action Modifier,dom,"Only usable by a ready unlocked vampire other than the acting wraith or zombie ally.
-or [obl] The acting ally gets +1 bleed (limited)."
+The acting ally gets +1 bleed (limited)."
+102325,102325:MODIFIER:obl,Gifts From Hereafter,Action Modifier,obl,"Only usable by a ready unlocked vampire other than the acting wraith or zombie ally.
+The acting ally gets +1 bleed (limited)."
 102325,102325:MODIFIER:DOM,Gifts From Hereafter,Action Modifier,DOM,"Only usable by a ready unlocked vampire other than the acting wraith or zombie ally.
-or [obl] The acting ally gets +1 bleed (limited), and after action resolution, this vampire can burn 1 blood to unlock the acting ally."
+The acting ally gets +1 bleed (limited), and after action resolution, this vampire can burn 1 blood to unlock the acting ally."
+102325,102325:MODIFIER:OBL,Gifts From Hereafter,Action Modifier,OBL,"Only usable by a ready unlocked vampire other than the acting wraith or zombie ally.
+The acting ally gets +1 bleed (limited), and after action resolution, this vampire can burn 1 blood to unlock the acting ally."
 100829,100829:POLITICAL,Giovanni Acceptance,Political Action,,"Successful referendum means this card is put in play and each Giovanni can choose to become Camarilla. As any Giovanni enters play, they can choose to become Camarilla."
 100830,100830:MASTER,Giovanni Discrimination,Master,,"Unique Master.
 Put this card in play. Any Giovanni burns 1 additional blood when attempting to block an action. This card may be burned by any minion as a (D) action."
@@ -2421,9 +2439,13 @@ Only usable if an ally would be burned in combat. Instead, they gain 1 life if t
 100907,100907:COMBAT:OBE,Heaven's Gate,Combat,OBE,"Only usable by a ready unlocked vampire not involved in the combat.
 Only usable if an ally would be burned in combat. Instead, they gain 1 life if they have no life, and they cannot enter (or be involved in) combat, perform actions, or block this turn; end combat, but add 2 life if they have no life, not to exceed their starting life."
 102328,102328:MODIFIER:for,Hedonism,Action Modifier,for,"Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block.
-or [pre] That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them."
+That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them."
+102328,102328:MODIFIER:pre,Hedonism,Action Modifier,pre,"Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block.
+That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them."
 102328,102328:MODIFIER:FOR,Hedonism,Action Modifier,FOR,"Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block.
-or [pre] That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them, but queue no combat."
+That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them, but queue no combat."
+102328,102328:MODIFIER:PRE,Hedonism,Action Modifier,PRE,"Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block.
+That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them, but queue no combat."
 100908,100908:MASTER,"Heidelberg Castle, Germany",Master,,"Unique location.
 Lock to move blood, equipment and/or retainers between any two ready vampires you control. Cannot be used during an action."
 100909,100909:EQUIPMENT,Helicopter,Equipment,,"Vehicle.
@@ -2534,9 +2556,13 @@ Put this card on any ready vampire. This vampire gets +1 stealth when attempting
 102356,102356:ACTION:AUS,Hunting the Beast,Action,AUS,"+1 stealth action.
 (D) Enter combat with a vampire, and at the end of that combat, if this vampire is ready and the opposing vampire is not, add 2 blood to a Salubri in your uncontrolled region."
 102329,102329:COMBAT:cel,Hunting the Quarry,Combat,cel,"Only usable if both combatants are still ready. A vampire can play only one Hunting the Quarry each combat.
-or [tha] Only usable if combat is about to end. Put this card on the opposing minion. You still control this card. Vampires you control can burn this card to attempt to enter combat with the attached minion as a +1 stealth (D) action."
+Only usable if combat is about to end. Put this card on the opposing minion. You still control this card. Vampires you control can burn this card to attempt to enter combat with the attached minion as a +1 stealth (D) action."
+102329,102329:COMBAT:tha,Hunting the Quarry,Combat,tha,"Only usable if both combatants are still ready. A vampire can play only one Hunting the Quarry each combat.
+Only usable if combat is about to end. Put this card on the opposing minion. You still control this card. Vampires you control can burn this card to attempt to enter combat with the attached minion as a +1 stealth (D) action."
 102329,102329:COMBAT:CEL,Hunting the Quarry,Combat,CEL,"Only usable if both combatants are still ready. A vampire can play only one Hunting the Quarry each combat.
-or [THA] Only usable if combat would end. Instead, this vampire burns 1 blood to start a new round."
+Only usable if combat would end. Instead, this vampire burns 1 blood to start a new round."
+102329,102329:COMBAT:THA,Hunting the Quarry,Combat,THA,"Only usable if both combatants are still ready. A vampire can play only one Hunting the Quarry each combat.
+Only usable if combat would end. Instead, this vampire burns 1 blood to start a new round."
 100947,100947:MODIFIER:dai,I am Legion,Action Modifier,dai,+1 stealth.
 100947,100947:MODIFIER:dai+obf,I am Legion,Action Modifier,dai+obf,Cancel a reaction card requiring Auspex [aus] as it is played (cost must be paid).
 100947,100947:MODIFIER:DAI+OBF,I am Legion,Action Modifier,DAI+OBF,"Cancel a reaction card requiring Auspex [aus] as it is played (cost must be paid), and/or gain 1 pool after action resolution if this action is successful."
@@ -2823,8 +2849,10 @@ This Guruhi gets 3 additional votes. If this Guruhi casts votes in favor, and th
 If you have 5 or fewer pool, gain 3 pool. Otherwise, gain 1 pool. In either case, put this card in play. You cannot use transfers to move counters to or from your uncontrolled minions. If you control the Edge during your unlock phase, burn this card."
 101060,101060:MASTER,"Kingston Penitentiary, Ontario",Master,,"Master: unique location. Hunting ground.
 During your unlock phase, you may move 1 blood from the blood bank to a ready vampire you control. Any other Methuselah may give you a pool during his or her unlock phase to lock this card to move 1 blood from the blood bank to a ready vampire he or she controls. A vampire can gain blood from only one hunting ground card each turn."
-102330,102330:COMBAT:obf,Kiss of Cathari,Combat,obf,or [pre] Strike: combat ends.
-102330,102330:COMBAT:OBF,Kiss of Cathari,Combat,OBF,"or [pre] Strike: combat ends, and after combat ends, if the range is close, stun the opposing minion."
+102330,102330:COMBAT:obf,Kiss of Cathari,Combat,obf,Strike: combat ends.
+102330,102330:COMBAT:pre,Kiss of Cathari,Combat,pre,Strike: combat ends.
+102330,102330:COMBAT:OBF,Kiss of Cathari,Combat,OBF,"Strike: combat ends, and after combat ends, if the range is close, stun the opposing minion."
+102330,102330:COMBAT:PRE,Kiss of Cathari,Combat,PRE,"Strike: combat ends, and after combat ends, if the range is close, stun the opposing minion."
 101061,101061:ACTION:ser,Kiss of Lachesis,Action,ser,"+1 stealth action.
 (D) Burn a retainer or non-unique equipment."
 101061,101061:ACTION:tem,Kiss of Lachesis,Action,tem,"+1 stealth action.
@@ -3047,9 +3075,13 @@ Search your library for an equipment card and equip this vampire with it (requir
 101143,101143:ACTION:THA,Magic of the Smith,Action,THA,"+1 stealth action.
 Search your library for an equipment card and equip this vampire with it (requirements and cost apply as normal; shuffle afterward), but this is a +3 stealth action."
 102331,102331:MODIFIER:dom,Magnetic Authority,Action Modifier,dom,"Only usable after resolution of a political action whose referendum passed.
-or [pot] Add 2 blood to a Sabbat vampire in your uncontrolled region."
+Add 2 blood to a Sabbat vampire in your uncontrolled region."
+102331,102331:MODIFIER:pot,Magnetic Authority,Action Modifier,pot,"Only usable after resolution of a political action whose referendum passed.
+Add 2 blood to a Sabbat vampire in your uncontrolled region."
 102331,102331:MODIFIER:DOM,Magnetic Authority,Action Modifier,DOM,"Only usable after resolution of a political action whose referendum passed.
-or [POT] Add 1 blood to each Sabbat vampire in your uncontrolled region."
+Add 1 blood to each Sabbat vampire in your uncontrolled region."
+102331,102331:MODIFIER:POT,Magnetic Authority,Action Modifier,POT,"Only usable after resolution of a political action whose referendum passed.
+Add 1 blood to each Sabbat vampire in your uncontrolled region."
 101144,101144:COMBAT:pre,Majesty,Combat,pre,Strike: combat ends.
 101144,101144:COMBAT:PRE,Majesty,Combat,PRE,"Strike: combat ends, and unlock this vampire before combat ends."
 101145,101145:MASTER,Major Boon,Master,,"Master: out-of-turn. Boon. Only usable if another Methuselah is being bled by a minion you do not control and the bleed amount is 1 or more, after blocks are declined.
@@ -3293,9 +3325,13 @@ Put this card on a ready vampire you control. Once each turn after a combat invo
 102253,102253:ACTION:DOM+PRO,Monstrous Form,Action,DOM+PRO,"+1 stealth action. Put this card on this vampire. During combat, you can lock this card to give this vampire +1 strength this round, or 1 maneuver or press."
 102253,102253:COMBAT:DOM+PRO,Monstrous Form,Combat,DOM+PRO,"+1 stealth action. Put this card on this vampire. During combat, you can lock this card to give this vampire +1 strength this round, or 1 maneuver or press."
 102332,102332:COMBAT:obl,Morbidity,Combat,obl,"Only usable before range is determined in combat with a vampire. A vampire can play only one Morbidity each round.
-or [tha] Put this card in play and move up to 2 blood from the opposing vampire to this card. After combat ends, move all the blood from this card to the opposing vampire and burn this card."
+Put this card in play and move up to 2 blood from the opposing vampire to this card. After combat ends, move all the blood from this card to the opposing vampire and burn this card."
+102332,102332:COMBAT:tha,Morbidity,Combat,tha,"Only usable before range is determined in combat with a vampire. A vampire can play only one Morbidity each round.
+Put this card in play and move up to 2 blood from the opposing vampire to this card. After combat ends, move all the blood from this card to the opposing vampire and burn this card."
 102332,102332:COMBAT:OBL,Morbidity,Combat,OBL,"Only usable before range is determined in combat with a vampire. A vampire can play only one Morbidity each round.
-or [tha] Put this card in play and move up to 2 blood from the opposing vampire to this card. After combat ends, move all the blood from this card to the opposing vampire and burn this card, and combat cards cost the opposing vampire +1 blood."
+Put this card in play and move up to 2 blood from the opposing vampire to this card. After combat ends, move all the blood from this card to the opposing vampire and burn this card, and combat cards cost the opposing vampire +1 blood."
+102332,102332:COMBAT:THA,Morbidity,Combat,THA,"Only usable before range is determined in combat with a vampire. A vampire can play only one Morbidity each round.
+Put this card in play and move up to 2 blood from the opposing vampire to this card. After combat ends, move all the blood from this card to the opposing vampire and burn this card, and combat cards cost the opposing vampire +1 blood."
 101243,101243:MASTER,Morgue Hunting Ground,Master,,"Unique location. Hunting ground.
 During your unlock phase, a ready vampire you control can gain 1 blood. A vampire can gain blood from only one hunting ground each turn."
 101244,101244:COMBAT:cel,Morphean Blow,Combat,cel,"Only usable at close range.
@@ -4019,9 +4055,13 @@ Move any mortal or ghoul retainer you control to this vampire, or put this card 
 101526,101526:ACTION:THN,Putrescent Servitude,Action,THN,"+1 stealth action.
 Move any mortal or ghoul retainer you control to this vampire, or put this card on a mortal or ghoul ally you control. This ally gains 1 life, and he or she may play cards that require basic Potence [pot] as a vampire, but take any mortal or ghoul retainer or put this card on any mortal or ghoul ally and take control of that ally."
 102335,102335:ACTION:obl,Putrescent Sustenance,Action,obl,"+1 stealth action.
-or [tha] Remove an ally in an ash heap from the game to gain 2 blood or to add 2 life to a zombie ally you control."
+Remove an ally in an ash heap from the game to gain 2 blood or to add 2 life to a zombie ally you control."
+102335,102335:ACTION:tha,Putrescent Sustenance,Action,tha,"+1 stealth action.
+Remove an ally in an ash heap from the game to gain 2 blood or to add 2 life to a zombie ally you control."
 102335,102335:ACTION:OBL,Putrescent Sustenance,Action,OBL,"+1 stealth action.
-or [tha] Remove an ally in an ash heap from the game to gain 2 blood or to add 2 life to a zombie ally you control, but for 3 blood or life."
+Remove an ally in an ash heap from the game to gain 2 blood or to add 2 life to a zombie ally you control, but for 3 blood or life."
+102335,102335:ACTION:THA,Putrescent Sustenance,Action,THA,"+1 stealth action.
+Remove an ally in an ash heap from the game to gain 2 blood or to add 2 life to a zombie ally you control, but for 3 blood or life."
 101527,101527:ALLY,Qetu the Evil Doer,Ally,,"Unique mummy with 3 life. 1 strength, 2 bleed.
 Qetu gets 1 optional press each combat, only usable to end combat. If Qetu is burned, shuffle her into her owner's library."
 101528,101528:COMBAT:obf,Quick Exit,Combat,obf,"Press, only usable to end combat."
@@ -4049,9 +4089,13 @@ As this location is played or its controller changes, its controller chooses a r
 101537,101537:ALLY,Rafastio Ghoul,Ally,,"Ghoul with 2 life. 1 bleed, 1 strength.
 Rafastio Ghoul can play cards requiring basic Thaumaturgy [tha] as a vampire with a capacity of 3."
 102336,102336:COMBAT:ani,Rage of Apedemak,Combat,ani,"Frenzy. Only usable before range is determined. A vampire can play only one Rage of Apedemak each combat.
-or [pot] This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage."
+This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage."
+102336,102336:COMBAT:pot,Rage of Apedemak,Combat,pot,"Frenzy. Only usable before range is determined. A vampire can play only one Rage of Apedemak each combat.
+This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage."
 102336,102336:COMBAT:ANI,Rage of Apedemak,Combat,ANI,"Frenzy. Only usable before range is determined. A vampire can play only one Rage of Apedemak each combat.
-or [pot] This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage, but this vampire's hand strikes inflict +2 damage."
+This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage, but this vampire's hand strikes inflict +2 damage."
+102336,102336:COMBAT:POT,Rage of Apedemak,Combat,POT,"Frenzy. Only usable before range is determined. A vampire can play only one Rage of Apedemak each combat.
+This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage, but this vampire's hand strikes inflict +2 damage."
 102303,102303:POLITICAL,Raising the Portcullis,Political Action,,"Successful referendum means this card is put in play. While your prey controls a vampire in torpor, vampires you control get +1 bleed. Vampires can call a referendum to burn this card as a +1 stealth political action. A Methuselah can have only one Raising the Portcullis."
 101538,101538:COMBAT,Raking Talons,Combat,,"Only usable before range is determined.
 For the remainder of combat, damage from this Gargoyle's hand strikes is aggravated. A vampire may play only one Raking Talons each combat."
@@ -4202,8 +4246,10 @@ Successful referendum means each Methuselah can choose a ready vampire they cont
 101595,101595:COMBAT:for,Relentless Reaper,Combat,for,Prevent 1 damage.
 101595,101595:COMBAT:thn,Relentless Reaper,Combat,thn,Press.
 101595,101595:COMBAT:THN,Relentless Reaper,Combat,THN,"Only usable if both combatants are still ready and combat would end. Instead, burn 1 blood to start a new round."
-102337,102337:MODIFIER:cel,Relentlessness,Action Modifier,cel,or [for] +1 stealth.
-102337,102337:MODIFIER:CEL,Relentlessness,Action Modifier,CEL,or [FOR] Only usable if a minion attempts to block. That attempt fails and the blocking minion cannot attempt to block this action again.
+102337,102337:MODIFIER:cel,Relentlessness,Action Modifier,cel,+1 stealth.
+102337,102337:MODIFIER:for,Relentlessness,Action Modifier,for,+1 stealth.
+102337,102337:MODIFIER:CEL,Relentlessness,Action Modifier,CEL,Only usable if a minion attempts to block. That attempt fails and the blocking minion cannot attempt to block this action again.
+102337,102337:MODIFIER:FOR,Relentlessness,Action Modifier,FOR,Only usable if a minion attempts to block. That attempt fails and the blocking minion cannot attempt to block this action again.
 101596,101596:EQUIPMENT,Reliquary: Akunanse Remains,Equipment,,"Unique equipment.
 During your unlock phase, choose Abombwe [abo], Animalism [ani] or Fortitude [for]. Until your next unlock phase, the Akunanse with this equipment has an additional level of the chosen Discipline. The Akunanse with this equipment gets +1 bleed and gains 1 capacity: he or she is one generation older."
 101597,101597:EQUIPMENT,Reliquary: Biague,Equipment,,"Equipment.
@@ -4529,9 +4575,13 @@ Choose a younger vampire. The chosen vampire cannot block this action, but choos
 101713,101713:ACTION:THA,Seeds of Corruption,Action,THA,"+1 stealth action.
 (D) Put this card on one of your prey's vampires. If the vampire is a Follower of Set, he or she burns 2 additional blood when attempting an action; otherwise, he or she burns 1 additional blood when attempting an action. The vampire's special abilities cannot be used. Any vampire(s) may burn this card with two +1 stealth actions, but the vampire burns 2 additional blood when attempting an action; Followers of Set burn 3 additional blood."
 102338,102338:MODIFIER:obf,Seeds of Terror,Action Modifier,obf,"Only usable as the action is announced.
-or [pre] Minions must burn 1 blood to attempt to block this action."
+Minions must burn 1 blood to attempt to block this action."
+102338,102338:MODIFIER:pre,Seeds of Terror,Action Modifier,pre,"Only usable as the action is announced.
+Minions must burn 1 blood to attempt to block this action."
 102338,102338:MODIFIER:OBF,Seeds of Terror,Action Modifier,OBF,"Only usable as the action is announced.
-or [pre] Minions must burn 1 blood to attempt to block this action, and choose a vampire. The chosen vampire cannot block this action."
+Minions must burn 1 blood to attempt to block this action, and choose a vampire. The chosen vampire cannot block this action."
+102338,102338:MODIFIER:PRE,Seeds of Terror,Action Modifier,PRE,"Only usable as the action is announced.
+Minions must burn 1 blood to attempt to block this action, and choose a vampire. The chosen vampire cannot block this action."
 101714,101714:COMBAT:qui,Selective Silence,Combat,qui,"Only usable during the first round of combat.
 Maneuver."
 101714,101714:COMBAT:QUI,Selective Silence,Combat,QUI,"Only usable during the first round of combat.
@@ -4563,8 +4613,10 @@ Rescue a vampire from torpor, and the rescued vampire gains 1 blood."
 101721,101721:ACTION:CHI,Sensory Deprivation,Action,CHI,"(D) Burn a retainer or put this card on an ally. The attached minion does not unlock as normal. Burn this card after this acting vampire leaves the ready region, but put this card on a vampire in play."
 101722,101722:ACTION:chi,Sensory Overload,Action,chi,(D) Put this card on a ready minion; you still control this card. The attached minion cannot perform actions or block. Burn this card during their discard phase.
 101722,101722:ACTION:CHI,Sensory Overload,Action,CHI,"(D) Put this card on a ready minion; you still control this card. The attached minion cannot perform actions or block. Burn this card during their discard phase, but burn this card during your unlock phase."
-102339,102339:REACTION:ani,Sentry Signal,Reaction,ani,or [tha] Only usable by a locked vampire. This vampire unlocks and attempts to block.
-102339,102339:REACTION:ANI,Sentry Signal,Reaction,ANI,or [THA] Reduce a bleed against you by 3.
+102339,102339:REACTION:ani,Sentry Signal,Reaction,ani,Only usable by a locked vampire. This vampire unlocks and attempts to block.
+102339,102339:REACTION:tha,Sentry Signal,Reaction,tha,Only usable by a locked vampire. This vampire unlocks and attempts to block.
+102339,102339:REACTION:ANI,Sentry Signal,Reaction,ANI,Reduce a bleed against you by 3.
+102339,102339:REACTION:THA,Sentry Signal,Reaction,THA,Reduce a bleed against you by 3.
 101723,101723:POLITICAL,Seraph,Political Action,,"Requires a Black Hand vampire.
 Choose a non-Seraph Black Hand vampire with a capacity above 5. If this referendum is successful, put this card on the chosen vampire. That Black Hand vampire gains 2 blood and is a Seraph. Non-Sabbat vampires cannot cast votes or ballots in this referendum."
 101724,101724:MODIFIER,Seraph's Second,Action Modifier,,"Requires a ready Seraph. Only usable when a non-Seraph Black Hand vampire is acting, after resolution.
@@ -4883,8 +4935,10 @@ Search your crypt for a younger vampire without Obfuscate [obf], reveal them, an
 This vampire gains blood equal to half the burned vampire's capacity rounded down."
 101836,101836:COMBAT:NEC,Soul Stealing,Combat,NEC,"Only usable if this vampire burns a vampire controlled by your prey.
 This vampire gains blood equal to half the burned vampire's capacity rounded down, but usable in combat."
-102340,102340:COMBAT:pot,Soulgrinder,Combat,pot,or [tha] Strike: hand strike at +2 damage.
-102340,102340:COMBAT:POT,Soulgrinder,Combat,POT,"or [tha] Strike: hand strike at +2 damage, and damage from this strike cannot be prevented by cards requiring Fortitude [for]."
+102340,102340:COMBAT:pot,Soulgrinder,Combat,pot,Strike: hand strike at +2 damage.
+102340,102340:COMBAT:tha,Soulgrinder,Combat,tha,Strike: hand strike at +2 damage.
+102340,102340:COMBAT:POT,Soulgrinder,Combat,POT,"Strike: hand strike at +2 damage, and damage from this strike cannot be prevented by cards requiring Fortitude [for]."
+102340,102340:COMBAT:THA,Soulgrinder,Combat,THA,"Strike: hand strike at +2 damage, and damage from this strike cannot be prevented by cards requiring Fortitude [for]."
 101837,101837:ACTION:aus+dom,Sound of a Breaking Oath,Action,aus+dom,"+1 stealth action. Put this card on a minion you control. If an action to steal the minion with this card is successful, this minion is burned instead and the acting minion takes 1 unpreventable damage."
 101837,101837:REACTION:AUS+DOM,Sound of a Breaking Oath,Reaction,AUS+DOM,"+1 stealth action. Put this card on a minion you control. If an action to steal the minion with this card is successful, this minion is burned instead and the acting minion takes 1 unpreventable damage, but play when an action to steal a minion you control is successful."
 101838,101838:ACTION,Sowing Dissension,Action,,"Requires a ready anarch.
@@ -5029,8 +5083,10 @@ Burn 1 blood to have that attempt fail; the blocking minion cannot attempt to bl
 Play when a vampire diablerizes a vampire of more than twice his or her capacity (before the blood hunt referendum, if any). Usable on your own turn. Move the victim from the ash heap to his or her owner's ready region, and move all blood from the diablerist to him or her. Remove the diablerist from the game."
 101891,101891:EQUIPMENT,Submachine Gun,Equipment,,"Weapon, gun.
 3R damage each strike, with an optional maneuver each combat."
-102341,102341:MODIFIER:cel,Subversion,Action Modifier,cel,or [pre] +1 stealth.
-102341,102341:MODIFIER:CEL,Subversion,Action Modifier,CEL,"or [PRE] +1 bleed (limited), or +1 stealth and +1 bleed (limited)."
+102341,102341:MODIFIER:cel,Subversion,Action Modifier,cel,+1 stealth.
+102341,102341:MODIFIER:pre,Subversion,Action Modifier,pre,+1 stealth.
+102341,102341:MODIFIER:CEL,Subversion,Action Modifier,CEL,"+1 bleed (limited), or +1 stealth and +1 bleed (limited)."
+102341,102341:MODIFIER:PRE,Subversion,Action Modifier,PRE,"+1 bleed (limited), or +1 stealth and +1 bleed (limited)."
 101892,101892:ALLY,Succubus,Ally,,"Demon with 3 life. 1 strength, 0 bleed.
 Damage from Succubus's hand strikes is aggravated. Succubus may steal 1 blood or life (gaining a life) from a minion as a +1 stealth (D) action. Once each turn, she may burn 1 life to get +1 bleed for the current action."
 101893,101893:MASTER,Succubus Club,Master,,"Master: unique location.
@@ -5089,10 +5145,14 @@ Survivalist may strike for 2R damage. He may lock to give a Brujah antitribu you
 Put the Swarm on any ready minion (employing the Swarm is a +1 stealth (D) action if that minion is controlled by another Methuselah). If this action is blocked, put the Swarm on the acting minion instead (no cost is paid). During this minion's unlock phase, if the Swarm has more than 1 life, it burns a life; otherwise, it steals 1 blood or life from this minion. A minion may have only one Swarm."
 101915,101915:POLITICAL,Sweeper,Political Action,,"Requires a baron.
 Choose a ready Anarch vampire. If this referendum is successful, put this card on the chosen anarch. During your unlock phase, if the anarch with this card is ready, you may look at the top card of each Methuselah's library (including your own)."
-102342,102342:MODIFIER:cel,Swift Cover,Action Modifier,cel,or [obf] Strike: dodge.
-102342,102342:COMBAT:cel,Swift Cover,Combat,cel,or [obf] Strike: dodge.
-102342,102342:MODIFIER:CEL,Swift Cover,Action Modifier,CEL,or [OBF] +1 stealth.
-102342,102342:COMBAT:CEL,Swift Cover,Combat,CEL,or [OBF] +1 stealth.
+102342,102342:MODIFIER:cel,Swift Cover,Action Modifier,cel,Strike: dodge.
+102342,102342:COMBAT:cel,Swift Cover,Combat,cel,Strike: dodge.
+102342,102342:MODIFIER:obf,Swift Cover,Action Modifier,obf,Strike: dodge.
+102342,102342:COMBAT:obf,Swift Cover,Combat,obf,Strike: dodge.
+102342,102342:MODIFIER:CEL,Swift Cover,Action Modifier,CEL,+1 stealth.
+102342,102342:COMBAT:CEL,Swift Cover,Combat,CEL,+1 stealth.
+102342,102342:MODIFIER:OBF,Swift Cover,Action Modifier,OBF,+1 stealth.
+102342,102342:COMBAT:OBF,Swift Cover,Combat,OBF,+1 stealth.
 101916,101916:COMBAT:cel,Swiftness of the Stag,Combat,cel,Press.
 101916,101916:COMBAT:spi,Swiftness of the Stag,Combat,spi,Maneuver or press.
 101916,101916:MODIFIER:SPI,Swiftness of the Stag,Action Modifier,SPI,+1 stealth.
@@ -5531,8 +5591,10 @@ Burn a location."
 102081,102081:REFLEX:abo,Unseen Hibernation,Reflex,abo,Cancel a frenzy card played on this vampire as it is played.
 102081,102081:REACTION:abo,Unseen Hibernation,Reaction,abo,Only usable during an action directed at this vampire. Not usable if the acting minion is an older vampire. The action fails.
 102081,102081:REACTION:ABO,Unseen Hibernation,Reaction,ABO,"Only usable during an action directed at this vampire. Not usable if the acting minion is an older vampire. The action fails, but usable by a locked vampire."
-102346,102346:MODIFIER:pot,Unthinkable Humiliation,Action Modifier,pot,or [pre] Minions must burn 1 blood or life to attempt to block this action.
-102346,102346:MODIFIER:POT,Unthinkable Humiliation,Action Modifier,POT,"or [pre] Minions must burn 1 blood or life to attempt to block this action, and minions get -1 intercept."
+102346,102346:MODIFIER:pot,Unthinkable Humiliation,Action Modifier,pot,Minions must burn 1 blood or life to attempt to block this action.
+102346,102346:MODIFIER:pre,Unthinkable Humiliation,Action Modifier,pre,Minions must burn 1 blood or life to attempt to block this action.
+102346,102346:MODIFIER:POT,Unthinkable Humiliation,Action Modifier,POT,"Minions must burn 1 blood or life to attempt to block this action, and minions get -1 intercept."
+102346,102346:MODIFIER:PRE,Unthinkable Humiliation,Action Modifier,PRE,"Minions must burn 1 blood or life to attempt to block this action, and minions get -1 intercept."
 102082,102082:ACTION:san,Unwholesome Bond,Action,san,"+1 stealth action.
 This vampire gains X+1 blood, where X is the number of ready, unlocked Blood Brothers of the same circle as the acting vampire."
 102082,102082:ACTION:SAN,Unwholesome Bond,Action,SAN,"+1 stealth action.
@@ -5693,9 +5755,13 @@ Strike: 2R aggravated damage."
 102141,102141:ALLY,Walks-With-Might,Ally,,"Unique werewolf with 4 life. 3 strength, 0 bleed.
 Walks-With-Might gets +1 intercept against Followers of Set. Master cards cost you 1 additional pool to play. Each strike or damaging effect made against him inflicts 1 less damage on him."
 102347,102347:COMBAT:pro,Wall of Filth,Combat,pro,"Only usable before range is determined.
-or [tha] Put this card on this vampire. This vampire can burn this card to prevent 2 non-aggravated damage in combat. A vampire can have only one Wall of Filth."
+Put this card on this vampire. This vampire can burn this card to prevent 2 non-aggravated damage in combat. A vampire can have only one Wall of Filth."
+102347,102347:COMBAT:tha,Wall of Filth,Combat,tha,"Only usable before range is determined.
+Put this card on this vampire. This vampire can burn this card to prevent 2 non-aggravated damage in combat. A vampire can have only one Wall of Filth."
 102347,102347:COMBAT:PRO,Wall of Filth,Combat,PRO,"Only usable before range is determined.
-or [tha] Put this card on this vampire. This vampire can burn this card to prevent 2 non-aggravated damage in combat. A vampire can have only one Wall of Filth, but to prevent 2 damage in combat."
+Put this card on this vampire. This vampire can burn this card to prevent 2 non-aggravated damage in combat. A vampire can have only one Wall of Filth, but to prevent 2 damage in combat."
+102347,102347:COMBAT:THA,Wall of Filth,Combat,THA,"Only usable before range is determined.
+Put this card on this vampire. This vampire can burn this card to prevent 2 non-aggravated damage in combat. A vampire can have only one Wall of Filth, but to prevent 2 damage in combat."
 102142,102142:MASTER,"Wall Street Night, Financial Newspaper",Master,,"Unique location.
 During an undirected action, you can lock this location to give a minion you control +1 intercept. A minion you control can lock this location to attempt to move 1 counter from an investment card to your pool as a +1 stealth (D) action."
 102143,102143:MODIFIER:1,Wanderer's Counsel,Action Modifier,,Only usable during a referendum. Usable by a locked vampire. This Akunanse gets an additional vote in this referendum.

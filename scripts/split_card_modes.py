@@ -164,6 +164,43 @@ def parse_mode_line_header(line: str):
     return disc_codes, type_codes, effect_text
 
 
+def parse_mode_line_headers(line: str):
+    """
+    Parse one or more declaration headers from a mode line.
+
+    Some cards use alternate discipline syntax:
+      [pot] or [pre] Effect text.
+
+    That means the same effect can be declared with either discipline, so the
+    line should produce one mode per alternative rather than treating the
+    second bracket as ordinary effect text.
+    """
+    first_header = parse_mode_line_header(line)
+    if first_header is None:
+        return None
+
+    disc_codes, type_codes, effect_text = first_header
+    headers = [(disc_codes, type_codes, effect_text)]
+
+    while effect_text.startswith("or ["):
+        alt_header = parse_mode_line_header(effect_text[3:])
+        if alt_header is None:
+            break
+
+        alt_disc_codes, alt_type_codes, alt_effect_text = alt_header
+        headers.append((alt_disc_codes, alt_type_codes, alt_effect_text))
+        effect_text = alt_effect_text
+
+    if len(headers) == 1:
+        return headers
+
+    shared_effect_text = headers[-1][2]
+    return [
+        (alt_disc_codes, alt_type_codes, shared_effect_text)
+        for alt_disc_codes, alt_type_codes, _ in headers
+    ]
+
+
 def compute_level(disc_codes: list) -> str:
     """Determine inferior/superior/mixed/none from the discipline codes."""
     if not disc_codes:
@@ -183,6 +220,11 @@ def make_disc_key(disc_codes: list, type_codes: list) -> str:
     if type_codes:
         return "+".join(type_codes)
     return "none"
+
+
+def make_inferior_disc_key(disc_codes: list) -> str:
+    """Build the discipline key for the matching inferior level."""
+    return "+".join(c.lower() for c in disc_codes)
 
 
 def compute_declared_type(type_codes: list, original_type: str) -> str:
@@ -241,10 +283,10 @@ def parse_card(row: dict) -> list:
     mode_line_indices = []
     parsed_headers = {}
     for i, line in enumerate(lines):
-        header = parse_mode_line_header(line)
-        if header is not None:
+        headers = parse_mode_line_headers(line)
+        if headers is not None:
             mode_line_indices.append(i)
-            parsed_headers[i] = header
+            parsed_headers[i] = headers
 
     # No mode lines → single mode carrying the full text
     if not mode_line_indices:
@@ -260,15 +302,15 @@ def parse_card(row: dict) -> list:
 
     modes = []
     for i in mode_line_indices:
-        disc_codes, type_codes, effect_text = parsed_headers[i]
-        modes.append(RawMode(
-            disc_codes=disc_codes,
-            type_codes=type_codes,
-            effect_text=effect_text,
-            preamble=preamble,
-            postamble=postamble,
-            auto=is_auto(type_codes, original_type),
-        ))
+        for disc_codes, type_codes, effect_text in parsed_headers[i]:
+            modes.append(RawMode(
+                disc_codes=disc_codes,
+                type_codes=type_codes,
+                effect_text=effect_text,
+                preamble=preamble,
+                postamble=postamble,
+                auto=is_auto(type_codes, original_type),
+            ))
 
     return modes
 
@@ -296,8 +338,13 @@ def resolve_as_above(raw_modes: list) -> list:
             ref2 = match.group(2)  # e.g. 'qui', or None
 
             if ref1 is None:
-                # Plain "As above" → use the most recently resolved mode
-                if resolved_store:
+                # Plain "As above" normally means the matching inferior mode.
+                # Fall back to the immediately preceding mode for older syntax
+                # where the relationship is not discipline-keyed.
+                inferior_key = make_inferior_disc_key(mode.disc_codes)
+                if mode.disc_codes and inferior_key in resolved_store:
+                    ref_key = inferior_key
+                elif resolved_store:
                     ref_key = next(reversed(resolved_store))
                 else:
                     print(
@@ -441,7 +488,7 @@ def load_csv(path: Path) -> list:
 
 def write_modes_csv(records: list, path: Path) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=MODES_FIELDNAMES)
+        writer = csv.DictWriter(f, fieldnames=MODES_FIELDNAMES, lineterminator="\r\n")
         writer.writeheader()
         for r in records:
             writer.writerow({
@@ -450,13 +497,13 @@ def write_modes_csv(records: list, path: Path) -> None:
                 "Name": r.Name,
                 "DeclaredType": r.DeclaredType,
                 "DisciplineRequirement": r.DisciplineRequirement,
-                "CardText": r.CardText,
+                "CardText": r.CardText.replace("\n", "\r\n"),
             })
 
 
 def write_index_csv(records_by_card: dict, path: Path) -> None:
     with open(path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=INDEX_FIELDNAMES)
+        writer = csv.DictWriter(f, fieldnames=INDEX_FIELDNAMES, lineterminator="\r\n")
         writer.writeheader()
         for card_id, recs in records_by_card.items():
             writer.writerow({

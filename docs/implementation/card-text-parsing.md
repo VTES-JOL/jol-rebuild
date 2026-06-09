@@ -54,6 +54,12 @@ Discipline codes use **case to signal level**: all-lowercase = inferior, all-upp
 
 Multi-discipline requirements are expressed by adjacent brackets with no space: `[pot][pre]` requires both disciplines simultaneously.
 
+Alternate discipline requirements are expressed with `or` between bracket headers. These produce one declaration mode per alternative, all with the same effect text:
+```
+[pot] or [pre] +1 bleed.
+→ one `[pot]` mode and one `[pre]` mode
+```
+
 ---
 
 ## Preamble and Postamble
@@ -87,7 +93,7 @@ The parser expands these references by substituting the referenced effect text. 
 
 | Text | Reference target |
 |---|---|
-| `As above` | The immediately preceding mode |
+| `As above` | Matching inferior discipline when available; otherwise the immediately preceding mode |
 | `As [xxx] above` | The most recently resolved mode with discipline key `xxx` |
 | `As [xxx][yyy] above` | The most recently resolved mode with discipline key `xxx+yyy` |
 
@@ -96,6 +102,8 @@ Substitution strips the trailing period from the referenced text before appendin
 "Strike: 1R damage, with 1 optional maneuver." + ", with 1 optional press."
 → "Strike: 1R damage, with 1 optional maneuver, with 1 optional press."
 ```
+
+For alternate discipline syntax, a plain `As above` on a superior-level mode resolves to the matching inferior discipline when that inferior mode exists. This keeps `[POT] or [PRE] As above …` tied to `[pot]` and `[pre]` respectively instead of whichever alternative happened to be parsed immediately before it.
 
 ---
 
