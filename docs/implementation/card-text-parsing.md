@@ -14,6 +14,7 @@ The parsing script at `scripts/split_card_modes.py` reads `vteslib.csv` and prod
 |---|---|
 | `csv/modes/vteslib_modes.csv` | One row per declaration mode per card (~3,500 rows) |
 | `csv/modes/vteslib_index.csv` | One row per original card with mode count and mode list |
+| `csv/modes/vteslib_as_above_review.csv` | Non-additive `As above` clauses that were not transformed automatically and need review |
 
 ---
 
@@ -105,6 +106,26 @@ Substitution strips the trailing period from the referenced text before appendin
 
 For alternate discipline syntax, a plain `As above` on a superior-level mode resolves to the matching inferior discipline when that inferior mode exists. This keeps `[POT] or [PRE] As above …` tied to `[pot]` and `[pre]` respectively instead of whichever alternative happened to be parsed immediately before it.
 
+Some `As above` clauses are direct text replacements rather than additive suffixes. The parser applies conservative replacements when the target text is unambiguous. Supported replacement families include:
+- replacing `Remove N cards`;
+- replacing numeric `+N stealth`, `+N bleed`, `+N intercept`, `+N strength`, damage, prevention, blood, or life quantities;
+- replacing `Choose ...` target text;
+- removing a sentence that provides an option later removed by `but without the option to ...`;
+- converting additive stealth such as `but with +1 stealth` into a leading stealth effect when there is no existing stealth value to replace.
+
+Example:
+```
+[nec] Remove thirteen cards … to get +1 bleed (limited).
+[aus][nec] As [nec] above, but remove only seven cards.
+[AUS][NEC] As [aus][nec] above, but for +2 bleed (limited).
+
+→ Remove thirteen cards … to get +1 bleed (limited).
+→ Remove seven cards … to get +1 bleed (limited).
+→ Remove seven cards … to get +2 bleed (limited).
+```
+
+Rows whose `CardText` used one of these replacement transforms are marked with `Transformed=yes`. Non-additive `As above` suffixes that do not match a known transform are written to `vteslib_as_above_review.csv` so new cards can be reviewed after regeneration.
+
 ---
 
 ## DeclaredType Assignment
@@ -188,9 +209,17 @@ Collisions (same card, same type, same discipline) are disambiguated with a nume
 | `Name` | Card name |
 | `OriginalType` | Unmodified `Type` column from the source CSV |
 | `DeclaredType` | The card type for this specific mode |
-| `DisciplineCost` | Discipline code(s) joined with `+`; blank if none |
+| `ClanRequirement` | Unmodified `Clan` requirement from the source CSV; blank if none |
+| `PathRequirement` | Unmodified `Path` requirement from the source CSV; blank if none |
+| `SourceDiscipline` | Unmodified card-level `Discipline` field from the source CSV |
+| `PoolCost` | Unmodified `Pool Cost` from the source CSV |
+| `BloodCost` | Unmodified `Blood Cost` from the source CSV |
+| `ConvictionCost` | Unmodified `Conviction Cost` from the source CSV |
+| `BurnOption` | Unmodified `Burn Option` from the source CSV |
+| `DisciplineRequirement` | Parsed declaration-mode discipline code(s) joined with `+`; blank if none |
 | `Level` | `inferior` / `superior` / `mixed` / `none` |
 | `CardText` | Preamble + resolved effect text for this mode (curly braces stripped) |
+| `Transformed` | `yes` if an `As above` suffix was applied as a replacement transform instead of simple appended text |
 | `Auto` | `yes` if parsed automatically; `no` if type is ambiguous |
 
 ### `vteslib_index.csv`
@@ -206,6 +235,17 @@ Collisions (same card, same type, same discipline) are disambiguated with a nume
 
 ---
 
+### `vteslib_as_above_review.csv`
+
+| Column | Description |
+|---|---|
+| `ModeId` | Generated mode identifier matching `vteslib_modes.csv` |
+| `Name` | Card name |
+| `RawCardText` | Full original `Card Text` from `vteslib.csv` |
+| `RawModeText` | Source mode text containing the unresolved `As above` clause |
+
+---
+
 ## Curly Brace Notation
 
 The source CSV uses `{…}` to mark errata text — corrections to the printed card that differ between superior and inferior levels or reflect rules updates. The parser strips brace markers and keeps the inner text:
@@ -213,6 +253,8 @@ The source CSV uses `{…}` to mark errata text — corrections to the printed c
 {Only usable during a bleed action. +1 bleed (limited).}
 →  Only usable during a bleed action. +1 bleed (limited).
 ```
+
+Brace markers are stripped before mode headers and `As above` references are parsed, so source text such as `{As above,}` is treated as `As above,`.
 
 ---
 

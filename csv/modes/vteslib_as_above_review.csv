@@ -1,0 +1,449 @@
+ModeId,Name,RawCardText,RawModeText
+100008:ACTION:FOR,Ablative Skin,"+1 stealth action.
+[for] Put this card on the acting vampire and put 3 ablative counters on this card. While in combat, this vampire may remove any number of ablative counters from this card to prevent that amount of non-aggravated damage. Burn this card when it has no more ablative counters.
+[FOR] As above, but this vampire may also prevent aggravated damage in combat in this way.","As above, but this vampire may also prevent aggravated damage in combat in this way."
+100088:ACTION:vis,Armor of Terra,"+1 stealth action.
+[tha] Put this card on a slave Gargoyle you control. The Gargoyle with this card treats aggravated damage as normal damage. Burn this card if this Gargoyle goes to torpor. A Gargoyle can have only one Armor of Terra.
+[vis] As [tha] above, but put this card on this acting Gargoyle.
+[VIS] As [vis] above, and the Gargoyle with this card may prevent 1 damage each combat.","As [tha] above, but put this card on this acting Gargoyle."
+100091:COMBAT:OBT,Arms of the Abyss,"[obt] Strike: dodge.
+[OBT] As above, with 1 additional strike (limited).","As above, with 1 additional strike (limited)."
+100142:ACTION:VIC,Bauble,"+1 stealth action.
+[vic] Put this card on this vampire, search your library for a non-unique non-location equipment card, and put it on another minion you control (ignore requirements and cost; shuffle afterward). This vampire cannot perform actions, block or cast votes or ballots. You can burn this card and the chosen equipment during your unlock phase or after the minion with the chosen equipment leaves the controlled region.
+[VIC] As above, but you can burn this card and the chosen equipment at any time.","As above, but you can burn this card and the chosen equipment at any time."
+100155:ACTION:FOR,Bestow Vigor,"+1 stealth action.
+[for] Play on a vampire you control and unlock this acting vampire. The minion with this card may play combat cards that require Fortitude [for] as a vampire with basic Fortitude. Burn this card at the end of your next turn.
+[FOR] As above, but play on an ally you control.","As above, but play on an ally you control."
+100191:ACTION:OBF,Blithe Acceptance,"[obf] Put this card on the acting vampire. This vampire gets +1 stealth. Burn this card if this vampire enters combat. A vampire may have only 1 Blithe Acceptance.
+[OBF] As above, but this vampire can burn 1 blood when he enters combat instead of burning this card.","As above, but this vampire can burn 1 blood when he enters combat instead of burning this card."
+100203:COMBAT:VIC,Blood of Acid,"Only usable at close range before strikes are chosen. A vampire can play only one Blood of Acid each round.
+[vic] During each strike resolution this round, the opposing minion takes environmental damage equal to the amount of damage they successfully inflict on this vampire.
+[VIC] As above, but the damage is aggravated.","As above, but the damage is aggravated."
+100231:COMBAT:PRO,Body of Sun,"[pro] Strike: 3 aggravated damage if at close range or 1R aggravated damage if at long range. The same amount of aggravated damage is inflicted on this striking minion and on all retainers employed by either combatant.
+[PRO] As above, but this striking minion takes no damage from this card, although his or her retainers still do.","As above, but this striking minion takes no damage from this card, although his or her retainers still do."
+100237:COMBAT:PRO,Bone Spur,"[pro] For the remainder of this round, this vampire's hand damage is aggravated.
+[PRO] As above, but for the remainder of this combat.","As above, but for the remainder of this combat."
+100238:COMBAT:VIC,Bonecraft,"[vic] Strike: 1 damage and put this card on the opposing minion. The attached minion gets -1 strength (after the current strike resolution step). The attached minion can burn this card as a +1 stealth action that costs 2 blood (allies cannot pay blood costs).
+[VIC] As above, but the attached minion gets -2 strength.","As above, but the attached minion gets -2 strength."
+100274:MODIFIER:PRE,Business Pressure,"Only usable during the polling step of a political action.
+[pre] Methuselahs can burn pool to get votes during the resolution of this card (resolve this card before moving on). A Methuselah gets +2 votes for each pool they burn.
+[PRE] As above, but you get +3 votes for each pool you burn.","As above, but you get +3 votes for each pool you burn."
+100278:ACTION:AUS+DEM,"Call, The","+1 stealth action.
+[aus][dem] Add 2 blood to a younger vampire with Dementation [dem] in your uncontrolled region.
+[AUS][DEM] As above, but add 3 blood.","As above, but add 3 blood."
+100300:ACTION:PRO,Carrion Coffin,"[pro] Put this card on the acting vampire. The vampire with this card may burn 1 blood to unlock at the end of any Methuselah's turn. Any vampire can burn this card as a (D) action.
+[PRO] As above, but this action is at +1 stealth.","As above, but this action is at +1 stealth."
+100316:ACTION:DOM,Chain of Command,"+1 stealth action.
+[dom] Put X younger vampires from your uncontrolled region in play with 1 blood from the blood bank each (and with any blood they already have). You cannot choose any unique vampires already in play. Those vampires must bleed. When one of them bleeds successfully, or when all that can bleed have, move them all to the bottom of your crypt.
+[DOM] As above, but move X+1 younger vampires.","As above, but move X+1 younger vampires."
+100330:ACTION:SPI,Charge of the Buffalo,"[for] (D) Enter combat with a locked minion.
+[spi] (D) Enter combat with a minion. Set the range for the first round of that combat to close, and this acting vampire's initial strike during that round is strike: hand strike at +1 damage.
+[SPI] As [spi] above, but the strike is at +2 damage.","As [spi] above, but the strike is at +2 damage."
+100340:ACTION:VIS,Children of Stone,"+2 stealth action.
+[tha] Equip with an equipment card from your hand and reduce its cost by 1 pool or 1 blood (requirements apply as normal).
+[vis] Search your library (shuffle afterward) and/or hand for a gargoyle creature retainer and employ it (requirements and cost apply as normal).
+[VIS] As [vis] above, but reduce its cost by 1 blood or pool.","As [vis] above, but reduce its cost by 1 blood or pool."
+100363:COMBAT:SAN,Clockwerx,"[san] Only usable before range is determined. Move an equipment from a ready Blood Brother of the same circle to this Blood Brother in combat.
+[SAN] As above, but usable any time during combat.","As above, but usable any time during combat."
+100384:ACTION:DOM,Command the Legion,"[dom] Lock X-1 allies or younger vampires.
+[DOM] As above, but one of the minions may be the same age or older.","As above, but one of the minions may be the same age or older."
+100388:ACTION:NEC,Compel the Spirit,"+1 stealth action.
+[nec] Move an ally or retainer that has been burned from play since your last turn from your ash heap to your hand.
+[NEC] As above, but move it to your ready region (ignore requirements and cost) with life equal to its starting life. If it is a retainer, move it to the acting minion.","As above, but move it to your ready region (ignore requirements and cost) with life equal to its starting life. If it is a retainer, move it to the acting minion."
+100408:COMBAT:ANI,Conquer the Beast,"Only usable before range is determined during the first round.
+[ani] Put this card in play with 3 counters. This vampire cannot use equipment this combat. Each time a card is played this combat, reset the number of counters on this card to 3. During the press step of each round this combat, this card automatically burns 1 of those counters to give this vampire 1 mandatory press to continue combat. Burn this card at the end of combat.
+[ANI] As above, but the presses are optional.","As above, but the presses are optional."
+100450:MODIFIER:AUS,Crocodile's Tongue,"Only usable if an ally or younger vampire attempts to block.
+[aus] That attempt fails and the blocking minion's controller cannot attempt to block this action again. The blocking minion can burn 1 blood or life to cancel this card as it is played.
+[AUS] As above, but canceling this card requires 1 additional blood or life.","As above, but canceling this card requires 1 additional blood or life."
+100492:MODIFIER:FOR,Daring the Dawn,"[for] Vampires cannot block this action. This vampire takes 2 unpreventable environmental aggravated damage after action resolution.
+[FOR] As above, but this vampire takes 1 unpreventable environmental aggravated damage.","As above, but this vampire takes 1 unpreventable environmental aggravated damage."
+100502:MODIFIER:FOR,Day Operation,"[for] Only usable as the action is announced. Vampires cannot block this action. The acting vampire goes to torpor after resolving the action.
+[FOR] As above, but usable if a minion is attempting to block.","As above, but usable if a minion is attempting to block."
+100507:COMBAT:POT,"Death of My Conscience, The","Requires a vampire with a capacity above 5. Do not replace until after combat. Play before strikes are chosen.
+[pot] Burn up to four cards in your hand. For each card you burn this way, this vampire gets +1 strength for the remainder of combat. Do not replace these cards until after combat.
+[POT] As above, but this vampire gets +2 strength for the remainder of combat for each card you burn this way.","As above, but this vampire gets +2 strength for the remainder of combat for each card you burn this way."
+100509:ACTION:NEC,Death Pact,"This card is an action card that becomes a retainer card. +1 stealth action.
+[nec] (D) Put this card on a ready vampire. If that vampire is burned, put this card on the vampire who brought this card into play. This card then represents a wraith retainer with 2 life. Once each combat, the vampire with this retainer may treat one aggravated damage inflicted on him or her as normal.
+[NEC] As above, but the retainer has 3 life.","As above, but the retainer has 3 life."
+100518:REACTION:DOM,Deflection,"Only usable if a minion is bleeding you, after blocks are declined.
+[dom] Lock this reacting vampire. Change the target of the bleed to another Methuselah other than the acting minion's controller (that Methuselah can attempt to block).
+[DOM] As above, but do not lock this vampire.","As above, but do not lock this vampire."
+100528:ACTION:OBT,Descent into Darkness,"+1 stealth action.
+[obt] Put {this card on this vampire, then put} this vampire and any {other} cards and counters on them out of play (breaking any temporary control effects{; this card remains in play}){}. During your influence phase, this vampire can gain 2 blood and you can choose to burn this card to return the vampire to play (in the same region as they were before), locked.
+[OBT] As above, but the vampire is unlocked as they return to play.","As above, but the vampire is unlocked as they return to play."
+100540:MODIFIER:ABO,Devil-Channel: Throat,"[abo] [REFLEX] Cancel a frenzy card played on this vampire as it is played.
+[abo] Frenzy (played on this acting vampire). Only usable when a non-werewolf ally or younger vampire attempts to block. That minion's blocking attempt fails (do not lock that minion). That minion cannot attempt to block this action again.
+[ABO] As above, but lock that blocking minion.","As above, but lock that blocking minion."
+100550:MODIFIER:PRE,Disarming Presence,"Only usable during a referendum before any votes or ballots are cast.
+[pre] When a vampire votes in this referendum, lock him or her.
+[PRE] As above, but do not lock your vampires when they cast their votes.","As above, but do not lock your vampires when they cast their votes."
+100555:COMBAT:OBF,Disguised Weapon,"Only usable before range is chosen if you have a weapon card in your hand.
+[obf] Equip this vampire with that weapon (and pay cost to equip as normal).
+[OBF] As above, but usable when choosing a strike.","As above, but usable when choosing a strike."
+100565:MODIFIER:SER,Divine Image,"Only usable as the action is announced.
+[ser] This action, this vampire gets -1 stealth, +1 strength, and can prevent 1 damage each combat.
+[SER] As above, with +1 bleed that does not count against the limit, only usable during a bleed action.","As above, with +1 bleed that does not count against the limit, only usable during a bleed action."
+100639:MODIFIER:DOM,Empowering the Puppet King,"{Only usable during a bleed action by a ready unlocked vampire other than the acting minion.}
+[dom] The acting minion gets +1 bleed {(limited)}.
+[DOM] As above, but usable by a ready locked vampire.","As above, but usable by a ready locked vampire."
+100658:ACTION:QUI,Erosion,"+1 stealth action.
+[qui] (D) Put this card on a minion controlled by another Methuselah. The attached minion gets a strength of 0 and cannot use melee weapons. They can burn this card as a +1 stealth action.
+[QUI] As above, but the action to burn this card does not get +1 stealth.","As above, but the action to burn this card does not get +1 stealth."
+100669:ACTION:NEC,Ex Nihilo,"+1 stealth action.
+[nec] Put this card on this vampire. This vampire gets +1 stealth, inflicts no damage in combat, and is immune to non-aggravated damage. This vampire cannot gain blood (instead, any blood they would gain goes to the blood bank). During your master phase, this vampire burns 1 blood or is burned. You can burn this card during your unlock phase.
+[NEC] As above, but you can burn this card during any Methuselah's unlock phase.","As above, but you can burn this card during any Methuselah's unlock phase."
+100679:COMBAT:AUS+VAL,Eye of Unforgiving Heaven,"[aus][val] Strike: 2R aggravated damage to all vampires, demon allies and demon retainers in combat. If this striking vampire is burned during the resolution of this strike, you gain 2 pool.
+[AUS][VAL] As above, but the damage done to this striking vampire is normal, not aggravated.","As above, but the damage done to this striking vampire is normal, not aggravated."
+100706:REACTION:CHI,Fata Amria,"[chi] [COMBAT] Strike: put this card on the opposing vampire; this strike cannot be dodged. The attached vampire cannot play cards requiring any superior Disciplines. They can burn this card during their unlock phase instead of unlocking as normal.
+[CHI] [REACTION] As above, but put this card on the acting vampire after resolution of a successful action directed at you (or a card you control).","As above, but put this card on the acting vampire after resolution of a successful action directed at you (or a card you control)."
+102249:RETAINER:ANI,Feral Hound,"Animal with 1 life.
+[ani] If the action to employ this retainer is successful, unlock this vampire during the next discard phase. You can lock this retainer to give the employer +1 intercept.
+[ANI] As above, but unlock this vampire after resolution of this action instead.","As above, but unlock this vampire after resolution of this action instead."
+100734:COMBAT:POT,Fire in the Blood,"Only usable before range is chosen.
+[pot] This vampire gets +1 strength for the remainder of combat.
+[POT] As above, but increase strength by 1 each round for the remainder of combat (e.g., this vampire will get +2 strength on the next round).","As above, but increase strength by 1 each round for the remainder of combat (e.g., this vampire will get +2 strength on the next round)."
+100749:COMBAT:PRO,Flesh of Marble,"Only usable before range is determined.
+[pro] This combat, if a damage is successfully inflicted on this vampire in a given round, any additional damage inflicted on this vampire in the same round is automatically prevented. Aggravated damage cannot be prevented this way.
+[PRO] As above, but aggravated damage is prevented this way as well.","As above, but aggravated damage is prevented this way as well."
+100750:COMBAT:VIC,Fleshcraft,"[vic] Strike: 1 damage and put this card on the opposing minion. The attached minion gets -1 stealth. The attached minion can burn this card as a +1 stealth action.
+[VIC] As above, but the attached minion minion gets -2 stealth.","As above, but the attached minion minion gets -2 stealth."
+100778:REACTION:QUI,Foul Blood,"Only usable if a vampire would successfully hunt.
+[qui] The acting vampire gets -1 hunt and, after action resolution, takes 1 unpreventable environmental damage. Lock this reacting vampire.
+[QUI] As above, but do not lock this reacting vampire.","As above, but do not lock this reacting vampire."
+102324:ALLY:OBL,Freakish Conglomeration,"Zombie with 3 life. 3 strength, 1 bleed.
+[obl] or [tha] During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action.
+[OBL] or [THA] As above, but this ally has 4 life.","As above, but this ally has 4 life."
+102324:ALLY:THA,Freakish Conglomeration,"Zombie with 3 life. 3 strength, 1 bleed.
+[obl] or [tha] During your unlock phase, this ally burns 1 life. This ally can enter combat with a minion as a (D) action.
+[OBL] or [THA] As above, but this ally has 4 life.","As above, but this ally has 4 life."
+100851:ACTION:NEC,Grasp the Ghostly,"+1 stealth action.
+[nec] Move a non-unique non-location equipment card from another Methuselah's ash heap to this minion and put 3 pathos counters on that equipment. During your unlock phase, burn 1 pathos counter from that equipment. Remove the equipment from the game if it has no pathos counters.
+[NEC] As above, but the equipment can be unique.","As above, but the equipment can be unique."
+100854:ACTION:MAL,Greater Curse,"+1 stealth action.
+[dai] (D) Bleed and gain 1 pool.
+[mal] (D) Put this card on an ally or a younger vampire. Bleed actions and combat cards cost this minion an additional blood or life. A minion can have only one Greater Curse. [mal] is not a Discipline.
+[MAL] As [mal] above, but the vampire need not be younger.","As [mal] above, but the vampire need not be younger."
+100891:RETAINER:PRO+SER,Hatch the Viper,"Retainer with 1 life.
+[pro][ser] The employer can prevent 1 damage each combat. Hatch the Viper inflicts 1 damage on the opposing minion each round of combat during normal strike resolution at close range.
+[PRO][SER] As above, but it inflicts 2 damage.","As above, but it inflicts 2 damage."
+100899:MODIFIER:SAN,Hay Ride,"Only usable after action resolution (successful or not).
+[san] Choose a Blood Brother of the same circle as this Blood Brother. As your next action, the chosen Blood Brother can play the action card used for this action from your ash heap as if from your hand.
+[SAN] As above, but this card costs 1 fewer blood.","As above, but this card costs 1 fewer blood."
+100904:ACTION:PRE,Heart of the City,"+1 stealth action.
+[pre] Put this card on this vampire. This vampire gets +1 bleed. A vampire can have only one Heart of the City.
+[PRE] As above, but this vampire gets +2 bleed.","As above, but this vampire gets +2 bleed."
+100907:COMBAT:OBE,Heaven's Gate,"Only usable by a ready unlocked vampire not involved in the combat.
+[nec] Prevent 1 damage to an ally in combat.
+[obe] Only usable if an ally would be burned in combat. Instead, they gain 1 life if they have no life, and they cannot enter (or be involved in) combat, perform actions, or block this turn; end combat.
+[OBE] As [obe] above, but add 2 life if they have no life, not to exceed their starting life.","As [obe] above, but add 2 life if they have no life, not to exceed their starting life."
+102328:MODIFIER:FOR,Hedonism,"Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block.
+[for] or [pre] That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them.
+[FOR] or [PRE] As above, but queue no combat.","As above, but queue no combat."
+102328:MODIFIER:PRE,Hedonism,"Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block.
+[for] or [pre] That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion, and queue a combat between them.
+[FOR] or [PRE] As above, but queue no combat.","As above, but queue no combat."
+100913:ACTION:POT,Heroic Might,"+3 stealth action.
+[pot] Put this card on this vampire. This vampire gets +1 strength. This vampire can strike: burn equipment. Burn this card if this vampire is in torpor. A vampire can have only one Heroic Might.
+[POT] As above, with an additional +1 strength, and this vampire can strike: 2R damage.","As above, with an additional +1 strength, and this vampire can strike: 2R damage."
+100917:ACTION:OBF,Hidden Pathways,"[obf] Put this card in play. Your minions get +1 stealth on non-bleeding {actions directed at} your prey. Any minion may burn this card as a (D) action. A Methuselah may have only one Hidden Pathways in play.
+[OBF] As above, but playing this card is a +1 stealth action.","As above, but playing this card is a +1 stealth action."
+100932:RETAINER:PRO,Homunculus,"Retainer with 1 life.
+[pro] During any Methuselah's unlock phase, the employer can burn 1 blood to unlock.
+[PRO] As above, but Homunculus has 2 life.","As above, but Homunculus has 2 life."
+100935:COMBAT:CHI,Horrid Reality,"Only usable before range is determined.
+[chi] Equip this vampire with the first weapon you find in your library (working down from the top; shuffle afterward; if the requirements are not met, it is burned). This weapon does not contest any card in play. Do not pay the cost for this weapon. At the end of this combat, burn the weapon if it is still in play.
+[CHI] As above, but shuffle the equipment into your library at the end of combat if it is still in play.","As above, but shuffle the equipment into your library at the end of combat if it is still in play."
+100954:COMBAT:CHI,Illusions of the Kindred,"Only usable before range is determined.
+[chi] Combat ends. Move the bottom card from your crypt to your ready region. That minion does not contest any other minions or titles in play. That vampire gains blood equal to half their capacity rounded down. That vampire and the opposing minion enter combat. Remove that minion from the game at the end of combat (if they are still in play).
+[CHI] As above, but that vampire gains blood equal to their capacity.","As above, but that vampire gains blood equal to their capacity."
+100955:ACTION:CHI,Illusory Resources,"+1 stealth action. Unique.
+[chi] Put this card in play with 1 counter. During your unlock phase, a ready vampire with Chimerstry [chi] you control can move 1 blood to this card. You can burn X counters from this card to reduce a bleed against you by X.
+[CHI] As above, but this card comes into play with 2 counters.","As above, but this card comes into play with 2 counters."
+100957:REACTION:QUI,Immaculate Vitae,"Only usable when a vampire controlled by another Methuselah successfully hunts.
+[qui] Put this card on that vampire; that vampire cannot block this reacting vampire. Burn this card if that vampire goes into torpor.
+[QUI] As above, but the acting vampire does not gain blood from the current hunting action.","As above, but the acting vampire does not gain blood from the current hunting action."
+100962:COMBAT:CHI,Imposing Phantasm,"Only usable before range is determined. A vampire can play only one Imposing Phantasm each combat.
+[chi] This vampire gets +1 strength this combat. After combat ends, if the opposing minion is ready, the opposing minion gains blood or life equal to the amount they lost to damage this combat.
+[CHI] As above, with 1 additional strike (limited) this round.","As above, with 1 additional strike (limited) this round."
+100971:COMBAT:POT,Increased Strength,"Only usable before range is determined.
+[pot] For the remainder of combat, all damaging strikes that require Potence [pot] made by this vampire inflict +1 damage.
+[POT] As above, but those strikes inflict +2 damage.","As above, but those strikes inflict +2 damage."
+100989:EQUIPMENT:THA,Inscription,"Equipment.
+[tha] Put this equipment on a ready vampire and put a card that requires Thaumaturgy [tha] from your hand on it (face up, out of play; this acting vampire pays the cost of that card). The vampire with this equipment can burn this equipment to use the basic Thaumaturgy ability of that card.
+[THA] As above, but the vampire can use the superior Thaumaturgy [THA] ability of the card.","As above, but the vampire can use the superior Thaumaturgy [THA] ability of the card."
+101009:REACTION:POT+PRE,Iron Heart,"[pot][pre] Cancel an action modifier that requires Presence [pre] as it is played. That card has no effect. No cost is paid.
+[POT][PRE] As [pot][pre] above, but cancel an action modifier that requires Dominate [dom].","As [pot][pre] above, but cancel an action modifier that requires Dominate [dom]."
+101017:RETAINER:ANI,Jackal,"Animal with 1 life.
+[ani] If your prey controls a ready Follower of Set or Assamite, the minion with this retainer gets +1 stealth.
+[ANI] As above, but this minion gets +2 stealth.","As above, but this minion gets +2 stealth."
+101027:COMBAT:FOR,Jua Vema,"[for] This vampire treats aggravated damage as normal damage this round.
+[FOR] As above, but for the remainder of the action if you lock an Aye on him or her.","As above, but for the remainder of the action if you lock an Aye on him or her."
+101049:REACTION:DOM,Kindred Coercion,"Only usable during a referendum.
+[dom] Force X vampires to abstain. This can cancel those vampires' votes and ballots. The affected vampires cannot be older than this reacting vampire.
+[DOM] As above, but you may change the votes and ballots that the affected vampires cast to votes and ballots of your choice instead. (The affected vampires may choose to abstain if they have not already cast their votes and ballots.)","As above, but you may change the votes and ballots that the affected vampires cast to votes and ballots of your choice instead. (The affected vampires may choose to abstain if they have not already cast their votes and ballots.)"
+101105:ACTION:NEC,Lifeless Tongues,"+1 stealth action.
+[nec] (D) Remove a vampire in any Methuselah's ash heap from the game and put this card in play under the control of that Methuselah. During this acting vampire's unlock phase, this acting vampire's controller can look at the hand of this Methuselah. Any minion can burn this card as a +1 stealth action.
+[NEC] As above, but during any unlock phase.","As above, but during any unlock phase."
+101116:MODIFIER:VIC,Lobotomy,"Only usable during a recruit ally action.
+[vic] Put this card on the ally and lock the ally after action resolution if this action is successful. Actions requiring Dominate [dom] or Presence [pre] have no effect on the attached ally. The attached ally gets -1 bleed and cannot maneuver.
+[VIC] As above, but the ally is not locked.","As above, but the ally is not locked."
+101123:ACTION:OBE,Lord of Serenity,"+1 stealth action.
+[for] Rescue up to two vampires from torpor. Vampires can ignore the normal prey, predator or target restrictions for blocking this action.
+[obe] Put this card on this vampire. During your unlock phase, this vampire can gain 1 blood. Vampires can burn this card as a (D) action.
+[OBE] As [obe] above, but this vampire can gain 2 blood.","As [obe] above, but this vampire can gain 2 blood."
+101143:ACTION:THA,Magic of the Smith,"+1 stealth action.
+[tha] Search your library for an equipment card and equip this vampire with it (requirements and cost apply as normal; shuffle afterward).
+[THA] As above, but this is a +3 stealth action.","As above, but this is a +3 stealth action."
+101159:MODIFIER:VIC,Malleable Visage,"Only usable by a ready unlocked vampire other than the acting minion.
+[vic] Only usable if an ally you control is blocked, before block resolution. Instead of resolving the block, unlock the acting minion, and this vampire and the blocking minion lock and enter combat (the action is still blocked).
+[VIC] As above, but usable if a vampire you control is blocked.","As above, but usable if a vampire you control is blocked."
+101166:ACTION:SER,Mark of Damnation,"[ser] (D) Put this card on a vampire controlled by your prey. Any minion in combat with that vampire gets +1 strength and gets one optional press to continue combat. The vampire with this card may burn this card as an action.
+[SER] As above, but opposing minions get +2 strength.","As above, but opposing minions get +2 strength."
+101180:ACTION:FOR,Masochism,"+1 stealth action.
+[for] Put this card on the acting vampire. Whenever damage is successfully inflicted on this vampire, put 1 rush counter on this card for each point of damage. Remove rush counters in excess of the vampire's capacity. Whenever this vampire plays a card, you may remove X rush counters from this card to reduce that card's blood cost by X.
+[FOR] As above, but put an additional rush counter on this card at the end of any round of combat in which this vampire takes damage.","As above, but put an additional rush counter on this card at the end of any round of combat in which this vampire takes damage."
+101182:RETAINER:NEC,Masquer,"Wraith with 1 life.
+[nec] Masquer is immune to non-aggravated damage. The employer gets +1 intercept. You can burn this retainer to give any minion +1 intercept.
+[NEC] As above, but Masquer has 2 life.","As above, but Masquer has 2 life."
+101185:ACTION:CHI,Mass Reality,"[chi] Put this card in play. Minions you control inflict +1 damage with weapons {each strike}. Any minion can burn this card as a (D) action.
+[CHI] As above, but they inflict +2 damage {each strike}.","As above, but they inflict +2 damage each strike."
+101200:ACTION:OBF,Memory's Fading Glimpse,"[obf] (D) Move an uncontrolled minion from your prey's uncontrolled region to the bottom of his or her crypt. Move all of the blood on that card to your prey's blood pool.
+[OBF] As above, but move one blood from the card to the acting vampire.","As above, but move one blood from the card to the acting vampire."
+101201:REACTION:OBF,Mental Maze,"Only usable if this vampire blocks an ally or younger vampire, before block resolution.
+[obf] Lock this vampire and end the action. This card costs Followers of Set 1 fewer blood.
+[OBF] As above, but do not lock this vampire.","As above, but do not lock this vampire."
+101220:ACTION:MAL,Minor Curse,"+1 stealth action.
+[mal] (D) Put this card on any minion. This minion's controller doesn't replace cards played by this minion until the end of the action. [mal] is not a Discipline.
+[MAL] As above, but the cards are not replaced until the discard phase of that turn.","As above, but the cards are not replaced until the discard phase of that turn."
+101251:COMBAT:SER,Mummify,"[ser] Strike: combat ends. This vampire unlocks and goes into torpor; put this card on the vampire. This vampire cannot attempt a leave torpor action. Burn this card if the vampire leaves torpor.
+[SER] As above, but this vampire may attempt a leave torpor action.","As above, but this vampire may attempt a leave torpor action."
+101254:RETAINER:ANI,Murder of Crows,"Animal with 1 life.
+[ani] Murder of Crows inflicts 1R damage on the opposing minion each round of combat during normal strike resolution.
+[ANI] As above, but Murder of Crows has 2 life.","As above, but Murder of Crows has 2 life."
+101262:COMBAT:PRO,Mythic Form,"Only usable before range is determined during the first round. A vampire can play only one Mythic Form each combat.
+[pro] This combat, this vampire gets +1 strength and can prevent 1 non-aggravated damage each round.
+[PRO] As above, but with 1 optional maneuver this round, and this vampire can strike: 2R aggravated damage once each round this combat.","As above, but with 1 optional maneuver this round, and this vampire can strike: 2R aggravated damage once each round this combat."
+101263:ACTION:THA,"Name Forgotten, The","[tha] (D) Put this card on a ready unique vampire. If the vampire with this card is burned, he or she is removed from the game instead, and all Methuselahs remove all other vampires with the same name in their crypts, uncontrolled regions and ash heaps from the game as well (shuffle all crypts afterward).
+[THA] As above, but this action is at +1 stealth.","As above, but this action is at +1 stealth."
+101283:ACTION:OBF,Night Moves,"[obf] (D) Bleed your predator or prey at +3 stealth. If more than 1 pool is bled with this action, ignore the excess.
+[OBF] (D) As above, but bleed at +6 stealth.","(D) As above, but bleed at +6 stealth."
+101286:MODIFIER:OBT,Nightshades,"[obt] Only usable as the action is announced. Choose an ally or younger vampire. The chosen minion gets -1 intercept.
+[OBT] As above, but usable if a minion attempts to block.","As above, but usable if a minion attempts to block."
+101296:ACTION:SPI,Nose of the Hound,"+1 stealth action.
+[aus] (D) Enter combat with a ready locked minion controlled by another Methuselah. This acting minion gets an optional maneuver in that combat.
+[spi] As [aus] above, with an additional optional maneuver during that combat.
+[SPI] As [spi] above, but enter combat with any ready minion controlled by another Methuselah.","As [spi] above, but enter combat with any ready minion controlled by another Methuselah."
+101309:REACTION:DOM,Obedience,"Only usable if this vampire is about to enter combat with an acting younger vampire.
+[dom] Unlock the acting vampire and end the action. (Do not lock this vampire if they are blocking.) The acting vampire cannot perform the same action this turn.
+[DOM] As above, but do not unlock the acting vampire.","As above, but do not unlock the acting vampire."
+101314:COMBAT:SAN,Octopod,"Requires a ready Blood Brother of the same circle as another one in combat. Usable by a vampire not involved in the combat.
+[san] Only usable before range is chosen. The other Blood Brother gets an additional strike {(limited)} each round{}.
+[SAN] As [san] above, but with two additional strikes {(limited)} each round.","As [san] above, but with two additional strikes (limited) each round."
+101340:RETAINER:ANI,Owl Companion,"Animal with 1 life.
+[ani] While the employer is in combat, the opposing minion's controller plays with an open hand.
+[ANI] As above, but Owl Companion has 2 life.","As above, but Owl Companion has 2 life."
+101349:ACTION:MYT,Pandora's Whisper,"+1 stealth action. Do not replace until your unlock phase.
+[nec] Move one library card from your ash heap to your hand (discard down afterward).
+[myt] Each other Methuselah can draw 2 cards. You draw 5 cards (discard down afterward).
+[MYT] As [myt] above, but you can put any of the cards you discard on the top of your library instead of in your ash heap.","As [myt] above, but you can put any of the cards you discard on the top of your library instead of in your ash heap."
+101381:REACTION:OBE,Peacemaker,"Only usable if this vampire blocks an action directed at you (or a card you control), before block resolution.
+[pre] Lock this blocking vampire. The action continues as if unblocked. This action, all minions get -1 bleed and -1 strength.
+[obe] As [pre] above, and unlock this blocking vampire after action resolution.
+[OBE] As [obe] above, but all minions get -2 bleed and -2 strength and cannot use weapons.","As [obe] above, but all minions get -2 bleed and -2 strength and cannot use weapons."
+101382:COMBAT:for+obe,Penitent Resilience,"[for] [COMBAT] This round, this vampire treats aggravated damage as normal damage and cards named /Flash Grenade/ have no effect on this vampire.
+[for][obe] [COMBAT] As [for] above, but until the end of combat.
+[FOR][OBE] [ACTION MODIFIER] Only usable as the action is announced. Choose a vampire. The chosen vampire cannot block this action.","As [for] above, but until the end of combat."
+101481:ACTION:THN,Pressing Flesh,"+1 stealth action.
+[thn] Move an ally in any ash heap who was burned from play to your ready region with this card and life equal to its starting life. This ally is a zombie instead of what it used to be, gets -1 bleed, cannot gain life, and can play cards requiring basic Fortitude [for] as a vampire.
+[THN] As above, but with 1 additional life.","As above, but with 1 additional life."
+101483:ACTION:POT,Preternatural Strength,"+2 stealth action.
+[pot] Put this card on this vampire. This vampire gets +1 strength. They cannot play cards named /Torn Signpost/. A vampire can have only one Preternatural Strength.
+[POT] As above, but this vampire gets +2 strength.","As above, but this vampire gets +2 strength."
+101516:REACTION:DOM,Pulling Strings,"Only usable during a referendum.
+[dom] Force a younger vampire to abstain. This can cancel that vampire's votes and ballots.
+[DOM] As above, but the affected vampire can be the same age or older.","As above, but the affected vampire can be the same age or older."
+101518:COMBAT,Punish,"[ACTION] +1 stealth action. (D) Put this card on a vampire. You still control this card. The vampire with this card cannot gain blood. Any blood he or she gains goes to the blood bank instead. Burn this card during your next unlock phase.
+[COMBAT] As [ACTION] above, but put this card on the opposing vampire as a hand strike (at strength damage) instead.","As [ACTION] above, but put this card on the opposing vampire as a hand strike (at strength damage) instead."
+101519:ALLY:NEC,Puppeteer,"Wraith with 1 life. 1 strength, 0 bleed.
+[nec] Puppeteer can take control of an ally or a vampire with capacity 4 or less until the end of your turn as a (D) action.
+[NEC] As above, but Puppeteer has 2 life.","As above, but Puppeteer has 2 life."
+101526:ACTION:THN,Putrescent Servitude,"+1 stealth action.
+[thn] Move any mortal or ghoul retainer you control to this vampire, or put this card on a mortal or ghoul ally you control. This ally gains 1 life, and he or she may play cards that require basic Potence [pot] as a vampire.
+[THN] (D) As above, but take any mortal or ghoul retainer or put this card on any mortal or ghoul ally and take control of that ally.","(D) As above, but take any mortal or ghoul retainer or put this card on any mortal or ghoul ally and take control of that ally."
+102336:COMBAT:ANI,Rage of Apedemak,"Frenzy. Only usable before range is determined. A vampire can play only one Rage of Apedemak each combat.
+[ani] or [pot] This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage.
+[ANI] or [POT] As above, but this vampire's hand strikes inflict +2 damage.","As above, but this vampire's hand strikes inflict +2 damage."
+102336:COMBAT:POT,Rage of Apedemak,"Frenzy. Only usable before range is determined. A vampire can play only one Rage of Apedemak each combat.
+[ani] or [pot] This combat, you get +1 hand size and this vampire's hand strikes inflict +1 damage.
+[ANI] or [POT] As above, but this vampire's hand strikes inflict +2 damage.","As above, but this vampire's hand strikes inflict +2 damage."
+101550:RETAINER:ANI,Raven Spy,"Animal with 1 life.
+[ani] The employer gets +1 intercept.
+[ANI] As above, but Raven Spy has 2 life.","As above, but Raven Spy has 2 life."
+101563:ALLY:THN,Reanimated Corpse,"Zombie with 2 life. 2 strength, 2 bleed.
+[thn] Put X pathos counters on this corpse when it enters play. During your unlock phase, burn 1 pathos counter. Remove the corpse from the game if it has no pathos counters. The corpse can play combat cards that require basic Fortitude [for] as a vampire.
+[THN] As above, but put 2 additional pathos counters on the corpse.","As above, but put 2 additional pathos counters on the corpse."
+101576:RETAINER:MYT,Redcap Wilder,"Changeling with 2 life.
+[myt] Vampires with capacity less than 7 must burn a blood to attempt to block the minion with this retainer.
+[MYT] As above, but the cost to employ this retainer is reduced by 1 blood.","As above, but the cost to employ this retainer is reduced by 1 blood."
+101578:REACTION:DOM,Redirection,"[dom] Only usable if a younger vampire is bleeding you, after blocks are declined. Lock this reacting vampire. Change the target of the bleed to another Methuselah other than the acting vampire's controller (that Methuselah can attempt to block).
+[DOM] As above, but the acting vampire can be the same age or older.","As above, but the acting vampire can be the same age or older."
+101585:ACTION:FOR,Regeneration,"+1 stealth action. Only usable by a vampire in torpor.
+[for] The acting vampire gains 4 blood from the blood bank. (Remove excess blood.) If this action is blocked, there is no combat; if the blocking minion is a vampire who can commit diablerie, that vampire may diablerize the acting vampire.
+[FOR] As above, but the acting vampire gains 5 blood from the blood bank.","As above, but the acting vampire gains 5 blood from the blood bank."
+101604:ACTION:FOR,Repair the Undead Flesh,"+3 stealth action.
+[for] Put this card on this vampire. In combat, this vampire may heal aggravated damage by burning 3 blood per point healed. Burn this card if this vampire goes to torpor.
+[FOR] As above, but burn only 2 blood per point.","As above, but burn only 2 blood per point."
+101617:ACTION:OBE,Resurrection,"+1 stealth action. Only usable if an ally or retainer has been burned from play since your last turn.
+[val] Move the ally or retainer card from your ash heap to your hand.
+[obe] Move the retainer card from an ash heap to this vampire, with life equal to its starting life. If it requires a Discipline, use the basic level.
+[OBE] As [obe] above, but move the ally card instead and put it in your ready region, unlocked.","As [obe] above, but move the ally card instead and put it in your ready region, unlocked."
+101618:ACTION:CEL+QUI,Retain the Quick Blood,"+1 stealth action.
+[cel][qui] Put this card on this vampire. Blood this vampire spends to play cards requiring Celerity [cel] or Quietus [qui] can be put on this card instead of returning to the blood bank. During your unlock phase, you can move 1 blood from this card to this vampire.
+[CEL][QUI] As above, but you can move 2 blood.","As above, but you can move 2 blood."
+101637:COMBAT:CEL,Riposte,"Not usable on the first round of combat.
+[cel] Strike: combat ends, and inflict 1 damage to the opposing minion once combat ends if the range is close (damage not preventable).
+[CEL] As above, but inflict 2 damage.","As above, but inflict 2 damage."
+101672:ACTION:OBF,Sacrificial Lamb,"[obf] Burn a vampire in torpor that you control. The acting vampire gains blood equal to the burned vampire's capacity (ignore excess blood). You may also transfer equipment from the burned vampire to this one. This action is not considered diablerie.
+[OBF] (D) As above, but burn a vampire in another Methuselah's torpor region.","(D) As above, but burn a vampire in another Methuselah's torpor region."
+101678:COMBAT:CEL,Sanguinary Wind,"[cel] Only usable before strikes are chosen. This vampire's strikes may not be dodged this round.
+[CEL] As above, but usable after strikes have been chosen.","As above, but usable after strikes have been chosen."
+101688:ACTION:MYT,Scarlet Lore,"+1 stealth action.
+[nec] Move a minion card from your ash heap to the top of your library.
+[myt] Search your library for a minion card (shuffle afterward), reveal it, and move it to the top of your library.
+[MYT] As [myt] above, with an additional +1 stealth.","As [myt] above, with an additional +1 stealth."
+101713:ACTION:THA,Seeds of Corruption,"+1 stealth action.
+[tha] (D) Put this card on one of your prey's vampires. If the vampire is a Follower of Set, he or she burns 2 additional blood when attempting an action; otherwise, he or she burns 1 additional blood when attempting an action. The vampire's special abilities cannot be used. Any vampire(s) may burn this card with two +1 stealth actions.
+[THA] As above, but the vampire burns 2 additional blood when attempting an action; Followers of Set burn 3 additional blood.","As above, but the vampire burns 2 additional blood when attempting an action; Followers of Set burn 3 additional blood."
+101721:ACTION:CHI,Sensory Deprivation,"[chi] (D) Burn a retainer or put this card on an ally. The attached minion does not unlock as normal. Burn this card after this acting vampire leaves the ready region.
+[CHI] As above, but put this card on a vampire in play.","As above, but put this card on a vampire in play."
+101722:ACTION:CHI,Sensory Overload,"[chi] (D) Put this card on a ready minion; you still control this card. The attached minion cannot perform actions or block. Burn this card during their discard phase.
+[CHI] As above, but burn this card during your unlock phase.","As above, but burn this card during your unlock phase."
+101731:ACTION:SER,Set's Curse,"+1 stealth action.
+[ser] (D) Burn an ally or retainer controlled by any Methuselah to put this card in play; it becomes an animal ally with 3 life, 2 strength and 0 bleed. This ally cannot play action cards and cannot have or use equipment or retainers.
+[SER] As above, but burn a vampire with capacity 2 or less to put this card in play.","As above, but burn a vampire with capacity 2 or less to put this card in play."
+101734:RETAINER:OBT,Shade,"Demon with 2 life.
+[obt] Shade inflicts 1 damage on the opposing minion each round of combat during normal strike resolution at close range.
+[OBT] As above, but Shade has 3 life.","As above, but Shade has 3 life."
+101751:ALLY:NEC,Shambling Hordes,"Zombie with 3 life. 0 strength, 0 bleed.
+[nec] After this ally enters play, remove an ally or vampire in your ash heap from the game or burn this ally. This ally gets +1 strength for each life it has. This ally can enter combat with a minion as a (D) action. It cannot gain life (instead, any life it would gain goes to the blood bank).
+[NEC] As above, but this ally has 4 life.","As above, but this ally has 4 life."
+101754:REACTION:PRO,Shape Mastery,"[pro] [COMBAT] Cancel a combat card requiring Obtenebration [obt], Protean [pro] or Vicissitude [vic] as it is played, and its cost is not paid. The opposing minion cannot play that card again this action.
+[PRO] [REACTION] As above, but cancel an action modifier card requiring any of those Disciplines.","As above, but cancel an action modifier card requiring any of those Disciplines."
+101756:COMBAT:FOR,Shared Strength,"Only usable by a ready vampire not involved in combat.
+[for] Choose a vampire in combat. For the remainder of combat, that vampire may play cards that require Fortitude [for] as if he or she has the basic level of Fortitude.
+[FOR] As above, but the chosen vampire may play cards as if he or she has the superior level of Fortitude [FOR].","As above, but the chosen vampire may play cards as if he or she has the superior level of Fortitude [FOR]."
+101758:REACTION:DEM,Shattered Mirror,"Only usable if this vampire blocks an ally or younger vampire bleeding you, before block resolution.
+[dem] Put this card on the acting minion, lock this vampire, and end the action. The attached minion gets -1 bleed. The attached vampire can burn this card as an action that costs 1 blood. A minion can have only one Shattered Mirror.
+[DEM] As above, but do not lock this vampire.","As above, but do not lock this vampire."
+101764:MODIFIER:SAN,Shell Game,"Only usable when the action is announced.
+[san] Lock X other ready Blood Brothers you control of the same circle as this one to give this Blood Brother +X stealth (even if stealth is not yet needed). If the action is successful, you may unlock one of those Blood Brothers.
+[SAN] As above, but unlock an additional one of those Blood Brothers if the action is successful.","As above, but unlock an additional one of those Blood Brothers if the action is successful."
+101776:MODIFIER:NEC,Shroudsight,"Only usable as an action requiring Necromancy [nec] or Giovanni is announced.
+[nec] After action resolution (successful or not), you can move the action card used for this action from your ash heap to the top of your library.
+[NEC] As above, but you can move any card played during this action from your ash heap to the top of your library.","As above, but you can move any card played during this action from your ash heap to the top of your library."
+101786:MODIFIER:MEL,Siren's Lure,"[cel] Burn 2 blood to get +1 stealth.
+[mel] Only usable by a ready unlocked vampire other than the acting minion if a minion attempts to block. That attempt fails and the blocking minion cannot attempt to block this action again. Lock this vampire and the blocking minion. After the action resolution, this vampire and the blocking minion enter combat.
+[MEL] As [mel] above, but do not lock this modifying vampire.","As [mel] above, but do not lock this modifying vampire."
+101797:MODIFIER:SAN,Slake the Thirst,"Only usable after this Blood Brother gains blood.
+[san] [COMBAT] Choose another ready Blood Brother of the same circle. The chosen Blood Brother gains the same amount of blood.
+[SAN] [ACTION MODIFIER] As above, but usable as an action modifier.","As above, but usable as an action modifier."
+101803:ACTION:DEM,Sleep of Reason,"[dem] (D) Send a younger vampire with 0 or 1 blood to torpor.
+[DEM] As above, but the vampire can be the same age or older.","As above, but the vampire can be the same age or older."
+101804:MODIFIER:OBF,Sleep Unseen,"[obf] Only usable at the end of a successful action (after resolving the action). Put this card on this acting vampire. Minions without Auspex [aus] cannot {perform actions directed at} the vampire with this card. Burn this card during your next unlock phase.
+[OBF] As above, but minions without superior Auspex [AUS] cannot {perform actions directed} at this vampire.","As above, but minions without superior Auspex [AUS] cannot perform actions directed at this vampire."
+101827:COMBAT:ANI,Song of Serenity,"Only usable before range is chosen.
+[ani] The opposing minion gets -1 strength this round. A vampire may play only one Song of Serenity each combat.
+[ANI] As above, but for the remainder of combat.","As above, but for the remainder of combat."
+101831:ACTION:NEC,Soul Feasting,"+1 stealth action.
+[nec] Hunt, or burn a wraith to hunt with +3 hunt (this is a directed action if you do not control the wraith).
+[NEC] As above, with an additional +1 hunt.","As above, with an additional +1 hunt."
+101834:ACTION:AUS+PRE,Soul Painting,"+1 stealth action.
+[aus][pre] (D) Put this card on a ready vampire. Vampires with Auspex [aus] get +1 intercept when attempting to block the vampire with this card. This vampire can burn this card as an action that costs 1 blood. A vampire can have only one Soul Painting.
+[AUS][PRE] As [aus][pre] above, but all vampires get +1 intercept when attempting to block this vampire.","As [aus][pre] above, but all vampires get +1 intercept when attempting to block this vampire."
+101835:ACTION:AUS,Soul Scan,"+1 stealth action.
+[aus] Search your crypt for a younger vampire without Obfuscate [obf]{, reveal them}, and move them to your uncontrolled region (shuffle afterward).
+[AUS] As above, but you can search for a younger vampire with up to one level of Obfuscate.","As above, but you can search for a younger vampire with up to one level of Obfuscate."
+101836:COMBAT:NEC,Soul Stealing,"Only usable if this vampire burns a vampire controlled by your prey.
+[nec] [ACTION MODIFIER] This vampire gains blood equal to half the burned vampire's capacity rounded down.
+[NEC] [COMBAT] As above, but usable in combat.","As above, but usable in combat."
+101837:REACTION:AUS+DOM,Sound of a Breaking Oath,"[aus][dom] [ACTION] +1 stealth action. Put this card on a minion you control. If an action to steal the minion with this card is successful, this minion is burned instead and the acting minion takes 1 unpreventable damage.
+[AUS][DOM] [REACTION] As above, but play when an action to steal a minion you control is successful.","As above, but play when an action to steal a minion you control is successful."
+102296:ALLY:OBL,Spectral Servitor,"Wraith with 1 life. 1 strength, 1 bleed.
+[obl] This ally can perform actions the turn it is recruited. Unlock this vampire if this is their first successful recruit ally action this turn. This ally can play non-action cards requiring {basic} Oblivion [obl] as a vampire. During your unlock phase, burn this ally.
+[OBL] As above, but during your unlock phase, you can burn 1 pool instead of burning this ally.","As above, but during your unlock phase, you can burn 1 pool instead of burning this ally."
+101844:ACTION:CEL,Speed of Thought,"[cel] (D) Bleed. If more than 1 pool is bled with this action, ignore the excess. Minions without Celerity [cel] cannot block this action.
+[CEL] As above, but minions without superior Celerity [CEL] cannot block this action.","As above, but minions without superior Celerity [CEL] cannot block this action."
+101858:MODIFIER:SPI,Squirrel Balance,"[cel] Only usable when the action is announced. If blocked, range in the first round of the resulting combat is automatically set to long.
+[spi] Minions without flight [FLIGHT] or Spiritus [spi] get -1 intercept when attempting to block this action.
+[SPI] As [spi] above, but those minions get -2 intercept.","As [spi] above, but those minions get -2 intercept."
+101882:COMBAT:POT,Street Cred,"Only usable at the end of a round of combat in which this vampire successfully inflicted more damage than the opposing minion.
+[pot] Move 1 blood from the blood bank to a younger vampire in your uncontrolled region. A vampire can play only 1 Street Cred each turn.
+[POT] As above, but move 2 blood.","As above, but move 2 blood."
+101883:COMBAT:spi,Strength of the Bear,"Only usable before range is determined.
+[ani] This vampire gets +1 strength this round.
+[spi] As [ani] above, but for the remainder of combat.
+[SPI] As [spi] above, with an optional press this round.","As [ani] above, but for the remainder of combat."
+101899:COMBAT:SPI,Summon Spirit Beast,"[ani] [COMBAT] Discard X cards.
+[spi] [COMBAT][REACTION] Move X animal retainers from your ash heap to this vampire, with life from the blood bank equal to their starting amounts. After this minion phase ends, burn those retainers.
+[SPI] As [spi] above, but the retainers are not burned until after the end of your next minion phase.","As [spi] above, but the retainers are not burned until after the end of your next minion phase."
+101899:REACTION:SPI,Summon Spirit Beast,"[ani] [COMBAT] Discard X cards.
+[spi] [COMBAT][REACTION] Move X animal retainers from your ash heap to this vampire, with life from the blood bank equal to their starting amounts. After this minion phase ends, burn those retainers.
+[SPI] As [spi] above, but the retainers are not burned until after the end of your next minion phase.","As [spi] above, but the retainers are not burned until after the end of your next minion phase."
+101934:COMBAT:ABO,Taming the Beast,"[abo] [REFLEX] Cancel a frenzy card played on this vampire as it is played.
+[abo] Strike: hand strike at +1 damage. This combat, this minion cannot cancel frenzy cards nor press to end.
+[ABO] As above, but strike: burn equipment.","As above, but strike: burn equipment."
+101991:COMBAT:MEL,Toreador's Bane,"Only usable in combat with a Toreador, Toreador antitribu, ally or younger vampire.
+[pre] Strike: combat ends.
+[mel] Strike: combat ends. After combat ends, if this vampire was blocked while performing a non-bleed non-political action, the action continues as if unblocked.
+[MEL] As [mel] above, but usable to continue a bleed or political action.","As [mel] above, but usable to continue a bleed or political action."
+101998:MODIFIER:DEM,Touch of Clarity,"Usable by a ready unlocked vampire other than the acting minion.
+[dem] Cancel a non-combat card requiring Dementation [dem], Dominate [dom] or Presence [pre] as it is played, and its cost is not paid. Lock this vampire.
+[DEM] As above, but do not lock this vampire.","As above, but do not lock this vampire."
+101998:REACTION:DEM,Touch of Clarity,"Usable by a ready unlocked vampire other than the acting minion.
+[dem] Cancel a non-combat card requiring Dementation [dem], Dominate [dom] or Presence [pre] as it is played, and its cost is not paid. Lock this vampire.
+[DEM] As above, but do not lock this vampire.","As above, but do not lock this vampire."
+102362:COMBAT:FOR,Tranquility Shield,"Only usable before range is determined during the first round.
+[for] This combat, this vampire can prevent 1 damage each round. This combat, frenzy cards cannot be used on this vampire; cancel the effects of frenzy cards that have already been used on this vampire this combat.
+[FOR] As above, but this vampire can prevent 2 damage each round.","As above, but this vampire can prevent 2 damage each round."
+102011:MODIFIER:thn,Transfusion,"[nec] Only usable after resolution of a successful action. Add 1 blood to a ready vampire.
+[thn] As [nec] above, but add 1 life to a ghoul or 1 blood to a ready vampire.
+[THN] Only usable after combat if this vampire is still ready and successfully inflicted any damage on the opposing minion during that combat. Put 1 transfusion counter on the opposing minion. If the opposing minion has 3 of your transfusion counters, burn them to steal the opposing minion. Only one Transfusion can be played at superior each turn.","As [nec] above, but add 1 life to a ghoul or 1 blood to a ready vampire."
+102045:ACTION:AUS+QUI,Truth of Blood,"[aus][qui] (D) Bleed with +1 bleed. If this action is blocked, the blocking minion's controller discards 2 cards at random before block resolution. Those cards are not replaced until after this action.
+[AUS][QUI] As above, but bleed with +2 bleed.","As above, but bleed with +2 bleed."
+102058:MODIFIER:PRO,Uncontrollable Rage,"Only usable when the action is announced.
+[pro] This vampire's hand strikes inflict +1 damage, aggravated, until the end of the action.
+[PRO] As above, but the hand strikes inflict +2 damage, aggravated.","As above, but the hand strikes inflict +2 damage, aggravated."
+102065:ALLY:ANI,Underbridge Stray,"Animal with 1 life. 0 strength, 0 bleed.
+[ani] This ally can burn 1 life to give a minion you control 1 press. During an action directed at you (or a card you control), you can burn this ally if it is not blocking to unlock a ready minion you control.
+[ANI] As above, but this ally has 2 life and 1 strength.","As above, but this ally has 2 life and 1 strength."
+102081:REACTION:ABO,Unseen Hibernation,"[abo] [REFLEX] Cancel a frenzy card played on this vampire as it is played.
+[abo] Only usable during {an} action directed at this vampire. Not usable if the acting minion is an older vampire. The action {fails}.
+[ABO] As above, but usable by a locked vampire.","As above, but usable by a locked vampire."
+102104:MODIFIER:SER,Venenation,"Only usable if this minion is blocked, before block resolution.
+[ser] Put 1 corruption counter on the blocking minion. If the number of your corruption counters on the minion equals or exceeds their capacity or cost, you can burn those counters to steal the blocking minion (combat does not occur).
+[SER] As above, but this card costs 1 fewer blood.","As above, but this card costs 1 fewer blood."
+102106:COMBAT:VAL,Vengeance of Samiel,"[pot] Strike: hand strike or use a melee weapon strike. This strike is at +1 damage.
+[val] As [pot] above, and this strike cannot be dodged.
+[VAL] As [val] above, but this strike is at +2 damage.","As [val] above, but this strike is at +2 damage."
+102127:COMBAT:OBE,Vitae Block,"Only usable before range is determined in combat with a vampire. A vampire can play only one Vitae Block each combat.
+[ani] This vampire gets 1 optional press this round.
+[obe] Put this card in play and move up to 2 blood from the opposing vampire to this card. During your unlock phase, move all the blood from this card to the opposing vampire and burn this card.
+[OBE] As [obe] above, but move up to 3 blood to this card.","As [obe] above, but move up to 3 blood to this card."
+102266:COMBAT:ANI,Voracious Vermin,"[ani] Strike: dodge.
+[ANI] As above, with 1 additional ranged strike: burn weapon.","As above, with 1 additional ranged strike: burn weapon."
+102131:MODIFIER:PRE,Voter Captivation,"Only usable after resolution of a political action whose referendum passed.
+[pre] This vampire gains 1 blood for each vote by which the referendum passed.
+[PRE] As above, but move up to 2 of those blood to your pool instead of this vampire.","As above, but move up to 2 of those blood to your pool instead of this vampire."
+102135:ACTION:spi,Vulture's Buffet,"+1 stealth{} action. If this hunt is successful, {unlock this} vampire{}.
+[obf] Remove a minion or retainer in any Methuselah's ash heap from the game to {hunt}.
+[spi] As [obf] above, but {at +1 hunt}.
+[SPI] As [spi] above, and you gain 1 pool.","As [obf] above, but at +1 hunt."
+102164:COMBAT:THA,Weather Control,"Only usable before range is determined during the first round. A vampire can play only one Weather Control each combat.
+[tha] Both combatants and each retainer on them take 1 unpreventable environmental damage before range is determined each round this combat.
+[THA] As above, but the amount of damage inflicted is increased by 1 in each subsequent round.","As above, but the amount of damage inflicted is increased by 1 in each subsequent round."
+102185:COMBAT:THA,Wind Dance,"[tha] Strike: dodge.
+[THA] As above, with 1 additional strike: dodge (limited).","As above, with 1 additional strike: dodge (limited)."
+102191:RETAINER:ANI,Wolf Companion,"Animal with 2 life.
+[ani] When the minion with this retainer is in combat, the opposing minion takes 1 damage during strike resolution (if the range is close).
+[ANI] As above, but Wolf Companion has 3 life.","As above, but Wolf Companion has 3 life."
