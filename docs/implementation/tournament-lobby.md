@@ -103,3 +103,33 @@ Players are registered to their respective games with the appropriate deck:
 Once active, game listings are filtered by role:
 - **Admins** — can see all table games across all rounds.
 - **Players** — can only see games where they are seated.
+
+## Scoring and Standings
+
+Tournament standings are calculated from completed preliminary games using the scoring rules in [VTES Rules — Tournament](../rules/tournament.md#scoring).
+
+Per-player standing fields:
+
+| Field              | Description                                                                 |
+|--------------------|-----------------------------------------------------------------------------|
+| `gameWins`         | Number of preliminary games where the player earned a Game Win              |
+| `victoryPoints`    | Total VP across preliminary games                                           |
+| `tournamentPoints` | Total TP across preliminary games, if TP entry/reporting is supported       |
+| `gamesPlayed`      | Number of seated games completed; byes do not count as played games         |
+
+Standings sort order:
+1. Game Wins descending.
+2. Victory Points descending.
+3. Tournament Points descending.
+
+A Game Win is awarded only when a player has at least 2 VP and more VP than every other player at that table.
+
+Timeout handling:
+- Each surviving player receives 0.5 VP.
+- The last surviving player still receives the normal full survivor VP.
+- A Game Win is still awarded only if the 2 VP and sole-leader requirements are met.
+
+Finals:
+- If `finalRound` is enabled, the `SEEDING` status uses preliminary standings to identify the final table players.
+- The final table is created from the top five standings entries unless tournament configuration or judge/admin override says otherwise.
+- Final standings and winner calculation should be explicit in the finals implementation rather than inferred from preliminary sorting alone.

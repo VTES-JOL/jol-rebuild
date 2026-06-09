@@ -36,15 +36,15 @@ Every card play in rules-enforced mode moves through four stages.
 
 ### Stage 1 — As Played
 
-The playing player declares the card (target, mode, cost). The card **leaves HAND immediately** and enters limbo. A narrow sequencing window opens (`AS_ANNOUNCED`) for "as it is played" cancellers only. Wake effects are also legal here. No cost is paid yet.
+The playing player declares the card (target, mode, cost). The card **leaves HAND immediately** and enters limbo. A narrow sequencing window opens (`AS_PLAYED`) for "as it is played" cancellers only. Wake effects needed to play effects in that window are also legal here. No cost is paid yet.
 
 ### Stage 2 — Limbo
 
-Applies to `ACTION` cards only. While the action is in progress, the card is neither in HAND nor in ASH_HEAP; it is tracked by `PendingActionState.actionCardRef`. All other card types skip limbo — they resolve immediately after the AS_ANNOUNCED window closes.
+Applies to `ACTION` cards only. While the action is in progress, the card is neither in HAND nor in ASH_HEAP; it is tracked by `PendingActionState.actionCardRef`. All other card types skip limbo — they resolve immediately after the `AS_PLAYED` window closes.
 
 ### Stage 3 — Resolution
 
-- **Action cards:** if the action reaches resolution (not blocked), cost is paid here. If cost cannot be paid, or if the targets are no longer valid, the action **fizzles**: card moves to ASH_HEAP with no effect, no NRA lock, no cost.
+- **Action cards:** if the action reaches resolution (not blocked), the NRA lock is recorded first, then cost is paid here. If cost cannot be paid, or if the targets are no longer valid, the action **fizzles**: card moves to ASH_HEAP with no effect and no cost paid, but the NRA lock remains because the action reached resolution.
 - **All other types:** cost paid immediately at declaration; effect resolves immediately.
 
 ### Stage 4 — Destination
@@ -61,7 +61,7 @@ After resolution the card goes to its final location:
 
 ## Replacement Timing
 
-After the AS_ANNOUNCED window closes (Stage 1 complete), the playing player draws back to their maximum hand size (default 7). If card text says "do not replace until [condition]," hand size stays reduced until that condition is met. Cancellation voids any "do not replace" clause — hand is replaced immediately at the end of the AS_ANNOUNCED window.
+After the `AS_PLAYED` window closes (Stage 1 complete), the playing player draws back to their maximum hand size (default 7). If card text says "do not replace until [condition]," hand size stays reduced until that condition is met. Cancellation voids any "do not replace" clause — hand is replaced immediately at the end of the `AS_PLAYED` window.
 
 ---
 
@@ -96,8 +96,8 @@ Out-of-turn master cards have `CardData.outOfTurn = true` (populated at card bui
 
 - Cannot play during own turn.
 - Can play only during another Methuselah's turn when the card's timing condition is satisfied.
-- Costs: uses the **playing player's** `masterActionsRemaining`. If `masterActionsRemaining = 0`, the play is rejected.
-- One out-of-turn master per window between turns: `outOfTurnMasterPlayedThisWindow: boolean` on `GameData` (reset on `NextTurn` for the playing player). Trifle exception applies — a trifle restores one action and allows a second play if budget permits.
+- Costs: debits the **playing player's next master phase action**, not the current player's `masterActionsRemaining`. Track this as future-debt state, e.g. `nextMasterActionsReservedByPlayer`, and subtract it when that player's next MASTER phase begins.
+- One out-of-turn master per window between turns: `outOfTurnMasterPlayedThisWindowByPlayer: Set<String>` on `GameData` (cleared for that player when their own turn begins). This limit applies even if the player later regains a master phase action. Trifle exception follows the card's text and trifle accounting; do not grant a generic extra master phase action just because the card was played out of turn.
 
 ---
 
@@ -142,11 +142,11 @@ The following `CardType` enum values must be added before phase enforcement can 
 2. Phase check: card type must match the current phase per the gate table.
 3. Actor check: `MODIFIER` requires acting player; `REACTION` requires non-acting player; `COMBAT` requires an active `CombatState`.
 4. Card limbo: for `ACTION` type, move card to limbo (`PendingActionState.actionCardRef`) rather than ASH_HEAP immediately.
-5. Replacement draw: after AS_ANNOUNCED window closes, emit `DrawCard(1)` if hand below max.
+5. Replacement draw: after `AS_PLAYED` window closes, emit `DrawCard(1)` if hand below max.
 6. Limited flag: check and set `bleedLimitedUsed` for `(limited)` bleed modifiers.
 
 `outOfTurn: boolean` must be added to `CardData` and populated in `GameInitService.buildCard()`.
 
-`masterActionsRemaining` is on `GameData` (see [Game State](./game-state.md#phase-accounting-fields)).
+`masterActionsRemaining` is on `GameData` for the current master phase (see [Game State](./game-state.md#phase-accounting-fields)); out-of-turn masters need separate future-debt tracking against the playing player's next master phase.
 
 See [Card Keywords](./card-keywords.md) for keyword parsing required to determine Trifle, out-of-turn, and conviction sub-type routing.

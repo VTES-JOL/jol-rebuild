@@ -24,9 +24,12 @@ A new `ReferendumState` object is added to `GameData`. It is set when a referend
 | `actingPlayerName` | `String`                       | Methuselah whose action or diablerie triggered the referendum; anchor for impulse order  |
 | `isBloodHunt`      | `boolean`                      | If true: fixed terms, no action modifiers or reactions legal, target is the diablerist   |
 | `targetRef`        | `CardRef?`                     | For blood hunt: the diablerist. For political actions with a specific target: that card  |
-| `votesFor`         | `int`                          | Running total of votes cast in favour                                                    |
-| `votesAgainst`     | `int`                          | Running total of votes cast against                                                      |
-| `votesByPlayer`    | `Map<String, int[]>`           | Per-player `[for, against]` array; tracks what each Methuselah has committed             |
+| `baseVotesFor`     | `int`                          | Votes cast in favour excluding the current Prisci block contribution                     |
+| `baseVotesAgainst` | `int`                          | Votes cast against excluding the current Prisci block contribution                       |
+| `prisciVotesFor`   | `int`                          | Current Prisci block contribution in favour, either 0 or 3                               |
+| `prisciVotesAgainst` | `int`                        | Current Prisci block contribution against, either 0 or 3                                 |
+| `votesByPlayer`    | `Map<String, int[]>`           | Per-player `[for, against]` array for display/audit                                      |
+| `votesByCardId`    | `Map<String, int[]>`           | Per-titled-vampire `[for, against]` ordinary votes already cast this referendum          |
 | `prisciBallots`    | `Map<String, Boolean>`         | Card ID → for/against; Priscus-only sub-referendum ballots                               |
 | `cardBurnedByPlayer` | `Set<String>`                | Players who have already burned one political action card this referendum                |
 | `pollingOpen`      | `boolean`                      | False during "before votes" window; true once `OpenPolling` is called                   |
@@ -58,9 +61,9 @@ Blood hunt referendums: action modifiers and reactions not legal; only vote sour
 
 ### Step 3 — Resolution
 
-`ClosePolling` tallies:
-- If `votesFor > votesAgainst` → referendum **passes**; apply effects.
-- Tied or `votesAgainst ≥ votesFor` → referendum **fails**; no effect.
+`ClosePolling` tallies `votesFor = baseVotesFor + prisciVotesFor` and `votesAgainst = baseVotesAgainst + prisciVotesAgainst`:
+- If `votesFor > votesAgainst` -> referendum **passes**; apply effects.
+- Tied or `votesAgainst >= votesFor` -> referendum **fails**; no effect.
 
 Set `PendingActionState.referendumSuccessful` accordingly. Clear `ReferendumState` from `GameData`. Resume AFTER_RESOLUTION sequencing window.
 
@@ -100,8 +103,12 @@ Validation rules:
 - Card must be in the READY region (torpored vampires cannot vote).
 - Card must be controlled by `playerName`.
 - Card must have a `title` field matching one of the titles above.
+- `amount` must be positive.
+- The card's already-cast total in `votesByCardId` plus `amount` must not exceed the title's vote value.
 
 A Methuselah may cast all of one vampire's votes as a single `CastVotes` call. They may also cast partial votes if they choose (e.g. one vote for and one vote against from a Prince, though unusual).
+
+When `CastVotes` succeeds, add the chosen amount to `baseVotesFor` or `baseVotesAgainst`, update `votesByPlayer`, and update the card's `[for, against]` entry in `votesByCardId`. This allows split votes while preventing any titled vampire from casting more than its title value.
 
 The political action card itself grants the **acting player's controller** 1 vote (included automatically when `CallReferendum` / `ResolveAction(POLITICAL)` opens the referendum).
 
@@ -111,7 +118,7 @@ The political action card itself grants the **acting player's controller** 1 vot
 
 The Priscus title is a collective Sabbat title. Each ready Priscus casts one ballot in a Priscus-only sub-referendum; the result determines how the Prisci block contributes to the main referendum.
 
-`CastPrisciBallot` adds the Priscus's card ID → `true`/`false` to `prisciBallots`. After each ballot, the server recomputes the Prisci block contribution:
+`CastPrisciBallot` adds the Priscus's card ID -> `true`/`false` to `prisciBallots`. After each ballot, the server recomputes the Prisci block contribution into `prisciVotesFor` / `prisciVotesAgainst`; it does not mutate `baseVotesFor` or `baseVotesAgainst`.
 
 | Sub-referendum result | Main referendum contribution |
 |-----------------------|------------------------------|
@@ -119,7 +126,7 @@ The Priscus title is a collective Sabbat title. Each ready Priscus casts one bal
 | Majority against      | +3 votes against             |
 | Tied                  | 0 votes                      |
 
-The contribution shifts dynamically as more Priscus ballots are cast. The final contribution is applied at `ClosePolling`.
+The contribution shifts dynamically as more Priscus ballots are cast. Recompute by setting both Prisci contribution fields back to 0, then setting exactly one of them to 3 when the Prisci ballots have a majority. The final contribution is included only when `ClosePolling` totals base votes plus Prisci votes.
 
 ---
 

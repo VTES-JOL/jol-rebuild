@@ -151,7 +151,7 @@ If an uncontested `CONTINUE` remains → new round begins from Step 1. If no unc
 
 ## Damage Prevention
 
-Played during Step 5. Applied in order played. Flat reductions subtract first; halving effects applied to the remaining total (fractional damage rounds up). A player may play multiple prevention cards, each applying to what remains after the previous.
+Played during Step 5. Prevention effects apply strictly in the order they are played. A flat reduction, halving effect, or other prevention effect modifies the damage total that remains at that moment; later prevention applies to the new remaining total. Fractional damage values round up when a prevention effect produces a fraction. A player may play multiple prevention cards, but the chosen play order is rules-significant.
 
 ---
 

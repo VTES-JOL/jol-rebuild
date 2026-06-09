@@ -14,8 +14,8 @@ Every action in rules-enforced mode moves through the following states, tracked 
 
 ```
 DeclareAction
-  → open AS_ANNOUNCED sequencing window (cancellers only)
-  → AS_ANNOUNCED closes
+  → if an action card is played: open AS_PLAYED cancellation window
+  → open AS_ANNOUNCED sequencing window (action-announcement effects only)
   → open block-attempt impulse window (DIRECTED_SINGLE or UNDIRECTED)
   [status: DURING_ACTION]
 
@@ -29,7 +29,9 @@ DeclareAction
 
     ── block attempt succeeds ──────────────▶  [status: BLOCKED]
                                                → StartCombat (see Combat)
-                                               → after combat: status → ACTION_CONTINUING or clear
+                                               → after combat: status → ACTION_CONTINUING or AFTER_RESOLUTION
+                                               → open AFTER_RESOLUTION sequencing window
+                                               → window closes → clear PendingActionState
 ```
 
 `ACTION_CONTINUING` is set when a "continue the action" effect fires after combat (e.g. Form of Mist). The block-attempt impulse window re-opens with the same stealth/intercept accumulators intact.
@@ -82,18 +84,20 @@ Currently implemented: `actorRef`, `actionType`, `targetPlayerName`, `status`, `
 |---------------------|-------------------------------------------------------------------------------|
 | `DURING_ACTION`     | Block-attempt impulse window open; acting minion locked                       |
 | `BLOCKED`           | A block attempt succeeded; combat is in progress                              |
-| `AFTER_RESOLUTION`  | Action reached resolution; AFTER_RESOLUTION sequencing window open            |
+| `AFTER_RESOLUTION`  | Unblocked action resolved, or blocked action's combat/block resolution finished; AFTER_RESOLUTION sequencing window open |
 | `ACTION_CONTINUING` | "Continue the action" effect fired after combat; re-entering block-attempt loop |
 
-`AS_ANNOUNCED` was previously reserved in the enum but is now replaced by the AS_ANNOUNCED sequencing window (see below); the enum value may be repurposed or removed.
+`AS_PLAYED` and `AS_ANNOUNCED` are sequencing-window types, not action statuses. `AS_PLAYED` applies to the card-play cancellation layer; `AS_ANNOUNCED` applies to action-announcement effects after the action exists.
 
 ---
 
-## AS_ANNOUNCED Sequencing Window
+## Declaration Sequencing Windows
 
-After `DeclareAction` and before opening the block-attempt impulse window, a `SequencingWindowState(AS_ANNOUNCED)` opens. This window is for "as it is played" cancellers only (e.g. Direct Intervention). All players pass → window closes → block-attempt impulse window opens.
+If an action card is played to declare the action, a `SequencingWindowState(AS_PLAYED)` opens first. This restricted window is for "as it is played" cancellers only (e.g. Direct Intervention) and wake effects needed to play effects in that window. The action card is not replaced until this window closes.
 
-Currently: `DeclareAction` opens the block-attempt impulse window directly, skipping this step. AS_ANNOUNCED sequencing must be inserted between declaration and the impulse window.
+After `AS_PLAYED` closes, or immediately for a basic action that did not play a card, a `SequencingWindowState(AS_ANNOUNCED)` opens. This window is for effects usable as the action is announced. All players pass -> window closes -> block-attempt impulse window opens.
+
+Currently: `DeclareAction` opens the block-attempt impulse window directly, skipping these declaration layers. Both sequencing windows must be inserted before the block-attempt impulse window.
 
 ---
 
@@ -117,7 +121,6 @@ NRA is tracked by `GameData.nraActionsByCardId: Map<String, Set<String>>` (clear
 
 - HUNT, EQUIP (a different equipment card), EMPLOY_RETAINER (a different retainer), RECRUIT_ALLY (a different ally) — these are repeatable basic actions.
 - Cancelled actions (never reach `reachedResolution`).
-- Actions that fizzle at resolution.
 
 ### NRA enforcement
 
@@ -126,8 +129,8 @@ On `DeclareAction`:
 2. If the minion's set in `nraActionsByCardId` already contains this key, reject the action.
 
 On `ResolveAction`:
-1. Set `reachedResolution = true`.
-2. Add the NRA key to the minion's set in `nraActionsByCardId`.
+1. Set `reachedResolution = true` and add the NRA key before paying action costs.
+2. If cost cannot be paid or targets are invalid, the action fizzles after the NRA lock is recorded.
 
 NRA locks persist through mid-turn unlocks.
 
@@ -166,7 +169,7 @@ Three independent success flags on `PendingActionState`:
 
 ## After-Resolution Window
 
-`ResolveAction` opens a `SequencingWindowState(AFTER_RESOLUTION)`. Only "after action resolution" / "after successful action" / "after successful bleed" / "after successful referendum" effects are legal here. ABC priority order applies. When the window closes, `PendingActionState` is cleared.
+`ResolveAction` opens a `SequencingWindowState(AFTER_RESOLUTION)` for unblocked actions. Blocked actions open the same window after combat or block resolution completes. Legal effects include "after action resolution", "after this action", "after block resolution" when a block occurred, "after successful action", "after successful bleed", and "after successful referendum" effects whose trigger preconditions are currently true. ABC priority order applies. When the window closes, `PendingActionState` is cleared.
 
 ---
 
