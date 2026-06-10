@@ -61,220 +61,7 @@ This separates generic card lifecycle from workflow timing. For example, a react
 
 ## Unified Action State Diagram
 
-The canonical diagram source is [action-state-machine.puml](./action-state-machine.puml). It is mirrored below as PlantUML for IDEs and Markdown viewers that support PlantUML blocks.
-
-```plantuml
-@startuml
-top to bottom direction
-
-skinparam nodesep 8
-skinparam ranksep 10
-
-skinparam state {
-    BackgroundColor<<window>> #EAF3FF
-    BorderColor<<window>> #2F6FA3
-    BackgroundColor<<task>> #FFF7E6
-    BorderColor<<task>> #A36B00
-}
-
-    [*] --> Idle
-    Idle : Empty enforced-mode action state
-    Idle : no PendingActionState
-    Idle : no CombatState
-    Idle : no ReferendumState
-    Idle : no ActiveTimingWindow
-
-    note top of Idle
-      Entry point:
-      empty action state
-    end note
-
-    Idle --> ActionDeclaring : DeclareAction or card ability
-
-    state ActionDeclaring {
-        state "BuildPendingAction" as BuildPendingAction <<task>>
-        state "CARD_AS_PLAYED_CANCEL_WINDOW" as CARD_AS_PLAYED_CANCEL_WINDOW <<window>>
-        state "ReplacePlayedCard" as ReplacePlayedCard <<task>>
-        state "ACTION_AS_ANNOUNCED" as ACTION_AS_ANNOUNCED <<window>>
-
-        [*] --> BuildPendingAction
-        BuildPendingAction --> CARD_AS_PLAYED_CANCEL_WINDOW : action card played
-        BuildPendingAction --> ACTION_AS_ANNOUNCED : basic action or in-play ability
-        CARD_AS_PLAYED_CANCEL_WINDOW --> ReplacePlayedCard : canceled
-        CARD_AS_PLAYED_CANCEL_WINDOW --> ReplacePlayedCard : all pass
-        ReplacePlayedCard : draw to max
-        ReplacePlayedCard : or register delayed replacement
-        ReplacePlayedCard --> [*] : canceled, clear action state
-        ReplacePlayedCard --> ACTION_AS_ANNOUNCED : card not canceled
-        ACTION_AS_ANNOUNCED --> [*] : all pass
-    }
-
-    ActionDeclaring --> ActionBlockWindow
-    [*] -[hidden]-> Idle
-    Idle -[hidden]-> ActionDeclaring
-    ActionDeclaring -[hidden]-> ActionBlockWindow
-
-    state ActionBlockWindow {
-        state "ACTION_DURING_ACTION" as ACTION_DURING_ACTION <<window>>
-        state "ACTION_BLOCK_ATTEMPT" as ACTION_BLOCK_ATTEMPT <<window>>
-        state "ACTION_STEALTH_INTERCEPT" as ACTION_STEALTH_INTERCEPT <<window>>
-        state "ACTION_BLOCKS_DECLINED" as ACTION_BLOCKS_DECLINED <<window>>
-
-        [*] --> ACTION_DURING_ACTION
-        ACTION_DURING_ACTION --> ACTION_BLOCK_ATTEMPT : block declared
-        ACTION_BLOCK_ATTEMPT --> ACTION_STEALTH_INTERCEPT : stealth/intercept needed
-        ACTION_STEALTH_INTERCEPT --> ACTION_DURING_ACTION : failed block attempt
-        ACTION_DURING_ACTION --> ACTION_BLOCKS_DECLINED : all eligible Methuselahs decline
-        ACTION_BLOCKS_DECLINED --> ACTION_DURING_ACTION : target changes or redirect
-        ACTION_BLOCKS_DECLINED --> [*] : all pass, no target change
-        ACTION_BLOCK_ATTEMPT --> [*] : block succeeds
-        ACTION_STEALTH_INTERCEPT --> [*] : block succeeds
-    }
-
-    ActionBlockWindow --> ActionResolution : no successful block
-    ActionBlockWindow --> ACTION_BLOCK_RESOLUTION_PRE_COMBAT : block succeeds
-    ActionBlockWindow -[hidden]-> ActionResolution
-
-    state "ACTION_BLOCK_RESOLUTION_PRE_COMBAT" as ACTION_BLOCK_RESOLUTION_PRE_COMBAT <<window>>
-    ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> CombatWorkflow : combat not canceled or replaced
-    ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_CONTINUING : block resolution continues action
-    ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_AFTER_RESOLUTION : block/action ends without combat
-
-    state CombatWorkflow {
-        state "COMBAT_BEFORE_RANGE" as COMBAT_BEFORE_RANGE <<window>>
-        state "COMBAT_DETERMINE_RANGE" as COMBAT_DETERMINE_RANGE <<window>>
-        state "COMBAT_BEFORE_STRIKES" as COMBAT_BEFORE_STRIKES <<window>>
-        state "COMBAT_STRIKE_DECLARATION" as COMBAT_STRIKE_DECLARATION <<window>>
-        state "COMBAT_BEFORE_STRIKE_RESOLUTION" as COMBAT_BEFORE_STRIKE_RESOLUTION <<window>>
-        state "ResolveStrikes" as ResolveStrikes <<task>>
-        state "COMBAT_DAMAGE_PREVENTION" as COMBAT_DAMAGE_PREVENTION <<window>>
-        state "COMBAT_DAMAGE_RESOLUTION" as COMBAT_DAMAGE_RESOLUTION <<window>>
-        state "COMBAT_WOULD_GO_TO_TORPOR" as COMBAT_WOULD_GO_TO_TORPOR <<window>>
-        state "COMBAT_WOULD_BE_BURNED" as COMBAT_WOULD_BE_BURNED <<window>>
-        state "CommitCombatResult" as CommitCombatResult <<task>>
-        state "COMBAT_ADDITIONAL_STRIKE_WINDOW" as COMBAT_ADDITIONAL_STRIKE_WINDOW <<window>>
-        state "COMBAT_PRESS_STEP" as COMBAT_PRESS_STEP <<window>>
-        state "COMBAT_END_OF_ROUND" as COMBAT_END_OF_ROUND <<window>>
-        state "COMBAT_WOULD_END" as COMBAT_WOULD_END <<window>>
-        state "COMBAT_ENDS" as COMBAT_ENDS <<window>>
-        state "COMBAT_AFTER_ENDS" as COMBAT_AFTER_ENDS <<window>>
-
-        [*] --> COMBAT_BEFORE_RANGE
-        COMBAT_BEFORE_RANGE --> COMBAT_DETERMINE_RANGE : all pass
-        COMBAT_DETERMINE_RANGE --> COMBAT_BEFORE_STRIKES : range set
-        COMBAT_BEFORE_STRIKES --> COMBAT_STRIKE_DECLARATION : all pass
-        COMBAT_STRIKE_DECLARATION --> COMBAT_BEFORE_STRIKE_RESOLUTION
-        COMBAT_BEFORE_STRIKE_RESOLUTION --> ResolveStrikes
-        ResolveStrikes --> COMBAT_DAMAGE_PREVENTION
-        COMBAT_DAMAGE_PREVENTION --> COMBAT_DAMAGE_RESOLUTION
-        COMBAT_DAMAGE_RESOLUTION --> COMBAT_WOULD_GO_TO_TORPOR : vampire would go to torpor
-        COMBAT_DAMAGE_RESOLUTION --> COMBAT_WOULD_BE_BURNED : minion would burn
-        COMBAT_DAMAGE_RESOLUTION --> CommitCombatResult : no replacement hook
-        COMBAT_WOULD_GO_TO_TORPOR --> DiablerieWorkflow : torpor replaced by diablerie
-        COMBAT_WOULD_GO_TO_TORPOR --> CommitCombatResult : result not replaced
-        COMBAT_WOULD_BE_BURNED --> CommitCombatResult : result not replaced
-        CommitCombatResult --> COMBAT_ADDITIONAL_STRIKE_WINDOW : additional strikes remain
-        COMBAT_ADDITIONAL_STRIKE_WINDOW --> COMBAT_STRIKE_DECLARATION : declare next strike pair
-        CommitCombatResult --> COMBAT_PRESS_STEP : no additional strikes
-        COMBAT_PRESS_STEP --> COMBAT_BEFORE_RANGE : press to continue
-        COMBAT_PRESS_STEP --> COMBAT_END_OF_ROUND : no new round
-        ResolveStrikes --> COMBAT_END_OF_ROUND : combat ends strike
-        CommitCombatResult --> COMBAT_END_OF_ROUND : combatant no longer ready
-        COMBAT_END_OF_ROUND --> COMBAT_WOULD_END
-        COMBAT_WOULD_END --> COMBAT_ENDS
-        COMBAT_ENDS --> COMBAT_AFTER_ENDS
-        COMBAT_AFTER_ENDS --> [*] : combat-ending hooks complete
-    }
-
-    CombatWorkflow --> ACTION_CONTINUING : continue-the-action effect
-    CombatWorkflow --> ACTION_AFTER_RESOLUTION : no continuation
-
-    state "ACTION_CONTINUING" as ACTION_CONTINUING <<window>>
-    ACTION_CONTINUING --> ActionBlockWindow : reopen block attempts
-
-    state ActionResolution {
-        state "CompleteAction" as CompleteAction <<task>>
-        state "ApplyActionEffect" as ApplyActionEffect <<task>>
-
-        [*] --> CompleteAction
-        CompleteAction : action reaches resolution
-        CompleteAction : NRA locks before cost
-        CompleteAction --> PoliticalReferendum : political action
-        CompleteAction --> DiablerieWorkflow : diablerie action or effect
-        CompleteAction --> ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
-        ApplyActionEffect --> [*]
-    }
-
-    state PoliticalReferendum {
-        state "REFERENDUM_CHOOSE_TERMS" as REFERENDUM_CHOOSE_TERMS <<window>>
-        state "REFERENDUM_BEFORE_VOTES" as REFERENDUM_BEFORE_VOTES <<window>>
-        state "REFERENDUM_POLLING" as REFERENDUM_POLLING <<window>>
-        state "REFERENDUM_RESOLUTION" as REFERENDUM_RESOLUTION <<window>>
-        state "REFERENDUM_AFTER_RESOLUTION" as REFERENDUM_AFTER_RESOLUTION <<window>>
-
-        [*] --> REFERENDUM_CHOOSE_TERMS
-        REFERENDUM_CHOOSE_TERMS --> REFERENDUM_BEFORE_VOTES
-        REFERENDUM_BEFORE_VOTES --> REFERENDUM_POLLING
-        REFERENDUM_POLLING --> REFERENDUM_RESOLUTION
-        REFERENDUM_RESOLUTION --> REFERENDUM_AFTER_RESOLUTION
-        REFERENDUM_AFTER_RESOLUTION --> [*]
-    }
-
-    PoliticalReferendum --> ACTION_AFTER_RESOLUTION
-    ActionResolution --> ACTION_AFTER_RESOLUTION
-    ActionResolution -[hidden]-> ACTION_AFTER_RESOLUTION
-    ACTION_AFTER_RESOLUTION -[hidden]-> DiablerieWorkflow
-
-    state DiablerieWorkflow {
-        state "DIABLERIE_BEING_COMMITTED" as DIABLERIE_BEING_COMMITTED <<window>>
-        state "DIABLERIE_CANCEL_OR_REPLACE" as DIABLERIE_CANCEL_OR_REPLACE <<window>>
-        state "DiablerieResolution" as DiablerieResolution <<task>>
-        state "DIABLERIE_AFTER_SUCCESS" as DIABLERIE_AFTER_SUCCESS <<window>>
-        state "TROPHY_AWARD_BEFORE_BLOOD_HUNT" as TROPHY_AWARD_BEFORE_BLOOD_HUNT <<window>>
-
-        [*] --> DIABLERIE_BEING_COMMITTED
-        DIABLERIE_BEING_COMMITTED --> DIABLERIE_CANCEL_OR_REPLACE
-        DIABLERIE_CANCEL_OR_REPLACE --> [*] : canceled
-        DIABLERIE_CANCEL_OR_REPLACE --> DiablerieResolution : not canceled
-        DiablerieResolution : blood transfer
-        DiablerieResolution : equipment choice
-        DiablerieResolution : victim burned
-        DiablerieResolution : discipline search
-        DiablerieResolution --> DIABLERIE_AFTER_SUCCESS
-        DIABLERIE_AFTER_SUCCESS --> TROPHY_AWARD_BEFORE_BLOOD_HUNT
-        TROPHY_AWARD_BEFORE_BLOOD_HUNT --> [*]
-    }
-
-    DiablerieWorkflow --> BloodHuntWorkflow : successful diablerie
-    DiablerieWorkflow --> ACTION_AFTER_RESOLUTION : canceled/no blood hunt
-    DiablerieWorkflow -[hidden]-> BloodHuntWorkflow
-
-    state BloodHuntWorkflow {
-        state "BLOOD_HUNT_BEFORE_VOTES" as BLOOD_HUNT_BEFORE_VOTES <<window>>
-        state "BLOOD_HUNT_POLLING" as BLOOD_HUNT_POLLING <<window>>
-        state "BLOOD_HUNT_RESOLUTION" as BLOOD_HUNT_RESOLUTION <<window>>
-        state "BLOOD_HUNT_WOULD_BURN_DIABLERIST" as BLOOD_HUNT_WOULD_BURN_DIABLERIST <<window>>
-        state "BLOOD_HUNT_AFTER_RESOLUTION" as BLOOD_HUNT_AFTER_RESOLUTION <<window>>
-
-        [*] --> BLOOD_HUNT_BEFORE_VOTES
-        BLOOD_HUNT_BEFORE_VOTES --> BLOOD_HUNT_POLLING
-        BLOOD_HUNT_POLLING --> BLOOD_HUNT_RESOLUTION
-        BLOOD_HUNT_RESOLUTION --> BLOOD_HUNT_WOULD_BURN_DIABLERIST : passes
-        BLOOD_HUNT_RESOLUTION --> BLOOD_HUNT_AFTER_RESOLUTION : fails
-        BLOOD_HUNT_WOULD_BURN_DIABLERIST --> BLOOD_HUNT_AFTER_RESOLUTION
-        BLOOD_HUNT_AFTER_RESOLUTION --> [*]
-    }
-
-    BloodHuntWorkflow --> COMBAT_END_OF_ROUND : enclosing combat exists
-    BloodHuntWorkflow --> ACTION_AFTER_RESOLUTION : enclosing action exists
-    BloodHuntWorkflow --> [*] : no enclosing action remains
-
-    state "ACTION_AFTER_RESOLUTION" as ACTION_AFTER_RESOLUTION <<window>>
-    ACTION_AFTER_RESOLUTION --> [*] : all pass, clear action state
-@enduml
-```
-
-Render the standalone file with PlantUML when a static asset is needed:
+The canonical diagram source is [action-state-machine.puml](./action-state-machine.puml).
 
 ```bash
 plantuml -tsvg docs/implementation/action-state-machine.puml
@@ -288,27 +75,35 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
 1. Declare action
    - If an action card is played:
      CARD_AS_PLAYED_CANCEL_WINDOW
+     — e.g. Direct Intervention (out-of-turn master, cancel an action card as played)
 
 2. Action is announced
    ACTION_AS_ANNOUNCED
+   — e.g. Consign to Oblivion (cancel the announced action), Day Operation (prevent blocks at announcement)
 
 3. During action and block attempts
    ACTION_DURING_ACTION
+   — e.g. Conditioning (bleed modifier, only usable during a bleed action)
    ACTION_BLOCK_ATTEMPT
+   — e.g. Eagle's Sight (reaction, +1 intercept when block attempt is declared)
    ACTION_STEALTH_INTERCEPT
+   — e.g. Resist Earth's Grasp [CEL sup] (+1 stealth during stealth/intercept exchange)
 
 4. All eligible blockers decline
    ACTION_BLOCKS_DECLINED
+   — e.g. Deflection (redirect bleed after blocks declined), Telepathic Misdirection [AUS sup]
 
 5A. If unblocked
    ACTION_RESOLUTION_SUCCESS
 
 5B. If blocked
    ACTION_BLOCK_RESOLUTION_PRE_COMBAT
+   — e.g. Massassi's Honor (only usable when this vampire is blocked, play before combat if any)
    -> enter Combat Workflow
 
 6. After action resolution
    ACTION_AFTER_RESOLUTION
+   — e.g. Freak Drive (unlock acting vampire after successful action)
 ```
 
 `ACTION_BLOCK_RESOLUTION_PRE_COMBAT` is a narrow implementation hook for card text playable after a block succeeds but before the resulting combat starts, including text such as "play before combat" or "when this vampire is successfully blocked." It is not a general official phase where arbitrary action modifiers or reactions become legal.
@@ -322,15 +117,19 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
 
 2. Round begins
    COMBAT_BEFORE_RANGE
+   — e.g. Carrion Crows (place before range; damages opposing minion each round)
 
 3. Determine range
    COMBAT_DETERMINE_RANGE
+   — e.g. Flash [CEL] (maneuver or press)
 
 4. Before strikes
    COMBAT_BEFORE_STRIKES
+   — e.g. Immortal Grapple (grapple, only at close range before strikes are chosen)
 
 5. Choose / declare strikes
    COMBAT_STRIKE_DECLARATION
+   — e.g. Theft of Vitae (strike: steal 2 blood from opposing vampire)
 
 6. Before strike resolution
    COMBAT_BEFORE_STRIKE_RESOLUTION
@@ -339,13 +138,16 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
 
 8. Damage prevention and damage handling
    COMBAT_DAMAGE_PREVENTION
+   — e.g. Forearm Block (prevent 2 damage from opposing minion's next hand strike)
    COMBAT_DAMAGE_RESOLUTION
 
 9. If the result would move a vampire to torpor
    COMBAT_WOULD_GO_TO_TORPOR
+   — e.g. Amaranth (replace pending torpor result with diablerie)
 
 10. If the result would burn a minion
    COMBAT_WOULD_BE_BURNED
+   — e.g. Reform Body (usable if this vampire would be burned; avoid the burn)
 
 11. Commit final result
    - vampire moves to TORPOR
@@ -354,10 +156,12 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
 
 12. Additional strikes, if applicable
    COMBAT_ADDITIONAL_STRIKE_WINDOW
+   — e.g. Blur [CEL sup] (2 additional strikes)
    -> repeat strike declaration and resolution for additional strikes
 
 13. Press step
    COMBAT_PRESS_STEP
+   — e.g. Psyche! (press to continue combat if both combatants are still ready)
 
 14. End of round
    COMBAT_END_OF_ROUND
@@ -469,15 +273,18 @@ The diablerie workflow owns the blood hunt trigger regardless of source. `Resolv
 
 3. Before votes and ballots
    REFERENDUM_BEFORE_VOTES
+   — e.g. Akunanse Kholo (usable during a referendum before votes and ballots are cast)
 
 4. Polling
    REFERENDUM_POLLING
+   — e.g. Absolute Tyranny [POT+PRE] (during polling step, +3 votes)
 
 5. Tally votes and determine result
    REFERENDUM_RESOLUTION
 
 6. Outcome-dependent referendum hooks
    REFERENDUM_AFTER_RESOLUTION
+   — e.g. Amici Noctis (after referendum passes, recover the political action card from ash heap)
 
 7. After action resolution
    ACTION_AFTER_RESOLUTION
@@ -505,6 +312,7 @@ Blood hunt is referendum-like, but it is not a political action.
 
 5. If the blood hunt passes and would burn the diablerist
    BLOOD_HUNT_WOULD_BURN_DIABLERIST
+   — e.g. Lay Low (anarch diablerist avoids being burned by the blood hunt)
 
 6. Commit final result
    - diablerist burns
@@ -526,12 +334,27 @@ Blood hunt is referendum-like, but it is not a political action.
 | Standard Master                             | `MASTER_PHASE`                         | Unless card text says out-of-turn                                  |
 | Event                                       | `DISCARD_PHASE_EVENT`                  | Uses the discard phase event play                                  |
 | `Direct Intervention` style canceller       | `CARD_AS_PLAYED_CANCEL_WINDOW`         | Restricted cancellation layer                                      |
-| `Freak Drive`                               | `ACTION_AFTER_RESOLUTION`              | After action resolves                                              |
+| `Consign to Oblivion`                       | `ACTION_AS_ANNOUNCED`                  | Cancel an action as it is announced                                |
+| `Day Operation`                             | `ACTION_AS_ANNOUNCED`                  | Prevent blocks by playing at announcement; caster goes to torpor   |
+| `Conditioning`                              | `ACTION_DURING_ACTION`                 | Bleed modifier; only usable during a bleed action                  |
+| `Eagle's Sight`                             | `ACTION_BLOCK_ATTEMPT`                 | Reaction; +1 intercept when a block attempt is declared            |
+| `Resist Earth's Grasp` [CEL sup]            | `ACTION_STEALTH_INTERCEPT`             | +1 stealth during the stealth/intercept exchange                   |
 | `Deflection` style bleed redirect           | `ACTION_BLOCKS_DECLINED`               | When text says after blocks are declined                           |
+| `Massassi's Honor`                          | `ACTION_BLOCK_RESOLUTION_PRE_COMBAT`   | Only usable when this vampire is blocked, play before combat       |
+| `Freak Drive`                               | `ACTION_AFTER_RESOLUTION`              | After action resolves                                              |
 | `Carrion Crows`                             | `COMBAT_BEFORE_RANGE`                  | Explicit before-range combat card                                  |
+| `Flash` [CEL]                               | `COMBAT_DETERMINE_RANGE`               | Maneuver or press                                                  |
+| `Immortal Grapple`                          | `COMBAT_BEFORE_STRIKES`                | Grapple; only at close range before strikes are chosen             |
+| `Theft of Vitae`                            | `COMBAT_STRIKE_DECLARATION`            | Strike: steal 2 blood from opposing vampire                        |
+| `Forearm Block`                             | `COMBAT_DAMAGE_PREVENTION`             | Prevent 2 damage from opposing minion's next hand strike           |
 | `Blur`                                      | `COMBAT_ADDITIONAL_STRIKE_WINDOW`      | Additional-strike source                                           |
 | `Amaranth`                                  | `COMBAT_WOULD_GO_TO_TORPOR`            | Replaces pending torpor with diablerie                             |
+| `Reform Body`                               | `COMBAT_WOULD_BE_BURNED`               | Usable if this vampire would be burned; avoid the burn             |
+| `Psyche!`                                   | `COMBAT_PRESS_STEP`                    | Press to continue combat if both combatants are still ready        |
 | `Crimson Fury`                              | `DIABLERIE_BEING_COMMITTED`            | Responds to a vampire being diablerized                            |
+| `Absolute Tyranny` [POT+PRE]                | `REFERENDUM_POLLING`                   | During polling step, +3 votes                                      |
+| `Akunanse Kholo`                            | `REFERENDUM_BEFORE_VOTES`              | Usable during referendum before votes and ballots are cast         |
+| `Amici Noctis`                              | `REFERENDUM_AFTER_RESOLUTION`          | After referendum passes, recover the political action card         |
 | `Lay Low`                                   | `BLOOD_HUNT_WOULD_BURN_DIABLERIST`     | Responds to blood hunt passing and burning the diablerist          |
 
 ---
@@ -540,11 +363,11 @@ Blood hunt is referendum-like, but it is not a political action.
 
 Prefer specific workflow windows over broad "interrupt" names. Specific names make legality checks easier to implement and test:
 
-| Prefer                                      | Avoid as canonical implementation state        |
-|---------------------------------------------|------------------------------------------------|
-| `COMBAT_WOULD_GO_TO_TORPOR`                 | `COMBAT_BURN_OR_TORPOR_REPLACEMENT`           |
-| `COMBAT_WOULD_BE_BURNED`                    | `COMBAT_EVENT_REPLACEMENT_OR_INTERRUPTION`    |
-| `DIABLERIE_BEING_COMMITTED`                 | `COMBAT_DIABLERIE_INTERRUPT`                  |
-| `BLOOD_HUNT_WOULD_BURN_DIABLERIST`          | `REFERENDUM_INTERRUPT`                        |
+| Prefer                             | Avoid as canonical implementation state    |
+|------------------------------------|--------------------------------------------|
+| `COMBAT_WOULD_GO_TO_TORPOR`        | `COMBAT_BURN_OR_TORPOR_REPLACEMENT`        |
+| `COMBAT_WOULD_BE_BURNED`           | `COMBAT_EVENT_REPLACEMENT_OR_INTERRUPTION` |
+| `DIABLERIE_BEING_COMMITTED`        | `COMBAT_DIABLERIE_INTERRUPT`               |
+| `BLOOD_HUNT_WOULD_BURN_DIABLERIST` | `REFERENDUM_INTERRUPT`                     |
 
 Broad names can still be useful for CSV review buckets, but the engine should expose the narrower window that matches the workflow step.
