@@ -1,6 +1,16 @@
 @startuml
 top to bottom direction
 
+skinparam nodesep 8
+skinparam ranksep 10
+
+skinparam state {
+    BackgroundColor<<window>> #EAF3FF
+    BorderColor<<window>> #2F6FA3
+    BackgroundColor<<task>> #FFF7E6
+    BorderColor<<task>> #A36B00
+}
+
 [*] --> Idle
 Idle : Empty enforced-mode action state
 Idle : no PendingActionState
@@ -8,90 +18,118 @@ Idle : no CombatState
 Idle : no ReferendumState
 Idle : no ActiveTimingWindow
 
+note top of Idle
+  Entry point:
+  empty action state
+end note
+
 Idle --> ActionDeclaring : DeclareAction or card ability
 
 state ActionDeclaring {
+    state "BuildPendingAction" as BuildPendingAction <<task>>
+    state "CARD_AS_PLAYED_CANCEL_WINDOW" as CARD_AS_PLAYED_CANCEL_WINDOW <<window>>
+    state "ReplacePlayedCard" as ReplacePlayedCard <<task>>
+    state "ACTION_AS_ANNOUNCED" as ACTION_AS_ANNOUNCED <<window>>
+
     [*] --> BuildPendingAction
-    BuildPendingAction --> CardAsPlayed : action card played
-    BuildPendingAction --> ActionAsAnnounced : basic action or in-play ability
-    CardAsPlayed : CARD_AS_PLAYED_CANCEL_WINDOW
-    CardAsPlayed --> Idle : canceled
-    CardAsPlayed --> ActionAsAnnounced : all pass
-    ActionAsAnnounced : ACTION_AS_ANNOUNCED
-    ActionAsAnnounced --> [*] : all pass
+    BuildPendingAction --> CARD_AS_PLAYED_CANCEL_WINDOW : action card played
+    BuildPendingAction --> ACTION_AS_ANNOUNCED : basic action or in-play ability
+    CARD_AS_PLAYED_CANCEL_WINDOW --> ReplacePlayedCard : canceled
+    CARD_AS_PLAYED_CANCEL_WINDOW --> ReplacePlayedCard : all pass
+    ReplacePlayedCard : draw to max
+    ReplacePlayedCard : or register delayed replacement
+    ReplacePlayedCard --> [*] : canceled, clear action state
+    ReplacePlayedCard --> ACTION_AS_ANNOUNCED : card not canceled
+    ACTION_AS_ANNOUNCED --> [*] : all pass
 }
 
 ActionDeclaring --> ActionBlockWindow
+[*] -[hidden]-> Idle
+Idle -[hidden]-> ActionDeclaring
+ActionDeclaring -[hidden]-> ActionBlockWindow
 
 state ActionBlockWindow {
-    [*] --> BlockOpportunities
-    BlockOpportunities : ACTION_DURING_ACTION
-    BlockOpportunities : ACTION_BLOCK_ATTEMPT
-    BlockOpportunities : ACTION_STEALTH_INTERCEPT
-    BlockOpportunities --> BlockOpportunities : failed block attempt
-    BlockOpportunities --> BlocksDeclined : all eligible Methuselahs decline
-    BlocksDeclined : ACTION_BLOCKS_DECLINED
-    BlocksDeclined --> BlockOpportunities : target changes or redirect
-    BlocksDeclined --> [*] : all pass, no target change
-    BlockOpportunities --> [*] : block succeeds
+    state "ACTION_DURING_ACTION" as ACTION_DURING_ACTION <<window>>
+    state "ACTION_BLOCK_ATTEMPT" as ACTION_BLOCK_ATTEMPT <<window>>
+    state "ACTION_STEALTH_INTERCEPT" as ACTION_STEALTH_INTERCEPT <<window>>
+    state "ACTION_BLOCKS_DECLINED" as ACTION_BLOCKS_DECLINED <<window>>
+
+    [*] --> ACTION_DURING_ACTION
+    ACTION_DURING_ACTION --> ACTION_BLOCK_ATTEMPT : block declared
+    ACTION_BLOCK_ATTEMPT --> ACTION_STEALTH_INTERCEPT : stealth/intercept needed
+    ACTION_STEALTH_INTERCEPT --> ACTION_DURING_ACTION : failed block attempt
+    ACTION_DURING_ACTION --> ACTION_BLOCKS_DECLINED : all eligible Methuselahs decline
+    ACTION_BLOCKS_DECLINED --> ACTION_DURING_ACTION : target changes or redirect
+    ACTION_BLOCKS_DECLINED --> [*] : all pass, no target change
+    ACTION_BLOCK_ATTEMPT --> [*] : block succeeds
+    ACTION_STEALTH_INTERCEPT --> [*] : block succeeds
 }
 
 ActionBlockWindow --> ActionResolution : no successful block
-ActionBlockWindow --> BlockResolutionPreCombat : block succeeds
+ActionBlockWindow --> ACTION_BLOCK_RESOLUTION_PRE_COMBAT : block succeeds
+ActionBlockWindow -[hidden]-> ActionResolution
 
-BlockResolutionPreCombat : ACTION_BLOCK_RESOLUTION_PRE_COMBAT
-BlockResolutionPreCombat --> CombatWorkflow : combat not canceled or replaced
-BlockResolutionPreCombat --> ActionContinuing : block resolution continues action
-BlockResolutionPreCombat --> ActionAfterResolution : block/action ends without combat
+state "ACTION_BLOCK_RESOLUTION_PRE_COMBAT" as ACTION_BLOCK_RESOLUTION_PRE_COMBAT <<window>>
+ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> CombatWorkflow : combat not canceled or replaced
+ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_CONTINUING : block resolution continues action
+ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_AFTER_RESOLUTION : block/action ends without combat
 
 state CombatWorkflow {
-    [*] --> CombatBeforeRange
-    CombatBeforeRange : COMBAT_BEFORE_RANGE
-    CombatBeforeRange --> CombatDetermineRange : all pass
-    CombatDetermineRange : COMBAT_DETERMINE_RANGE
-    CombatDetermineRange --> CombatBeforeStrikes : range set
-    CombatBeforeStrikes : COMBAT_BEFORE_STRIKES
-    CombatBeforeStrikes --> CombatStrikeDeclaration : all pass
-    CombatStrikeDeclaration : COMBAT_STRIKE_DECLARATION
-    CombatStrikeDeclaration --> CombatBeforeStrikeResolution
-    CombatBeforeStrikeResolution : COMBAT_BEFORE_STRIKE_RESOLUTION
-    CombatBeforeStrikeResolution --> CombatStrikeResolution
-    CombatStrikeResolution : resolve strikes
-    CombatStrikeResolution --> CombatDamageResolution
-    CombatDamageResolution : COMBAT_DAMAGE_PREVENTION
-    CombatDamageResolution : COMBAT_DAMAGE_RESOLUTION
-    CombatDamageResolution --> CombatWouldGoToTorpor : vampire would go to torpor
-    CombatDamageResolution --> CombatWouldBeBurned : minion would burn
-    CombatDamageResolution --> CombatResultCommitted : no replacement hook
-    CombatWouldGoToTorpor : COMBAT_WOULD_GO_TO_TORPOR
-    CombatWouldBeBurned : COMBAT_WOULD_BE_BURNED
-    CombatWouldGoToTorpor --> DiablerieWorkflow : torpor replaced by diablerie
-    CombatWouldGoToTorpor --> CombatResultCommitted : result not replaced
-    CombatWouldBeBurned --> CombatResultCommitted : result not replaced
-    CombatResultCommitted --> CombatAdditionalStrike : additional strikes remain
-    CombatAdditionalStrike : COMBAT_ADDITIONAL_STRIKE_WINDOW
-    CombatAdditionalStrike --> CombatStrikeDeclaration : declare next strike pair
-    CombatResultCommitted --> CombatPressStep : no additional strikes
-    CombatPressStep : COMBAT_PRESS_STEP
-    CombatPressStep --> CombatBeforeRange : press to continue
-    CombatPressStep --> CombatEnding : no new round
-    CombatStrikeResolution --> CombatEnding : combat ends strike
-    CombatResultCommitted --> CombatEnding : combatant no longer ready
-    CombatEnding : COMBAT_END_OF_ROUND
-    CombatEnding : COMBAT_WOULD_END
-    CombatEnding : COMBAT_ENDS
-    CombatEnding : COMBAT_AFTER_ENDS
-    CombatEnding --> [*] : combat-ending hooks complete
+    state "COMBAT_BEFORE_RANGE" as COMBAT_BEFORE_RANGE <<window>>
+    state "COMBAT_DETERMINE_RANGE" as COMBAT_DETERMINE_RANGE <<window>>
+    state "COMBAT_BEFORE_STRIKES" as COMBAT_BEFORE_STRIKES <<window>>
+    state "COMBAT_STRIKE_DECLARATION" as COMBAT_STRIKE_DECLARATION <<window>>
+    state "COMBAT_BEFORE_STRIKE_RESOLUTION" as COMBAT_BEFORE_STRIKE_RESOLUTION <<window>>
+    state "ResolveStrikes" as ResolveStrikes <<task>>
+    state "COMBAT_DAMAGE_PREVENTION" as COMBAT_DAMAGE_PREVENTION <<window>>
+    state "COMBAT_DAMAGE_RESOLUTION" as COMBAT_DAMAGE_RESOLUTION <<window>>
+    state "COMBAT_WOULD_GO_TO_TORPOR" as COMBAT_WOULD_GO_TO_TORPOR <<window>>
+    state "COMBAT_WOULD_BE_BURNED" as COMBAT_WOULD_BE_BURNED <<window>>
+    state "CommitCombatResult" as CommitCombatResult <<task>>
+    state "COMBAT_ADDITIONAL_STRIKE_WINDOW" as COMBAT_ADDITIONAL_STRIKE_WINDOW <<window>>
+    state "COMBAT_PRESS_STEP" as COMBAT_PRESS_STEP <<window>>
+    state "COMBAT_END_OF_ROUND" as COMBAT_END_OF_ROUND <<window>>
+    state "COMBAT_WOULD_END" as COMBAT_WOULD_END <<window>>
+    state "COMBAT_ENDS" as COMBAT_ENDS <<window>>
+    state "COMBAT_AFTER_ENDS" as COMBAT_AFTER_ENDS <<window>>
+
+    [*] --> COMBAT_BEFORE_RANGE
+    COMBAT_BEFORE_RANGE --> COMBAT_DETERMINE_RANGE : all pass
+    COMBAT_DETERMINE_RANGE --> COMBAT_BEFORE_STRIKES : range set
+    COMBAT_BEFORE_STRIKES --> COMBAT_STRIKE_DECLARATION : all pass
+    COMBAT_STRIKE_DECLARATION --> COMBAT_BEFORE_STRIKE_RESOLUTION
+    COMBAT_BEFORE_STRIKE_RESOLUTION --> ResolveStrikes
+    ResolveStrikes --> COMBAT_DAMAGE_PREVENTION
+    COMBAT_DAMAGE_PREVENTION --> COMBAT_DAMAGE_RESOLUTION
+    COMBAT_DAMAGE_RESOLUTION --> COMBAT_WOULD_GO_TO_TORPOR : vampire would go to torpor
+    COMBAT_DAMAGE_RESOLUTION --> COMBAT_WOULD_BE_BURNED : minion would burn
+    COMBAT_DAMAGE_RESOLUTION --> CommitCombatResult : no replacement hook
+    COMBAT_WOULD_GO_TO_TORPOR --> DiablerieWorkflow : torpor replaced by diablerie
+    COMBAT_WOULD_GO_TO_TORPOR --> CommitCombatResult : result not replaced
+    COMBAT_WOULD_BE_BURNED --> CommitCombatResult : result not replaced
+    CommitCombatResult --> COMBAT_ADDITIONAL_STRIKE_WINDOW : additional strikes remain
+    COMBAT_ADDITIONAL_STRIKE_WINDOW --> COMBAT_STRIKE_DECLARATION : declare next strike pair
+    CommitCombatResult --> COMBAT_PRESS_STEP : no additional strikes
+    COMBAT_PRESS_STEP --> COMBAT_BEFORE_RANGE : press to continue
+    COMBAT_PRESS_STEP --> COMBAT_END_OF_ROUND : no new round
+    ResolveStrikes --> COMBAT_END_OF_ROUND : combat ends strike
+    CommitCombatResult --> COMBAT_END_OF_ROUND : combatant no longer ready
+    COMBAT_END_OF_ROUND --> COMBAT_WOULD_END
+    COMBAT_WOULD_END --> COMBAT_ENDS
+    COMBAT_ENDS --> COMBAT_AFTER_ENDS
+    COMBAT_AFTER_ENDS --> [*] : combat-ending hooks complete
 }
 
-CombatWorkflow --> ActionContinuing : continue-the-action effect
-CombatWorkflow --> ActionAfterResolution : no continuation
-CombatWorkflow --> BloodHuntWorkflow : combat-caused diablerie completes
+CombatWorkflow --> ACTION_CONTINUING : continue-the-action effect
+CombatWorkflow --> ACTION_AFTER_RESOLUTION : no continuation
 
-ActionContinuing : ACTION_CONTINUING
-ActionContinuing --> ActionBlockWindow : reopen block attempts
+state "ACTION_CONTINUING" as ACTION_CONTINUING <<window>>
+ACTION_CONTINUING --> ActionBlockWindow : reopen block attempts
 
 state ActionResolution {
+    state "CompleteAction" as CompleteAction <<task>>
+    state "ApplyActionEffect" as ApplyActionEffect <<task>>
+
     [*] --> CompleteAction
     CompleteAction : action reaches resolution
     CompleteAction : NRA locks before cost
@@ -102,61 +140,69 @@ state ActionResolution {
 }
 
 state PoliticalReferendum {
-    [*] --> ReferendumChooseTerms
-    ReferendumChooseTerms : REFERENDUM_CHOOSE_TERMS
-    ReferendumChooseTerms --> ReferendumBeforeVotes
-    ReferendumBeforeVotes : REFERENDUM_BEFORE_VOTES
-    ReferendumBeforeVotes --> ReferendumPolling
-    ReferendumPolling : REFERENDUM_POLLING
-    ReferendumPolling --> ReferendumResolution
-    ReferendumResolution : REFERENDUM_RESOLUTION
-    ReferendumResolution --> ReferendumAfterResolution
-    ReferendumAfterResolution : REFERENDUM_AFTER_RESOLUTION
-    ReferendumAfterResolution --> [*]
+    state "REFERENDUM_CHOOSE_TERMS" as REFERENDUM_CHOOSE_TERMS <<window>>
+    state "REFERENDUM_BEFORE_VOTES" as REFERENDUM_BEFORE_VOTES <<window>>
+    state "REFERENDUM_POLLING" as REFERENDUM_POLLING <<window>>
+    state "REFERENDUM_RESOLUTION" as REFERENDUM_RESOLUTION <<window>>
+    state "REFERENDUM_AFTER_RESOLUTION" as REFERENDUM_AFTER_RESOLUTION <<window>>
+
+    [*] --> REFERENDUM_CHOOSE_TERMS
+    REFERENDUM_CHOOSE_TERMS --> REFERENDUM_BEFORE_VOTES
+    REFERENDUM_BEFORE_VOTES --> REFERENDUM_POLLING
+    REFERENDUM_POLLING --> REFERENDUM_RESOLUTION
+    REFERENDUM_RESOLUTION --> REFERENDUM_AFTER_RESOLUTION
+    REFERENDUM_AFTER_RESOLUTION --> [*]
 }
 
-PoliticalReferendum --> ActionAfterResolution
-ActionResolution --> ActionAfterResolution
+PoliticalReferendum --> ACTION_AFTER_RESOLUTION
+ActionResolution --> ACTION_AFTER_RESOLUTION
+ActionResolution -[hidden]-> ACTION_AFTER_RESOLUTION
+ACTION_AFTER_RESOLUTION -[hidden]-> DiablerieWorkflow
 
 state DiablerieWorkflow {
-    [*] --> DiablerieBeingCommitted
-    DiablerieBeingCommitted : DIABLERIE_BEING_COMMITTED
-    DiablerieBeingCommitted --> DiablerieCancelOrReplace
-    DiablerieCancelOrReplace : DIABLERIE_CANCEL_OR_REPLACE
-    DiablerieCancelOrReplace --> [*] : canceled
-    DiablerieCancelOrReplace --> DiablerieResolution : not canceled
+    state "DIABLERIE_BEING_COMMITTED" as DIABLERIE_BEING_COMMITTED <<window>>
+    state "DIABLERIE_CANCEL_OR_REPLACE" as DIABLERIE_CANCEL_OR_REPLACE <<window>>
+    state "DiablerieResolution" as DiablerieResolution <<task>>
+    state "DIABLERIE_AFTER_SUCCESS" as DIABLERIE_AFTER_SUCCESS <<window>>
+    state "TROPHY_AWARD_BEFORE_BLOOD_HUNT" as TROPHY_AWARD_BEFORE_BLOOD_HUNT <<window>>
+
+    [*] --> DIABLERIE_BEING_COMMITTED
+    DIABLERIE_BEING_COMMITTED --> DIABLERIE_CANCEL_OR_REPLACE
+    DIABLERIE_CANCEL_OR_REPLACE --> [*] : canceled
+    DIABLERIE_CANCEL_OR_REPLACE --> DiablerieResolution : not canceled
     DiablerieResolution : blood transfer
     DiablerieResolution : equipment choice
     DiablerieResolution : victim burned
     DiablerieResolution : discipline search
-    DiablerieResolution --> DiablerieAfterSuccess
-    DiablerieAfterSuccess : DIABLERIE_AFTER_SUCCESS
-    DiablerieAfterSuccess --> TrophyAward
-    TrophyAward : TROPHY_AWARD_BEFORE_BLOOD_HUNT
-    TrophyAward --> [*]
+    DiablerieResolution --> DIABLERIE_AFTER_SUCCESS
+    DIABLERIE_AFTER_SUCCESS --> TROPHY_AWARD_BEFORE_BLOOD_HUNT
+    TROPHY_AWARD_BEFORE_BLOOD_HUNT --> [*]
 }
 
 DiablerieWorkflow --> BloodHuntWorkflow : successful diablerie
-DiablerieWorkflow --> ActionAfterResolution : canceled/no blood hunt
+DiablerieWorkflow --> ACTION_AFTER_RESOLUTION : canceled/no blood hunt
+DiablerieWorkflow -[hidden]-> BloodHuntWorkflow
 
 state BloodHuntWorkflow {
-    [*] --> BloodHuntBeforeVotes
-    BloodHuntBeforeVotes : BLOOD_HUNT_BEFORE_VOTES
-    BloodHuntBeforeVotes --> BloodHuntPolling
-    BloodHuntPolling : BLOOD_HUNT_POLLING
-    BloodHuntPolling --> BloodHuntResolution
-    BloodHuntResolution : BLOOD_HUNT_RESOLUTION
-    BloodHuntResolution --> BloodHuntWouldBurn : passes
-    BloodHuntResolution --> BloodHuntAfterResolution : fails
-    BloodHuntWouldBurn : BLOOD_HUNT_WOULD_BURN_DIABLERIST
-    BloodHuntWouldBurn --> BloodHuntAfterResolution
-    BloodHuntAfterResolution : BLOOD_HUNT_AFTER_RESOLUTION
-    BloodHuntAfterResolution --> [*]
+    state "BLOOD_HUNT_BEFORE_VOTES" as BLOOD_HUNT_BEFORE_VOTES <<window>>
+    state "BLOOD_HUNT_POLLING" as BLOOD_HUNT_POLLING <<window>>
+    state "BLOOD_HUNT_RESOLUTION" as BLOOD_HUNT_RESOLUTION <<window>>
+    state "BLOOD_HUNT_WOULD_BURN_DIABLERIST" as BLOOD_HUNT_WOULD_BURN_DIABLERIST <<window>>
+    state "BLOOD_HUNT_AFTER_RESOLUTION" as BLOOD_HUNT_AFTER_RESOLUTION <<window>>
+
+    [*] --> BLOOD_HUNT_BEFORE_VOTES
+    BLOOD_HUNT_BEFORE_VOTES --> BLOOD_HUNT_POLLING
+    BLOOD_HUNT_POLLING --> BLOOD_HUNT_RESOLUTION
+    BLOOD_HUNT_RESOLUTION --> BLOOD_HUNT_WOULD_BURN_DIABLERIST : passes
+    BLOOD_HUNT_RESOLUTION --> BLOOD_HUNT_AFTER_RESOLUTION : fails
+    BLOOD_HUNT_WOULD_BURN_DIABLERIST --> BLOOD_HUNT_AFTER_RESOLUTION
+    BLOOD_HUNT_AFTER_RESOLUTION --> [*]
 }
 
-BloodHuntWorkflow --> ActionAfterResolution : enclosing action exists
-BloodHuntWorkflow --> Idle : no enclosing action remains
+BloodHuntWorkflow --> COMBAT_END_OF_ROUND : enclosing combat exists
+BloodHuntWorkflow --> ACTION_AFTER_RESOLUTION : enclosing action exists
+BloodHuntWorkflow --> [*] : no enclosing action remains
 
-ActionAfterResolution : ACTION_AFTER_RESOLUTION
-ActionAfterResolution --> Idle : all pass, clear action state
+state "ACTION_AFTER_RESOLUTION" as ACTION_AFTER_RESOLUTION <<window>>
+ACTION_AFTER_RESOLUTION --> [*] : all pass, clear action state
 @enduml

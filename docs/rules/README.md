@@ -4,6 +4,7 @@ These documents describe Vampire: The Eternal Struggle rules from a tabletop per
 physical card game can read these and relate them to their experience at the table.
 
 For the official source material, see the [VEKN Rulebook](https://www.vekn.net/rulebook),
+the [rulebook2024 maintained source](https://github.com/GiottoVerducci/rulebook2024/blob/main/README.md),
 [Detailed Play Summary](https://www.vekn.net/detailed-play-summary), and the
 [VTES Rulings database](https://github.com/vtes-biased/vtes-rulings/blob/main/README.md).
 
@@ -35,6 +36,7 @@ enforces protocol exactly.
 ## Source Notes
 
 - [VEKN Rulebook](https://www.vekn.net/rulebook) is the primary source for tabletop rules, turn structure, regions, actions, combat, referendums, card types, and glossary definitions.
+- [rulebook2024 maintained source](https://github.com/GiottoVerducci/rulebook2024/blob/main/README.md) is used as an additional official rulebook source for rule checks, especially when validating current wording or structure against the published VEKN rulebook.
 - [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used where these documents need protocol-level timing detail beyond the rulebook's shorter descriptions.
 - [VEKN Tournament Rules](https://archon.vekn.net/document/tournament-rules.html) are used for sanctioned tournament structure, deck legality, scoring, and tournament definitions.
 - [VEKN Card Lists](https://www.vekn.net/card-lists) are used for current card text and set/card-list driven legality checks.

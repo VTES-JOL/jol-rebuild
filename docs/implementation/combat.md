@@ -122,6 +122,8 @@ Accumulate `pendingDamage` and `pendingAggravated` from all strikes. Prevention 
 
 Before moving a vampire to TORPOR, open the `COMBAT_WOULD_GO_TO_TORPOR` replacement window. Before burning a minion as a combat result, open the `COMBAT_WOULD_BE_BURNED` replacement window. These are combat result hooks; if a replacement effect creates diablerie, enter the separate diablerie workflow described in [Timing Windows](./timing-windows.md#combat-caused-diablerie-workflow).
 
+If that diablerie opens a blood hunt, resolve the diablerie and blood hunt immediately, then return to the combat-ending flow. Do not jump directly to the enclosing action's after-resolution window; the combat still reaches end-of-round and combat-ending hooks because one or both combatants are no longer ready.
+
 **Steal Blood:** not damage; not preventable; cancelled by a Dodge. Moves blood/life counters from target to striker.
 
 **Environmental damage:** damage with no `attackerRef` or `defenderRef` — produced by card text that says "this minion takes X damage" without an opposing minion as the source. Applied directly to `pendingDamage` (or `pendingAggravated` if the text says aggravated) for the affected combatant. Prevention cards may reduce it unless the card text says otherwise. Does not trigger "damage from a strike" effects.
@@ -194,7 +196,7 @@ The middle of the sequence is atomic, but card text can create windows immediate
 3. **Victim burned:** `CardMovedEffect(victim, ASH_HEAP)`; all remaining attached cards and counters on the victim are burned.
 4. **Discipline search:** if victim's capacity is strictly greater than diablerist's current capacity, diablerist's controller may search hand, library, and ash heap for one master: Discipline card and put it on the diablerist. Capacity increases by 1; no blood added to fill the new capacity.
 5. **Trophy awards:** if the victim is a Red List minion, Trophy awards are resolved before the blood hunt. Controller may search hand/library/ash heap for a master Trophy card to put on the diablerist. Other unawarded Trophies already in play may move to the diablerist at their controller's discretion.
-6. **Blood hunt trigger:** `ReferendumState` is opened automatically with `isBloodHunt = true` and `targetRef` = diablerist — see [Referendums](./referendums.md#blood-hunt-auto-trigger). The blood hunt referendum must fully resolve before the AFTER_RESOLUTION window of the triggering action opens.
+6. **Blood hunt trigger:** `ReferendumState` is opened automatically with `isBloodHunt = true` and `targetRef` = diablerist — see [Referendums](./referendums.md#blood-hunt-auto-trigger). The blood hunt referendum must fully resolve before the AFTER_RESOLUTION window of the triggering action opens. If diablerie was created inside combat, combat-ending hooks still run before the action workflow resumes.
 
 The diablerie workflow owns step 6 regardless of source. It opens blood hunt after successful diablerie from a directed action, combat replacement effect, blocked leave-torpor action, or any card text that creates diablerie.
 
