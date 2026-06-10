@@ -56,7 +56,7 @@ A vampire's blood total can never exceed their current capacity. Any effect that
 Every action follows this state sequence:
 
 ```
-Idle -> As Played -> As Announced -> During Action (Impulse Loop) -> Resolution -> After Resolution -> End
+Idle -> As Played -> As Announced -> During Action (Impulse Loop) -> Blocks Declined -> Resolution -> After Resolution -> End
 ```
 
 For blocked actions that are continued (e.g. Form of Mist), the sequence expands:
@@ -69,7 +69,8 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 |-----------------------|----------|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | **As Played**         | Yes      | Impulse (restricted)         | Only if a card is played to announce the action. Restricted window for "as played" cancellers and wake effects; the card is not replaced yet. |
 | **As Announced**      | Yes      | Impulse (resets on any play) | Only effects usable as the action is announced are legal; these resolve before regular action modifiers, reactions, and block attempts.       |
-| **During Action**     | Yes      | Impulse (resets on any play) | Stealth/intercept subject to "only when needed" rule; see [Blocking](./blocking.md)                                                           |
+| **During Action**     | Yes      | Impulse (resets on any play) | Block attempts and normal action modifier/reaction play. Stealth/intercept subject to "only when needed" rule; see [Blocking](./blocking.md) |
+| **Blocks Declined**   | Yes      | Impulse (resets on any play) | Final pre-resolution window after all eligible Methuselahs decline further block attempts. Target changes reopen block attempts; see [Blocking](./blocking.md) |
 | **Resolution**        | No       | Deterministic                | No player interaction; two branches (see below)                                                                                               |
 | **Action Continuing** | No       | Sequencing (ABC)             | Fires when a "continue the action" effect is played                                                                                           |
 | **After Resolution**  | No       | Sequencing (ABC)             | One effect at a time; Freak Drive, Voter Captivation, etc.                                                                                    |
@@ -78,7 +79,7 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 
 **Resolution branches:**
 
-- Action not blocked -> pay cost -> apply effect -> enter After Resolution.
+- Action not blocked -> after the Blocks Declined window closes -> pay cost -> apply effect -> enter After Resolution.
 - Action blocked -> combat subsystem (FIFO queue) -> when combat fully resolves -> enter After Resolution, or Action Continuing if a continue-the-action effect fires.
 
 Combat must fully resolve before the lifecycle leaves Resolution.
@@ -220,4 +221,4 @@ No further block attempts, stealth/intercept plays, or action modifiers are lega
 - [VEKN Rulebook § The Edge](https://www.vekn.net/rulebook) defines Edge movement from successful bleeds with a bleed amount of 1 or more.
 - [VEKN Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summary) is the basis for the card declaration, cancellation, replacement, and action-resolution timing model referenced by the lifecycle here.
 - [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for sequencing/impulse vocabulary, after-resolution timing, and continuation-after-block protocol.
-- Card-specific examples such as Freak Drive, Voter Captivation, Cats' Guidance, and Lutz von Hohenzollern should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists), because current card text can refine exact trigger wording.
+- Card-specific examples such as Freak Drive, Voter Captivation, Cats' Guidance, and Lutz von Hohenzollern should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists) and the [VTES Rulings database](https://github.com/vtes-biased/vtes-rulings/blob/main/README.md), because current card text and card-specific rulings can refine exact trigger wording.

@@ -4,7 +4,7 @@ Documents the formal action declaration, action lifecycle, NRA tracking, per-typ
 
 See [VTES Rules — Actions](../rules/actions.md) for the tabletop rules this implements.
 
-For blocking and stealth/intercept enforcement, see [Blocking](./blocking.md). For the referendum engine, see [Referendums](./referendums.md). For the combat system, see [Combat](./combat.md). For card play timing and lifecycle, see [Card Play](./card-play.md).
+For blocking and stealth/intercept enforcement, see [Blocking](./blocking.md). For the referendum engine, see [Referendums](./referendums.md). For the combat system, see [Combat](./combat.md). For card play timing and lifecycle, see [Card Play](./card-play.md). For the cross-workflow window order, see [Timing Windows](./timing-windows.md).
 
 ---
 
@@ -19,7 +19,10 @@ DeclareAction
   → open block-attempt impulse window (DIRECTED_SINGLE or UNDIRECTED)
   [status: DURING_ACTION]
 
-    ── all players pass without blocking ──▶  ResolveAction
+    ── all players pass without blocking ──▶  open BLOCKS_DECLINED pre-resolution impulse window
+                                               → if target changes: return to block-attempt impulse window
+                                               → all players pass with no target change
+                                               → ResolveAction
                                                → apply resolution effects
                                                → set actionSuccessful = true
                                                → set reachedResolution = true (NRA locks)
@@ -36,6 +39,8 @@ DeclareAction
 
 `ACTION_CONTINUING` is set when a "continue the action" effect fires after combat (e.g. Form of Mist). The block-attempt impulse window re-opens with the same stealth/intercept accumulators intact.
 
+For the expanded sequential ordering of action, combat, diablerie, referendum, and blood hunt windows, use [Timing Windows](./timing-windows.md). In particular, a diablerie action enters the diablerie workflow before the triggering action's `AFTER_RESOLUTION` window opens.
+
 ---
 
 ## Commands
@@ -44,7 +49,7 @@ DeclareAction
 |-----------------|-----------------------------------------------|-------------------------------------------------------------------------------------------|
 | `DeclareAction` | `actorRef`, `actionType`, `targetPlayerName?` | MINION phase; current player; actor in READY, unlocked, not contested; NRA check          |
 | `AttemptBlock`  | `blockerRef`                                  | Impulse window active; blocker controller = current impulse holder; blocker eligible — see [Blocking](./blocking.md) |
-| `ResolveAction` | —                                             | Impulse window closed; action status = DURING_ACTION                                      |
+| `ResolveAction` | —                                             | Blocks Declined pre-resolution window closed; action status = DURING_ACTION               |
 | `AbortAction`   | —                                             | Action in progress; cancels action, unlocks actor, clears all state                       |
 
 ---
@@ -72,6 +77,7 @@ DeclareAction
 | `passedBlockWindowsByPlayer` | `Set<String>`               | Players who passed their current block window; reset on redirect — see [Blocking](./blocking.md)          |
 | `cannotBlockRefs`            | `Set<CardRef>`              | Minions with explicit "cannot block" restrictions for the duration of this action                         |
 | `currentBlockerRef`          | `CardRef?`                  | Active blocker during a current attempt; null when no attempt in progress                                 |
+| `blocksDeclined`             | `boolean`                   | True after all eligible blockers have declined and before action resolution; reset if the action target changes |
 | `wakePermissionByCardId`     | `Set<String>`               | Minion card IDs granted temporary wake permission — see [Blocking](./blocking.md)                         |
 
 > **Implementation status:** `actorRef`, `actionType`, `targetPlayerName`, `status`, and `blockerRef` are on the Java class. All other fields in the table above are part of the target design and must be added before the corresponding feature can be enforced.

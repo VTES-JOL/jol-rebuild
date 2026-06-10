@@ -4,7 +4,7 @@ Documents the referendum engine: political actions, vote sources, Prisci ballots
 
 See [VTES Rules — Referendums](../rules/referendums.md) for the tabletop rules this implements.
 
-For declaring a political action and the action lifecycle, see [Actions](./actions.md). For blood hunt triggered by diablerie, see [Combat § Diablerie](./combat.md#diablerie).
+For declaring a political action and the action lifecycle, see [Actions](./actions.md). For blood hunt triggered by diablerie, see [Combat § Diablerie](./combat.md#diablerie). For the cross-workflow order of referendum and blood hunt windows, see [Timing Windows](./timing-windows.md).
 
 ---
 
@@ -140,6 +140,8 @@ After the diablerie sequence completes (step 6 — Blood Hunt Trigger — in [Co
 - `terms` = "Blood hunt against [diablerist name]"
 
 If the blood hunt passes: `CardMovedEffect(diablerist, ASH_HEAP)` — the diablerist is burned.
+
+Before applying that burn, open `BLOOD_HUNT_WOULD_BURN_DIABLERIST`. This is a blood-hunt result hook, not a combat burn hook; it applies even when the diablerie was caused by combat.
 
 The blood hunt referendum must fully resolve (reach `ClosePolling`) before the AFTER_RESOLUTION sequencing window of the triggering action opens. The overall action lifecycle is: diablerie steps 1–5 → blood hunt referendum (steps 1–3 per above) → AFTER_RESOLUTION window.
 

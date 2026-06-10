@@ -27,7 +27,9 @@ The existing `HandlerUtils.buildPassOrder(DIRECTED_SINGLE / UNDIRECTED, actingPl
 
 ## Block Window State Machine
 
-The block-attempt loop is driven by the existing impulse window on `GameData`. Each block-attempt cycle:
+The block-attempt loop is driven by the existing impulse window on `GameData`. It has two action sub-states: normal block opportunities, then the final Blocks Declined pre-resolution window.
+
+### Block opportunities
 
 1. Impulse window open (`DIRECTED_SINGLE` or `UNDIRECTED` context, depending on `targetPlayerName`).
 2. Current `currentImpulseHolder` may call `AttemptBlock` (naming a ready, unlocked, eligible, non-`cannotBlockRefs` minion) or `PassImpulse`.
@@ -38,9 +40,22 @@ The block-attempt loop is driven by the existing impulse window on `GameData`. E
    d. **Block succeeds** (`interceptsByBlockerRef[currentBlockerRef] ≥ stealth`): set `status = BLOCKED`, lock blocker, close impulse window, start combat.
    e. **Block fails** (`stealth > interceptsByBlockerRef[currentBlockerRef]`): blocker does not lock; clear `currentBlockerRef`; return impulse to same holder to try another minion or pass.
 4. **If `PassImpulse`:** advance to next player per pass order.
-5. All eligible players pass consecutively → impulse window closes → `ResolveAction` becomes available.
+5. All eligible players pass consecutively → enter the Blocks Declined window. Do not call `ResolveAction` yet.
 
 A Methuselah may attempt multiple block attempts with different minions while they hold impulse. If they pass, they may not attempt again in the current window (unless a redirect opens a new window — see below).
+
+### Blocks Declined pre-resolution window
+
+After all eligible Methuselahs have declined block attempts, open/continue an action impulse window with block attempts disabled:
+
+1. Acting Methuselah gets impulse first, then normal action impulse order applies.
+2. Legal action modifiers, reactions, and in-play effects may still be played before resolution.
+3. Effects with "after blocks are declined" timing are legal in this window. This includes bleed redirects such as Deflection.
+4. `AttemptBlock` is rejected while `blocksDeclined = true`.
+5. If a card/effect changes `targetPlayerName`, clear the current block-window pass state, set `blocksDeclined = false`, and reopen normal block opportunities for the new target.
+6. If all players pass in this window with no target change or action-ending effect, close the impulse window and make `ResolveAction` available.
+
+This window is what allows the common sequence: prey declines to block, acting player increases bleed, prey wakes a locked minion, that minion plays Deflection, then block attempts reopen for the new target with the increased bleed amount preserved.
 
 ---
 
@@ -62,6 +77,7 @@ Both totals accumulate on `PendingActionState` and carry across all block window
 | `passedBlockWindowsByPlayer` | `Set<String>`           | Players who have passed in the current block window; reset when a redirect opens a new window |
 | `cannotBlockRefs`            | `Set<CardRef>`          | Minions prohibited from blocking for the duration of this action                         |
 | `currentBlockerRef`          | `CardRef?`              | Active blocker in a current attempt; null when no attempt in progress                    |
+| `blocksDeclined`             | `boolean`               | True after all eligible Methuselahs have declined block attempts and before action resolution; reset on redirect |
 
 ### Comparison rule
 
@@ -88,7 +104,10 @@ When a reaction card redirects an action to a new target:
 2. Carry all accumulated modifiers: `stealth`, `interceptsByBlockerRef`, `bleedAmount`.
 3. Clear `passedBlockWindowsByPlayer` — players who passed in the previous window may attempt again.
 4. Minions in `cannotBlockRefs` remain ineligible for the full action.
-5. Re-open the block-attempt impulse window with the appropriate context for the new target.
+5. Set `blocksDeclined = false`.
+6. Re-open the block-attempt impulse window with the appropriate context for the new target.
+
+Redirect cards with "after blocks are declined" timing are played in the Blocks Declined pre-resolution window. Redirects are rejected during an active block attempt because the target of the action cannot change while a block attempt is unresolved.
 
 ---
 
@@ -107,7 +126,15 @@ When a wake card is played:
 2. That minion may now play reactions and attempt blocks as though unlocked.
 3. When the action ends (after AFTER_RESOLUTION window closes): clear `wakePermissionByCardId`; apply any lock/unlock or penalty stated in the wake card's text.
 
-A locked minion is eligible to play a wake card in the AS_ANNOUNCED window ("as it is played" layer) even though it would not normally be eligible in the impulse window.
+### Timing windows
+
+Wake effects are reaction cards, so they can be played during normal reaction-card timing before action resolution when their card text is otherwise legal.
+
+That includes the Blocks Declined pre-resolution window. For example, after a bleed's block attempts have been declined and before `ResolveAction`, a locked minion can play a wake effect, then play a legal bleed-redirect reaction such as Deflection.
+
+Wake effects also have one special timing permission: a locked minion may play a wake effect during the `AS_PLAYED` window when that wake effect is needed to play another reaction/effect that itself is legal in `AS_PLAYED` (for example, an "as it is played" canceller). This is not the `AS_ANNOUNCED` window. Cards playable "as the action is announced" use `AS_ANNOUNCED`; wake effects do not automatically use that window unless their own card text says so.
+
+A reaction card that unlocks a minion but does not grant wake-style "as though unlocked" permission does not get the `AS_PLAYED` exception.
 
 ---
 

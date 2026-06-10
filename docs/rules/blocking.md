@@ -33,9 +33,22 @@ Once a Methuselah decides not to make any further block attempts against a given
 2. Stealth and intercept modifiers may be played, subject to the "only when needed" rule.
 3. If the blocker's final intercept is greater than or equal to the acting minion's final stealth, the action is **blocked**. As part of block resolution, the blocker is locked and enters combat with the acting minion. This does not require the blocker to have been unlocked before the attempt; a locked minion blocking via a wake-style effect remains locked.
 4. If stealth exceeds intercept, the block attempt fails; the blocker does **not** lock. The next eligible Methuselah may attempt.
-5. If all eligible Methuselahs pass without a successful block, the action succeeds and enters Resolution.
+5. If all eligible Methuselahs pass without a successful block, the action enters the **Blocks Declined** window before resolution.
 
 A single Methuselah may make multiple successive attempts with different minions while that Methuselah's block opportunity remains open.
+
+### Blocks Declined Window
+
+After every eligible blocking Methuselah has declined further block attempts, the action is not resolved immediately. The game enters a final pre-resolution impulse/sequencing window:
+
+- The acting Methuselah has the first opportunity, then other Methuselahs follow the normal action impulse order.
+- No further block attempts may be declared in this window unless the action's target changes.
+- Action modifiers, reaction cards, and in-play effects that are legal before action resolution may still be played. This includes bleed modifiers such as Bonding and bleed redirects such as Deflection.
+- Cards whose text says "after blocks are declined" are legal only in this window.
+- If a redirect or other effect changes the action's target, block attempts reopen for the new target. All accumulated action modifiers and reactions remain in effect.
+- If all Methuselahs pass in the Blocks Declined window without changing the target or otherwise ending the action, the action succeeds and enters Resolution.
+
+Example: Alice bleeds Bob. Bob declines further block attempts. Alice then plays a bleed modifier. Bob may then play a wake effect such as On the Qui Vive to allow a locked minion to play reactions as though unlocked, then play Deflection, whose timing is "only usable if a minion is bleeding you, after blocks are declined." The redirected bleed targets another Methuselah, and block attempts reopen for that new target with the increased bleed amount still in effect.
 
 ---
 
@@ -60,6 +73,8 @@ Some reaction cards allow a Methuselah to redirect an action to a different targ
 - A new block window opens with the **new target** Methuselah.
 - Any Methuselah who passed on blocking during a **previous** block window for this action is **not** automatically excluded from the new window. If the action is redirected back to a player who previously passed, all of that player's eligible minions may attempt to block again. The prior pass applies only to the window in which it was made.
 - The exception is any minion that carries an explicit "cannot attempt to block" restriction from a card effect. That restriction persists for the duration of the action.
+
+Many bleed redirects, including Deflection and superior Telepathic Misdirection, are explicitly usable only **after blocks are declined**. These cards are played in the Blocks Declined window, not during an active block attempt; the active-target restriction in the block-attempt sub-window prevents target changes while a block attempt is unresolved.
 
 **Example sequence (bleed redirected away and back):**
 
@@ -110,7 +125,10 @@ Action modifiers and reactions are asymmetric:
 
 A **wake effect** is a special reaction card (e.g. On the Qui Vive, Forced Awakening) that allows a locked minion to react during another Methuselah's action as though unlocked:
 
-- Wake cards are played in the "as played" interrupt layer, allowing them to be played by a locked minion as soon as an eligible action is declared.
+- Wake cards are reaction cards. They may be played during normal reaction-card timing before action resolution, as allowed by their card text and the current timing window.
+- Wake cards also have a special timing permission in the **"as a card is played" / As Played** window: a locked minion may play a wake effect there when needed to play another reaction or effect that itself must be played in that As Played window, such as an "as it is played" canceller.
+- This special As Played permission is not the same as the **As Announced** window for cards playable "as the action is announced." Wake effects do not automatically belong to As Announced unless their own card text creates that timing.
+- A reaction that unlocks a minion but does not wake it is not a wake effect and does not get the special As Played timing permission.
 - A wake effect does not unlock the minion or change its ready/locked state. It grants permission for the minion to play further reaction cards and attempt to block as though unlocked for the duration specified by the card.
 - If the minion blocks and combat results, they remain engaged in combat normally.
 - At the end of the action, the permission expires. Any additional lock/unlock or penalty text on the wake card is then applied as specified.
@@ -120,7 +138,10 @@ A **wake effect** is a special reaction card (e.g. On the Qui Vive, Forced Awake
 ## Source Notes
 
 - [VEKN Rulebook § Actions](https://www.vekn.net/rulebook) defines directed and undirected actions, eligible blocking Methuselahs, ready/unlocked blocking requirements, and successful block consequences.
+- [VEKN Rulebook § Detailed course of an action](https://www.vekn.net/rulebook) defines the "no current block attempt", active block attempt, and "blocks have been declined by all Methuselahs" states, including the final pre-resolution window and target-change reopen rule.
 - [VEKN Rulebook § Stealth and Intercept](https://www.vekn.net/rulebook) defines the "only when needed" restriction and the default comparison of stealth against intercept.
 - [VEKN Rulebook § Reaction Cards](https://www.vekn.net/rulebook) defines who may play reactions and the general restriction that reaction cards are played by Methuselahs other than the acting Methuselah.
+- [VEKN Rulebook glossary entry for Wake](https://www.vekn.net/rulebook) defines wake duration and the special permission to play wake effects during the "as a card is played" window.
 - [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for block-attempt pass order, impulse reset after a play, redirect windows, and accumulated action modifiers.
-- Wake-effect behavior is card-text driven; examples and exact permission durations should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists).
+- [VEKN Detailed Play Summary § Playing Cards and Other Effects](https://www.vekn.net/detailed-play-summary) states that the "as played" window permits "as it is played" cancellers and wake-style cards that grant the ability to play those effects, and excludes other cards/effects.
+- Wake-effect behavior and redirect timing are card-text driven; examples and exact wording such as On the Qui Vive and Deflection should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists) and the [VTES Rulings database](https://github.com/vtes-biased/vtes-rulings/blob/main/README.md).

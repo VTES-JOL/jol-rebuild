@@ -4,6 +4,8 @@ Documents card play enforcement: phase gating, card type lifecycle, out-of-turn 
 
 See [VTES Rules — Card Timing and Card Types](../rules/card-play.md) for the tabletop rules this implements.
 
+For the sequential window taxonomy used by action, combat, diablerie, referendum, and blood hunt workflows, see [Timing Windows](./timing-windows.md).
+
 ---
 
 ## Phase Gate Map

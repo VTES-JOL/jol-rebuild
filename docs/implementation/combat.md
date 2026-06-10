@@ -4,6 +4,8 @@ Documents the combat system: range, maneuvers, strikes, damage resolution, press
 
 See [VTES Rules — Combat](../rules/combat.md) for the tabletop rules this implements.
 
+For the cross-workflow order of combat, diablerie, and blood hunt hooks, see [Timing Windows](./timing-windows.md).
+
 ---
 
 ## Current Status
@@ -117,6 +119,8 @@ Accumulate `pendingDamage` and `pendingAggravated` from all strikes. Prevention 
 
 **Torpor check:** after damage resolution, vampire with unmended normal damage goes to TORPOR (unless aggravated damage burned them outright).
 
+Before moving a vampire to TORPOR, open the `COMBAT_WOULD_GO_TO_TORPOR` replacement window. Before burning a minion as a combat result, open the `COMBAT_WOULD_BE_BURNED` replacement window. These are combat result hooks; if a replacement effect creates diablerie, enter the separate diablerie workflow described in [Timing Windows](./timing-windows.md#combat-caused-diablerie-workflow).
+
 **Steal Blood:** not damage; not preventable; cancelled by a Dodge. Moves blood/life counters from target to striker.
 
 **Environmental damage:** damage with no `attackerRef` or `defenderRef` — produced by card text that says "this minion takes X damage" without an opposing minion as the source. Applied directly to `pendingDamage` (or `pendingAggravated` if the text says aggravated) for the affected combatant. Prevention cards may reduce it unless the card text says otherwise. Does not trigger "damage from a strike" effects.
@@ -163,7 +167,7 @@ Blood Cursed vampires cannot commit diablerie — validated on `DeclareAction` f
 
 ### Diablerie Resolution Sequence
 
-The sequence is atomic — no interruptions between steps:
+The middle of the sequence is atomic, but card text can create windows immediately before or after the atomic resolution. Enter this workflow at `DIABLERIE_BEING_COMMITTED`, then allow `DIABLERIE_CANCEL_OR_REPLACE` effects before step 1. After step 5, allow `DIABLERIE_AFTER_SUCCESS` effects before the blood hunt trigger.
 
 1. **Blood transfer:** all victim's remaining blood moves to the diablerist via `CardCounterChangedEffect`; blood exceeding the diablerist's capacity is burned (lost to the bank).
 2. **Equipment choice:** the diablerist's controller chooses which equipment on the victim to take (if any); `CardAttachedEffect` for each taken item.
