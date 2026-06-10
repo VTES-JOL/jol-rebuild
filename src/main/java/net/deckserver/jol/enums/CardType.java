@@ -22,6 +22,8 @@ public enum CardType {
     EQUIPMENT("Equipment"),
     EVENT("Event"),
     LOCATION("Location"),
+    CONVICTION("Conviction"),
+    POWER("Power"),
     NONE("");
 
     private final String label;

@@ -34,6 +34,24 @@ Any minion may perform these actions without an action card. All actions except 
 
 Basic actions other than bleed are repeatable by the same minion in a turn. NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers.
 
+### Mandatory Actions
+
+Some actions are mandatory and must be performed before non-mandatory actions. A ready unlocked vampire with no blood must hunt as a mandatory action. If any of your minions have mandatory actions still to perform, none of your minions may perform a non-mandatory action.
+
+If multiple minions have mandatory actions, their controller chooses the order. A minion required to take a mandatory action cannot take any other action. If a minion has two or more different mandatory actions, or has one mandatory action they cannot take, that minion is stuck and cannot perform any action; this does not stop other minions from acting.
+
+### Torpor-Related Actions
+
+Two additional basic actions involve minions in or adjacent to torpor. These are not in the table above because they have different eligibility requirements.
+
+| Action           | Who                   | Default stealth                                         | Effect                                                                                                                                                                                                                                                                                                                     |
+|------------------|-----------------------|---------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Leave Torpor** | Torpored vampire only | +1                                                      | Costs 2 blood from the acting vampire. If the action succeeds, the vampire moves from torpor to the ready region. If blocked, no combat occurs — if the blocker is a vampire, the blocker may instead choose to diablerize the torpored vampire. If they decline or are an ally, the action fails with no cost paid.       |
+| **Rescue**       | Any ready vampire     | +1 if rescuing own vampire; +0 if rescuing another's    | Targets a vampire in torpor. Costs 2 blood, paid by the acting vampire, the rescued vampire, or split between them. If successful, moves the target vampire to the ready region; the rescued vampire does not lock or unlock from being rescued. If blocked, the acting vampire and blocking minion enter combat normally. |
+| **Diablerise**   | Any ready vampire     | +1 if targeting own vampire; +0 if targeting another's  | Targets a vampire in torpor. If successful, the target is diablerized; see [Combat § Diablerie](./combat.md#diablerie). If blocked, the acting vampire and blocking minion enter combat normally.                                                                                                                          |
+
+Leave Torpor is the only action a minion in torpor may take. Rescue and diablerie are actions taken by ready vampires targeting a vampire in torpor.
+
 ### Blood Capacity Overflow
 
 A vampire's blood total can never exceed their current capacity. Any effect that would bring a vampire above capacity instead brings them to capacity; the excess blood is returned to the bank. This applies to hunt, blood gain from card effects, and any other source of blood.
@@ -45,7 +63,7 @@ A vampire's blood total can never exceed their current capacity. Any effect that
 Every action follows this state sequence:
 
 ```
-Idle -> As Played -> As Announced -> During Action (Impulse Loop) -> Resolution -> After Resolution -> End
+Idle -> As Played -> As Announced -> During Action (Impulse Loop) -> Blocks Declined -> Resolution -> After Resolution -> End
 ```
 
 For blocked actions that are continued (e.g. Form of Mist), the sequence expands:
@@ -58,7 +76,8 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 |-----------------------|----------|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | **As Played**         | Yes      | Impulse (restricted)         | Only if a card is played to announce the action. Restricted window for "as played" cancellers and wake effects; the card is not replaced yet. |
 | **As Announced**      | Yes      | Impulse (resets on any play) | Only effects usable as the action is announced are legal; these resolve before regular action modifiers, reactions, and block attempts.       |
-| **During Action**     | Yes      | Impulse (resets on any play) | Stealth/intercept subject to "only when needed" rule; see [Blocking](./blocking.md)                                                           |
+| **During Action**     | Yes      | Impulse (resets on any play) | Block attempts and normal action modifier/reaction play. Stealth/intercept subject to "only when needed" rule; see [Blocking](./blocking.md) |
+| **Blocks Declined**   | Yes      | Impulse (resets on any play) | Final pre-resolution window after all eligible Methuselahs decline further block attempts. Target changes reopen block attempts; see [Blocking](./blocking.md) |
 | **Resolution**        | No       | Deterministic                | No player interaction; two branches (see below)                                                                                               |
 | **Action Continuing** | No       | Sequencing (ABC)             | Fires when a "continue the action" effect is played                                                                                           |
 | **After Resolution**  | No       | Sequencing (ABC)             | One effect at a time; Freak Drive, Voter Captivation, etc.                                                                                    |
@@ -67,7 +86,7 @@ For blocked actions that are continued (e.g. Form of Mist), the sequence expands
 
 **Resolution branches:**
 
-- Action not blocked -> pay cost -> apply effect -> enter After Resolution.
+- Action not blocked -> after the Blocks Declined window closes -> pay cost -> apply effect -> enter After Resolution.
 - Action blocked -> combat subsystem (FIFO queue) -> when combat fully resolves -> enter After Resolution, or Action Continuing if a continue-the-action effect fires.
 
 Combat must fully resolve before the lifecycle leaves Resolution.
@@ -152,7 +171,7 @@ NRA is triggered at the **Complete Action** step: after block attempts are resol
 1. NRA fires; the acting minion is locked out of this action type for the rest of the turn.
 2. Then:
    - **Not blocked** -> pay cost -> resolve action.
-   - **Blocked** -> action card burned (cost not paid) -> blocker locks -> combat begins. If the acting minion is in torpor, there is no combat; the blocking player may choose to diablerize instead. See [Combat § Leave Torpor action](./combat.md#leave-torpor-action).
+   - **Blocked** -> action card burned (cost not paid) -> blocker locks -> combat begins. If the action is Leave Torpor, there is no combat; if the blocker is a vampire, the blocking player may choose to diablerize instead. See [Combat § Leave Torpor action](./combat.md#leave-torpor-action).
 
 ### Two Separate Tracking Mechanisms
 
@@ -209,4 +228,4 @@ No further block attempts, stealth/intercept plays, or action modifiers are lega
 - [VEKN Rulebook § The Edge](https://www.vekn.net/rulebook) defines Edge movement from successful bleeds with a bleed amount of 1 or more.
 - [VEKN Detailed Play Summary §1.6](https://www.vekn.net/detailed-play-summary) is the basis for the card declaration, cancellation, replacement, and action-resolution timing model referenced by the lifecycle here.
 - [VEKN Detailed Play Summary](https://www.vekn.net/detailed-play-summary) is used for sequencing/impulse vocabulary, after-resolution timing, and continuation-after-block protocol.
-- Card-specific examples such as Freak Drive, Voter Captivation, Cats' Guidance, and Lutz von Hohenzollern should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists), because current card text can refine exact trigger wording.
+- Card-specific examples such as Freak Drive, Voter Captivation, Cats' Guidance, and Lutz von Hohenzollern should be checked against [VEKN Card Lists](https://www.vekn.net/card-lists) and the [VTES Rulings database](https://github.com/vtes-biased/vtes-rulings/blob/main/README.md), because current card text and card-specific rulings can refine exact trigger wording.

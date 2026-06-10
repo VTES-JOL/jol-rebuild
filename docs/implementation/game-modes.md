@@ -111,6 +111,6 @@ Commands are dispatched by `GameCommandService` and produce `CommandResult`, whi
 `SequencingWindowChangedEffect`, `GameNotesChangedEffect`, `GameModeChangedEffect`,
 `GameCompletedEffect`, `OrderOfPlayReversedEffect`.
 
-Effects are currently co-produced alongside direct mutations (handlers still mutate `GameData` directly). The future CQRS step is to make handlers pure functions returning only effects, with a `GameEffectApplier` doing all mutations.
+Handlers are pure functions: they validate, read state, and return `CommandResult` carrying a `List<GameEffect>` — no direct mutations. `GameEffectApplicator` is the sole mutation path; it applies each effect and returns a human-readable change-log string broadcast to all clients.
 
 See [Mechanics Gaps](./mechanics-gaps.md) for which enforced-mode commands are fully rules-aware vs partially implemented.

@@ -31,6 +31,7 @@ Each topic has a paired rules doc and implementation doc. Rules docs explain tab
 | —                                                     | [Game Modes](docs/implementation/game-modes.md)                                              |
 | —                                                     | [Board Layouts](docs/implementation/board-layouts.md)                                        |
 | —                                                     | [Chat System](docs/implementation/chat.md)                                                   |
+| —                                                     | [Card Text Parsing](docs/implementation/card-text-parsing.md)                                |
 | —                                                     | [Mechanics Gaps](docs/implementation/mechanics-gaps.md)                                      |
 
 ## Commands

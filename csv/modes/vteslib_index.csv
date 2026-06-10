@@ -1,0 +1,2365 @@
+CardId,Name,OriginalType,ModeCount,ModeIds,Auto
+100001,.44 Magnum,Equipment,1,100001:EQUIPMENT,yes
+100002,419 Operation,Action,1,100002:ACTION,yes
+102217,47th Street Royals,Ally,1,102217:ALLY,yes
+100003,Aaron's Feeding Razor,Equipment,1,100003:EQUIPMENT,yes
+100004,Abactor,Action,1,100004:ACTION,yes
+100005,Abandoning the Flesh,Combat/Reaction,2,100005:COMBAT:dem|100005:REACTION:dem,no
+100006,Abbot,Action,1,100006:ACTION,yes
+100007,Abjure,Power,1,100007:COMBAT,yes
+100008,Ablative Skin,Action,2,100008:ACTION:for|100008:ACTION:FOR,yes
+100009,Abombwe,Master,1,100009:MASTER,yes
+100010,Abomination,Action,1,100010:ACTION,yes
+100011,Absimiliard's Army,Event,1,100011:EVENT,yes
+102308,Absolute Tyranny,Action Modifier/Reaction,4,102308:MODIFIER:pot+pre|102308:REACTION:pot+pre|102308:MODIFIER:POT+PRE|102308:REACTION:POT+PRE,no
+100012,Absolution of the Diabolist,Master,1,100012:MASTER,yes
+100013,Absorb the Mind,Combat,3,100013:COMBAT:dom|100013:COMBAT:myt|100013:COMBAT:MYT,yes
+102309,Abuse of Power,Action,1,102309:ACTION,yes
+100014,Abyssal Hunter,Ally,1,100014:ALLY,yes
+100015,Academic Hunting Ground,Master,1,100015:MASTER,yes
+100016,Acheron Vortex,Action Modifier,1,100016:MODIFIER,yes
+100017,Achilles' Heel,Master,1,100017:MASTER,yes
+100018,Aching Beauty,Master,1,100018:MASTER,yes
+100019,Acquired Ventrue Assets,Master,1,100019:MASTER,yes
+100020,Acrobatics,Combat,2,100020:COMBAT:cel|100020:COMBAT:CEL,yes
+100021,Adaptability,Combat,2,100021:COMBAT:pro|100021:COMBAT:PRO,yes
+100022,Adhocracy,Action Modifier,3,100022:MODIFIER:ani|100022:MODIFIER:chi|100022:MODIFIER:pot,yes
+100023,"Admonitions, The",Master,1,100023:MASTER,yes
+100024,Agate Talisman,Equipment,1,100024:EQUIPMENT,yes
+100025,Agent of Power,Master,1,100025:MASTER,yes
+102286,Aggressive Corpse,Ally,1,102286:ALLY,yes
+100026,Aggressive Tactics,Master,1,100026:MASTER,yes
+100027,Ahriman's Demesne,Combat,2,100027:COMBAT:obt|100027:COMBAT:OBT,yes
+100028,Ahrimane Protectorate,Action,1,100028:ACTION,yes
+100029,Aid from Bats,Combat,2,100029:COMBAT:ani|100029:COMBAT:ANI,yes
+100030,"Ailing Spirit, The",Action,3,100030:ACTION:dom|100030:ACTION:obe|100030:ACTION:OBE,yes
+100031,Aire of Elation,Action Modifier,2,100031:MODIFIER:pre|100031:MODIFIER:PRE,yes
+100032,AK-47,Equipment,1,100032:EQUIPMENT,yes
+100033,"Akhenaten, The Sun Pharaoh",Ally,1,100033:ALLY,yes
+100034,Akunanse Kholo,Action Modifier/Reaction,2,100034:MODIFIER|100034:REACTION,no
+100035,Al's Army Apparatus,Master,1,100035:MASTER,yes
+100036,Alacrity,Action Modifier,2,100036:MODIFIER:cel|100036:MODIFIER:CEL,yes
+100037,Alamut,Master,1,100037:MASTER,yes
+100038,Alastor,Political Action,1,100038:POLITICAL,yes
+100039,"Alia, God's Messenger",Ally,1,100039:ALLY,yes
+100040,Alpha Glint,Combat,2,100040:COMBAT:ani+for|100040:COMBAT:ANI+FOR,yes
+100041,Alvusia,Master,1,100041:MASTER,yes
+100042,Amam the Devourer,Ally,1,100042:ALLY,yes
+100043,Amaranth,Combat,1,100043:COMBAT,yes
+100044,"Ambrosius, The Ferryman",Ally,1,100044:ALLY,yes
+100045,Ambulance,Equipment,1,100045:EQUIPMENT,yes
+100046,Ambush,Action,1,100046:ACTION,yes
+102274,Amici Noctis,Action Modifier,1,102274:MODIFIER,yes
+100047,Amria,Combat,2,100047:COMBAT:chi|100047:COMBAT:CHI,yes
+100048,Amulet of Temporal Perception,Equipment,1,100048:EQUIPMENT,yes
+100049,Amusement Park Hunting Ground,Master,1,100049:MASTER,yes
+100050,Anachronism,Master,1,100050:MASTER,yes
+100051,Ananasi Vampirephile,Ally,1,100051:ALLY,yes
+100052,"Anarch Free Press, The",Master,1,100052:MASTER,yes
+100053,"Anarch Manifesto, An",Equipment,1,100053:EQUIPMENT,yes
+100054,Anarch Railroad,Master,1,100054:MASTER,yes
+100055,Anarch Revolt,Master,1,100055:MASTER,yes
+100056,Anarch Salon,Political Action,1,100056:POLITICAL,yes
+100057,Anarch Secession,Action,1,100057:ACTION,yes
+100058,Anarch Troublemaker,Master,1,100058:MASTER,yes
+100059,Anarchist Uprising,Political Action,1,100059:POLITICAL,yes
+100060,Anathema,Political Action,1,100060:POLITICAL,yes
+100061,Ancestor Spirit,Master,1,100061:MASTER,yes
+100062,Ancestor's Insight,Action Modifier/Reaction,2,100062:REACTION:aus|100062:MODIFIER:AUS,yes
+100063,"Ancestor's Talisman, The",Equipment,1,100063:EQUIPMENT,yes
+100064,Ancient Influence,Political Action,1,100064:POLITICAL,yes
+100065,Ancilla Empowerment,Political Action,1,100065:POLITICAL,yes
+100066,Anesthetic Touch,Combat,3,100066:COMBAT:aus|100066:COMBAT:obe|100066:COMBAT:OBE,yes
+100067,Angel of Berlin,Master,1,100067:MASTER,yes
+102349,Angel's Gift,Combat,2,102349:COMBAT:1|102349:COMBAT:2,yes
+100068,Anima Gathering,Action,2,100068:ACTION:aus|100068:ACTION:AUS,yes
+100069,Animal Magnetism,Action Modifier,2,100069:MODIFIER:ani+obf|100069:MODIFIER:ANI+OBF,yes
+100070,Animalism,Master,1,100070:MASTER,yes
+100071,"Ankara Citadel, Turkey, The",Equipment,1,100071:EQUIPMENT,yes
+100072,Anonymous Freight,Action,1,100072:ACTION,yes
+100073,Antediluvian Awakening,Master,1,100073:MASTER,yes
+100074,"Anthelios, The Red Star",Event,1,100074:EVENT,yes
+102350,Anticipation,Combat,2,102350:COMBAT:aus|102350:COMBAT:AUS,yes
+100075,Antithesis,Action,1,100075:ACTION,yes
+100076,Apparition,Combat,2,100076:COMBAT:chi|100076:COMBAT:CHI,yes
+100077,Apportation,Combat,2,100077:COMBAT:tha|100077:COMBAT:THA,yes
+100078,Approximation of Loyalty,Action Modifier,2,100078:MODIFIER:pre|100078:MODIFIER:PRE,yes
+100079,"Aranthebes, The Immortal",Action,1,100079:ACTION,yes
+100080,Arcane Appraiser,Ally,1,100080:ALLY,yes
+100081,Arcane Library,Master,1,100081:MASTER,yes
+100082,"Arcanum Chapterhouse, Alexandria",Master,1,100082:MASTER,yes
+100083,Arcanum Investigator,Ally,1,100083:ALLY,yes
+100084,Archon,Political Action,1,100084:POLITICAL,yes
+100085,Archon Investigation,Master,1,100085:MASTER,yes
+100086,Argent Baton,Equipment,1,100086:EQUIPMENT,yes
+100087,Armor of Caine's Fury,Combat,3,100087:COMBAT:pre|100087:COMBAT:val|100087:COMBAT:VAL,yes
+100088,Armor of Terra,Action,3,100088:ACTION:tha|100088:ACTION:vis|100088:ACTION:VIS,yes
+100089,Armor of Vitality,Combat,2,100089:COMBAT:for|100089:COMBAT:FOR,yes
+100090,Arms Dealer,Ally,1,100090:ALLY,yes
+102275,Arms of Ahriman,Combat,2,102275:COMBAT:obl|102275:COMBAT:OBL,yes
+100091,Arms of the Abyss,Combat,2,100091:COMBAT:obt|100091:COMBAT:OBT,yes
+100092,Army of Apparitions,Reaction,2,100092:REACTION:chi|100092:REACTION:CHI,yes
+100093,Army of Rats,Action,1,100093:ACTION:ani,yes
+100094,Arson,Action,1,100094:ACTION,yes
+100095,Art Museum,Master,1,100095:MASTER,yes
+100096,"Art of Love, The",Master,1,100096:MASTER,yes
+100097,"Art of Memory, The",Action Modifier,1,100097:MODIFIER,yes
+100098,"Art of Pain, The",Master,1,100098:MASTER,yes
+100099,Art Scam,Action,1,100099:ACTION,yes
+100100,Art's Traumatic Essence,Action,3,100100:ACTION:aus|100100:ACTION:mel|100100:ACTION:MEL,yes
+100101,Artistically Inept,Master,1,100101:MASTER,yes
+100102,As the Crow,Action Modifier,1,100102:MODIFIER:FLIGHT,yes
+100103,Asanbonsam Ghoul,Ally,1,100103:ALLY,yes
+100104,Ascendance,Master,1,100104:MASTER,yes
+100105,Ashes to Ashes,Combat,3,100105:COMBAT:for|100105:COMBAT:thn|100105:COMBAT:THN,yes
+100106,Ashur Tablets,Master,1,100106:MASTER,yes
+100107,Assault Rifle,Equipment,1,100107:EQUIPMENT,yes
+100108,Asylum Hunting Ground,Master,1,100108:MASTER,yes
+100109,Atonement,Action,1,100109:ACTION,yes
+100110,Augur,Action,1,100110:ACTION,yes
+102310,Augury of Doom,Action,1,102310:ACTION,yes
+100111,Aura Absorption,Action Modifier/Reaction,3,100111:REACTION:aus|100111:REACTION:myt|100111:MODIFIER:MYT,yes
+100112,Aura of Invincibility,Action Modifier,1,100112:MODIFIER,yes
+100113,Aura Reading,Combat,2,100113:COMBAT:aus|100113:COMBAT:AUS,yes
+100114,Auspex,Master,1,100114:MASTER,yes
+100115,Autarkis Persecution,Political Action,1,100115:POLITICAL,yes
+100116,Auto-da-fé,Political Action,1,100116:POLITICAL,yes
+100117,Autonomic Mastery,Combat,2,100117:COMBAT:dom|100117:COMBAT:DOM,yes
+100118,Aversion,Reaction,3,100118:REACTION:cel|100118:REACTION:val|100118:REACTION:VAL,yes
+100119,Awe,Action Modifier,2,100119:MODIFIER:pre|100119:MODIFIER:PRE,yes
+100120,Aye,Master,1,100120:MASTER,yes
+100121,Baal's Bloody Talons,Combat,2,100121:COMBAT:qui|100121:COMBAT:QUI,yes
+100122,Babble,Reaction,2,100122:REACTION:dem|100122:REACTION:DEM,yes
+100123,Backflip,Combat,1,100123:COMBAT,yes
+100124,Backstab,Combat,2,100124:COMBAT:cel|100124:COMBAT:CEL,yes
+100125,Backstep,Combat,1,100125:COMBAT,yes
+100126,Backways,Master,1,100126:MASTER,yes
+102218,Bait and Switch,Reaction,1,102218:REACTION,yes
+100127,Baleful Doll,Equipment,2,100127:EQUIPMENT:nec|100127:EQUIPMENT:NEC,yes
+100128,Baltimore Purge,Action,1,100128:ACTION,yes
+100129,Bamba,Action,1,100129:ACTION,yes
+100130,Bang Nakh — Tiger's Claws,Equipment,1,100130:EQUIPMENT,yes
+100131,Banishment,Political Action,1,100131:POLITICAL,yes
+100132,Banner of Neutrality,Reaction,1,100132:REACTION,yes
+100133,Banshee Ironwail,Equipment,1,100133:EQUIPMENT,yes
+102268,Banu Haqim Justicar,Political Action,1,102268:POLITICAL,yes
+100134,Barrenness,Action,2,100134:ACTION:mal|100134:ACTION:MAL,yes
+100135,"Barrens, The",Master,1,100135:MASTER,yes
+100136,Base Hunting Ground,Master,1,100136:MASTER,yes
+100137,Baseball Bat,Equipment,1,100137:EQUIPMENT,yes
+100138,Basilisk's Touch,Combat,3,100138:COMBAT:pot|100138:COMBAT:myt|100138:COMBAT:MYT,yes
+100139,Bastard Sword,Equipment,1,100139:EQUIPMENT,yes
+100140,Bastille Opera House,Master,1,100140:MASTER,yes
+100141,Battle Frenzy,Master,1,100141:MASTER,yes
+100142,Bauble,Action,2,100142:ACTION:vic|100142:ACTION:VIC,yes
+100143,Bay and Howl,Master,1,100143:MASTER,yes
+100144,Bear-Baiting,Action Modifier,1,100144:MODIFIER,yes
+100145,Bear's Skin,Combat,2,100145:COMBAT:ani+pro|100145:COMBAT:ANI+PRO,yes
+100146,Beast Meld,Action Modifier,2,100146:MODIFIER:ani+pro|100146:MODIFIER:ANI+PRO,yes
+100147,"Becoming, The",Action,1,100147:ACTION,yes
+100148,Becoming of Ennoia,Event,1,100148:EVENT,yes
+100149,Behind You!,Combat,2,100149:COMBAT:obf|100149:COMBAT:OBF,yes
+100150,Belonging Grants Protection,Action,1,100150:ACTION,yes
+100151,Benefit Performance,Political Action,1,100151:POLITICAL,yes
+100152,Beretta 9mm,Equipment,1,100152:EQUIPMENT,yes
+100153,Bestial Vengeance,Combat,2,100153:COMBAT:ani|100153:COMBAT:ANI,yes
+100154,Bestial Visage,Master,1,100154:MASTER,yes
+100155,Bestow Vigor,Action,2,100155:ACTION:for|100155:ACTION:FOR,yes
+100156,Betrayer,Master,1,100156:MASTER,yes
+100157,Bewitching Oration,Action Modifier,2,100157:MODIFIER:pre|100157:MODIFIER:PRE,yes
+100158,Beyond Reproach,Political Action,1,100158:POLITICAL,yes
+100159,Big Game,Action,1,100159:ACTION,yes
+100160,Bima,Ally,1,100160:ALLY,yes
+100161,Bind the Night-Walker,Reaction,1,100161:REACTION,yes
+102287,Biotech Company Hunting Ground,Master,1,102287:MASTER,yes
+100162,Biothaumaturgic Experiment,Action,2,100162:ACTION:tha|100162:ACTION:THA,yes
+100163,"Bitter and Sweet Story, The",Event,1,100163:EVENT,yes
+100164,"Black Beast, The",Combat,1,100164:COMBAT,yes
+100165,Black Forest Base,Master,1,100165:MASTER,yes
+100166,Black Gloves,Equipment,1,100166:EQUIPMENT,yes
+100167,Black Hand Emissary,Action,1,100167:ACTION,yes
+100168,Black Hand Ritual,Action,1,100168:ACTION,yes
+102351,Black Market Cache,Master,1,102351:MASTER,yes
+100169,Black Metamorphosis,Action,2,100169:ACTION:obt|100169:ACTION:OBT,yes
+100170,Black Spiral Buddy,Ally,1,100170:ALLY,yes
+100171,Black Sunrise,Reaction,2,100171:REACTION:qui|100171:REACTION:QUI,yes
+100172,"Black Throne, The",Master,1,100172:MASTER,yes
+100173,Blackmail,Action,2,100173:ACTION:obf|100173:ACTION:OBF,yes
+100174,Blade Clot,Action Modifier/Combat,2,100174:MODIFIER|100174:COMBAT,no
+100175,Blade of Bellona,Equipment,1,100175:EQUIPMENT,yes
+100176,Blade of Enoch,Equipment,1,100176:EQUIPMENT,yes
+100177,Blanket of Night,Action Modifier,2,100177:MODIFIER:obt|100177:MODIFIER:OBT,yes
+100178,Bleeding the Vine,Master,1,100178:MASTER,yes
+100179,Blessed Audience,Action,3,100179:ACTION:aus|100179:ACTION:mel|100179:ACTION:MEL,yes
+100180,Blessed Blade,Combat,3,100180:REFLEX:val|100180:COMBAT:val|100180:COMBAT:VAL,yes
+100181,Blessed Resilience,Master,1,100181:MASTER,yes
+100182,Blessing of Chaos,Action,2,100182:ACTION:dem|100182:ACTION:DEM,yes
+100183,Blessing of Durga Syn,Combat,2,100183:COMBAT:chi|100183:COMBAT:CHI,yes
+100184,Blessing of the Beast,Master,1,100184:MASTER,yes
+100185,Blessing of the Name,Action,1,100185:ACTION,yes
+100186,Blessings of the Loa,Master,1,100186:MASTER,yes
+100187,Blight,Combat,2,100187:COMBAT:nec|100187:COMBAT:NEC,yes
+100188,Blind Spot,Master,1,100188:MASTER,yes
+100189,Bliss,Combat/Reaction,3,100189:COMBAT:dom+pre|100189:REACTION:dom+pre|100189:COMBAT:DOM+PRE,yes
+100190,Blissful Agony,Combat,3,100190:COMBAT:ani|100190:COMBAT:val|100190:COMBAT:VAL,yes
+100191,Blithe Acceptance,Action,2,100191:ACTION:obf|100191:ACTION:OBF,yes
+100192,Blood Agony,Combat,2,100192:COMBAT:qui|100192:COMBAT:QUI,yes
+100193,Blood Awakening,Action Modifier/Reaction,2,100193:REACTION:qui|100193:MODIFIER:QUI,yes
+100194,Blood Bond,Action,1,100194:ACTION,yes
+100195,Blood Brother Ambush,Action Modifier,1,100195:MODIFIER,yes
+100196,Blood Buff,Master,1,100196:MASTER,yes
+100197,Blood Clots,Action,2,100197:ACTION:qui|100197:ACTION:QUI,yes
+100198,Blood Cult Awareness Network,Event,1,100198:EVENT,yes
+100199,Blood Doll,Master,1,100199:MASTER,yes
+100200,Blood Feast,Action,1,100200:ACTION,yes
+100201,Blood Fury,Combat,2,100201:COMBAT:tha|100201:COMBAT:THA,yes
+100202,Blood Hunt,Action,1,100202:ACTION,yes
+100203,Blood of Acid,Combat,2,100203:COMBAT:vic|100203:COMBAT:VIC,yes
+100204,Blood of Sandman,Action,2,100204:ACTION:tha|100204:ACTION:THA,yes
+100205,Blood of the Cobra,Combat,2,100205:COMBAT:qui|100205:COMBAT:QUI,yes
+100206,Blood of the Sabbat,Action,1,100206:ACTION,yes
+100207,Blood Puppy,Master,1,100207:MASTER,yes
+100208,Blood Rage,Combat,2,100208:COMBAT:tha|100208:COMBAT:THA,yes
+100209,Blood Shield,Equipment,1,100209:EQUIPMENT,yes
+100210,Blood Siege,Political Action,1,100210:POLITICAL,yes
+100211,Blood Sweat,Combat,2,100211:COMBAT:qui|100211:COMBAT:QUI,yes
+100212,Blood Tears of Kephran,Equipment,1,100212:EQUIPMENT,yes
+100213,Blood Tempering,Action,2,100213:ACTION:for+qui|100213:ACTION:FOR+QUI,yes
+100214,Blood to Water,Combat,2,100214:COMBAT:tha|100214:COMBAT:THA,yes
+100215,Blood Trade,Event,1,100215:EVENT,yes
+100216,Blood Turnip,Master,1,100216:MASTER,yes
+100217,Blood Weakens,Event,1,100217:EVENT,yes
+100218,Bloodbath,Action,1,100218:ACTION,yes
+100219,Bloodform,Combat,2,100219:COMBAT:vic|100219:COMBAT:VIC,yes
+100220,Blooding,Action,1,100220:ACTION,yes
+100221,Blooding by the Code,Master,1,100221:MASTER,yes
+100222,Bloodlust,Action,2,100222:ACTION:pre|100222:ACTION:PRE,yes
+100223,Bloodstone,Equipment,1,100223:EQUIPMENT,yes
+100224,Bloodstorm of Chorazin,Reaction,1,100224:REACTION,yes
+100225,Bloodwork,Action,1,100225:ACTION,yes
+100226,Blow Torch,Equipment,1,100226:EQUIPMENT,yes
+100227,Blur,Combat,2,100227:COMBAT:cel|100227:COMBAT:CEL,yes
+100228,Body Arsenal,Combat,2,100228:COMBAT:vic|100228:COMBAT:VIC,yes
+100229,Body Bag,Equipment,1,100229:EQUIPMENT,yes
+100230,Body Flare,Combat,2,100230:COMBAT:pro|100230:COMBAT:PRO,yes
+100231,Body of Sun,Combat,2,100231:COMBAT:pro|100231:COMBAT:PRO,yes
+100232,Bollix,Combat,3,100232:COMBAT:cel|100232:COMBAT:pre|100232:COMBAT:tha,yes
+100233,Bomb,Equipment,1,100233:EQUIPMENT,yes
+100234,Bond,Action,1,100234:ACTION,yes
+100235,Bond with the Mountain,Combat,3,100235:COMBAT:tha|100235:COMBAT:vis|100235:COMBAT:VIS,yes
+100236,Bonding,Action Modifier,2,100236:MODIFIER:dom|100236:MODIFIER:DOM,yes
+102293,Bone Shambler,Ally,2,102293:ALLY:obl|102293:ALLY:OBL,yes
+100237,Bone Spur,Combat,2,100237:COMBAT:pro|100237:COMBAT:PRO,yes
+100238,Bonecraft,Combat,2,100238:COMBAT:vic|100238:COMBAT:VIC,yes
+100239,"Book of Going Forth by Night, The",Equipment,1,100239:EQUIPMENT,yes
+100240,Border Skirmish,Action,1,100240:ACTION,yes
+100241,Botched Move,Combat,1,100241:COMBAT,yes
+100242,Bounty,Master,1,100242:MASTER,yes
+100243,Bowl of Convergence,Equipment,1,100243:EQUIPMENT,yes
+100244,Boxed In,Combat,1,100244:COMBAT,yes
+100245,Brainwash,Master,1,100245:MASTER,yes
+100246,Brass Knuckles,Equipment,1,100246:EQUIPMENT,yes
+100247,Bravo,Master,1,100247:MASTER,yes
+102247,Break the Bonds,Action,3,102247:ACTION:ani|102247:ACTION:obf|102247:ACTION:pre,yes
+100248,Break the Code,Event,1,100248:EVENT,yes
+100249,Breath of Thanatos,Action Modifier/Combat,2,100249:MODIFIER:nec|100249:COMBAT:NEC,yes
+100250,Breath of the Dragon,Combat,2,100250:COMBAT:vic|100250:COMBAT:VIC,yes
+100251,Bribes,Action Modifier,1,100251:MODIFIER,yes
+100252,Brick by Brick,Combat,3,100252:COMBAT:tha|100252:COMBAT:vis|100252:COMBAT:VIS,yes
+100253,Brick Laying,Action,2,100253:ACTION:pot|100253:ACTION:POT,yes
+100254,Brigitte Gebauer,Ally,1,100254:ALLY,yes
+100255,Brinksmanship,Political Action,1,100255:POLITICAL,yes
+102236,"British Museum, London, The",Master,1,102236:MASTER,yes
+100256,Brother in Arms,Action,1,100256:ACTION,yes
+100257,Brother's Blood,Combat,2,100257:COMBAT:san|100257:COMBAT:SAN,yes
+100258,Brothers Grimm,Master,1,100258:MASTER,yes
+100259,"Bruisers, The",Ally,1,100259:ALLY,yes
+100260,Brujah Debate,Master,1,100260:MASTER,yes
+100261,Brujah Frenzy,Master,1,100261:MASTER,yes
+100262,Brujah Justicar,Political Action,1,100262:POLITICAL,yes
+100263,Brutal Influence,Action,2,100263:ACTION:pot|100263:ACTION:POT,yes
+100264,Brute Force,Combat,2,100264:COMBAT:pot|100264:COMBAT:POT,yes
+100265,Bujo,Action,1,100265:ACTION,yes
+100266,Bum's Rush,Action,1,100266:ACTION,yes
+100267,Bundi,Equipment,1,100267:EQUIPMENT,yes
+100268,Burden the Mind,Master,1,100268:MASTER,yes
+100269,Bureaucratic Overload,Master,1,100269:MASTER,yes
+102311,Burial Site Hunting Ground,Master,1,102311:MASTER,yes
+100270,Burning Touch,Action Modifier/Combat,3,100270:COMBAT:tha|100270:MODIFIER:val|100270:MODIFIER:VAL,yes
+100271,Burning Wrath,Combat,2,100271:COMBAT:pot|100271:COMBAT:POT,yes
+100272,Burnt Offerings,Reaction,2,100272:REACTION:aus|100272:REACTION:AUS,yes
+100273,Burst of Sunlight,Combat,2,100273:COMBAT:tha|100273:COMBAT:THA,yes
+100274,Business Pressure,Action Modifier,2,100274:MODIFIER:pre|100274:MODIFIER:PRE,yes
+100275,Cadet,Master,1,100275:MASTER,yes
+100276,Caiaphas Smith,Ally,1,100276:ALLY,yes
+100277,Cairo Int'l Airport,Master,1,100277:MASTER,yes
+100278,"Call, The",Action,2,100278:ACTION:aus+dem|100278:ACTION:AUS+DEM,yes
+100279,Call of the Hungry Dead,Action Modifier,2,100279:MODIFIER:nec|100279:MODIFIER:NEC,yes
+100280,Call the Great Beast,Action,1,100280:ACTION,yes
+100281,Call the Lamprey,Combat,2,100281:COMBAT:obt|100281:COMBAT:OBT,yes
+100282,Call the Wild Hunt,Combat,2,100282:COMBAT:ani+pro|100282:COMBAT:ANI+PRO,yes
+100283,Camaraderie,Reaction,2,100283:REACTION:san|100283:REACTION:SAN,yes
+102269,Camarilla Conclave,Master,1,102269:MASTER,yes
+100284,Camarilla Exemplary,Political Action,1,100284:POLITICAL,yes
+100285,Camarilla Threat,Political Action,1,100285:POLITICAL,yes
+100286,Camarilla Vitae Slave,Retainer,1,100286:RETAINER,yes
+102270,Camarilla's Iron Fist,Political Action,1,102270:POLITICAL,yes
+100287,Camera Phone,Equipment,1,100287:EQUIPMENT,yes
+100288,Campground Hunting Ground,Master,1,100288:MASTER,yes
+100289,Can't Take it with You,Political Action,1,100289:POLITICAL,yes
+100290,Canine Horde,Combat,2,100290:COMBAT:ani|100290:COMBAT:ANI,yes
+100291,Canopic Jar,Equipment,2,100291:EQUIPMENT:ser|100291:EQUIPMENT:SER,yes
+100292,Capitalist,Master,1,100292:MASTER,yes
+102298,Cappadocian Crypt,Master,1,102298:MASTER,yes
+100293,Car Bomb,Reaction,1,100293:REACTION,yes
+100294,Cardinal Benediction,Political Action,1,100294:POLITICAL,yes
+100295,Cardinal Sin: Failure of Mission,Reaction,1,100295:REACTION,yes
+100296,Cardinal Sin: Insubordination,Reaction,1,100296:REACTION,yes
+100297,Carfax Abbey,Master,1,100297:MASTER,yes
+100298,Carlton Van Wyk,Ally,1,100298:ALLY,yes
+100299,Carnivale,Master,1,100299:MASTER,yes
+100300,Carrion Coffin,Action,2,100300:ACTION:pro|100300:ACTION:PRO,yes
+100301,Carrion Crows,Combat,2,100301:COMBAT:ani|100301:COMBAT:ANI,yes
+100302,Carthage Remembered,Master,1,100302:MASTER,yes
+100303,Carver's Meat Packing and Storage,Master,1,100303:MASTER,yes
+100304,Caseless Rounds,Combat,1,100304:COMBAT,yes
+100305,Cat Burglary,Action,2,100305:ACTION:cel|100305:ACTION:CEL,yes
+100306,Catacombs,Equipment,1,100306:EQUIPMENT,yes
+100307,Catatonic Fear,Combat,2,100307:COMBAT:pre|100307:COMBAT:PRE,yes
+100308,Cats' Guidance,Reaction,2,100308:REACTION:ani|100308:REACTION:ANI,yes
+100309,Cauldron of Blood,Combat,2,100309:COMBAT:tha|100309:COMBAT:THA,yes
+100310,Cavalier,Master,1,100310:MASTER,yes
+100311,Cave of Apples,Master,1,100311:MASTER,yes
+100312,Celerity,Master,1,100312:MASTER,yes
+100313,Celestial Harmony,Action,2,100313:ACTION:aus|100313:ACTION:AUS,yes
+100314,Census Taker,Master,1,100314:MASTER,yes
+100315,Centralized Background Check,Master,1,100315:MASTER,yes
+100316,Chain of Command,Action,2,100316:ACTION:dom|100316:ACTION:DOM,yes
+100317,Chainsaw,Equipment,1,100317:EQUIPMENT,yes
+100318,Chair of Hades,Action,2,100318:ACTION:nec|100318:ACTION:NEC,yes
+100319,Chalice of Kinship,Equipment,1,100319:EQUIPMENT,yes
+100320,Chameleon,Action,1,100320:ACTION,yes
+100321,Chameleon's Colors,Combat,3,100321:COMBAT:ani|100321:COMBAT:spi|100321:COMBAT:SPI,yes
+100322,Champion,Power,1,100322:REACTION,yes
+100323,Change of Target,Action Modifier,1,100323:MODIFIER,yes
+100324,Changeling,Action Modifier,2,100324:MODIFIER:vic|100324:MODIFIER:VIC,yes
+100325,Changeling Skin Mask,Equipment,1,100325:EQUIPMENT,yes
+100326,Chanjelin Ward,Master,1,100326:MASTER,yes
+100327,Channel 10,Master,1,100327:MASTER,yes
+100328,Channeling the Beast,Combat,1,100328:COMBAT,yes
+100329,Chantry,Master,1,100329:MASTER,yes
+100330,Charge of the Buffalo,Action,3,100330:ACTION:for|100330:ACTION:spi|100330:ACTION:SPI,yes
+100331,"Charigger, The Axe",Retainer,1,100331:RETAINER,yes
+100332,Charisma,Master,1,100332:MASTER,yes
+100333,Charismatic Aura,Combat,2,100333:COMBAT:aus+pre|100333:COMBAT:AUS+PRE,yes
+100334,Charming Lobby,Action,2,100334:ACTION:pre|100334:ACTION:PRE,yes
+100335,Charnas the Imp,Retainer,1,100335:RETAINER,yes
+100336,Cheat the Fates,Action,3,100336:ACTION:pre|100336:ACTION:tem|100336:ACTION:TEM,yes
+100337,Cheval de Bataille,Action Modifier,1,100337:MODIFIER,yes
+102246,Childe of the Revolution,Action,1,102246:ACTION,yes
+100338,Childling Muse,Retainer,1,100338:RETAINER,yes
+100339,Children of Osiris,Master,1,100339:MASTER,yes
+100340,Children of Stone,Action,3,100340:ACTION:tha|100340:ACTION:vis|100340:ACTION:VIS,yes
+100341,Chill of Oblivion,Action,2,100341:ACTION:nec|100341:ACTION:NEC,yes
+100342,Chimerstry,Master,1,100342:MASTER,yes
+100343,Chiram's Hold,Combat,1,100343:COMBAT,yes
+100344,Chiropteran Marauder,Combat,2,100344:COMBAT:vic|100344:COMBAT:VIC,yes
+100345,Choir,Action,2,100345:ACTION:mel|100345:ACTION:MEL,yes
+100346,Chronicle of the Lost Tribe,Action,1,100346:ACTION,yes
+100347,Church of the Order of St. Blaise,Master,1,100347:MASTER,yes
+100348,"Church of Vindicated Faith, The",Master,1,100348:MASTER,yes
+100349,Circle,Combat,1,100349:COMBAT,yes
+100350,Circumspect Revelation,Action Modifier,1,100350:MODIFIER,yes
+100351,City Gangrel Connections,Master,1,100351:MASTER,yes
+102234,City Star Taxi,Ally,1,102234:ALLY,yes
+100352,Claiming the Body,Action Modifier,2,100352:MODIFIER:san|100352:MODIFIER:SAN,yes
+100353,Clan Impersonation,Action,1,100353:ACTION,yes
+100354,Clan Loyalty,Action Modifier,1,100354:MODIFIER,yes
+100355,Clandestine Contract,Action,1,100355:ACTION,yes
+100356,Claws of the Dead,Combat,2,100356:COMBAT:pro|100356:COMBAT:PRO,yes
+100357,Cleansing Ritual,Action,3,100357:ACTION:dom|100357:ACTION:obe|100357:ACTION:OBE,yes
+100358,Cleave,Combat,1,100358:COMBAT,yes
+100359,Clio's Kiss,Action,3,100359:ACTION:dom|100359:ACTION:tem|100359:ACTION:TEM,yes
+100360,Cloak of Blood,Action,1,100360:ACTION,yes
+100361,Cloak of the Abalone,Equipment,1,100361:EQUIPMENT,yes
+100362,Cloak the Gathering,Action Modifier,2,100362:MODIFIER:obf|100362:MODIFIER:OBF,yes
+100363,Clockwerx,Combat,2,100363:COMBAT:san|100363:COMBAT:SAN,yes
+100364,Closed Session,Action Modifier,1,100364:MODIFIER,yes
+100365,Clotho's Gift,Action,3,100365:ACTION:obf|100365:ACTION:tem|100365:ACTION:TEM,yes
+100366,Club Illusion,Master,1,100366:MASTER,yes
+100367,Club Zombie,Master,1,100367:MASTER,yes
+100368,Coagulate Blood,Combat,2,100368:COMBAT:qui|100368:COMBAT:QUI,yes
+100369,Coagulated Entity,Action,2,100369:ACTION:san|100369:ACTION:SAN,yes
+100370,Cobra Fangs,Combat,2,100370:COMBAT:ser|100370:COMBAT:SER,yes
+100371,Code of Milan Suspended,Political Action,1,100371:POLITICAL,yes
+100372,Code of Samiel,Master,1,100372:MASTER,yes
+100373,Codex of the Damned,Equipment,1,100373:EQUIPMENT,yes
+100374,Codex of the Edenic Groundskeepers,Equipment,1,100374:EQUIPMENT,yes
+100375,Cold Amber's Hold,Action,1,100375:ACTION,yes
+100376,Cold Aura,Combat,2,100376:COMBAT:nec|100376:COMBAT:NEC,yes
+102312,Cold War,Political Action,1,102312:POLITICAL,yes
+100377,Collapse the Arches,Combat,3,100377:COMBAT:tha|100377:COMBAT:vis|100377:COMBAT:VIS,yes
+100378,Coma,Combat,2,100378:COMBAT:dem|100378:COMBAT:DEM,yes
+100379,Combat Shotgun,Equipment,1,100379:EQUIPMENT,yes
+100380,Command,Action Modifier,2,100380:MODIFIER:dom|100380:MODIFIER:DOM,yes
+100381,Command of the Beast,Action Modifier,2,100381:MODIFIER:dom|100381:MODIFIER:DOM,yes
+100382,Command of the Harpies,Political Action,1,100382:POLITICAL,yes
+100383,Command Performance,Master,1,100383:MASTER,yes
+100384,Command the Legion,Action,2,100384:ACTION:dom|100384:ACTION:DOM,yes
+100385,Communal Haven: Cathedral,Master,1,100385:MASTER,yes
+100386,Communal Haven: Temple,Master,1,100386:MASTER,yes
+100387,Community Justice,Action,1,100387:ACTION,yes
+100388,Compel the Spirit,Action,2,100388:ACTION:nec|100388:ACTION:NEC,yes
+100389,Compress,Combat,3,100389:COMBAT:pot|100389:COMBAT:thn|100389:COMBAT:THN,yes
+100390,Computer Hacking,Action,1,100390:ACTION,yes
+100391,Conceal,Action,2,100391:ACTION:obf|100391:ACTION:OBF,yes
+100392,Concealed Weapon,Combat,1,100392:COMBAT,yes
+100393,Concert Tour,Action,1,100393:ACTION,yes
+100394,Concoction of Vitality,Equipment,1,100394:EQUIPMENT,yes
+100395,Concordance,Action,3,100395:ACTION:ser|100395:ACTION:dai|100395:ACTION:DAI,yes
+100396,Condemn the Sins of the Father,Action,2,100396:ACTION:qui|100396:ACTION:QUI,yes
+100397,Condemnation: Betrayed,Action,3,100397:ACTION:ser|100397:ACTION:dai|100397:ACTION:DAI,yes
+100398,Condemnation: Doomed,Action,3,100398:ACTION:obf|100398:ACTION:dai|100398:ACTION:DAI,yes
+100399,Condemnation: Languid,Action,3,100399:ACTION:pre|100399:ACTION:dai|100399:ACTION:DAI,yes
+100400,Condemnation: Mute,Action,3,100400:ACTION:chi|100400:ACTION:dai|100400:ACTION:DAI,yes
+100401,Conditioning,Action Modifier,2,100401:MODIFIER:dom|100401:MODIFIER:DOM,yes
+100402,Conductor,Master,1,100402:MASTER,yes
+102271,Confiscation,Political Action,1,102271:POLITICAL,yes
+100403,Conflagration,Combat,3,100403:COMBAT:pot|100403:COMBAT:dai|100403:COMBAT:DAI,yes
+100404,Conflict of Interests,Reaction,1,100404:REACTION,yes
+100405,Confusion,Action Modifier,2,100405:MODIFIER:dem|100405:MODIFIER:DEM,yes
+100406,Confusion of the Eye,Reaction,2,100406:REACTION:obf|100406:REACTION:OBF,yes
+100407,Conniver,Master,1,100407:MASTER,yes
+100408,Conquer the Beast,Combat,2,100408:COMBAT:ani|100408:COMBAT:ANI,yes
+100409,Conquest of Humanity,Event,1,100409:EVENT,yes
+100410,Consanguineous Boon,Political Action,1,100410:POLITICAL,yes
+100411,Consanguineous Condemnation,Political Action,1,100411:POLITICAL,yes
+100412,Conscripted Statue,Action Modifier,2,100412:MODIFIER:vis|100412:MODIFIER:VIS,yes
+100413,Consecration Rites,Action,1,100413:ACTION,yes
+100414,Conservative Agitation,Political Action,1,100414:POLITICAL,yes
+102288,Consign to Oblivion,Action Modifier,2,102288:MODIFIER:obl|102288:MODIFIER:OBL,yes
+100415,Consignment to Duat,Action,2,100415:ACTION:ser|100415:ACTION:SER,yes
+100416,Constant Revolution,Action,1,100416:ACTION,yes
+100417,Consume the Dead,Action/Reaction,2,100417:ACTION|100417:REACTION,yes
+100418,Contagion,Action,2,100418:ACTION:dai|100418:ACTION:DAI,yes
+100419,Contingency Planning,Master,1,100419:MASTER,yes
+102352,Contraband,Combat,2,102352:COMBAT:obf|102352:COMBAT:OBF,yes
+100420,Contract,Master,1,100420:MASTER,yes
+100421,Convergence,Master,1,100421:MASTER,yes
+100422,Cooler,Equipment,1,100422:EQUIPMENT,yes
+100423,Coordinate Attacks,Combat,2,100423:COMBAT:san|100423:COMBAT:SAN,yes
+100424,Coroner's Contact,Master,1,100424:MASTER,yes
+100425,Corporal Reservoir,Master,1,100425:MASTER,yes
+100426,Corporate Hunting Ground,Master,1,100426:MASTER,yes
+100427,Corpse Balloon,Retainer,2,100427:RETAINER:vic|100427:RETAINER:VIC,yes
+100428,Corpse Minion,Retainer,1,100428:RETAINER,yes
+100429,Corrupt Construction,Ally,2,100429:ALLY:vic|100429:ALLY:VIC,yes
+100430,Corruption,Action,1,100430:ACTION,yes
+100431,Corruption's Purge,Political Action,1,100431:POLITICAL,yes
+100432,Coterie Tactics,Reaction,1,100432:REACTION,yes
+100433,Council of Seraphim,Action Modifier,1,100433:MODIFIER,yes
+100434,Courier,Ally,1,100434:ALLY,yes
+100435,"Coven, The",Master,1,100435:MASTER,yes
+100436,Covenant of Blood,Action,1,100436:ACTION,yes
+100437,Covincraft,Reaction,2,100437:REACTION:1|100437:REACTION:2,yes
+100438,Cracking the Wall,Master,1,100438:MASTER,yes
+100439,Crawling Chamber,Combat,3,100439:COMBAT:tha|100439:COMBAT:vis|100439:COMBAT:VIS,yes
+100440,Create Gargoyle,Action,1,100440:ACTION,yes
+100441,Creation Rites,Action,1,100441:ACTION,yes
+100442,Creep Show,Master,1,100442:MASTER,yes
+100443,Creeping Infection,Combat,2,100443:COMBAT:thn|100443:COMBAT:THN,yes
+102213,Creeping Sabotage,Action,1,102213:ACTION,yes
+100444,Creepshow Casino,Master,1,100444:MASTER,yes
+100445,Crematorium,Master,1,100445:MASTER,yes
+100446,CrimethInc.,Action Modifier,3,100446:MODIFIER:pro|100446:MODIFIER:qui|100446:MODIFIER:tha,yes
+100447,Crimson Fury,Combat/Reaction,4,100447:COMBAT:ani|100447:REACTION:ani|100447:COMBAT:ANI|100447:REACTION:ANI,no
+100448,"Crimson Sentinel, The",Equipment,1,100448:EQUIPMENT,yes
+100449,"Crocodile Temple, The",Master,1,100449:MASTER,yes
+100450,Crocodile's Tongue,Action Modifier,2,100450:MODIFIER:aus|100450:MODIFIER:AUS,yes
+100451,Crusade: Amsterdam,Political Action,1,100451:POLITICAL,yes
+100452,Crusade: Aragon,Political Action,1,100452:POLITICAL,yes
+100453,Crusade: Atlanta,Political Action,1,100453:POLITICAL,yes
+100454,Crusade: Barcelona,Political Action,1,100454:POLITICAL,yes
+100455,Crusade: Berlin,Political Action,1,100455:POLITICAL,yes
+100456,Crusade: Brussels,Political Action,1,100456:POLITICAL,yes
+100457,Crusade: Chicago,Political Action,1,100457:POLITICAL,yes
+100458,Crusade: Detroit,Political Action,1,100458:POLITICAL,yes
+100459,Crusade: Dublin,Political Action,1,100459:POLITICAL,yes
+100460,Crusade: Frankfurt,Political Action,1,100460:POLITICAL,yes
+100461,Crusade: Geneva,Political Action,1,100461:POLITICAL,yes
+100462,Crusade: Houston,Political Action,1,100462:POLITICAL,yes
+100463,Crusade: Istanbul,Political Action,1,100463:POLITICAL,yes
+100464,Crusade: London,Political Action,1,100464:POLITICAL,yes
+100465,Crusade: Mexico City,Political Action,1,100465:POLITICAL,yes
+100466,Crusade: Miami,Political Action,1,100466:POLITICAL,yes
+100467,Crusade: New York,Political Action,1,100467:POLITICAL,yes
+100468,Crusade: Paris,Political Action,1,100468:POLITICAL,yes
+100469,Crusade: Philadelphia,Political Action,1,100469:POLITICAL,yes
+100470,Crusade: Pittsburgh,Political Action,1,100470:POLITICAL,yes
+100471,Crusade: Rome,Political Action,1,100471:POLITICAL,yes
+100472,Crusade: Toronto,Political Action,1,100472:POLITICAL,yes
+100473,"Crusade: Washington, D.C.",Political Action,1,100473:POLITICAL,yes
+100474,"Crusader Sword, The",Equipment,1,100474:EQUIPMENT,yes
+100475,Cry Wolf,Ally,1,100475:ALLY,yes
+100476,Crypt's Sons,Retainer,1,100476:RETAINER,yes
+100477,Cryptic Mission,Action,2,100477:ACTION:tha|100477:ACTION:THA,yes
+100478,Cryptic Rider,Action Modifier,1,100478:MODIFIER,yes
+100479,Cull the Herd,Action,1,100479:ACTION,yes
+100480,Cultivated Blood Shortage,Master,1,100480:MASTER,yes
+100481,Cunctator Motion,Political Action,1,100481:POLITICAL,yes
+100482,Curmudgeon,Master,1,100482:MASTER,yes
+100483,Curse of Nitocris,Master,1,100483:MASTER,yes
+102313,Cursed Abattoir,Master,1,102313:MASTER,yes
+100484,D'habi Revenant,Retainer,1,100484:RETAINER,yes
+100485,Dabbler,Master,1,100485:MASTER,yes
+100486,Daemonic Possession,Action,2,100486:ACTION:nec|100486:ACTION:NEC,yes
+100487,Dagger,Equipment,1,100487:EQUIPMENT,yes
+100488,Dagon's Call,Combat,2,100488:COMBAT:qui|100488:COMBAT:QUI,yes
+100489,Dam the Heart's River,Combat,2,100489:COMBAT:qui|100489:COMBAT:QUI,yes
+100490,"Damned, The",Master,1,100490:MASTER,yes
+102314,Dance of the Dead,Action,1,102314:ACTION,yes
+102315,Dance with the Devil,Combat,4,102315:COMBAT:obf|102315:COMBAT:tha|102315:COMBAT:OBF|102315:COMBAT:THA,yes
+100491,Danse Macabre,Master,1,100491:MASTER,yes
+100492,Daring the Dawn,Action Modifier,2,100492:MODIFIER:for|100492:MODIFIER:FOR,yes
+100493,Dark Influences,Master,1,100493:MASTER,yes
+100494,Dark Mirror of the Mind,Action,1,100494:ACTION,yes
+100495,Dark Steel,Combat,2,100495:COMBAT:obt+pot|100495:COMBAT:OBT+POT,yes
+102235,Dark Web Procurer,Ally,1,102235:ALLY,yes
+100496,Darkling Trickery,Combat,3,100496:COMBAT:obt|100496:COMBAT:myt|100496:COMBAT:MYT,yes
+100497,Darkness Within,Combat,2,100497:COMBAT:obt|100497:COMBAT:OBT,yes
+100498,Darksight,Reaction,2,100498:REACTION:obt|100498:REACTION:OBT,yes
+100499,"Dartmoor, England",Equipment,1,100499:EQUIPMENT,yes
+100500,Dauntain Black Magician,Ally,1,100500:ALLY,yes
+100501,Dawn Operation,Action Modifier,2,100501:MODIFIER:for|100501:MODIFIER:FOR,yes
+100502,Day Operation,Action Modifier,2,100502:MODIFIER:for|100502:MODIFIER:FOR,yes
+100503,Dead Hand,Combat,2,100503:COMBAT:nec|100503:COMBAT:NEC,yes
+102299,Dead Pool,Master,1,102299:MASTER,yes
+100504,Dead-End Alley,Combat,1,100504:COMBAT,yes
+100505,"Deadliest Sin, The",Reaction,1,100505:REACTION,yes
+100506,Deal with the Devil,Master,1,100506:MASTER,yes
+100507,"Death of My Conscience, The",Combat,2,100507:COMBAT:pot|100507:COMBAT:POT,yes
+100508,Death of the Drum,Combat,3,100508:COMBAT:cel|100508:COMBAT:mel|100508:COMBAT:MEL,yes
+100509,Death Pact,Action,2,100509:ACTION:nec|100509:ACTION:NEC,yes
+100510,Death Seeker,Combat,1,100510:COMBAT,yes
+100511,Decapitate,Combat,2,100511:COMBAT:pot|100511:COMBAT:POT,yes
+100512,Decompose,Action,2,100512:ACTION:thn|100512:ACTION:THN,yes
+100513,Deed the Heart's Desire,Action Modifier,2,100513:MODIFIER:qui|100513:MODIFIER:QUI,yes
+100514,Deep Cover Agent,Action,1,100514:ACTION,yes
+102219,Deep Ecology,Reaction,3,102219:REACTION:ani|102219:REACTION:for|102219:REACTION:pro,yes
+100515,Deep Song,Action,2,100515:ACTION:ani|100515:ACTION:ANI,yes
+100516,Deer Rifle,Equipment,1,100516:EQUIPMENT,yes
+100517,Defender of the Haven,Action,1,100517:ACTION,yes
+100518,Deflection,Reaction,2,100518:REACTION:dom|100518:REACTION:DOM,yes
+100519,Delaying Tactics,Reaction,1,100519:REACTION,yes
+100520,Delivery Truck,Equipment,1,100520:EQUIPMENT,yes
+100521,Dementation,Master,1,100521:MASTER,yes
+100522,Demonstration,Master,1,100522:MASTER,yes
+100523,Denial of Aphrodite's Favor,Combat/Reaction,4,100523:COMBAT:dom+for|100523:REACTION:dom+for|100523:COMBAT:DOM+FOR|100523:REACTION:DOM+FOR,no
+100524,Deny,Action Modifier/Combat,2,100524:COMBAT:dem|100524:MODIFIER:DEM,yes
+100525,Deploy the Hand,Political Action,1,100525:POLITICAL,yes
+100526,Depravity,Master,1,100526:MASTER,yes
+100527,Derange,Action,1,100527:ACTION,yes
+100528,Descent into Darkness,Action,2,100528:ACTION:obt|100528:ACTION:OBT,yes
+100529,Desert Eagle,Equipment,1,100529:EQUIPMENT,yes
+100530,Despiral,Action,1,100530:ACTION,yes
+100531,Destructive Secrets,Action,1,100531:ACTION,yes
+100532,Detect Authority,Reaction,3,100532:REACTION:ani|100532:REACTION:ser|100532:REACTION:tha,yes
+100533,Detection,Master,1,100533:MASTER,yes
+100534,Determine,Reaction,1,100534:REACTION,yes
+100535,Development,Master,1,100535:MASTER,yes
+100536,Deviki Prasanta,Ally,1,100536:ALLY,yes
+100537,Devil-Channel: Back,Combat,3,100537:REFLEX:abo|100537:COMBAT:abo|100537:COMBAT:ABO,yes
+100538,Devil-Channel: Feet,Combat,3,100538:REFLEX:abo|100538:COMBAT:abo|100538:COMBAT:ABO,yes
+100539,Devil-Channel: Hands,Combat,3,100539:REFLEX:abo|100539:COMBAT:abo|100539:COMBAT:ABO,yes
+100540,Devil-Channel: Throat,Action Modifier,3,100540:REFLEX:abo|100540:MODIFIER:abo|100540:MODIFIER:ABO,yes
+100541,Día de los Muertos,Master,1,100541:MASTER,yes
+100542,Diabolic Lure,Reaction,3,100542:REACTION:aus|100542:REACTION:dai|100542:REACTION:DAI,yes
+100543,"Diamond Thunderbolt, The",Master,1,100543:MASTER,yes
+100544,Din of the Damned,Action Modifier,1,100544:MODIFIER,yes
+100545,Direct Intervention,Master,1,100545:MASTER,yes
+100546,Dirty Contract,Master,1,100546:MASTER,yes
+100547,Dirty Little Secrets,Action Modifier,1,100547:MODIFIER,yes
+100548,Dis Pater,Master,1,100548:MASTER,yes
+100549,Disarm,Combat,2,100549:COMBAT:pot|100549:COMBAT:POT,yes
+100550,Disarming Presence,Action Modifier,2,100550:MODIFIER:pre|100550:MODIFIER:PRE,yes
+100551,Discern,Power,1,100551:REACTION,yes
+100552,Disciple of Lazarus,Action,1,100552:ACTION,yes
+100553,Disease,Combat,2,100553:COMBAT:qui|100553:COMBAT:QUI,yes
+100554,Disengage,Combat,1,100554:COMBAT,yes
+100555,Disguised Weapon,Combat,2,100555:COMBAT:obf|100555:COMBAT:OBF,yes
+100556,Dismemberment of Osiris,Action,2,100556:ACTION:ser|100556:ACTION:SER,yes
+100557,Disputed Territory,Political Action,1,100557:POLITICAL,yes
+100558,Dissolution,Combat,2,100558:COMBAT:pro|100558:COMBAT:PRO,yes
+100559,Distant Friend,Action,2,100559:ACTION:dom+pre|100559:ACTION:DOM+PRE,yes
+100560,Distraction,Action,2,100560:ACTION:cel|100560:ACTION:CEL,yes
+100561,Dive Bomb,Action,1,100561:ACTION:FLIGHT,yes
+100562,Dive into Madness,Action,2,100562:ACTION:dem|100562:ACTION:DEM,yes
+100563,Diversion,Combat,3,100563:COMBAT:cel|100563:COMBAT:for|100563:COMBAT:tha,yes
+100564,Diversity,Political Action,1,100564:POLITICAL,yes
+100565,Divine Image,Action Modifier,2,100565:MODIFIER:ser|100565:MODIFIER:SER,yes
+100566,Divine Sign,Action,2,100566:ACTION:nec|100566:ACTION:NEC,yes
+100567,Dodge,Combat,1,100567:COMBAT,yes
+100568,Dog Pack,Retainer,1,100568:RETAINER,yes
+102353,Dogged Pursuit,Reaction,2,102353:REACTION:ani|102353:REACTION:ANI,yes
+100569,Dogs of War,Political Action,1,100569:POLITICAL,yes
+100570,Domain Challenge,Political Action,1,100570:POLITICAL,yes
+100571,Domain of Evernight,Action Modifier,3,100571:MODIFIER:obf|100571:MODIFIER:tem|100571:MODIFIER:TEM,yes
+102316,Dominant Personality,Action Modifier,4,102316:MODIFIER:pot|102316:MODIFIER:pre|102316:MODIFIER:POT|102316:MODIFIER:PRE,yes
+100572,Dominate,Master,1,100572:MASTER,yes
+100573,Dominate Kine,Action,2,100573:ACTION:dom|100573:ACTION:DOM,yes
+100574,Dominion,Master,1,100574:MASTER,yes
+100575,Donate,Power,3,100575:MODIFIER|100575:REACTION|100575:COMBAT,yes
+100576,Donnybrook,Combat,3,100576:COMBAT:obf|100576:COMBAT:pro|100576:COMBAT:ser,yes
+102220,Double Deuce,Ally,1,102220:ALLY,yes
+100577,"Dr. Marisa Fletcher, CDC",Event,1,100577:EVENT,yes
+100578,Draba,Action/Reaction,2,100578:ACTION:chi|100578:REACTION:CHI,yes
+100579,Draeven Softfoot,Ally,1,100579:ALLY,yes
+100580,Dragon's Breath Rounds,Combat,1,100580:COMBAT,yes
+100581,Dragonbound,Event,1,100581:EVENT,yes
+100582,Drain Essence,Combat,2,100582:COMBAT:tha|100582:COMBAT:THA,yes
+100583,Dramatic Upheaval,Political Action,1,100583:POLITICAL,yes
+100584,Draught of the Soul,Action Modifier/Combat,6,100584:MODIFIER:qui|100584:COMBAT:qui|100584:MODIFIER:aus+qui|100584:COMBAT:aus+qui|100584:MODIFIER:AUS+QUI|100584:COMBAT:AUS+QUI,no
+100585,Drawing Out the Beast,Combat,2,100585:COMBAT:ani|100585:COMBAT:ANI,yes
+100586,Dread Gaze,Reaction,2,100586:REACTION:pre|100586:REACTION:PRE,yes
+102317,Dread Mastiff,Retainer,2,102317:RETAINER:ani|102317:RETAINER:ANI,yes
+100587,Dream World,Action,2,100587:ACTION:pre|100587:ACTION:PRE,yes
+100588,Dreams of the Sphinx,Master,1,100588:MASTER,yes
+100589,Drink the Blood of Ahriman,Action,1,100589:ACTION,yes
+100590,Drop Point Network,Master,1,100590:MASTER,yes
+100591,Drum of Xipe Totec,Equipment,1,100591:EQUIPMENT,yes
+100592,Dual Form,Action,2,100592:ACTION:pro|100592:ACTION:PRO,yes
+100593,Duma Rafiki,Retainer,1,100593:RETAINER,yes
+100594,Dummy Corporation,Master,1,100594:MASTER,yes
+100595,Dusk Work,Action Modifier,1,100595:MODIFIER,yes
+100596,Dust to Dust,Combat,3,100596:COMBAT:obf|100596:COMBAT:thn|100596:COMBAT:THN,yes
+100597,Dust Up,Combat,3,100597:COMBAT:ani|100597:COMBAT:cel|100597:COMBAT:pot,yes
+100598,Eagle's Sight,Reaction,2,100598:REACTION:aus|100598:REACTION:AUS,yes
+100599,Ears of the Hare,Reaction,3,100599:REACTION:pro|100599:REACTION:spi|100599:REACTION:SPI,yes
+100600,Earth Control,Action Modifier,2,100600:MODIFIER:pro|100600:MODIFIER:PRO,yes
+100601,Earth Meld,Combat,2,100601:COMBAT:pro|100601:COMBAT:PRO,yes
+100602,Earth Swords,Combat,3,100602:COMBAT:pot|100602:COMBAT:myt|100602:COMBAT:MYT,yes
+100603,Earth-Feeder,Action,1,100603:ACTION,yes
+100604,Earthshock,Combat,2,100604:COMBAT:pot|100604:COMBAT:POT,yes
+100605,Eat the Rich,Political Action,1,100605:POLITICAL,yes
+100606,Ebony Fox Hunt,Master,1,100606:MASTER,yes
+100607,Eccentric Billionaire,Ally,1,100607:ALLY,yes
+100608,Echo of Harmonies,Action Modifier,3,100608:MODIFIER:pre|100608:MODIFIER:mel|100608:MODIFIER:MEL,yes
+100609,Ecoterrorists,Master,1,100609:MASTER,yes
+100610,Ecstasy,Reaction,2,100610:REACTION:ser|100610:REACTION:SER,yes
+100611,Ecstatic Agony,Action,2,100611:ACTION:aus|100611:ACTION:AUS,yes
+102237,ECTU Operative,Ally,1,102237:ALLY,yes
+100612,Edge Explosion,Event,1,100612:EVENT,yes
+100613,Edge of the World,Action Modifier,1,100613:MODIFIER,yes
+100614,Edge Vitiation,Action,2,100614:ACTION:ser|100614:ACTION:SER,yes
+100615,Edged Illusion,Action,2,100615:ACTION:chi|100615:ACTION:CHI,yes
+100616,Effective Management,Master,1,100616:MASTER,yes
+100617,Elder Impersonation,Action Modifier,2,100617:MODIFIER:obf|100617:MODIFIER:OBF,yes
+100618,Elder Intervention,Reaction,1,100618:REACTION,yes
+100619,Elder Kindred Network,Reaction,1,100619:REACTION,yes
+100620,Elder Library,Master,1,100620:MASTER,yes
+100621,Elder Michaelis's Hold,Reaction,1,100621:REACTION,yes
+100622,"Eldest Are Kholo, The",Action Modifier/Reaction,2,100622:MODIFIER|100622:REACTION,yes
+100623,"Eldest Command Undeath, The",Political Action,1,100623:POLITICAL,yes
+100624,Eldritch Glimmer,Combat,2,100624:COMBAT:tha|100624:COMBAT:THA,yes
+100625,Elemental Stoicism,Action/Combat,6,100625:ACTION:for|100625:COMBAT:for|100625:ACTION:for+obf|100625:COMBAT:for+obf|100625:ACTION:FOR+obf|100625:COMBAT:FOR+obf,no
+100626,Elephant Guardian,Retainer,1,100626:RETAINER,yes
+100627,Elixir of Distillation,Equipment,1,100627:EQUIPMENT,yes
+100628,Eluding the Arms of Morpheus,Reaction,1,100628:REACTION,yes
+100629,Elysian Fields,Master,1,100629:MASTER,yes
+100630,Elysium: Sforzesco Castle,Master,1,100630:MASTER,yes
+100631,Elysium: The Arboretum,Master,1,100631:MASTER,yes
+100632,Elysium: The Palace of Versailles,Master,1,100632:MASTER,yes
+100633,"Embrace, The",Action,1,100633:ACTION,yes
+100634,Emerald Legionnaire,Ally,1,100634:ALLY,yes
+100635,Emergency Powers,Action,1,100635:ACTION,yes
+100636,Emergency Preparations,Master,1,100636:MASTER,yes
+100637,Emergency Rations,Action,1,100637:ACTION,yes
+100638,Emissary,Action Modifier,1,100638:MODIFIER,yes
+102318,Empires Fall,Political Action,1,102318:POLITICAL,yes
+100639,Empowering the Puppet King,Action Modifier,2,100639:MODIFIER:dom|100639:MODIFIER:DOM,yes
+100640,Enchant Kindred,Action,2,100640:ACTION:pre|100640:ACTION:PRE,yes
+100641,Enchanted Marionette,Equipment,1,100641:EQUIPMENT,yes
+102221,Enchanting Gaze,Action Modifier,2,102221:MODIFIER:pre+pro|102221:MODIFIER:PRE+PRO,yes
+100642,Enforcer,Action,1,100642:ACTION,yes
+100643,Engling Fury,Action,3,100643:ACTION:for|100643:ACTION:spi|100643:ACTION:SPI,yes
+102238,Enhanced Coagulant,Equipment,1,102238:EQUIPMENT,yes
+100644,Enhanced Senses,Reaction,2,100644:REACTION:aus|100644:REACTION:AUS,yes
+100645,Enkil Cog,Action Modifier,1,100645:MODIFIER,yes
+100646,Ennoia's Theater,Master,1,100646:MASTER,yes
+100647,Enrage,Action,2,100647:ACTION:pre|100647:ACTION:PRE,yes
+100648,Ensconced,Action/Reaction,2,100648:ACTION:vis|100648:REACTION:VIS,yes
+100649,Ensemble,Action Modifier,1,100649:MODIFIER,yes
+102319,Ensnare a Beast,Reaction,4,102319:REACTION:ani|102319:REACTION:cel|102319:REACTION:ANI|102319:REACTION:CEL,yes
+102320,Enthrall,Action,4,102320:ACTION:obf|102320:ACTION:pre|102320:ACTION:OBF|102320:ACTION:PRE,yes
+100650,Enticement,Action,2,100650:ACTION:ser|100650:ACTION:SER,yes
+100651,Entombment,Combat,2,100651:COMBAT:obt|100651:COMBAT:OBT,yes
+100652,Entrancement,Action,2,100652:ACTION:pre|100652:ACTION:PRE,yes
+100653,Entrenching,Action,1,100653:ACTION,yes
+100654,Ephor,Master,1,100654:MASTER,yes
+100655,Epiphany,Action,1,100655:ACTION,yes
+100656,"Erciyes Fragments, The",Master,1,100656:MASTER,yes
+100657,Erebus Mask,Equipment,1,100657:EQUIPMENT,yes
+100658,Erosion,Action,2,100658:ACTION:qui|100658:ACTION:QUI,yes
+100659,Eruption of Vitae,Combat,2,100659:COMBAT:qui|100659:COMBAT:QUI,yes
+100660,Esbat,Action,1,100660:ACTION,yes
+100661,Escaped Mental Patient,Ally,1,100661:ALLY,yes
+100662,Esgrima,Master,1,100662:MASTER,yes
+100663,Esprit de Corps,Action,2,100663:ACTION:pot+pre|100663:ACTION:POT+PRE,yes
+100664,Esteem,Action Modifier,1,100664:MODIFIER,yes
+100665,"Eternal Mask, The",Action,2,100665:ACTION:ser|100665:ACTION:SER,yes
+100666,Eternal Vigilance,Action,1,100666:ACTION,yes
+100667,"Eternals of Sirius, The",Master,1,100667:MASTER,yes
+100668,Evil Eye,Combat/Reaction,2,100668:COMBAT:mal|100668:REACTION:MAL,yes
+100669,Ex Nihilo,Action,2,100669:ACTION:nec|100669:ACTION:NEC,yes
+100670,Excellent Thirst,Action Modifier,1,100670:MODIFIER,yes
+100671,Exclusion Principle,Political Action,1,100671:POLITICAL,yes
+100672,Excommunication,Political Action,1,100672:POLITICAL,yes
+100673,Exile,Action,2,100673:ACTION:pre|100673:ACTION:PRE,yes
+100674,Expiate,Combat,1,100674:COMBAT,yes
+102276,Expulsion,Political Action,1,102276:POLITICAL,yes
+100675,Extortion,Reaction,2,100675:REACTION:ser|100675:REACTION:SER,yes
+100676,Extremis Boon,Master,1,100676:MASTER,yes
+100677,Exuding Blood,Combat,2,100677:COMBAT:qui|100677:COMBAT:QUI,yes
+100678,Eye of Hazimel,Equipment,1,100678:EQUIPMENT,yes
+100679,Eye of Unforgiving Heaven,Combat,2,100679:COMBAT:aus+val|100679:COMBAT:AUS+VAL,yes
+100680,Eyes of Argus,Reaction,2,100680:REACTION:aus|100680:REACTION:AUS,yes
+100681,Eyes of Blades,Combat,2,100681:COMBAT:aus+cel|100681:COMBAT:AUS+CEL,yes
+100682,Eyes of Chaos,Action Modifier,2,100682:MODIFIER:dem|100682:MODIFIER:DEM,yes
+100683,Eyes of the Beast,Reaction,2,100683:REACTION:pro|100683:REACTION:PRO,yes
+100684,Eyes of the Dead,Reaction,2,100684:REACTION:nec|100684:REACTION:NEC,yes
+100685,Eyes of the Night,Reaction,2,100685:REACTION:obt|100685:REACTION:OBT,yes
+100686,Eyes of the Serpent,Action Modifier/Combat,4,100686:MODIFIER:ser|100686:COMBAT:ser|100686:MODIFIER:SER|100686:COMBAT:SER,no
+102222,Eyes of the Wild,Reaction,1,102222:REACTION,yes
+100687,Faceless Night,Action Modifier,2,100687:MODIFIER:obf|100687:MODIFIER:OBF,yes
+100688,Fade from View,Combat,2,100688:COMBAT:obf|100688:COMBAT:OBF,yes
+100689,Fae Contortion,Action Modifier/Combat,4,100689:REFLEX:myt|100689:COMBAT:obt|100689:COMBAT:myt|100689:MODIFIER:MYT,yes
+100690,Faerie Wards,Reaction,3,100690:REACTION:aus|100690:REACTION:myt|100690:REACTION:MYT,yes
+100691,Failsafe,Master,1,100691:MASTER,yes
+100692,Faithful Servant,Retainer,1,100692:RETAINER,yes
+100693,Fake Out,Combat,1,100693:COMBAT,yes
+100694,Falcon's Eye,Reaction,3,100694:REACTION:ani|100694:REACTION:spi|100694:REACTION:SPI,yes
+100695,Fall of the Camarilla,Event,1,100695:EVENT,yes
+100696,Fall of the Sabbat,Event,1,100696:EVENT,yes
+100697,False Resonance,Action Modifier,2,100697:MODIFIER:chi|100697:MODIFIER:CHI,yes
+100698,Fame,Master,1,100698:MASTER,yes
+100699,Familial Bond,Reaction,1,100699:REACTION,yes
+102289,Family Gathering,Master,1,102289:MASTER,yes
+100700,Fanfare for Elysium,Political Action,2,100700:POLITICAL:mel|100700:POLITICAL:MEL,yes
+100701,Fantasy World,Action,2,100701:ACTION:chi|100701:ACTION:CHI,yes
+100702,Far Fatuus,Combat,2,100702:COMBAT:chi|100702:COMBAT:CHI,yes
+100703,Far Mastery,Action,2,100703:ACTION:dom|100703:ACTION:DOM,yes
+100704,Fast Hands,Combat,2,100704:COMBAT:cel|100704:COMBAT:CEL,yes
+100705,Fast Reaction,Reaction,2,100705:REACTION:aus|100705:REACTION:AUS,yes
+100706,Fata Amria,Combat/Reaction,2,100706:COMBAT:chi|100706:REACTION:CHI,yes
+100707,Fata Morgana,Action Modifier,2,100707:MODIFIER:chi|100707:MODIFIER:CHI,yes
+100708,Fatuus Mastery,Action,2,100708:ACTION:chi|100708:ACTION:CHI,yes
+100709,FBI Special Affairs Division,Event,1,100709:EVENT,yes
+100710,Fear of Mekhet,Master,1,100710:MASTER,yes
+100711,Fear of the Void Below,Combat,3,100711:COMBAT:obf|100711:COMBAT:dai|100711:COMBAT:DAI,yes
+102248,Feast of the Soul's Secrets,Action,2,102248:ACTION:dom|102248:ACTION:DOM,yes
+100712,Fee Stake: Boston,Action,1,100712:ACTION,yes
+100713,Fee Stake: Corte,Action,1,100713:ACTION,yes
+100714,Fee Stake: Los Angeles,Action,1,100714:ACTION,yes
+100715,Fee Stake: New York,Action,1,100715:ACTION,yes
+100716,Fee Stake: Perth,Action,1,100716:ACTION,yes
+100717,Fee Stake: Seattle,Action,1,100717:ACTION,yes
+100718,Feline Saboteur,Action,2,100718:ACTION:ani+obf|100718:ACTION:ANI+OBF,yes
+100719,"Felix ""Fix"" Hessian",Ally,1,100719:ALLY,yes
+100720,Femur of Toomler,Equipment,1,100720:EQUIPMENT,yes
+102249,Feral Hound,Retainer,2,102249:RETAINER:ani|102249:RETAINER:ANI,yes
+100721,Feral Spirit,Master,1,100721:MASTER,yes
+100722,Ferraille,Master,1,100722:MASTER,yes
+100723,Festivo dello Estinto,Master,1,100723:MASTER,yes
+100724,Fetish Club Hunting Ground,Master,1,100724:MASTER,yes
+102321,Fever Pitch,Action Modifier,4,102321:MODIFIER:for|102321:MODIFIER:pre|102321:MODIFIER:FOR|102321:MODIFIER:PRE,yes
+100725,Field Training,Action,1,100725:ACTION,yes
+100726,Fiendish Tongue,Action,1,100726:ACTION,yes
+100727,Fifth Tradition: Hospitality,Action,1,100727:ACTION,yes
+100728,Filchware's Pawn Shop,Master,1,100728:MASTER,yes
+100729,Fillip,Reaction,1,100729:REACTION,yes
+100730,Final Loosening,Reaction,3,100730:REACTION:aus|100730:REACTION:dem|100730:REACTION:for,yes
+100731,"Final Nights, The",Political Action,1,100731:POLITICAL,yes
+100732,Finding the Path,Political Action,1,100732:POLITICAL,yes
+102322,"Fiorella, Empty One",Ally,1,102322:ALLY,yes
+100733,Fire Dance,Action,1,100733:ACTION,yes
+100734,Fire in the Blood,Combat,2,100734:COMBAT:pot|100734:COMBAT:POT,yes
+100735,Fire on the Mountain,Action,1,100735:ACTION,yes
+100736,Firebrand,Political Action,1,100736:POLITICAL,yes
+100737,First Tradition: The Masquerade,Political Action,1,100737:POLITICAL,yes
+100738,Fists of Death,Combat,2,100738:COMBAT:pot|100738:COMBAT:POT,yes
+100739,Flak Jacket,Equipment,1,100739:EQUIPMENT,yes
+100740,Flames of Insurrection,Master,1,100740:MASTER,yes
+100741,Flames of the Netherworld,Combat,3,100741:COMBAT:tha|100741:COMBAT:dai|100741:COMBAT:DAI,yes
+100742,Flamethrower,Equipment,1,100742:EQUIPMENT,yes
+100743,Flaming Candle,Equipment,1,100743:EQUIPMENT,yes
+100744,Flash,Combat,2,100744:COMBAT:cel|100744:COMBAT:CEL,yes
+100745,Flash Grenade,Equipment,1,100745:EQUIPMENT,yes
+100746,Fleecing the Gaje,Action,1,100746:ACTION,yes
+100747,Fleetness,Action,2,100747:ACTION:cel|100747:ACTION:CEL,yes
+100748,Flesh Bond,Combat,2,100748:COMBAT:ani|100748:COMBAT:ANI,yes
+100749,Flesh of Marble,Combat,2,100749:COMBAT:pro|100749:COMBAT:PRO,yes
+100750,Fleshcraft,Combat,2,100750:COMBAT:vic|100750:COMBAT:VIC,yes
+102354,Fleshforge Chamber,Master,1,102354:MASTER,yes
+100751,Flow Within the Mountain,Combat,3,100751:COMBAT:tha|100751:COMBAT:vis|100751:COMBAT:VIS,yes
+100752,Flurry of Action,Action,2,100752:ACTION:cel|100752:ACTION:CEL,yes
+100753,Focus the Blood,Combat,1,100753:COMBAT,yes
+100754,Foldable Machine Gun,Equipment,1,100754:EQUIPMENT,yes
+100755,Folderol,Reaction,3,100755:REACTION:aus|100755:REACTION:myt|100755:REACTION:MYT,yes
+100756,Follow the Alpha,Action Modifier,1,100756:MODIFIER,yes
+100757,Follow the Blood,Reaction,1,100757:REACTION,yes
+100758,Force of Personality,Action Modifier/Combat,2,100758:COMBAT:pre|100758:MODIFIER:PRE,yes
+100759,Force of Will,Action,2,100759:ACTION:for|100759:ACTION:FOR,yes
+100760,Forced Awakening,Reaction,1,100760:REACTION,yes
+102250,Forced Confessional,Action Modifier,2,102250:MODIFIER:dom|102250:MODIFIER:DOM,yes
+100761,Forced March,Action Modifier,2,100761:MODIFIER:cel+for|100761:MODIFIER:CEL+FOR,yes
+100762,Forced Vigilance,Reaction,2,100762:REACTION:for|100762:REACTION:FOR,yes
+100763,Forearm Block,Combat,1,100763:COMBAT,yes
+100764,Foresee,Power,1,100764:COMBAT,yes
+100765,Foreshadowing Destruction,Action Modifier,2,100765:MODIFIER:dom|100765:MODIFIER:DOM,yes
+100766,Forest of Shadows,Master,1,100766:MASTER,yes
+100767,Forger's Hammer,Action Modifier,2,100767:MODIFIER:pot|100767:MODIFIER:POT,yes
+100768,Forgery,Action,1,100768:ACTION,yes
+100769,Forgotten Labyrinth,Action Modifier,2,100769:MODIFIER:obf|100769:MODIFIER:OBF,yes
+100770,Form of Corruption,Action,2,100770:ACTION:ser|100770:ACTION:SER,yes
+100771,Form of Mist,Combat,2,100771:COMBAT:pro|100771:COMBAT:PRO,yes
+102223,Form of the Bat,Action Modifier/Reaction,2,102223:MODIFIER:pro|102223:REACTION:PRO,yes
+102224,Form of the Cobra,Action Modifier/Combat,2,102224:COMBAT:pro|102224:MODIFIER:PRO,yes
+100772,Form of the Ghost,Combat,2,100772:COMBAT:pro|100772:COMBAT:PRO,yes
+100773,Form of the Serpent,Action Modifier/Combat,2,100773:MODIFIER:ser|100773:COMBAT:SER,yes
+102225,Form of the Wolf,Combat,2,102225:COMBAT:pro|102225:COMBAT:PRO,yes
+100774,Fortitude,Master,1,100774:MASTER,yes
+100775,Fortschritt Library,Master,1,100775:MASTER,yes
+100776,Fortune Teller,Retainer,1,100776:RETAINER,yes
+100777,Fortune Teller Shop,Master,1,100777:MASTER,yes
+102323,Forward Momentum,Master,1,102323:MASTER,yes
+100778,Foul Blood,Reaction,2,100778:REACTION:qui|100778:REACTION:QUI,yes
+100779,Foundation Exhibit,Master,1,100779:MASTER,yes
+100780,Founders of the Ebony Kingdom,Action,1,100780:ACTION,yes
+100781,"Fourth Cycle, The",Event,1,100781:EVENT,yes
+100782,Fourth Tradition: The Accounting,Action,1,100782:ACTION,yes
+100783,Fractura,Combat,3,100783:COMBAT:cel|100783:COMBAT:str|100783:COMBAT:STR,yes
+100784,Fractured Armament,Combat,2,100784:COMBAT:pot|100784:COMBAT:POT,yes
+100785,Fragment of the Book of Nod,Master,1,100785:MASTER,yes
+100786,"Framing, The",Action,1,100786:ACTION,yes
+100787,Framing an Ancient Grudge,Master,1,100787:MASTER,yes
+100788,Freak Drive,Action Modifier,2,100788:MODIFIER:for|100788:MODIFIER:FOR,yes
+102324,Freakish Conglomeration,Ally,4,102324:ALLY:obl|102324:ALLY:tha|102324:ALLY:OBL|102324:ALLY:THA,yes
+100789,Free Fight,Combat,2,100789:COMBAT:san|100789:COMBAT:SAN,yes
+100790,Free States Rant,Political Action,1,100790:POLITICAL,yes
+100791,Frenzy,Master,1,100791:MASTER,yes
+100792,Friend of Mine,Reaction,3,100792:REACTION:for|100792:REACTION:nec|100792:REACTION:obt,yes
+100793,From a Sinking Ship,Master,1,100793:MASTER,yes
+100794,Frontal Assault,Master,1,100794:MASTER,yes
+100795,Frozen Object,Action,3,100795:ACTION:ser|100795:ACTION:tem|100795:ACTION:TEM,yes
+100796,Fueled by Heart's Blood,Event,1,100796:EVENT,yes
+100797,Funeral Wake,Reaction,2,100797:REACTION:nec|100797:REACTION:NEC,yes
+100798,Galaric's Legacy,Master,1,100798:MASTER,yes
+100799,Gambit Accepted,Master,1,100799:MASTER,yes
+100800,Game of Malkav,Master,1,100800:MASTER,yes
+100801,Games of Instinct,Action,1,100801:ACTION,yes
+100802,Gang Tactics,Action Modifier,1,100802:MODIFIER,yes
+100803,Gang Territory,Master,1,100803:MASTER,yes
+100804,Gangrel Atavism,Master,1,100804:MASTER,yes
+100805,Gangrel Conspiracy,Master,1,100805:MASTER,yes
+100806,Gangrel Justicar,Political Action,1,100806:POLITICAL,yes
+100807,Gangrel Revel,Master,1,100807:MASTER,yes
+100808,Gargoyle Slave,Ally,1,100808:ALLY,yes
+100809,Garibaldi-Meucci Museum,Master,1,100809:MASTER,yes
+100810,Garrote,Equipment,1,100810:EQUIPMENT,yes
+100811,Gas-Powered Chainsaw,Equipment,1,100811:EQUIPMENT,yes
+102290,"Gate of Acheron, The",Action,1,102290:ACTION,yes
+100812,Gather,Action,1,100812:ACTION,yes
+100813,Gear Up,Action,3,100813:ACTION:nec|100813:ACTION:pre|100813:ACTION:vic,yes
+100814,Gemini's Mirror,Combat,2,100814:COMBAT:obf|100814:COMBAT:OBF,yes
+100815,Gestalt,Reaction,2,100815:REACTION:san|100815:REACTION:SAN,yes
+100816,Ghost-Eater,Action,1,100816:ACTION,yes
+100817,Ghoul Escort,Retainer,1,100817:RETAINER,yes
+100818,Ghoul Messenger,Retainer,1,100818:RETAINER,yes
+100819,Ghoul Retainer,Retainer,1,100819:RETAINER,yes
+100820,Ghouled,Action Modifier,1,100820:MODIFIER,yes
+100821,Ghouled Street Thug,Ally,1,100821:ALLY,yes
+100822,"Ghouls of Plaza Morería, The",Ally,1,100822:ALLY,yes
+100823,Gianna di Canneto,Ally,1,100823:ALLY,yes
+100824,Giant's Blood,Master,1,100824:MASTER,yes
+100825,Gift of Bellona,Action Modifier,3,100825:MODIFIER:aus|100825:MODIFIER:val|100825:MODIFIER:VAL,yes
+100826,Gift of Experience,Master,1,100826:MASTER,yes
+100827,Gift of Proteus,Action,1,100827:ACTION,yes
+100828,Gift of Sleep,Action Modifier/Reaction,4,100828:MODIFIER:obf|100828:MODIFIER:obe|100828:REACTION:obe|100828:MODIFIER:OBE,yes
+102325,Gifts From Hereafter,Action Modifier,4,102325:MODIFIER:dom|102325:MODIFIER:obl|102325:MODIFIER:DOM|102325:MODIFIER:OBL,yes
+100829,Giovanni Acceptance,Political Action,1,100829:POLITICAL,yes
+100830,Giovanni Discrimination,Master,1,100830:MASTER,yes
+100831,Gird Minions,Master,1,100831:MASTER,yes
+100832,Giulia Giovanni Abruzzina,Ally,1,100832:ALLY,yes
+100833,"Giuseppe, Gravedigger",Retainer,1,100833:RETAINER,yes
+100834,Glancing Blow,Combat,1,100834:COMBAT,yes
+100835,Glare of Lies,Reaction,2,100835:REACTION:aus+obe|100835:REACTION:AUS+OBE,yes
+100836,Glaser Rounds,Combat,1,100836:COMBAT,yes
+100837,Glass Walker Pact,Master,1,100837:MASTER,yes
+100838,Gleam of Red Eyes,Combat,2,100838:COMBAT:pro|100838:COMBAT:PRO,yes
+100839,Glutton,Master,1,100839:MASTER,yes
+100840,Go Anarch,Action,1,100840:ACTION,yes
+102355,Go-getter,Action Modifier,2,102355:MODIFIER:obf|102355:MODIFIER:OBF,yes
+100841,Goblinism,Action,3,100841:ACTION:pot|100841:ACTION:myt|100841:ACTION:MYT,yes
+100842,Golconda: Inner Peace,Master,1,100842:MASTER,yes
+100843,"Goodnight, Sweet Prince",Master,1,100843:MASTER,yes
+100844,Goth Band,Ally,1,100844:ALLY,yes
+100845,Govern the Unaligned,Action,2,100845:ACTION:dom|100845:ACTION:DOM,yes
+100846,Gramle,Action,1,100846:ACTION,yes
+100847,"Gran Madre di Dio, Italy",Equipment,1,100847:EQUIPMENT,yes
+100848,Grand Temple of Set,Master,1,100848:MASTER,yes
+100849,"Grandest Trick, The",Action Modifier,1,100849:MODIFIER,yes
+100850,Grasp of the Python,Combat,2,100850:COMBAT:ser|100850:COMBAT:SER,yes
+100851,Grasp the Ghostly,Action,2,100851:ACTION:nec|100851:ACTION:NEC,yes
+102326,Gravebound Drone,Ally,2,102326:ALLY:obl|102326:ALLY:OBL,yes
+100852,Graverobbing,Action,2,100852:ACTION:dom|100852:ACTION:DOM,yes
+100853,Great Symposium,Master,1,100853:MASTER,yes
+100854,Greater Curse,Action,3,100854:ACTION:dai|100854:ACTION:mal|100854:ACTION:MAL,yes
+100855,Gregory Winter,Ally,1,100855:ALLY,yes
+100856,Gremlins,Action,3,100856:ACTION:dom|100856:ACTION:myt|100856:ACTION:MYT,yes
+100857,Grenade,Equipment,1,100857:EQUIPMENT,yes
+100858,Grey Thorne,Ally,1,100858:ALLY,yes
+100859,Groaning Corpse,Combat,2,100859:COMBAT:thn|100859:COMBAT:THN,yes
+100860,Grooming the Protégé,Master,1,100860:MASTER,yes
+100861,Groundfighting,Combat,1,100861:COMBAT,yes
+100862,Growing Fury,Combat,2,100862:COMBAT:pot|100862:COMBAT:POT,yes
+100863,Guard Dogs,Reaction,2,100863:REACTION:ani|100863:REACTION:ANI,yes
+100864,Guard Duty,Action,1,100864:ACTION,yes
+100865,Guarded Rubrics,Equipment,1,100865:EQUIPMENT,yes
+100866,Guardian Angel,Master,1,100866:MASTER,yes
+100867,Guardian Ghoul,Ally,1,100867:ALLY,yes
+100868,Guardian Vigil,Reaction,3,100868:REACTION:aus|100868:REACTION:cel|100868:REACTION:for,yes
+100869,Guide and Mentor,Master,1,100869:MASTER,yes
+100870,Guinea-Bissau Carnival,Master,1,100870:MASTER,yes
+100871,Gurchon Hall,Master,1,100871:MASTER,yes
+100872,Guru,Master,1,100872:MASTER,yes
+100873,"Guruhi Are the Land, The",Action Modifier,1,100873:MODIFIER,yes
+100874,Guruhi Kholo,Action Modifier/Reaction,2,100874:MODIFIER|100874:REACTION,no
+100875,Gypsies,Ally,1,100875:ALLY,yes
+100876,Hackerspace,Master,1,100876:MASTER,yes
+100877,Hag's Wrinkles,Action Modifier,3,100877:MODIFIER:obf|100877:MODIFIER:thn|100877:MODIFIER:THN,yes
+100878,Hall of Hades' Court,Action Modifier/Reaction,5,100878:MODIFIER:dom|100878:MODIFIER:tem|100878:REACTION:tem|100878:MODIFIER:TEM|100878:REACTION:TEM,yes
+100879,Hall of Mirrors,Combat,2,100879:COMBAT:chi|100879:COMBAT:CHI,yes
+100880,Hand Contract,Master,1,100880:MASTER,yes
+100881,Hand Intervention,Political Action,1,100881:POLITICAL,yes
+100882,Hand of Conrad,Equipment,1,100882:EQUIPMENT,yes
+100883,Hanging Fermata,Master,1,100883:MASTER,yes
+100884,Haqim's Law: Judgment,Master,1,100884:MASTER,yes
+100885,Haqim's Law: Leadership,Action,1,100885:ACTION,yes
+102226,Haqim's Law: Retribution,Master,1,102226:MASTER,yes
+100886,Harass,Action,1,100886:ACTION,yes
+100887,Hard Case,Reaction,2,100887:REACTION:for|100887:REACTION:FOR,yes
+100888,Harmony,Action,1,100888:ACTION,yes
+100889,Harvest Rites,Action,1,100889:ACTION,yes
+100890,Harzomatuili,Ally,1,100890:ALLY,yes
+100891,Hatch the Viper,Retainer,2,100891:RETAINER:pro+ser|100891:RETAINER:PRO+SER,yes
+100892,Hatchling,Action,1,100892:ACTION,yes
+100893,Haunt,Action,2,100893:ACTION:nec|100893:ACTION:NEC,yes
+100894,"Haunting, The",Action,2,100894:ACTION:dem|100894:ACTION:DEM,yes
+100895,Haven Affinity,Master,1,100895:MASTER,yes
+100896,Haven Hunting,Action,1,100896:ACTION,yes
+100897,Haven Uncovered,Master,1,100897:MASTER,yes
+100898,Hawg,Equipment,1,100898:EQUIPMENT,yes
+100899,Hay Ride,Action Modifier,2,100899:MODIFIER:san|100899:MODIFIER:SAN,yes
+100900,Haymaker,Combat,1,100900:COMBAT,yes
+100901,Healing Touch,Action,3,100901:ACTION:cel|100901:ACTION:obe|100901:ACTION:OBE,yes
+100902,Heart of Darkness,Action,2,100902:ACTION:ser|100902:ACTION:SER,yes
+100903,Heart of Nizchetus,Equipment,1,100903:EQUIPMENT,yes
+100904,Heart of the City,Action,2,100904:ACTION:pre|100904:ACTION:PRE,yes
+100905,Heart's Desire,Action Modifier,2,100905:MODIFIER:aus+chi|100905:MODIFIER:AUS+CHI,yes
+100906,Heartblood of the Clan,Master,1,100906:MASTER,yes
+102327,Heartrender,Ally,1,102327:ALLY,yes
+100907,Heaven's Gate,Combat,3,100907:COMBAT:nec|100907:COMBAT:obe|100907:COMBAT:OBE,yes
+102328,Hedonism,Action Modifier,4,102328:MODIFIER:for|102328:MODIFIER:pre|102328:MODIFIER:FOR|102328:MODIFIER:PRE,yes
+100908,"Heidelberg Castle, Germany",Master,1,100908:MASTER,yes
+100909,Helicopter,Equipment,1,100909:EQUIPMENT,yes
+100910,Hell-for-Leather,Combat,3,100910:COMBAT:ani|100910:COMBAT:cel|100910:COMBAT:obt,yes
+100911,Hellhound,Ally,1,100911:ALLY,yes
+100912,Herald of Topheth,Ally,1,100912:ALLY,yes
+100913,Heroic Might,Action,2,100913:ACTION:pot|100913:ACTION:POT,yes
+100914,Hexaped,Ally,1,100914:ALLY,yes
+100915,Hexe,Combat,3,100915:COMBAT:dai|100915:COMBAT:str|100915:COMBAT:STR,yes
+100916,Hidden Lurker,Action Modifier,2,100916:MODIFIER:obf|100916:MODIFIER:OBF,yes
+100917,Hidden Pathways,Action,2,100917:ACTION:obf|100917:ACTION:OBF,yes
+100918,Hidden Strength,Combat,2,100918:COMBAT:for|100918:COMBAT:FOR,yes
+100919,Hide,Power,2,100919:MODIFIER|100919:REACTION,yes
+100920,Hide the Heart,Reaction,3,100920:REACTION:aus|100920:REACTION:val|100920:REACTION:VAL,yes
+100921,Hide the Mind,Action Modifier/Combat,2,100921:COMBAT:obf|100921:MODIFIER:OBF,yes
+100922,Hiding in the Open,Political Action,1,100922:POLITICAL,yes
+100923,Hierophant,Political Action,1,100923:POLITICAL,yes
+100924,High Aye,Action Modifier,1,100924:MODIFIER,yes
+100925,High Ground,Combat,1,100925:COMBAT,yes
+100926,"High Museum of Art, Atlanta",Master,1,100926:MASTER,yes
+100927,High Orun,Action Modifier/Reaction,2,100927:MODIFIER|100927:REACTION,no
+100928,High Stakes,Political Action,1,100928:POLITICAL,yes
+100929,High Top,Ally,1,100929:ALLY,yes
+100930,Highway Haven: RV,Equipment,1,100930:EQUIPMENT,yes
+100931,Hive Mind,Action,2,100931:ACTION:san|100931:ACTION:SAN,yes
+100932,Homunculus,Retainer,2,100932:RETAINER:pro|100932:RETAINER:PRO,yes
+100933,Honor the Elders,Political Action,1,100933:POLITICAL,yes
+100934,Horrid Form,Combat,2,100934:COMBAT:vic|100934:COMBAT:VIC,yes
+100935,Horrid Reality,Combat,2,100935:COMBAT:chi|100935:COMBAT:CHI,yes
+100936,Horrific Countenance,Action Modifier,1,100936:MODIFIER:pro,yes
+100937,Horseshoes,Action,2,100937:ACTION:pot|100937:ACTION:POT,yes
+100938,Hospital Food,Master,1,100938:MASTER,yes
+100939,Hostile Takeover,Master,1,100939:MASTER,yes
+100940,Houngan,Master,1,100940:MASTER,yes
+100941,Hourglass of the Mind,Action,3,100941:ACTION:pot|100941:ACTION:tem|100941:ACTION:TEM,yes
+100942,House of Sorrow,Master,1,100942:MASTER,yes
+100943,Humanitas,Master,1,100943:MASTER,yes
+100944,Hunger Moon,Event,1,100944:EVENT,yes
+102227,Hunger of Marduk,Combat,2,102227:COMBAT:tha|102227:COMBAT:THA,yes
+100945,"Hungry Coyote, The",Master,1,100945:MASTER,yes
+100946,"Hunt Club, The",Master,1,100946:MASTER,yes
+102228,Hunter's Mark,Action,2,102228:ACTION:cel+tha|102228:ACTION:CEL+THA,yes
+102356,Hunting the Beast,Action,2,102356:ACTION:aus|102356:ACTION:AUS,yes
+102329,Hunting the Quarry,Combat,4,102329:COMBAT:cel|102329:COMBAT:tha|102329:COMBAT:CEL|102329:COMBAT:THA,yes
+100947,I am Legion,Action Modifier,3,100947:MODIFIER:dai|100947:MODIFIER:dai+obf|100947:MODIFIER:DAI+OBF,yes
+100948,Ignis Fatuus,Reaction,2,100948:REACTION:chi|100948:REACTION:CHI,yes
+100949,Ignore the Searing Flames,Combat,3,100949:COMBAT:ser|100949:COMBAT:dai|100949:COMBAT:DAI,yes
+100950,Igoli's Loyalty,Action Modifier,1,100950:MODIFIER,yes
+100951,Illegal Search and Seizure,Master,1,100951:MASTER,yes
+100952,Illegalism,Action,3,100952:ACTION:cel|100952:ACTION:chi|100952:ACTION:pre,yes
+100953,Illuminate,Power,1,100953:POWER,yes
+100954,Illusions of the Kindred,Combat,2,100954:COMBAT:chi|100954:COMBAT:CHI,yes
+100955,Illusory Resources,Action,2,100955:ACTION:chi|100955:ACTION:CHI,yes
+100956,Ilomba,Retainer,1,100956:RETAINER,yes
+100957,Immaculate Vitae,Reaction,2,100957:REACTION:qui|100957:REACTION:QUI,yes
+100958,Immense Size,Combat,2,100958:COMBAT:vic|100958:COMBAT:VIC,yes
+100959,Immortal Grapple,Combat,2,100959:COMBAT:pot|100959:COMBAT:POT,yes
+100960,Imperator,Political Action,1,100960:POLITICAL,yes
+100961,Imperial Decree,Action,1,100961:ACTION,yes
+100962,Imposing Phantasm,Combat,2,100962:COMBAT:chi|100962:COMBAT:CHI,yes
+100963,Imprison,Combat,1,100963:COMBAT,yes
+100964,Improvised Flamethrower,Equipment,1,100964:EQUIPMENT,yes
+100965,Improvised Tactics,Combat,3,100965:COMBAT:aus|100965:COMBAT:pot|100965:COMBAT:pro,yes
+100966,Impundulu,Ally,1,100966:ALLY,yes
+100967,In Memory of the Two Lands,Master,1,100967:MASTER,yes
+100968,"Inbase Discotek, Frankfurt",Master,1,100968:MASTER,yes
+100969,Inceptor,Master,1,100969:MASTER,yes
+100970,Inconnu Tutelage,Event,1,100970:EVENT,yes
+100971,Increased Strength,Combat,2,100971:COMBAT:pot|100971:COMBAT:POT,yes
+100972,Incriminating Videotape,Equipment,1,100972:EQUIPMENT,yes
+100973,Indomitability,Combat,2,100973:COMBAT:for|100973:COMBAT:FOR,yes
+100974,Inevitability of the Void,Action Modifier,2,100974:MODIFIER:aus+nec|100974:MODIFIER:AUS+NEC,yes
+100975,Infamous Insurgent,Master,1,100975:MASTER,yes
+100976,Infamous Warlock,Master,1,100976:MASTER,yes
+100977,Infection,Combat,3,100977:COMBAT:for|100977:COMBAT:thn|100977:COMBAT:THN,yes
+100978,Infernal Familiar,Retainer,1,100978:RETAINER:tha,yes
+100979,Infernal Pact,Master,1,100979:MASTER,yes
+100980,Infernal Pursuit,Combat,2,100980:COMBAT:cel|100980:COMBAT:CEL,yes
+100981,Infernal Servitor,Ally,2,100981:ALLY:dai|100981:ALLY:DAI,yes
+100982,Inflict,Combat,1,100982:COMBAT,yes
+100983,Informant,Ally,1,100983:ALLY,yes
+100984,Information Highway,Master,1,100984:MASTER,yes
+100985,Information Network,Master,1,100985:MASTER,yes
+100986,Inner Essence,Combat,2,100986:COMBAT:vic|100986:COMBAT:VIC,yes
+100987,Innocent Bystander,Action Modifier,1,100987:MODIFIER,yes
+100988,Inquisition,Action,1,100988:ACTION,yes
+100989,Inscription,Equipment,2,100989:EQUIPMENT:tha|100989:EQUIPMENT:THA,yes
+100990,Inside Dirt,Action,1,100990:ACTION,yes
+100991,Inspire,Power,1,100991:ACTION,yes
+100992,Inspire Greatness,Action Modifier,2,100992:MODIFIER:pot+pre|100992:MODIFIER:POT+PRE,yes
+100993,Instability,Master,1,100993:MASTER,yes
+100994,Instantaneous Transformation,Action Modifier,2,100994:MODIFIER:cel+pro|100994:MODIFIER:CEL+PRO,yes
+100995,Instinctive Reaction,Reaction,2,100995:REACTION:ani|100995:REACTION:ANI,yes
+100996,Institution Hunting Ground,Master,1,100996:MASTER,yes
+100997,Insurance Scam,Master,1,100997:MASTER,yes
+100998,Internal Recursion,Reaction,3,100998:REACTION:pre|100998:REACTION:tem|100998:REACTION:TEM,yes
+100999,Intimidation,Action,2,100999:ACTION:pre|100999:ACTION:PRE,yes
+101000,Into the Fire,Master,1,101000:MASTER,yes
+101001,Into Thin Air,Action Modifier,2,101001:MODIFIER:obf|101001:MODIFIER:OBF,yes
+101002,"Inveraray, Scotland",Equipment,1,101002:EQUIPMENT,yes
+101003,Investiture,Political Action,1,101003:POLITICAL,yes
+102251,Invigorate,Action Modifier,3,102251:MODIFIER:ani|102251:MODIFIER:dom|102251:MODIFIER:pro,yes
+101004,Invitation Accepted,Political Action,1,101004:POLITICAL,yes
+101005,Invoke Poison Glands,Combat,3,101005:REFLEX:abo|101005:COMBAT:abo|101005:COMBAT:ABO,yes
+101006,Invoking the Beast,Combat,3,101006:REFLEX:abo|101006:COMBAT:abo|101006:COMBAT:ABO,yes
+101007,IR Goggles,Equipment,1,101007:EQUIPMENT,yes
+101008,Iron Glare,Action Modifier,2,101008:MODIFIER:pot+pre|101008:MODIFIER:POT+PRE,yes
+101009,Iron Heart,Reaction,2,101009:REACTION:pot+pre|101009:REACTION:POT+PRE,yes
+101010,Irregular Protocol,Reaction,1,101010:REACTION,yes
+101011,Ishtarri Kholo,Action Modifier/Reaction,2,101011:MODIFIER|101011:REACTION,no
+101012,Ishtarri Warlord,Master,1,101012:MASTER,yes
+101013,Island of Yiaros,Master,1,101013:MASTER,yes
+101014,Ivory Bow,Equipment,1,101014:EQUIPMENT,yes
+101015,"J. S. Simmons, Esq.",Retainer,1,101015:RETAINER,yes
+101016,Jack of Both Sides,Action,1,101016:ACTION,yes
+101017,Jackal,Retainer,2,101017:RETAINER:ani|101017:RETAINER:ANI,yes
+101018,Jackie Therman,Retainer,1,101018:RETAINER,yes
+101019,Jake Washington,Master,1,101019:MASTER,yes
+101020,Jar of Skin Eaters,Equipment,1,101020:EQUIPMENT,yes
+101021,Jar the Soul,Action,2,101021:ACTION:nec|101021:ACTION:NEC,yes
+101022,Jericho Founding,Political Action,1,101022:POLITICAL,yes
+101023,"Jones, The",Combat,2,101023:COMBAT:ser|101023:COMBAT:SER,yes
+101024,Joseph Pander,Master,1,101024:MASTER,yes
+101025,Joumlon's Axe,Equipment,1,101025:EQUIPMENT,yes
+101026,Journal of Hrorsh,Equipment,1,101026:EQUIPMENT,yes
+101027,Jua Vema,Combat,2,101027:COMBAT:for|101027:COMBAT:FOR,yes
+101028,Judgment: Camarilla Segregation,Action,1,101028:ACTION,yes
+101029,Judgment: Death to the Brujah!,Action,1,101029:ACTION,yes
+101030,Jungle Hunting Ground,Master,1,101030:MASTER,yes
+101031,Justicar Retribution,Political Action,1,101031:POLITICAL,yes
+101032,Kali's Fang,Equipment,1,101032:EQUIPMENT,yes
+101033,Karavalanisha Vrana,Equipment,1,101033:EQUIPMENT,yes
+101034,Kaymakli Barrier,Action,1,101034:ACTION,yes
+101035,Kaymakli Fragment,Equipment,1,101035:EQUIPMENT,yes
+101036,Kaymakli Nightmares,Master,1,101036:MASTER,yes
+101037,Kduva's Mask,Equipment,1,101037:EQUIPMENT,yes
+101038,Keep it Simple,Reaction,1,101038:REACTION,yes
+101039,Kerrie,Equipment,1,101039:EQUIPMENT,yes
+101040,Kevlar Vest,Equipment,1,101040:EQUIPMENT,yes
+101041,Keystone Kine,Action,3,101041:ACTION:cel|101041:ACTION:nec|101041:ACTION:obf,yes
+101042,"Khabar: Community, The",Master,1,101042:MASTER,yes
+101043,Khabar: Glory,Action,1,101043:ACTION,yes
+101044,"Khabar: Honor, The",Combat,1,101044:COMBAT,yes
+101045,Khabar: Loyalty,Action,1,101045:ACTION,yes
+101046,Khazar's Diary (Endless Night),Action,1,101046:ACTION,yes
+101047,Kherebutu,Ally,1,101047:ALLY,yes
+101048,"Khobar Towers, Al-Khubar",Master,1,101048:MASTER,yes
+101049,Kindred Coercion,Reaction,2,101049:REACTION:dom|101049:REACTION:DOM,yes
+101050,Kindred Intelligence,Action,1,101050:ACTION,yes
+101051,Kindred Manipulation,Action Modifier,1,101051:MODIFIER,yes
+101052,Kindred Restructure,Political Action,1,101052:POLITICAL,yes
+101053,Kindred Segregation,Political Action,1,101053:POLITICAL,yes
+101054,Kindred Society Games,Master,1,101054:MASTER,yes
+101055,Kindred Spirits,Action,2,101055:ACTION:dem|101055:ACTION:DEM,yes
+101056,Kine Resources Contested,Political Action,1,101056:POLITICAL,yes
+101057,King of the Mountain,Combat,2,101057:COMBAT:for|101057:COMBAT:FOR,yes
+101058,King's Favor,Reaction,1,101058:REACTION,yes
+101059,King's Rising,Master,1,101059:MASTER,yes
+101060,"Kingston Penitentiary, Ontario",Master,1,101060:MASTER,yes
+102330,Kiss of Cathari,Combat,4,102330:COMBAT:obf|102330:COMBAT:pre|102330:COMBAT:OBF|102330:COMBAT:PRE,yes
+101061,Kiss of Lachesis,Action,3,101061:ACTION:ser|101061:ACTION:tem|101061:ACTION:TEM,yes
+101062,"Kiss of Ra, The",Action Modifier,2,101062:MODIFIER:for|101062:MODIFIER:FOR,yes
+101063,"Knights, The",Ally,1,101063:ALLY,yes
+101064,Knotted Cord,Action Modifier/Reaction,2,101064:MODIFIER|101064:REACTION,no
+101065,Kpist m/45,Equipment,1,101065:EQUIPMENT,yes
+101066,Kraken's Kiss,Combat,2,101066:COMBAT:vic|101066:COMBAT:VIC,yes
+101067,KRCG News Radio,Master,1,101067:MASTER,yes
+101068,Kumpania,Master,1,101068:MASTER,yes
+101069,Kuta,Political Action,1,101069:POLITICAL,yes
+101070,"Labyrinth, The",Master,1,101070:MASTER,yes
+101071,Lam Into,Combat,3,101071:COMBAT:for|101071:COMBAT:pot|101071:COMBAT:vic,yes
+101072,Lapse,Combat,3,101072:COMBAT:pot|101072:COMBAT:tem|101072:COMBAT:TEM,yes
+101073,Laptop Computer,Equipment,1,101073:EQUIPMENT,yes
+102272,Lasombra Justicar,Political Action,1,102272:POLITICAL,yes
+101074,Last Stand,Master,1,101074:MASTER,yes
+101075,Lay Low,Action Modifier/Combat,2,101075:MODIFIER|101075:COMBAT,no
+101076,Lazarene Inquisitor,Master,1,101076:MASTER,yes
+101077,Lead Fist,Combat,3,101077:COMBAT:tha|101077:COMBAT:vis|101077:COMBAT:VIS,yes
+101078,Leadership Vacuum,Master,1,101078:MASTER,yes
+101079,Leapfrog,Combat,3,101079:COMBAT:obf|101079:COMBAT:spi|101079:COMBAT:SPI,yes
+101080,Learjet,Equipment,1,101080:EQUIPMENT,yes
+101081,Leather Jacket,Equipment,1,101081:EQUIPMENT,yes
+101082,Leathery Hide,Combat,1,101082:COMBAT,yes
+101083,Leech,Action,1,101083:ACTION,yes
+101084,Left for Dead,Master,1,101084:MASTER,yes
+101085,Legacy,Action,1,101085:ACTION,yes
+101086,Legacy of Caine,Master,1,101086:MASTER,yes
+101087,Legacy of Pander,Political Action,1,101087:POLITICAL,yes
+101088,Legacy of Power,Reaction,1,101088:REACTION,yes
+101089,Legal Manipulations,Action,2,101089:ACTION:pre|101089:ACTION:PRE,yes
+101090,Legend of the Leopard,Action,1,101090:ACTION,yes
+101091,Legendary Vampire,Master,1,101091:MASTER,yes
+101092,Legion,Action,1,101092:ACTION,yes
+101093,Legwork,Reaction,1,101093:REACTION,yes
+101094,"Leonardo, Mortician",Ally,1,101094:ALLY,yes
+101095,Lesser Boon,Master,1,101095:MASTER,yes
+101096,Lessons in the Steel,Combat,2,101096:COMBAT:aus+for|101096:COMBAT:AUS+FOR,yes
+101097,Letter from Vienna,Master,1,101097:MASTER,yes
+101098,Leverage,Action Modifier,1,101098:MODIFIER,yes
+101099,Lextalionis,Political Action,1,101099:POLITICAL,yes
+101100,Libertas,Master,1,101100:MASTER,yes
+101101,Liberty Club Intrigue,Action,1,101101:ACTION,yes
+101102,Library Hunting Ground,Master,1,101102:MASTER,yes
+101103,Life Boon,Master,1,101103:MASTER,yes
+101104,Life in the City,Master,1,101104:MASTER,yes
+101105,Lifeless Tongues,Action,2,101105:ACTION:nec|101105:ACTION:NEC,yes
+101106,Light Intensifying Goggles,Equipment,1,101106:EQUIPMENT,yes
+101107,Lightning Reflexes,Combat,2,101107:COMBAT:cel|101107:COMBAT:CEL,yes
+101108,Lilith's Blessing,Master,1,101108:MASTER,yes
+101109,Lily Prelude,Political Action,2,101109:POLITICAL:mel|101109:POLITICAL:MEL,yes
+101110,"Line, The",Master,1,101110:MASTER,yes
+102229,Line Brawl,Action,3,102229:ACTION:cel|102229:ACTION:pot|102229:ACTION:pre,yes
+101111,Liquefy the Mortal Coil,Combat,2,101111:COMBAT:vic|101111:COMBAT:VIC,yes
+101112,Liquidation,Master,1,101112:MASTER,yes
+101113,Little Mountain Cemetery,Action,1,101113:ACTION,yes
+101114,Living Manse,Equipment,1,101114:EQUIPMENT,yes
+101115,Living Wood Staff,Equipment,1,101115:EQUIPMENT,yes
+101116,Lobotomy,Action Modifier,2,101116:MODIFIER:vic|101116:MODIFIER:VIC,yes
+101117,Local 1111,Equipment,1,101117:EQUIPMENT,yes
+101118,Lock,Action,1,101118:ACTION,yes
+101119,Loki's Gift,Action,2,101119:ACTION:pro|101119:ACTION:PRO,yes
+101120,"London Evening Star, Tabloid Newspaper",Master,1,101120:MASTER,yes
+101121,Loner,Master,1,101121:MASTER,yes
+101122,Loose Cannon,Action Modifier,3,101122:MODIFIER:dem|101122:MODIFIER:tha|101122:MODIFIER:vic,yes
+101123,Lord of Serenity,Action,3,101123:ACTION:for|101123:ACTION:obe|101123:ACTION:OBE,yes
+101124,Loss,Action,2,101124:ACTION:qui|101124:ACTION:QUI,yes
+101125,Lost in Crowds,Action Modifier,2,101125:MODIFIER:obf|101125:MODIFIER:OBF,yes
+101126,Lost in Translation,Reaction,1,101126:REACTION,yes
+102273,Loup,Action Modifier,1,102273:MODIFIER,yes
+101127,"Louvre, Paris, The",Master,1,101127:MASTER,yes
+101128,Loving Agony,Combat,3,101128:COMBAT:ani|101128:COMBAT:val|101128:COMBAT:VAL,yes
+101129,Loyal Street Gang,Ally,1,101129:ALLY,yes
+101130,Loyalist,Reaction,1,101130:REACTION,yes
+101131,Lucky Blow,Combat,1,101131:COMBAT,yes
+101132,Lunatic Eruption,Action,2,101132:ACTION:dem|101132:ACTION:DEM,yes
+101133,Lupine Assault,Master,1,101133:MASTER,yes
+101134,Lure of the Serpent,Action,2,101134:ACTION:ser|101134:ACTION:SER,yes
+101135,"Lyndhurst Estate, New York",Equipment,1,101135:EQUIPMENT,yes
+101136,Maabara,Master,1,101136:MASTER,yes
+101137,Machine Blitz,Combat,2,101137:COMBAT:tha|101137:COMBAT:THA,yes
+101138,Madman's Quill,Action,2,101138:ACTION:aus+dem|101138:ACTION:AUS+DEM,yes
+101139,Madness Network,Master,1,101139:MASTER,yes
+101140,Madness of the Bard,Master,1,101140:MASTER,yes
+101141,Madrigal,Action Modifier/Reaction,5,101141:REACTION:pre|101141:MODIFIER:mel|101141:REACTION:mel|101141:MODIFIER:MEL|101141:REACTION:MEL,yes
+101142,Magazine,Combat,1,101142:COMBAT,yes
+101143,Magic of the Smith,Action,2,101143:ACTION:tha|101143:ACTION:THA,yes
+102331,Magnetic Authority,Action Modifier,4,102331:MODIFIER:dom|102331:MODIFIER:pot|102331:MODIFIER:DOM|102331:MODIFIER:POT,yes
+101144,Majesty,Combat,2,101144:COMBAT:pre|101144:COMBAT:PRE,yes
+101145,Major Boon,Master,1,101145:MASTER,yes
+101146,Make an Example,Action Modifier,1,101146:MODIFIER,yes
+101147,Make the Misere,Action,3,101147:ACTION:cel|101147:ACTION:obf|101147:ACTION:pot,yes
+101148,Malajit Chandramouli,Retainer,1,101148:RETAINER,yes
+101149,Maleficia,Master,1,101149:MASTER,yes
+101150,Malkavian Dementia,Master,1,101150:MASTER,yes
+101151,Malkavian Derangement: Alternate Personality,Master,1,101151:MASTER,yes
+101152,Malkavian Derangement: Paranoia,Master,1,101152:MASTER,yes
+101153,Malkavian Game,Master,1,101153:MASTER,yes
+101154,Malkavian Justicar,Political Action,1,101154:POLITICAL,yes
+101155,Malkavian Prank,Master,1,101155:MASTER,yes
+101156,Malkavian Rider Clause,Reaction,1,101156:REACTION,yes
+101157,"Malkavian Seven Miseries, The",Master,1,101157:MASTER,yes
+101158,Malkavian Time Auction,Master,1,101158:MASTER,yes
+101159,Malleable Visage,Action Modifier,2,101159:MODIFIER:vic|101159:MODIFIER:VIC,yes
+101160,Manstopper Rounds,Combat,1,101160:COMBAT,yes
+101161,Mantle of the Bestial Majesty,Action,2,101161:ACTION:pro|101161:ACTION:PRO,yes
+101162,Mantle of the Moon,Action Modifier,1,101162:MODIFIER,yes
+101163,Mapatano Utando,Master,1,101163:MASTER,yes
+101164,Marijava Ghoul,Retainer,1,101164:RETAINER,yes
+101165,Marijava Thuggee,Ally,1,101165:ALLY,yes
+101166,Mark of Damnation,Action,2,101166:ACTION:ser|101166:ACTION:SER,yes
+101167,Mark of the Damned,Political Action,1,101167:POLITICAL,yes
+101168,Mark V,Equipment,1,101168:EQUIPMENT,yes
+101169,Marked Path,Action Modifier,2,101169:MODIFIER:obf|101169:MODIFIER:OBF,yes
+101170,Marked Territory,Action,1,101170:ACTION,yes
+101171,Market Square,Master,1,101171:MASTER,yes
+101172,"Marrakesh Codex, The",Master,1,101172:MASTER,yes
+101173,Martial Ritus,Action,1,101173:ACTION,yes
+101174,Martinelli's Ring,Equipment,1,101174:EQUIPMENT,yes
+101175,Martyr's Resilience,Combat,2,101175:COMBAT:aus+for|101175:COMBAT:AUS+FOR,yes
+101176,Masai Blood Milk,Action,1,101176:ACTION,yes
+101177,Masca,Action Modifier,3,101177:MODIFIER:obf|101177:MODIFIER:str|101177:MODIFIER:STR,yes
+101178,Mask Empathy,Combat,2,101178:COMBAT:pre|101178:COMBAT:PRE,yes
+101179,Mask of a Thousand Faces,Action Modifier,2,101179:MODIFIER:obf|101179:MODIFIER:OBF,yes
+101180,Masochism,Action,2,101180:ACTION:for|101180:ACTION:FOR,yes
+101181,Masque of Judas,Combat,2,101181:COMBAT:aus+obf|101181:COMBAT:AUS+OBF,yes
+101182,Masquer,Retainer,2,101182:RETAINER:nec|101182:RETAINER:NEC,yes
+101183,Masquerade Endangered,Master,1,101183:MASTER,yes
+101184,Masquerade Enforcement,Political Action,1,101184:POLITICAL,yes
+101185,Mass Reality,Action,2,101185:ACTION:chi|101185:ACTION:CHI,yes
+101186,Massassi's Honor,Action Modifier,1,101186:MODIFIER,yes
+101187,"Mausoleum, Venice, The",Master,1,101187:MASTER,yes
+101188,Mayaparisatya,Combat,2,101188:COMBAT:chi|101188:COMBAT:CHI,yes
+101189,"Mbare Market, Harare",Master,1,101189:MASTER,yes
+101190,Meat Cleaver,Equipment,1,101190:EQUIPMENT,yes
+101191,Meat Hook,Equipment,1,101191:EQUIPMENT,yes
+101192,"Meddling of Semsith, The",Political Action,1,101192:POLITICAL,yes
+101193,Media Influence,Action,2,101193:ACTION:pre|101193:ACTION:PRE,yes
+102252,Meditative Grove,Master,1,102252:MASTER,yes
+101194,Mehemet of the Ahl-i-Batin,Ally,1,101194:ALLY,yes
+101195,Melange,Reaction,2,101195:REACTION:aus|101195:REACTION:AUS,yes
+101196,Meld with the Land,Combat,2,101196:COMBAT:vic|101196:COMBAT:VIC,yes
+101197,Member of the Entourage,Ally,1,101197:ALLY,yes
+101198,Memories of Mortality,Master,1,101198:MASTER,yes
+101199,Memory Rift,Action Modifier,3,101199:MODIFIER:dem|101199:MODIFIER:obf|101199:MODIFIER:pre,yes
+101200,Memory's Fading Glimpse,Action,2,101200:ACTION:obf|101200:ACTION:OBF,yes
+101201,Mental Maze,Reaction,2,101201:REACTION:obf|101201:REACTION:OBF,yes
+101202,Mercury's Arrow,Combat,2,101202:COMBAT:cel|101202:COMBAT:CEL,yes
+101203,Mercy for Seth,Combat,2,101203:COMBAT:nec|101203:COMBAT:NEC,yes
+101204,Mercy for the Weak,Combat,1,101204:COMBAT,yes
+101205,Mesmerize,Action,2,101205:ACTION:dom|101205:ACTION:DOM,yes
+101206,Mesu Bedshet,Action,1,101206:ACTION,yes
+101207,Metro Underground,Master,1,101207:MASTER,yes
+102239,"Michael Harris, the Incinerator",Ally,1,102239:ALLY,yes
+101208,Might of the Camarilla,Political Action,1,101208:POLITICAL,yes
+101209,Mighty Grapple,Combat,2,101209:COMBAT:pot|101209:COMBAT:POT,yes
+101210,"Millicent Smith, Puritan Vampire Hunter",Master,1,101210:MASTER,yes
+101211,Mind Numb,Action,2,101211:ACTION:pre|101211:ACTION:PRE,yes
+101212,Mind of a Child,Action,2,101212:ACTION:dem|101212:ACTION:DEM,yes
+101213,Mind of a Killer,Action,2,101213:ACTION:dem|101213:ACTION:DEM,yes
+101214,Mind of the Wilds,Action Modifier,2,101214:MODIFIER:ani+aus|101214:MODIFIER:ANI+AUS,yes
+101216,Mind Tricks,Action Modifier,2,101216:MODIFIER:dem|101216:MODIFIER:DEM,yes
+101217,Minion Tap,Master,1,101217:MASTER,yes
+101218,Ministry,Reaction,1,101218:REACTION,yes
+101219,Minor Boon,Master,1,101219:MASTER,yes
+101220,Minor Curse,Action,2,101220:ACTION:mal|101220:ACTION:MAL,yes
+101221,Minor Irritation,Reaction,1,101221:REACTION,yes
+101222,Mirror Image,Action Modifier/Combat,2,101222:MODIFIER:chi|101222:COMBAT:CHI,yes
+101223,Mirror Walk,Action Modifier,2,101223:MODIFIER:tha|101223:MODIFIER:THA,yes
+101224,Mirror's Visage,Action Modifier,2,101224:MODIFIER:chi|101224:MODIFIER:CHI,yes
+101225,Misdirection,Master,1,101225:MASTER,yes
+101226,"Missing Voice, The",Action Modifier,3,101226:MODIFIER:cel|101226:MODIFIER:mel|101226:MODIFIER:MEL,yes
+101227,Mistaken Identity,Reaction,1,101227:REACTION,yes
+101228,Mistrust,Master,1,101228:MASTER,yes
+102240,"Mithraeum, London, The",Master,1,102240:MASTER,yes
+102241,Mithraic Cultist,Master,1,102241:MASTER,yes
+101229,Mob Connections,Master,1,101229:MASTER,yes
+101230,Mob Rule,Action Modifier/Reaction,2,101230:MODIFIER|101230:REACTION,no
+102242,"Mobile HQ, Operation Antigen",Master,1,102242:MASTER,yes
+101231,Moise Kasavubu,Ally,1,101231:ALLY,yes
+101232,Mokolé Blood,Equipment,1,101232:EQUIPMENT,yes
+101233,"Mole, The",Reaction,3,101233:REACTION:ani|101233:REACTION:cel|101233:REACTION:dom,yes
+101234,Mole's Tunneling,Action Modifier,3,101234:MODIFIER:ani|101234:MODIFIER:spi|101234:MODIFIER:SPI,yes
+101235,Molotov Cocktail,Combat,1,101235:COMBAT,yes
+101236,Momentary Delay,Action Modifier,1,101236:MODIFIER,yes
+101237,Momentum's Edge,Master,1,101237:MASTER,yes
+101238,Monastery of Shadows,Master,1,101238:MASTER,yes
+101239,Monkey Wrench,Action Modifier,1,101239:MODIFIER,yes
+101240,Monocle of Clarity,Equipment,1,101240:EQUIPMENT,yes
+101241,Monomancy,Action,1,101241:ACTION,yes
+101242,Monster,Master,1,101242:MASTER,yes
+102253,Monstrous Form,Action/Combat,4,102253:ACTION:dom+pro|102253:COMBAT:dom+pro|102253:ACTION:DOM+PRO|102253:COMBAT:DOM+PRO,no
+102332,Morbidity,Combat,4,102332:COMBAT:obl|102332:COMBAT:tha|102332:COMBAT:OBL|102332:COMBAT:THA,yes
+101243,Morgue Hunting Ground,Master,1,101243:MASTER,yes
+101244,Morphean Blow,Combat,3,101244:COMBAT:cel|101244:COMBAT:val|101244:COMBAT:VAL,yes
+101245,Mouthpiece,Action Modifier,2,101245:MODIFIER:dom|101245:MODIFIER:DOM,yes
+101246,Movement of the Mind,Combat,2,101246:COMBAT:tha|101246:COMBAT:THA,yes
+101247,Movement of the Slow Body,Action,2,101247:ACTION:pro|101247:ACTION:PRO,yes
+101248,Mozambique Allure,Action,1,101248:ACTION,yes
+101249,Mr. Winthrop,Retainer,1,101249:RETAINER,yes
+101250,Muddled Vampire Hunter,Ally,1,101250:ALLY,yes
+101251,Mummify,Combat,2,101251:COMBAT:ser|101251:COMBAT:SER,yes
+101252,Mummy's Tongue,Equipment,1,101252:EQUIPMENT,yes
+101253,Mundane,Master,1,101253:MASTER,yes
+101254,Murder of Crows,Retainer,2,101254:RETAINER:ani|101254:RETAINER:ANI,yes
+101255,Muricia's Call,Action,3,101255:ACTION:ani|101255:ACTION:ani+spi|101255:ACTION:ANI+SPI,yes
+101256,Murmur of the False Will,Action Modifier/Reaction,2,101256:MODIFIER:dom|101256:REACTION:DOM,yes
+101257,Muse of Flame,Action,1,101257:ACTION,yes
+101258,Mustajib,Action,1,101258:ACTION,yes
+101259,My Enemy's Enemy,Reaction,2,101259:REACTION:aus|101259:REACTION:AUS,yes
+101260,My Kin Against the World,Political Action,1,101260:POLITICAL,yes
+101261,Mylan Horseed,Ally,1,101261:ALLY,yes
+101262,Mythic Form,Combat,2,101262:COMBAT:pro|101262:COMBAT:PRO,yes
+101263,"Name Forgotten, The",Action,2,101263:ACTION:tha|101263:ACTION:THA,yes
+101264,Nar-Sheptha,Retainer,1,101264:RETAINER,yes
+101265,Narrow Minds,Event,1,101265:EVENT,yes
+101266,National Guard Support,Political Action,1,101266:POLITICAL,yes
+101267,Necromancy,Master,1,101267:MASTER,yes
+101268,Necrosis,Combat,3,101268:COMBAT:pot|101268:COMBAT:thn|101268:COMBAT:THN,yes
+101269,Neebi,Combat,1,101269:COMBAT,yes
+101270,Neighborhood Watch Commander,Ally,1,101270:ALLY,yes
+101271,Neonate Breach,Political Action,1,101271:POLITICAL,yes
+101272,Nephandus,Ally,1,101272:ALLY,yes
+101273,Nephren-Ka,Ally,1,101273:ALLY,yes
+101274,Nest of Eagles,Reaction,1,101274:REACTION,yes
+101275,Netwar,Reaction,3,101275:REACTION:aus|101275:REACTION:chi|101275:REACTION:dem,yes
+101276,Neutral Guard,Action Modifier,3,101276:MODIFIER:for|101276:MODIFIER:obe|101276:MODIFIER:OBE,yes
+101277,New Carthage,Master,1,101277:MASTER,yes
+101278,New in Town,Master,1,101278:MASTER,yes
+101279,"New Inquisition, The",Event,1,101279:EVENT,yes
+101280,New Management,Action,1,101280:ACTION,yes
+101281,New Moon Sigil,Action,2,101281:ACTION:spi|101281:ACTION:SPI,yes
+101282,Ni Dieu ni Maître,Action Modifier,3,101282:MODIFIER:ani|101282:MODIFIER:for|101282:MODIFIER:vic,yes
+101283,Night Moves,Action,2,101283:ACTION:obf|101283:ACTION:OBF,yes
+102254,Night Terrors,Reaction,2,102254:REACTION:obf+pre|102254:REACTION:OBF+PRE,yes
+101284,Nightmare Curse,Action,3,101284:ACTION:chi|101284:ACTION:aus+chi|101284:ACTION:AUS+CHI,yes
+101285,Nightmares upon Nightmares,Event,1,101285:EVENT,yes
+101286,Nightshades,Action Modifier,2,101286:MODIFIER:obt|101286:MODIFIER:OBT,yes
+101287,Nightstick,Equipment,1,101287:EQUIPMENT,yes
+101288,Nimble Feet,Combat,2,101288:COMBAT:cel|101288:COMBAT:CEL,yes
+101289,Nkishi,Equipment,1,101289:EQUIPMENT,yes
+101290,No Confidence,Action Modifier,1,101290:MODIFIER,yes
+101291,No Secrets From the Magaji,Action,1,101291:ACTION,yes
+101292,No Trace,Combat,2,101292:COMBAT:obf|101292:COMBAT:OBF,yes
+101293,Nocturn,Ally,2,101293:ALLY:obt|101293:ALLY:OBT,yes
+101294,Nocturn Theater,Master,1,101294:MASTER,yes
+101295,Nod,Master,1,101295:MASTER,yes
+101296,Nose of the Hound,Action,3,101296:ACTION:aus|101296:ACTION:spi|101296:ACTION:SPI,yes
+101297,Nosferatu Bestial,Action,1,101297:ACTION,yes
+101298,Nosferatu Hosting,Master,1,101298:MASTER,yes
+101299,Nosferatu Justicar,Political Action,1,101299:POLITICAL,yes
+101300,Nosferatu Kingdom,Master,1,101300:MASTER,yes
+101301,Nosferatu Performance Art,Action,1,101301:ACTION,yes
+101302,Nosferatu Putrescence,Combat,1,101302:COMBAT,yes
+101303,Not to Be,Master,1,101303:MASTER,yes
+101304,Notorious Brutality,Action Modifier,1,101304:MODIFIER,yes
+101305,NRA PAC,Event,1,101305:EVENT,yes
+101306,NSA Trio,Event,1,101306:EVENT,yes
+101307,"Oath, The",Combat/Reaction,2,101307:COMBAT|101307:REACTION,no
+101308,Oath of Loyalty,Master,1,101308:MASTER,yes
+101309,Obedience,Reaction,2,101309:REACTION:dom|101309:REACTION:DOM,yes
+102255,Obedient Flesh,Action Modifier/Combat,2,102255:MODIFIER:dom+pro|102255:COMBAT:DOM+PRO,yes
+101310,Obfuscate,Master,1,101310:MASTER,yes
+102277,Oblivion,Master,1,102277:MASTER,yes
+101311,Obsession,Master,1,101311:MASTER,yes
+101312,Obtenebration,Master,1,101312:MASTER,yes
+101313,Occlusion,Action Modifier/Combat,2,101313:COMBAT:chi|101313:MODIFIER:CHI,yes
+101314,Octopod,Combat,2,101314:COMBAT:san|101314:COMBAT:SAN,yes
+101315,Of Noble Blood,Action,1,101315:ACTION,yes
+101316,Off Kilter,Action,1,101316:ACTION,yes
+101317,Ohoyo Hopoksia (Bastet),Ally,1,101317:ALLY,yes
+101318,Old Friends,Action Modifier,2,101318:MODIFIER:obf|101318:MODIFIER:OBF,yes
+101319,Olid Loa,Combat,1,101319:COMBAT,yes
+101320,Omael Kuman,Retainer,1,101320:RETAINER,yes
+102278,Ominous Chorus,Action Modifier/Reaction,2,102278:MODIFIER|102278:REACTION,no
+101321,On the Qui Vive,Reaction,1,101321:REACTION,yes
+102256,One With the Land,Reaction,2,102256:REACTION:pro|102256:REACTION:PRO,yes
+101322,Open Dossier,Reaction,1,101322:REACTION,yes
+101323,Open Grate,Combat,1,101323:COMBAT,yes
+101324,Open War,Action,1,101324:ACTION,yes
+101325,Ophidian Gaze,Reaction,2,101325:REACTION:pre+ser|101325:REACTION:PRE+SER,yes
+101326,Opium Den,Master,1,101326:MASTER,yes
+101327,Oppugnant Night,Action,1,101327:ACTION,yes
+101328,Orb of Ulain,Equipment,1,101328:EQUIPMENT,yes
+101329,Order of Hermes Cabal,Ally,1,101329:ALLY,yes
+102230,Organized Resistance,Reaction,1,102230:REACTION,yes
+101330,Orgy of Blood,Combat,1,101330:COMBAT,yes
+101331,Orun,Master,1,101331:MASTER,yes
+101332,Osebo Kholo,Action Modifier/Reaction,2,101332:MODIFIER|101332:REACTION,no
+101333,Ossian,Ally,1,101333:ALLY,yes
+101334,Oubliette,Combat,2,101334:COMBAT:obt|101334:COMBAT:OBT,yes
+101335,Out of Control,Master,1,101335:MASTER,yes
+101336,Out of the Frying Pan,Master,1,101336:MASTER,yes
+101337,Outcast Mage,Ally,1,101337:ALLY,yes
+101338,Outside the Hourglass,Combat,3,101338:COMBAT:obf|101338:COMBAT:tem|101338:COMBAT:TEM,yes
+101339,Overseer,Political Action,1,101339:POLITICAL,yes
+101340,Owl Companion,Retainer,2,101340:RETAINER:ani|101340:RETAINER:ANI,yes
+101341,"Oxford University, England",Master,1,101341:MASTER,yes
+101342,Pack Alpha,Combat,2,101342:COMBAT:ani|101342:COMBAT:ANI,yes
+101343,Pack Tactics,Reaction,1,101343:REACTION,yes
+101344,Palace Hunting Ground,Master,1,101344:MASTER,yes
+101345,Palatial Estate,Equipment,1,101345:EQUIPMENT,yes
+101346,Palla Grande,Master,1,101346:MASTER,yes
+101347,Pallid,Master,1,101347:MASTER,yes
+101348,Panacea,Action,3,101348:ACTION:aus|101348:ACTION:obe|101348:ACTION:OBE,yes
+101349,Pandora's Whisper,Action,3,101349:ACTION:nec|101349:ACTION:myt|101349:ACTION:MYT,yes
+101350,Papillon,Master,1,101350:MASTER,yes
+101351,Paragon,Master,1,101351:MASTER,yes
+101352,Paris Opera House,Master,1,101352:MASTER,yes
+101353,Parity Shift,Political Action,1,101353:POLITICAL,yes
+101354,Park Hunting Ground,Master,1,101354:MASTER,yes
+101355,"Parthenon, The",Master,1,101355:MASTER,yes
+102231,Party Out Of Bounds,Reaction,3,102231:REACTION:obf|102231:REACTION:pre|102231:REACTION:pro,yes
+102279,Pass Through Shadow,Combat,2,102279:COMBAT:obl|102279:COMBAT:OBL,yes
+101356,Passion,Action,2,101356:ACTION:dem|101356:ACTION:DEM,yes
+101357,Patagia: Flaps Allowing Limited Flight,Action,1,101357:ACTION,yes
+101358,"Path of Blood, The",Master,1,101358:MASTER,yes
+101359,"Path of Bone, The",Master,1,101359:MASTER,yes
+101360,Path of Death and the Soul,Master,1,101360:MASTER,yes
+101361,Path of Evil Revelations,Master,1,101361:MASTER,yes
+101362,"Path of Harmony, The",Master,1,101362:MASTER,yes
+101363,"Path of Lilith, The",Master,1,101363:MASTER,yes
+101364,"Path of Metamorphosis, The",Master,1,101364:MASTER,yes
+101365,"Path of Night, The",Master,1,101365:MASTER,yes
+101366,"Path of Paradox, The",Master,1,101366:MASTER,yes
+101367,"Path of Retribution, The",Master,1,101367:MASTER,yes
+101368,"Path of Service, The",Master,1,101368:MASTER,yes
+101369,"Path of Tears, The",Master,1,101369:MASTER,yes
+101370,"Path of the Feral Heart, The",Master,1,101370:MASTER,yes
+101371,"Path of the Scorched Heart, The",Action,1,101371:ACTION,yes
+101372,Path of the Void,Master,1,101372:MASTER,yes
+101373,"Path of Typhon, The",Master,1,101373:MASTER,yes
+102300,Paths in Two Worlds,Action Modifier,2,102300:MODIFIER:obl|102300:MODIFIER:OBL,yes
+101374,Patrol,Reaction,1,101374:REACTION,yes
+101375,Patronage,Action,1,101375:ACTION,yes
+101376,Patshiv,Action,1,101376:ACTION,yes
+101377,Patsy,Political Action,1,101377:POLITICAL,yes
+101378,Patterns in the Chaos,Action Modifier,2,101378:MODIFIER:dem|101378:MODIFIER:DEM,yes
+101379,"Peace of Khetamon, The",Political Action,1,101379:POLITICAL,yes
+101380,Peace Treaty,Political Action,1,101380:POLITICAL,yes
+101381,Peacemaker,Reaction,3,101381:REACTION:pre|101381:REACTION:obe|101381:REACTION:OBE,yes
+101382,Penitent Resilience,Action Modifier/Combat,3,101382:COMBAT:for|101382:COMBAT:for+obe|101382:MODIFIER:FOR+OBE,yes
+101383,Pentex(TM) Loves You!,Master,1,101383:MASTER,yes
+101384,Pentex(TM) Subversion,Master,1,101384:MASTER,yes
+101385,"Père Lachaise, France",Master,1,101385:MASTER,yes
+101386,Perfect Clarity,Action Modifier,2,101386:MODIFIER:tha|101386:MODIFIER:THA,yes
+101387,Perfect Paragon,Action Modifier,2,101387:MODIFIER:pre|101387:MODIFIER:PRE,yes
+101388,Perfectionist,Master,1,101388:MASTER,yes
+101389,Permanency,Action Modifier,2,101389:MODIFIER:chi|101389:MODIFIER:CHI,yes
+101390,Permanent Vacation,Political Action,1,101390:POLITICAL,yes
+101391,Perpetual Care,Political Action,1,101391:POLITICAL,yes
+101392,Persistent Echo,Action,3,101392:ACTION:aus|101392:ACTION:mel|101392:ACTION:MEL,yes
+101393,Persona Non Grata,Political Action,1,101393:POLITICAL,yes
+101394,Personal Involvement,Master,1,101394:MASTER,yes
+101395,Personal Scourge,Combat,2,101395:COMBAT:dem|101395:COMBAT:DEM,yes
+101396,Petra Resonance,Action,1,101396:ACTION,yes
+102358,Phantasmagoria,Action,2,102358:ACTION:pre|102358:ACTION:PRE,yes
+101397,Phantom Speaker,Action Modifier,3,101397:MODIFIER:chi|101397:MODIFIER:mel|101397:MODIFIER:MEL,yes
+101398,Phased Motion Detector,Equipment,1,101398:EQUIPMENT,yes
+101399,Phobia,Action,2,101399:ACTION:ser|101399:ACTION:SER,yes
+101400,"Pier 13, Port of Baltimore",Equipment,1,101400:EQUIPMENT,yes
+102333,Pillars Fall,Action,1,102333:ACTION,yes
+101401,Piper,Master,1,101401:MASTER,yes
+102291,Pit of Contemplation,Action,1,102291:ACTION,yes
+101402,Plasmic Form,Action Modifier/Combat,2,101402:MODIFIER:vic|101402:COMBAT:VIC,yes
+102232,"Platinum Protocol, The",Action,3,102232:ACTION:obf|102232:ACTION:pre|102232:ACTION:pro,yes
+101403,Playing for Keeps,Master,1,101403:MASTER,yes
+101404,Poacher's Hunting Ground,Master,1,101404:MASTER,yes
+101405,Pocket Out of Time,Action Modifier,3,101405:MODIFIER:obt|101405:MODIFIER:tem|101405:MODIFIER:TEM,yes
+101406,Poison Pill,Reaction,1,101406:REACTION,yes
+101407,Poison the Well of Life,Action,2,101407:ACTION:qui|101407:ACTION:QUI,yes
+101408,Poker,Equipment,1,101408:EQUIPMENT,yes
+101409,Polaris Coach,Equipment,1,101409:EQUIPMENT,yes
+101410,Police Department,Master,1,101410:MASTER,yes
+101411,Political Ally,Ally,1,101411:ALLY,yes
+101412,Political Antagonist,Ally,1,101412:ALLY,yes
+101413,Political Backlash,Reaction,1,101413:REACTION,yes
+101414,Political Flux,Political Action,1,101414:POLITICAL,yes
+101415,Political Hunting Ground,Master,1,101415:MASTER,yes
+101416,Political Seizure,Master,1,101416:MASTER,yes
+101417,Political Stranglehold,Political Action,1,101417:POLITICAL,yes
+101418,Political Struggle,Action,1,101418:ACTION,yes
+101419,Ponticulus,Ally,1,101419:ALLY,yes
+101420,Port Authority,Event,1,101420:EVENT,yes
+101421,Port Hunting Ground,Master,1,101421:MASTER,yes
+101422,"Portrait, The",Action,1,101422:ACTION,yes
+101423,Possession,Action,2,101423:ACTION:nec|101423:ACTION:NEC,yes
+101424,Potence,Master,1,101424:MASTER,yes
+101425,Potio Martyrium,Action,1,101425:ACTION,yes
+101426,Pounce,Combat,1,101426:COMBAT,yes
+101427,Powder of Rigidity,Equipment,1,101427:EQUIPMENT,yes
+101428,Power of All,Reaction,1,101428:REACTION,yes
+101429,Power of One,Action Modifier,3,101429:MODIFIER:obt|101429:MODIFIER:pot|101429:MODIFIER:pre,yes
+101430,Power Structure,Master,1,101430:MASTER,yes
+101431,Powerbase: Barranquilla,Master,1,101431:MASTER,yes
+101432,Powerbase: Berlin,Master,1,101432:MASTER,yes
+101433,Powerbase: Cape Verde,Master,1,101433:MASTER,yes
+101434,Powerbase: Chicago,Master,1,101434:MASTER,yes
+101435,Powerbase: Los Angeles,Master,1,101435:MASTER,yes
+101436,Powerbase: Luanda,Master,1,101436:MASTER,yes
+101437,Powerbase: Madrid,Master,1,101437:MASTER,yes
+101438,Powerbase: Mexico City,Master,1,101438:MASTER,yes
+101439,Powerbase: Montreal,Master,1,101439:MASTER,yes
+102301,Powerbase: Munich,Master,1,102301:MASTER,yes
+101440,Powerbase: New York,Master,1,101440:MASTER,yes
+101441,Powerbase: Rome,Master,1,101441:MASTER,yes
+101442,Powerbase: Savannah,Master,1,101442:MASTER,yes
+101443,Powerbase: Tshwane,Master,1,101443:MASTER,yes
+101444,"Powerbase: Washington, D.C.",Master,1,101444:MASTER,yes
+101445,Powerbase: Zürich,Master,1,101445:MASTER,yes
+101446,Praetorian Backer,Action,1,101446:ACTION,yes
+101447,Praxis Seizure: Amsterdam,Political Action,1,101447:POLITICAL,yes
+101448,Praxis Seizure: Athens,Political Action,1,101448:POLITICAL,yes
+101449,Praxis Seizure: Atlanta,Political Action,1,101449:POLITICAL,yes
+101450,Praxis Seizure: Barcelona,Political Action,1,101450:POLITICAL,yes
+101451,Praxis Seizure: Berlin,Political Action,1,101451:POLITICAL,yes
+101452,Praxis Seizure: Boston,Political Action,1,101452:POLITICAL,yes
+101453,Praxis Seizure: Brussels,Political Action,1,101453:POLITICAL,yes
+101454,Praxis Seizure: Cairo,Political Action,1,101454:POLITICAL,yes
+101455,Praxis Seizure: Chicago,Political Action,1,101455:POLITICAL,yes
+101456,Praxis Seizure: Cleveland,Political Action,1,101456:POLITICAL,yes
+101457,Praxis Seizure: Dallas,Political Action,1,101457:POLITICAL,yes
+101458,Praxis Seizure: Dublin,Political Action,1,101458:POLITICAL,yes
+101459,Praxis Seizure: Frankfurt,Political Action,1,101459:POLITICAL,yes
+101460,Praxis Seizure: Geneva,Political Action,1,101460:POLITICAL,yes
+101461,Praxis Seizure: Glasgow,Political Action,1,101461:POLITICAL,yes
+101462,Praxis Seizure: Houston,Political Action,1,101462:POLITICAL,yes
+101463,Praxis Seizure: Istanbul,Political Action,1,101463:POLITICAL,yes
+101464,Praxis Seizure: London,Political Action,1,101464:POLITICAL,yes
+101465,Praxis Seizure: Miami,Political Action,1,101465:POLITICAL,yes
+101466,Praxis Seizure: Monaco,Political Action,1,101466:POLITICAL,yes
+101467,Praxis Seizure: Paris,Political Action,1,101467:POLITICAL,yes
+101468,Praxis Seizure: Rome,Political Action,1,101468:POLITICAL,yes
+101469,Praxis Seizure: Seattle,Political Action,1,101469:POLITICAL,yes
+101470,Praxis Seizure: Stockholm,Political Action,1,101470:POLITICAL,yes
+101471,Praxis Seizure: Venice,Political Action,1,101471:POLITICAL,yes
+101472,"Praxis Seizure: Washington, D.C.",Political Action,1,101472:POLITICAL,yes
+102307,Praxis Seizure: York,Political Action,1,102307:POLITICAL,yes
+101473,Praxis Solomon,Political Action,1,101473:POLITICAL,yes
+101474,Precision,Action,2,101474:ACTION:cel|101474:ACTION:CEL,yes
+101475,Precognition,Reaction,2,101475:REACTION:aus|101475:REACTION:AUS,yes
+101476,Precognizant Mobility,Action,2,101476:ACTION:aus|101476:ACTION:AUS,yes
+101477,Predator's Communion,Reaction,3,101477:REFLEX:abo|101477:REACTION:abo|101477:REACTION:ABO,yes
+101478,Predator's Mastery,Action Modifier,3,101478:REFLEX:abo|101478:MODIFIER:abo|101478:MODIFIER:ABO,yes
+101479,Predator's Transformation,Action Modifier/Combat,4,101479:REFLEX:abo|101479:MODIFIER:abo|101479:MODIFIER:ABO|101479:COMBAT:ABO,yes
+101480,Presence,Master,1,101480:MASTER,yes
+101481,Pressing Flesh,Action,2,101481:ACTION:thn|101481:ACTION:THN,yes
+101482,Preternatural Evasion,Combat,2,101482:COMBAT:cel|101482:COMBAT:CEL,yes
+101483,Preternatural Strength,Action,2,101483:ACTION:pot|101483:ACTION:POT,yes
+101484,Priestess of Sekhmet,Retainer,1,101484:RETAINER,yes
+101485,Primal Instincts,Combat,2,101485:COMBAT:aus|101485:COMBAT:AUS,yes
+101486,Principia Discordia,Action,3,101486:ACTION:aus|101486:ACTION:qui|101486:ACTION:ser,yes
+101487,Priority Contract,Master,1,101487:MASTER,yes
+101488,Priority Shift,Action,1,101488:ACTION,yes
+101489,Prison of the Mind,Action,2,101489:ACTION:dem|101489:ACTION:DEM,yes
+101490,Private Audience,Action Modifier,1,101490:MODIFIER,yes
+102334,Privileged Position,Master,1,102334:MASTER,yes
+101491,Procurer,Ally,1,101491:ALLY,yes
+101492,Project,Power,1,101492:MODIFIER,yes
+101493,Projectile,Combat,2,101493:COMBAT:cel|101493:COMBAT:CEL,yes
+101494,Promise of 1528,Action Modifier/Reaction,2,101494:MODIFIER|101494:REACTION,no
+101495,Propaganda,Action,2,101495:ACTION:pre|101495:ACTION:PRE,yes
+101496,Propaganda of the Deed,Action Modifier,1,101496:MODIFIER,yes
+101497,Prophecies of Gehenna,Master,1,101497:MASTER,yes
+101498,Protean,Master,1,101498:MASTER,yes
+101499,Protect Thine Own,Political Action,1,101499:POLITICAL,yes
+102214,Protected District,Reaction,1,102214:REACTION,yes
+101500,Protected Resources,Master,1,101500:MASTER,yes
+101501,Protection Racket,Reaction,1,101501:REACTION,yes
+101502,Protracted Investment,Master,1,101502:MASTER,yes
+101503,Provision of the Silsila,Action Modifier/Reaction,2,101503:MODIFIER|101503:REACTION,no
+101504,Proxy Kissed,Master,1,101504:MASTER,yes
+101505,Psalm of the Damned,Action Modifier,3,101505:MODIFIER:pre|101505:MODIFIER:mal|101505:MODIFIER:MAL,yes
+101506,Pseudo-Blindness,Reaction,2,101506:REACTION:chi|101506:REACTION:CHI,yes
+101507,Psyche!,Combat,2,101507:COMBAT:cel|101507:COMBAT:CEL,yes
+101508,Psychic Assault,Combat,2,101508:COMBAT:aus|101508:COMBAT:AUS,yes
+101509,Psychic Projection,Action,2,101509:ACTION:aus|101509:ACTION:AUS,yes
+101510,Psychic Veil,Action,2,101510:ACTION:obf|101510:ACTION:OBF,yes
+101511,Psychomachia,Action Modifier,3,101511:MODIFIER:pre|101511:MODIFIER:dai|101511:MODIFIER:DAI,yes
+102302,Psychophagia,Action,1,102302:ACTION,yes
+101512,Public Enemy,Action,1,101512:ACTION,yes
+101513,Public Trust,Action,2,101513:ACTION:pre|101513:ACTION:PRE,yes
+101514,Public Vilification,Political Action,1,101514:POLITICAL,yes
+101515,Pulled Fangs,Combat,1,101515:COMBAT,yes
+101516,Pulling Strings,Reaction,2,101516:REACTION:dom|101516:REACTION:DOM,yes
+101517,Pulse of the Canaille,Action,2,101517:ACTION:aus|101517:ACTION:AUS,yes
+101518,Punish,Action/Combat,2,101518:ACTION|101518:COMBAT,yes
+101215,Puppet Master,Action,2,101215:ACTION:dom|101215:ACTION:DOM,yes
+101519,Puppeteer,Ally,2,101519:ALLY:nec|101519:ALLY:NEC,yes
+101520,Purchase Pact,Master,1,101520:MASTER,yes
+101521,Purification,Action/Reaction,2,101521:ACTION:qui|101521:REACTION:QUI,yes
+101522,Purity of the Beast,Action,1,101522:ACTION,yes
+101523,Pursuit,Combat,2,101523:COMBAT:cel|101523:COMBAT:CEL,yes
+101524,Pushing the Limit,Combat,2,101524:COMBAT:pot|101524:COMBAT:POT,yes
+101525,Putrefaction,Combat,3,101525:COMBAT:pre|101525:COMBAT:thn|101525:COMBAT:THN,yes
+101526,Putrescent Servitude,Action,2,101526:ACTION:thn|101526:ACTION:THN,yes
+102335,Putrescent Sustenance,Action,4,102335:ACTION:obl|102335:ACTION:tha|102335:ACTION:OBL|102335:ACTION:THA,yes
+101527,Qetu the Evil Doer,Ally,1,101527:ALLY,yes
+101528,Quick Exit,Combat,2,101528:COMBAT:obf|101528:COMBAT:OBF,yes
+101529,Quick Jab,Combat,1,101529:COMBAT,yes
+101530,Quick Meld,Combat,2,101530:COMBAT:pro|101530:COMBAT:PRO,yes
+101531,Quicken Sight,Reaction,2,101531:REACTION:aus+cel|101531:REACTION:AUS+CEL,yes
+101532,Quickness,Combat,2,101532:COMBAT:cel|101532:COMBAT:CEL,yes
+101533,Quicksilver Contemplation,Action Modifier/Reaction,5,101533:REACTION:aus|101533:REACTION:tem|101533:MODIFIER:aus+tem|101533:REACTION:aus+tem|101533:MODIFIER:AUS+TEM,yes
+101534,Quietus,Master,1,101534:MASTER,yes
+101535,Rabble Razing,Political Action,1,101535:POLITICAL,yes
+101536,"Rack, The",Master,1,101536:MASTER,yes
+101537,Rafastio Ghoul,Ally,1,101537:ALLY,yes
+102336,Rage of Apedemak,Combat,4,102336:COMBAT:ani|102336:COMBAT:pot|102336:COMBAT:ANI|102336:COMBAT:POT,yes
+102303,Raising the Portcullis,Political Action,1,102303:POLITICAL,yes
+101538,Raking Talons,Combat,1,101538:COMBAT,yes
+101539,Rampage,Action,1,101539:ACTION:pot,yes
+101540,Random Patterns,Action Modifier/Reaction,2,101540:REACTION:aus+dem|101540:MODIFIER:AUS+DEM,yes
+101541,Rant!,Action Modifier,1,101541:MODIFIER,yes
+101542,Rapid Change,Action Modifier/Combat,2,101542:MODIFIER:pro|101542:COMBAT:PRO,yes
+101543,Rapid Healing,Action,2,101543:ACTION:for|101543:ACTION:FOR,yes
+101544,Rapid Thought,Combat,2,101544:COMBAT:cel|101544:COMBAT:CEL,yes
+101545,Raptor,Retainer,2,101545:RETAINER:ani|101545:RETAINER:ANI,yes
+101546,Rastacourere,Action,1,101546:ACTION,yes
+101547,Rat's Warning,Reaction,2,101547:REACTION:ani|101547:REACTION:ANI,yes
+101548,Ravager,Master,1,101548:MASTER,yes
+101549,Rave,Action,1,101549:ACTION,yes
+101550,Raven Spy,Retainer,2,101550:RETAINER:ani|101550:RETAINER:ANI,yes
+101551,Ravnos Acceptance,Political Action,1,101551:POLITICAL,yes
+101552,Ravnos Cache,Master,1,101552:MASTER,yes
+101553,Ravnos Carnival,Master,1,101553:MASTER,yes
+101554,Raw Recruit,Action,1,101554:ACTION,yes
+101555,Rayzeel's Song,Action,3,101555:ACTION:ani|101555:ACTION:val|101555:ACTION:VAL,yes
+101556,Razor Bat,Retainer,1,101556:RETAINER,yes
+101557,React with Conviction,Conviction,1,101557:CONVICTION,yes
+101558,Read Intentions,Combat,2,101558:COMBAT:aus|101558:COMBAT:AUS,yes
+101559,Read the Winds,Reaction,2,101559:REACTION:ani+aus|101559:REACTION:ANI+AUS,yes
+101560,Reality,Action,2,101560:ACTION:chi|101560:ACTION:CHI,yes
+101561,Reality Mirror,Combat,1,101561:COMBAT,yes
+101562,"Realm of the Black Sun, The",Master,1,101562:MASTER,yes
+101563,Reanimated Corpse,Ally,2,101563:ALLY:thn|101563:ALLY:THN,yes
+101564,Rebel,Master,1,101564:MASTER,yes
+101565,Rebirth,Action Modifier,1,101565:MODIFIER,yes
+101566,Recalled to the Founder,Event,1,101566:EVENT,yes
+101567,Reckless Agitation,Political Action,1,101567:POLITICAL,yes
+101568,Recruiting Party,Action,1,101568:ACTION,yes
+101569,Recruitment,Master,1,101569:MASTER,yes
+101570,Recruitment Exercise,Action,1,101570:ACTION,yes
+101571,Recure of the Homeland,Action,1,101571:ACTION,yes
+101572,Recurring Contemplation,Action Modifier,3,101572:MODIFIER:pre|101572:MODIFIER:tem|101572:MODIFIER:TEM,yes
+101573,Red Herring,Action Modifier,2,101573:MODIFIER:chi|101573:MODIFIER:CHI,yes
+101574,Red List,Action,1,101574:ACTION,yes
+101575,"Red Question, The",Action Modifier,1,101575:MODIFIER,yes
+101576,Redcap Wilder,Retainer,2,101576:RETAINER:myt|101576:RETAINER:MYT,yes
+101577,Redeem the Lost Soul,Master,1,101577:MASTER,yes
+101578,Redirection,Reaction,2,101578:REACTION:dom|101578:REACTION:DOM,yes
+101579,Redistribution,Action,2,101579:ACTION:san|101579:ACTION:SAN,yes
+101580,Redline,Master,1,101580:MASTER,yes
+101581,Reform Body,Combat/Reaction,4,101581:COMBAT:vic|101581:REACTION:vic|101581:COMBAT:VIC|101581:REACTION:VIC,no
+101582,Reformation,Action,3,101582:ACTION:chi|101582:ACTION:dom|101582:ACTION:ser,yes
+101583,Regaining the Upper Hand,Political Action,1,101583:POLITICAL,yes
+101584,Regarhagan's Hold,Master,1,101584:MASTER,yes
+101585,Regeneration,Action,2,101585:ACTION:for|101585:ACTION:FOR,yes
+101586,Regenerative Blood,Master,1,101586:MASTER,yes
+101587,Regent,Master,1,101587:MASTER,yes
+101588,Rego Motum,Combat,2,101588:COMBAT:tha|101588:COMBAT:THA,yes
+101589,Reindoctrination,Action,1,101589:ACTION,yes
+101590,Reinforcements,Political Action,1,101590:POLITICAL,yes
+101591,Reins of Power,Political Action,1,101591:POLITICAL,yes
+101592,Rejuvenate,Power,1,101592:ACTION,yes
+101593,Release of the Shackled Soul,Action,2,101593:ACTION:nec|101593:ACTION:NEC,yes
+101594,Relentless Pursuit,Combat,2,101594:COMBAT:pot|101594:COMBAT:POT,yes
+101595,Relentless Reaper,Combat,3,101595:COMBAT:for|101595:COMBAT:thn|101595:COMBAT:THN,yes
+102337,Relentlessness,Action Modifier,4,102337:MODIFIER:cel|102337:MODIFIER:for|102337:MODIFIER:CEL|102337:MODIFIER:FOR,yes
+101596,Reliquary: Akunanse Remains,Equipment,1,101596:EQUIPMENT,yes
+101597,Reliquary: Biague,Equipment,1,101597:EQUIPMENT,yes
+101598,Reliquary: Shango Remains,Equipment,1,101598:EQUIPMENT,yes
+101599,Reliquary: Trinket,Equipment,1,101599:EQUIPMENT,yes
+101600,Remnant of the Endless Storm,Ally,1,101600:ALLY,yes
+101601,Remover,Master,1,101601:MASTER,yes
+101602,Renegade Garou,Ally,1,101602:ALLY,yes
+101603,Renewed Vigor,Action,4,101603:ACTION:for|101603:ACTION:obe:1|101603:ACTION:obe:2|101603:ACTION:OBE,yes
+101604,Repair the Undead Flesh,Action,2,101604:ACTION:for|101604:ACTION:FOR,yes
+101605,Repo Man,Ally,1,101605:ALLY,yes
+101606,Repulsion,Action Modifier,3,101606:MODIFIER:pre|101606:MODIFIER:obe|101606:MODIFIER:OBE,yes
+101607,Research,Master,1,101607:MASTER,yes
+101608,Resilience,Combat,2,101608:COMBAT:for|101608:COMBAT:FOR,yes
+101609,Resilient Mind,Action,2,101609:ACTION:for|101609:ACTION:FOR,yes
+101610,Resist Earth's Grasp,Action Modifier/Combat,2,101610:COMBAT:cel|101610:MODIFIER:CEL,yes
+101611,Respire,Power,2,101611:ACTION:1|101611:ACTION:2,yes
+101612,Resplendent Protector,Retainer,1,101612:RETAINER,yes
+101613,Restoration,Action,2,101613:ACTION:for|101613:ACTION:FOR,yes
+101614,Restricted Vitae,Event,1,101614:EVENT,yes
+101615,Restructure,Action,2,101615:ACTION:dem|101615:ACTION:DEM,yes
+101616,Resume the Coil,Action,2,101616:ACTION:nec|101616:ACTION:NEC,yes
+101617,Resurrection,Action,3,101617:ACTION:val|101617:ACTION:obe|101617:ACTION:OBE,yes
+101618,Retain the Quick Blood,Action,2,101618:ACTION:cel+qui|101618:ACTION:CEL+QUI,yes
+101619,Retribution,Master,1,101619:MASTER,yes
+101620,"Return to Innocence, The",Action,1,101620:ACTION,yes
+101621,Reunion Kamut,Action,1,101621:ACTION,yes
+101622,Revelation of Desire,Action Modifier,2,101622:MODIFIER:ser|101622:MODIFIER:SER,yes
+101623,Revelation of Despair,Reaction,2,101623:REACTION:ser|101623:REACTION:SER,yes
+101624,Revelation of Ecstasy,Action,2,101624:ACTION:ser|101624:ACTION:SER,yes
+102233,Revelation of the Serpent,Action Modifier,2,102233:MODIFIER:pre+pro|102233:MODIFIER:PRE+PRO,yes
+101625,Revelation of the Sire,Action,1,101625:ACTION,yes
+101626,Revelation of Wrath,Combat,2,101626:COMBAT:ser|101626:COMBAT:SER,yes
+101627,Revelations,Action,2,101627:ACTION:aus|101627:ACTION:AUS,yes
+101628,Revenant,Retainer,1,101628:RETAINER,yes
+101629,Reversal of Fortunes,Political Action,1,101629:POLITICAL,yes
+101630,Revocation of Tyre,Political Action,1,101630:POLITICAL,yes
+101631,Revolutionary Council,Political Action,1,101631:POLITICAL,yes
+101632,Rewilding,Action,1,101632:ACTION,yes
+101633,Rewind Time,Reaction,3,101633:REACTION:pre|101633:REACTION:tem|101633:REACTION:TEM,yes
+101634,Riddle Phantastique,Action,1,101634:ACTION,yes
+101635,Righteous Aura,Combat,1,101635:COMBAT,yes
+102359,Righteous Blade,Equipment,1,102359:EQUIPMENT,yes
+101636,Rigor Mortis,Combat,3,101636:COMBAT:pre|101636:COMBAT:thn|101636:COMBAT:THN,yes
+101637,Riposte,Combat,2,101637:COMBAT:cel|101637:COMBAT:CEL,yes
+101638,Rise of the Fallen,Action,1,101638:ACTION,yes
+101639,Rise of the Nephtali,Event,1,101639:EVENT,yes
+101640,"Rising, The",Event,1,101640:EVENT,yes
+101641,Ritual Challenge,Action,1,101641:ACTION,yes
+102243,Ritual Goblet,Equipment,1,102243:EQUIPMENT,yes
+101642,Ritual of the Bitter Rose,Action Modifier/Combat,2,101642:MODIFIER|101642:COMBAT,no
+101643,Ritual Scalpel,Equipment,1,101643:EQUIPMENT,yes
+101644,Robert Carter,Retainer,1,101644:RETAINER,yes
+101645,Rock Cat,Ally,1,101645:ALLY,yes
+101646,Rockheart,Combat,3,101646:COMBAT:tha|101646:COMBAT:vis|101646:COMBAT:VIS,yes
+101647,Rogue,Master,1,101647:MASTER,yes
+101648,Roll,Combat,1,101648:COMBAT:FLIGHT,yes
+101649,Rolling with the Punches,Combat,2,101649:COMBAT:for|101649:COMBAT:FOR,yes
+101650,Rom Gypsy,Ally,1,101650:ALLY,yes
+101651,Rooftop Shadow,Reaction,2,101651:REACTION:cel|101651:REACTION:CEL,yes
+101652,Root of Vitality,Action,2,101652:ACTION:vic|101652:ACTION:VIC,yes
+101653,"Rose Foundation, The",Master,1,101653:MASTER,yes
+101654,Rötschreck,Master,1,101654:MASTER,yes
+102304,Rotting Behemoth,Ally,2,102304:ALLY:obl|102304:ALLY:OBL,yes
+102215,Roundhouse,Combat,2,102215:COMBAT:pot|102215:COMBAT:POT,yes
+101655,Rowan Ring,Equipment,1,101655:EQUIPMENT,yes
+101656,RPG Launcher,Equipment,1,101656:EQUIPMENT,yes
+101657,Rubicon,Action,1,101657:ACTION,yes
+101658,Ruins of Ceoris,Equipment,1,101658:EQUIPMENT,yes
+101659,Ruins of Charizel,Master,1,101659:MASTER,yes
+101660,"Ruins of Villers Abbey, Belgium",Equipment,1,101660:EQUIPMENT,yes
+101661,Rumble,Action,1,101661:ACTION,yes
+101662,"Rumor Mill, Tabloid Newspaper, The",Master,1,101662:MASTER,yes
+101663,Rumors of Gehenna,Political Action,1,101663:POLITICAL,yes
+101664,Rutor's Hand,Action,2,101664:ACTION:tha|101664:ACTION:THA,yes
+101665,Saatet-ta,Ally,1,101665:ALLY,yes
+101666,Sabbat Inquisitor,Political Action,1,101666:POLITICAL,yes
+101667,Sabbat Priest,Political Action,1,101667:POLITICAL,yes
+101668,Sabbat Threat,Political Action,1,101668:POLITICAL,yes
+101669,Sacrament of Carnage,Combat,2,101669:COMBAT:pot|101669:COMBAT:POT,yes
+101670,"Sacré-Cœur Cathedral, France",Equipment,1,101670:EQUIPMENT,yes
+101671,Sacrifice,Political Action,1,101671:POLITICAL,yes
+101672,Sacrificial Lamb,Action,2,101672:ACTION:obf|101672:ACTION:OBF,yes
+101673,Safe Passage,Action Modifier,3,101673:MODIFIER:for|101673:MODIFIER:obe|101673:MODIFIER:OBE,yes
+101674,Salt of Thoth,Reaction,1,101674:REACTION,yes
+101675,Samuel Haight,Ally,1,101675:ALLY,yes
+101676,"San Lorenzo de El Escorial, Spain",Equipment,1,101676:EQUIPMENT,yes
+101677,San Nicolás de los Servitas,Equipment,1,101677:EQUIPMENT,yes
+101678,Sanguinary Wind,Combat,2,101678:COMBAT:cel|101678:COMBAT:CEL,yes
+101679,Sanguine Entrapment,Combat,2,101679:COMBAT:cel+qui|101679:COMBAT:CEL+QUI,yes
+101680,Sanguine Instruction,Action,1,101680:ACTION,yes
+101681,"Sargon Fragment, The",Equipment,1,101681:EQUIPMENT,yes
+101682,Saturday-Night Special,Equipment,1,101682:EQUIPMENT,yes
+102257,Saulot's Avenging Fist,Master,1,102257:MASTER,yes
+102258,Saulot's Guiding Wisdom,Master,1,102258:MASTER,yes
+102259,Saulot's Healing Touch,Master,1,102259:MASTER,yes
+101683,Savannah Runner,Reaction,2,101683:REACTION:cel|101683:REACTION:CEL,yes
+101684,Save Face,Combat,1,101684:COMBAT,yes
+101685,Sawed-Off Shotgun,Equipment,1,101685:EQUIPMENT,yes
+101686,Scalpel Tongue,Action Modifier/Reaction,4,101686:MODIFIER:cel+pre|101686:REACTION:cel+pre|101686:MODIFIER:CEL+PRE|101686:REACTION:CEL+PRE,no
+101687,"Scapelli, The Family ""Mechanic""",Ally,1,101687:ALLY,yes
+101688,Scarlet Lore,Action,3,101688:ACTION:nec|101688:ACTION:myt|101688:ACTION:MYT,yes
+101689,Scattershot,Combat,1,101689:COMBAT,yes
+101690,SchreckNET,Action,1,101690:ACTION,yes
+101691,Scobax,Reaction,3,101691:REACTION:pre|101691:REACTION:str|101691:REACTION:STR,yes
+101692,Scorn of Adonis,Action Modifier,1,101692:MODIFIER,yes
+101693,Scorpion Sting,Combat,2,101693:COMBAT:ani|101693:COMBAT:ANI,yes
+101694,Scorpion's Touch,Combat,2,101694:COMBAT:qui|101694:COMBAT:QUI,yes
+101695,Scourge,Political Action,1,101695:POLITICAL,yes
+101696,Scourge of Alecto,Combat,2,101696:COMBAT:cel+pre|101696:COMBAT:CEL+PRE,yes
+101697,Scourge of the Enochians,Event,1,101697:EVENT,yes
+101698,Scouting Mission,Action,2,101698:ACTION:dom|101698:ACTION:DOM,yes
+102292,Screamer,Ally,1,102292:ALLY,yes
+101699,Screw the Masquerade!,Political Action,1,101699:POLITICAL,yes
+101700,Scrounging,Action,1,101700:ACTION,yes
+101701,Scry the Hearthstone,Reaction,3,101701:REACTION:tha|101701:REACTION:vis|101701:REACTION:VIS,yes
+101702,Scrying of Secrets,Action Modifier,2,101702:MODIFIER:aus|101702:MODIFIER:AUS,yes
+102260,Sculpt the Flesh,Combat,2,102260:COMBAT:pro|102260:COMBAT:PRO,yes
+101703,Seal of Veddartha,Equipment,1,101703:EQUIPMENT,yes
+101704,Seattle Committee,Master,1,101704:MASTER,yes
+101705,Second Sight,Conviction,1,101705:CONVICTION,yes
+101706,Second Tradition: Domain,Reaction,2,101706:REACTION:1|101706:REACTION:2,yes
+101707,Secret Horde,Master,1,101707:MASTER,yes
+101708,"Secret Library of Alexandria, The",Master,1,101708:MASTER,yes
+101709,"Secret Must Be Kept, The",Political Action,1,101709:POLITICAL,yes
+101710,Secret Passage,Master,1,101710:MASTER,yes
+101711,Secure Haven,Master,1,101711:MASTER,yes
+101712,Seduction,Action Modifier,2,101712:MODIFIER:dom|101712:MODIFIER:DOM,yes
+101713,Seeds of Corruption,Action,2,101713:ACTION:tha|101713:ACTION:THA,yes
+102338,Seeds of Terror,Action Modifier,4,102338:MODIFIER:obf|102338:MODIFIER:pre|102338:MODIFIER:OBF|102338:MODIFIER:PRE,yes
+101714,Selective Silence,Combat,2,101714:COMBAT:qui|101714:COMBAT:QUI,yes
+101715,Sengir Dagger,Equipment,1,101715:EQUIPMENT,yes
+101716,Sense Death,Action,3,101716:ACTION:ani|101716:ACTION:val|101716:ACTION:VAL,yes
+101717,Sense the Savage Way,Reaction,2,101717:REACTION:ani|101717:REACTION:ANI,yes
+101718,Sense the Sin,Action Modifier/Reaction,3,101718:REACTION:aus|101718:REACTION:dai|101718:MODIFIER:DAI,yes
+101719,Sense Vibrations,Master,1,101719:MASTER,yes
+101720,Sense Vitality,Action,3,101720:ACTION:for|101720:ACTION:val|101720:ACTION:VAL,yes
+101721,Sensory Deprivation,Action,2,101721:ACTION:chi|101721:ACTION:CHI,yes
+101722,Sensory Overload,Action,2,101722:ACTION:chi|101722:ACTION:CHI,yes
+102339,Sentry Signal,Reaction,4,102339:REACTION:ani|102339:REACTION:tha|102339:REACTION:ANI|102339:REACTION:THA,yes
+101723,Seraph,Political Action,1,101723:POLITICAL,yes
+101724,Seraph's Second,Action Modifier,1,101724:MODIFIER,yes
+101725,Serenading the Kami,Action Modifier,2,101725:MODIFIER:tha|101725:MODIFIER:THA,yes
+101726,Sermon of Caine,Master,1,101726:MASTER,yes
+101727,Serpent's Numbing Kiss,Combat,2,101727:COMBAT:pre+ser|101727:COMBAT:PRE+SER,yes
+101728,Serpentis,Master,1,101728:MASTER,yes
+101729,Servitor of Irad,Master,1,101729:MASTER,yes
+101730,Set's Call,Reaction,2,101730:REACTION:ser|101730:REACTION:SER,yes
+101731,Set's Curse,Action,2,101731:ACTION:ser|101731:ACTION:SER,yes
+101732,Shaal Fragment,Equipment,1,101732:EQUIPMENT,yes
+101733,Shackles of Enkidu,Equipment,1,101733:EQUIPMENT,yes
+101734,Shade,Retainer,2,101734:RETAINER:obt|101734:RETAINER:OBT,yes
+101735,Shadow Body,Combat,2,101735:COMBAT:obt|101735:COMBAT:OBT,yes
+101736,Shadow Boxing,Action Modifier/Combat,2,101736:COMBAT:obf+pot|101736:MODIFIER:OBF+POT,yes
+102280,Shadow Cast,Action Modifier,2,102280:MODIFIER:obl|102280:MODIFIER:OBL,yes
+102281,Shadow Cloak,Action Modifier,2,102281:MODIFIER:obl|102281:MODIFIER:OBL,yes
+101737,Shadow Court Satyr,Ally,1,101737:ALLY,yes
+101738,Shadow Feint,Combat,2,101738:COMBAT:cel+obf|101738:COMBAT:CEL+OBF,yes
+101739,Shadow of Taint,Action,3,101739:ACTION:dom|101739:ACTION:val|101739:ACTION:VAL,yes
+101740,Shadow of the Beast,Action,2,101740:ACTION:pro|101740:ACTION:PRO,yes
+101741,Shadow of the Wolf,Combat,2,101741:COMBAT:pro|101741:COMBAT:PRO,yes
+101742,Shadow Parasite,Combat,2,101742:COMBAT:obt|101742:COMBAT:OBT,yes
+101743,Shadow Play,Action Modifier,2,101743:MODIFIER:obt|101743:MODIFIER:OBT,yes
+102294,Shadow Sentinel,Reaction,2,102294:REACTION:obl|102294:REACTION:OBL,yes
+102305,Shadow Shift,Combat,2,102305:COMBAT:obl|102305:COMBAT:OBL,yes
+101744,Shadow Step,Combat,2,101744:COMBAT:obt|101744:COMBAT:OBT,yes
+101745,Shadow Strike,Combat,2,101745:COMBAT:obt|101745:COMBAT:OBT,yes
+101746,Shadow Twin,Action,2,101746:ACTION:obt|101746:ACTION:OBT,yes
+101747,Shadowed Eyes,Action,2,101747:ACTION:aus+obt|101747:ACTION:AUS+OBT,yes
+101748,Shakar,Master,1,101748:MASTER,yes
+101749,Shakar: the Hunt,Master,1,101749:MASTER,yes
+101750,Shaman,Retainer,1,101750:RETAINER,yes
+101751,Shambling Hordes,Ally,2,101751:ALLY:nec|101751:ALLY:NEC,yes
+101752,Shame,Power,1,101752:COMBAT,yes
+101753,Shanty Town Hunting Ground,Master,1,101753:MASTER,yes
+101754,Shape Mastery,Combat/Reaction,2,101754:COMBAT:pro|101754:REACTION:PRO,yes
+102244,"Shard, London, The",Master,1,102244:MASTER,yes
+101755,Shared Nightmare,Action,2,101755:ACTION:chi|101755:ACTION:CHI,yes
+101756,Shared Strength,Combat,2,101756:COMBAT:for|101756:COMBAT:FOR,yes
+101757,Shatter the Gate,Action,1,101757:ACTION,yes
+101758,Shattered Mirror,Reaction,2,101758:REACTION:dem|101758:REACTION:DEM,yes
+101759,Shattering,Action,3,101759:ACTION:chi|101759:ACTION:dem|101759:ACTION:pro,yes
+101760,Shattering Blow,Combat,2,101760:COMBAT:pot|101760:COMBAT:POT,yes
+101761,Shattering Crescendo,Action,3,101761:ACTION:pro|101761:ACTION:mel|101761:ACTION:MEL,yes
+101762,Sheepdog,Action,1,101762:ACTION,yes
+101763,Shell Break,Action,1,101763:ACTION,yes
+101764,Shell Game,Action Modifier,2,101764:MODIFIER:san|101764:MODIFIER:SAN,yes
+101765,Shepherd's Innocence,Action,2,101765:ACTION:ani|101765:ACTION:ANI,yes
+101766,Shilmulo Deception,Reaction,2,101766:REACTION:chi|101766:REACTION:CHI,yes
+101767,Shilmulo Tarot,Equipment,1,101767:EQUIPMENT,yes
+101768,Shock Troops,Master,1,101768:MASTER,yes
+101769,Short-Term Investment,Master,1,101769:MASTER,yes
+101770,Shotgun Ritual,Combat,2,101770:COMBAT:tha|101770:COMBAT:THA,yes
+101771,Shoulder Drop,Combat,1,101771:COMBAT,yes
+101772,Show of Force,Action,2,101772:ACTION:pot+pre|101772:ACTION:POT+PRE,yes
+101773,Shroud Mastery,Action Modifier,2,101773:MODIFIER:nec|101773:MODIFIER:NEC,yes
+101774,Shroud of Absence,Action Modifier,2,101774:MODIFIER:dom+obt|101774:MODIFIER:DOM+OBT,yes
+102295,Shroud of Decay,Action,2,102295:ACTION:obl|102295:ACTION:OBL,yes
+101775,Shroud of Night,Action Modifier,2,101775:MODIFIER:obt|101775:MODIFIER:OBT,yes
+101776,Shroudsight,Action Modifier,2,101776:MODIFIER:nec|101776:MODIFIER:NEC,yes
+101777,Sibyl's Tongue,Action,1,101777:ACTION,yes
+101778,Side Strike,Combat,2,101778:COMBAT:cel|101778:COMBAT:CEL,yes
+101779,Sideslip,Combat,2,101779:COMBAT:cel|101779:COMBAT:CEL,yes
+101780,Sight Beyond Sight,Master,1,101780:MASTER,yes
+101781,"Signet of King Saul, The",Equipment,1,101781:EQUIPMENT,yes
+101782,Silence of Death,Combat,2,101782:COMBAT:qui|101782:COMBAT:QUI,yes
+101783,Sins of the Cauchemar,Reaction,2,101783:REACTION:aus|101783:REACTION:AUS,yes
+101784,Siphon,Action,1,101784:ACTION,yes
+101785,Sire's Index Finger,Equipment,1,101785:EQUIPMENT,yes
+101786,Siren's Lure,Action Modifier,3,101786:MODIFIER:cel|101786:MODIFIER:mel|101786:MODIFIER:MEL,yes
+101787,"Sires Command, Childer Inherit",Action,1,101787:ACTION,yes
+101788,Sixth Tradition: Destruction,Action,1,101788:ACTION,yes
+101789,Skaald,Action,1,101789:ACTION,yes
+101790,Skin of Night,Combat,2,101790:COMBAT:for|101790:COMBAT:FOR,yes
+101791,Skin of Rock,Combat,2,101791:COMBAT:for|101791:COMBAT:FOR,yes
+101792,Skin of Steel,Combat,2,101792:COMBAT:for|101792:COMBAT:FOR,yes
+101793,Skin of the Adder,Combat,2,101793:COMBAT:ser|101793:COMBAT:SER,yes
+101794,Skin of the Chameleon,Action Modifier,3,101794:MODIFIER:tha|101794:MODIFIER:vis|101794:MODIFIER:VIS,yes
+101795,Skin Trap,Combat,2,101795:COMBAT:vic|101795:COMBAT:VIC,yes
+101796,Skullduggery,Action,3,101796:ACTION:obf|101796:ACTION:pre|101796:ACTION:pro,yes
+101797,Slake the Thirst,Action Modifier/Combat,2,101797:COMBAT:san|101797:MODIFIER:SAN,yes
+101798,Slam,Combat,2,101798:COMBAT:pot|101798:COMBAT:POT,yes
+101799,"Slashers, The",Ally,1,101799:ALLY,yes
+101800,"Slaughterhouse, The",Master,1,101800:MASTER,yes
+101801,Slaughtering the Herd,Action,2,101801:ACTION:dom|101801:ACTION:DOM,yes
+101802,Slave Auction,Master,1,101802:MASTER,yes
+101803,Sleep of Reason,Action,2,101803:ACTION:dem|101803:ACTION:DEM,yes
+101804,Sleep Unseen,Action Modifier,2,101804:MODIFIER:obf|101804:MODIFIER:OBF,yes
+101805,"Sleeping Mind, The",Action Modifier,2,101805:MODIFIER:dom|101805:MODIFIER:DOM,yes
+101806,Sleight of Hand,Action,2,101806:ACTION:chi|101806:ACTION:CHI,yes
+101807,"Slow Withering, The",Event,1,101807:EVENT,yes
+101808,Slum Hunting Ground,Master,1,101808:MASTER,yes
+101809,Smash and Grab,Action,3,101809:ACTION:ani|101809:ACTION:dem|101809:ACTION:pot,yes
+101810,Smear Campaign,Master,1,101810:MASTER,yes
+101811,"Smiling Jack, The Anarch",Master,1,101811:MASTER,yes
+101812,Smite,Combat,1,101812:COMBAT,yes
+101813,Smoke and Mirrors,Action Modifier,3,101813:MODIFIER:chi|101813:MODIFIER:obf|101813:MODIFIER:obt,yes
+101814,Smoke Grenade,Equipment,1,101814:EQUIPMENT,yes
+101815,Snipe Hunt,Political Action,1,101815:POLITICAL,yes
+101816,Sniper Rifle,Equipment,1,101816:EQUIPMENT,yes
+101817,Soak,Combat,2,101817:COMBAT:for|101817:COMBAT:FOR,yes
+101818,Soar,Action Modifier,1,101818:MODIFIER,yes
+101819,Social Charm,Action,2,101819:ACTION:pre|101819:ACTION:PRE,yes
+101820,Social Ladder,Master,1,101820:MASTER,yes
+101821,Society Hunting Ground,Master,1,101821:MASTER,yes
+101822,Society of Leopold,Master,1,101822:MASTER,yes
+101823,Sociopath,Master,1,101823:MASTER,yes
+101824,Sonar,Reaction,2,101824:REACTION:pro|101824:REACTION:PRO,yes
+101825,Song in the Dark,Combat,2,101825:COMBAT:ani|101825:COMBAT:ANI,yes
+101826,Song of Pan,Action,1,101826:ACTION,yes
+101827,Song of Serenity,Combat,2,101827:COMBAT:ani|101827:COMBAT:ANI,yes
+101828,Songs of the Distant Vitae,Action,2,101828:ACTION:qui|101828:ACTION:QUI,yes
+101829,Soul Burn,Combat,2,101829:COMBAT:tha|101829:COMBAT:THA,yes
+101830,Soul Decoration,Action,2,101830:ACTION:obf+vic|101830:ACTION:OBF+VIC,yes
+101831,Soul Feasting,Action,2,101831:ACTION:nec|101831:ACTION:NEC,yes
+101832,Soul Gem of Etrius,Equipment,1,101832:EQUIPMENT,yes
+101833,Soul of the Earth,Action,1,101833:ACTION,yes
+101834,Soul Painting,Action,2,101834:ACTION:aus+pre|101834:ACTION:AUS+PRE,yes
+101835,Soul Scan,Action,2,101835:ACTION:aus|101835:ACTION:AUS,yes
+101836,Soul Stealing,Action Modifier/Combat,2,101836:MODIFIER:nec|101836:COMBAT:NEC,yes
+102340,Soulgrinder,Combat,4,102340:COMBAT:pot|102340:COMBAT:tha|102340:COMBAT:POT|102340:COMBAT:THA,yes
+101837,Sound of a Breaking Oath,Action/Reaction,2,101837:ACTION:aus+dom|101837:REACTION:AUS+DOM,yes
+101838,Sowing Dissension,Action,1,101838:ACTION,yes
+101839,"Spawning Pool, The",Master,1,101839:MASTER,yes
+101840,Speak with Spirits,Reaction,3,101840:REACTION:ani|101840:REACTION:spi|101840:REACTION:SPI,yes
+101841,Special Report,Master,1,101841:MASTER,yes
+101842,Specialization,Master,1,101842:MASTER,yes
+101843,Spectral Divination,Action Modifier/Reaction,2,101843:MODIFIER:nec|101843:REACTION:NEC,yes
+102296,Spectral Servitor,Ally,2,102296:ALLY:obl|102296:ALLY:OBL,yes
+101844,Speed of Thought,Action,2,101844:ACTION:cel|101844:ACTION:CEL,yes
+101845,Spell of Life,Action,1,101845:ACTION,yes
+101846,Spike-Thrower,Equipment,1,101846:EQUIPMENT,yes
+101847,Spirit Claws,Action/Combat,3,101847:COMBAT:pro|101847:COMBAT:pro+spi|101847:ACTION:PRO+SPI,yes
+101848,Spirit Marionette,Action,3,101848:ACTION:dom|101848:ACTION:obe|101848:ACTION:OBE,yes
+101849,Spirit Summoning Chamber,Master,1,101849:MASTER,yes
+101850,Spirit's Touch,Reaction,2,101850:REACTION:aus|101850:REACTION:AUS,yes
+101851,Spiritual Guidance,Combat,1,101851:COMBAT,yes
+101852,Spiritual Intervention,Combat,2,101852:COMBAT:nec|101852:COMBAT:NEC,yes
+101853,Spiritual Protector,Retainer,1,101853:RETAINER,yes
+102297,Split the Veil,Action,1,102297:ACTION,yes
+101854,Spoils of War,Action Modifier,1,101854:MODIFIER,yes
+101855,Spontaneous Power,Master,1,101855:MASTER,yes
+101856,Sport Bike,Equipment,1,101856:EQUIPMENT,yes
+101857,Spying Mission,Action Modifier,2,101857:MODIFIER:obf|101857:MODIFIER:OBF,yes
+101858,Squirrel Balance,Action Modifier,3,101858:MODIFIER:cel|101858:MODIFIER:spi|101858:MODIFIER:SPI,yes
+101859,Staredown,Combat,2,101859:COMBAT:pre|101859:COMBAT:PRE,yes
+101860,Starshell Grenade Launcher,Equipment,1,101860:EQUIPMENT,yes
+101861,Starvation of Marena,Combat,2,101861:COMBAT:vic|101861:COMBAT:VIC,yes
+101862,Static Virtue,Master,1,101862:MASTER,yes
+101863,"Status Perfectus, The",Action,1,101863:ACTION,yes
+101864,Steadfastness,Reaction,2,101864:REACTION:for|101864:REACTION:FOR,yes
+101865,Steal the Mind,Action,3,101865:ACTION:dom|101865:ACTION:myt|101865:ACTION:MYT,yes
+101866,Stealing Years,Action,1,101866:ACTION,yes
+101867,Stealth Ritus,Action Modifier,1,101867:MODIFIER,yes
+101868,Steam Tunnels,Master,1,101868:MASTER,yes
+101869,Steely Tenacity,Action/Combat,3,101869:COMBAT:ani|101869:ACTION:dom|101869:ACTION:qui,yes
+101870,Stiff Contempt,Action Modifier,1,101870:MODIFIER,yes
+101871,Still the Mortal Flesh,Combat,2,101871:COMBAT:dom|101871:COMBAT:DOM,yes
+101872,Stolen Police Cruiser,Equipment,1,101872:EQUIPMENT,yes
+101873,Stone Dog,Retainer,1,101873:RETAINER,yes
+101874,Stone Quills,Combat,3,101874:COMBAT:tha|101874:COMBAT:vis|101874:COMBAT:VIS,yes
+101875,Stone Travel,Action Modifier,3,101875:MODIFIER:obt|101875:MODIFIER:myt|101875:MODIFIER:MYT,yes
+101876,Stonestrength,Combat,3,101876:COMBAT:tha|101876:COMBAT:vis|101876:COMBAT:VIS,yes
+101877,Storage Annex,Master,1,101877:MASTER,yes
+101878,Storm Sewers,Master,1,101878:MASTER,yes
+101879,Strained Vitae Supply,Master,1,101879:MASTER,yes
+101880,Strange Day,Action Modifier,1,101880:MODIFIER,yes
+101881,"Stranger Among Us, The",Master,1,101881:MASTER,yes
+101882,Street Cred,Combat,2,101882:COMBAT:pot|101882:COMBAT:POT,yes
+101883,Strength of the Bear,Combat,3,101883:COMBAT:ani|101883:COMBAT:spi|101883:COMBAT:SPI,yes
+101884,Striga,Master,1,101884:MASTER,yes
+101885,Strike at the True Flesh,Combat,2,101885:COMBAT:qui|101885:COMBAT:QUI,yes
+101886,Strike with Conviction,Conviction,1,101886:CONVICTION,yes
+101887,Strix,Reaction,2,101887:REACTION:str|101887:REACTION:STR,yes
+101888,Stunt Cycle,Combat,2,101888:COMBAT:pot|101888:COMBAT:POT,yes
+101889,Stutter-Step,Combat,2,101889:COMBAT:cel|101889:COMBAT:CEL,yes
+102282,Stygian Shroud,Action Modifier,2,102282:MODIFIER:obl|102282:MODIFIER:OBL,yes
+101890,Subdued by the Blood,Master,1,101890:MASTER,yes
+101891,Submachine Gun,Equipment,1,101891:EQUIPMENT,yes
+102341,Subversion,Action Modifier,4,102341:MODIFIER:cel|102341:MODIFIER:pre|102341:MODIFIER:CEL|102341:MODIFIER:PRE,yes
+101892,Succubus,Ally,1,101892:ALLY,yes
+101893,Succubus Club,Master,1,101893:MASTER,yes
+101894,Succulent Vitae,Action Modifier,2,101894:MODIFIER:qui|101894:MODIFIER:QUI,yes
+101895,Sudario Refraction,Action,1,101895:ACTION,yes
+101896,Sudden Reversal,Master,1,101896:MASTER,yes
+101897,Summon History,Action,2,101897:ACTION:tem|101897:ACTION:TEM,yes
+101898,Summon Soul,Action,2,101898:ACTION:nec|101898:ACTION:NEC,yes
+101899,Summon Spirit Beast,Combat/Reaction,5,101899:COMBAT:ani|101899:COMBAT:spi|101899:REACTION:spi|101899:COMBAT:SPI|101899:REACTION:SPI,no
+101900,Summon the Abyss,Action,2,101900:ACTION:obt|101900:ACTION:OBT,yes
+101901,Summon the Serpent,Action,1,101901:ACTION,yes
+101902,"Summoning, The",Action,2,101902:ACTION:pre|101902:ACTION:PRE,yes
+101903,Sunrise Service,Action,1,101903:ACTION,yes
+101904,"Sunset Strip, Hollywood",Master,1,101904:MASTER,yes
+101905,Superior Mettle,Combat,2,101905:COMBAT:for|101905:COMBAT:FOR,yes
+101906,Supernatural Resistance,Combat/Reaction,2,101906:COMBAT|101906:REACTION,no
+101907,Suppressing Fire,Action Modifier,1,101907:MODIFIER,yes
+101908,Surge,Power,2,101908:COMBAT|101908:REACTION,yes
+101909,Surprise Influence,Reaction,1,101909:REACTION,yes
+101910,Survivalist,Ally,1,101910:ALLY,yes
+101911,Suspension of Disbelief,Action,2,101911:ACTION:chi|101911:ACTION:CHI,yes
+101912,Svadharma,Master,1,101912:MASTER,yes
+101913,Swallowed by the Night,Action Modifier/Combat,2,101913:MODIFIER:obf|101913:COMBAT:OBF,yes
+101914,Swarm,Retainer,1,101914:RETAINER,yes
+101915,Sweeper,Political Action,1,101915:POLITICAL,yes
+102342,Swift Cover,Action Modifier/Combat,8,102342:MODIFIER:cel|102342:COMBAT:cel|102342:MODIFIER:obf|102342:COMBAT:obf|102342:MODIFIER:CEL|102342:COMBAT:CEL|102342:MODIFIER:OBF|102342:COMBAT:OBF,no
+101916,Swiftness of the Stag,Action Modifier/Combat,3,101916:COMBAT:cel|101916:COMBAT:spi|101916:MODIFIER:SPI,yes
+101917,Swiss Cut,Master,1,101917:MASTER,yes
+101918,Swoop,Combat,1,101918:COMBAT,yes
+101919,Sword of Judgment,Equipment,1,101919:EQUIPMENT,yes
+101920,Sword of Nuln,Equipment,1,101920:EQUIPMENT,yes
+102261,Sword of the Archangel,Equipment,1,102261:EQUIPMENT,yes
+101921,Sword of the Righteous,Combat,3,101921:COMBAT:ani|101921:COMBAT:val|101921:COMBAT:VAL,yes
+101922,Sword of Troile,Equipment,1,101922:EQUIPMENT,yes
+101923,Sympathetic Agony,Combat,2,101923:COMBAT:chi+for|101923:COMBAT:CHI+FOR,yes
+102360,Szlachta Assistant,Retainer,1,102360:RETAINER,yes
+102361,Szlachta Bodyguard,Retainer,1,102361:RETAINER,yes
+101924,Tabriz Assembly,Master,1,101924:MASTER,yes
+101925,Tainted Spring,Action Modifier,2,101925:MODIFIER:ani|101925:MODIFIER:ANI,yes
+101926,Tainted Vitae,Reaction,1,101926:REACTION,yes
+101927,Tajdid,Master,1,101927:MASTER,yes
+101928,Taking the Skin: Minion,Action Modifier/Combat,3,101928:REFLEX:abo|101928:MODIFIER:abo|101928:COMBAT:abo,no
+101929,Taking the Skin: Vulture,Reaction,3,101929:REFLEX:abo|101929:REACTION:abo|101929:REACTION:ABO,yes
+101930,"Talaq, The Immortal",Ally,1,101930:ALLY,yes
+101931,Talbot's Chainsaw,Equipment,1,101931:EQUIPMENT,yes
+101932,Talith,Equipment,1,101932:EQUIPMENT,yes
+101933,Talons of the Dead,Master,1,101933:MASTER,yes
+101934,Taming the Beast,Combat,3,101934:REFLEX:abo|101934:COMBAT:abo|101934:COMBAT:ABO,yes
+101935,Tangle Atropos' Hand,Action Modifier,3,101935:MODIFIER:pot|101935:MODIFIER:tem|101935:MODIFIER:TEM,yes
+101936,Tapestry of Blood,Equipment,1,101936:EQUIPMENT,yes
+101937,"Tara, The Hollow One",Ally,1,101937:ALLY,yes
+101938,Target Hand,Combat,1,101938:COMBAT,yes
+101939,Target Head,Combat,1,101939:COMBAT,yes
+101940,Target Leg,Combat,1,101940:COMBAT,yes
+101941,Target Retainer,Combat,1,101941:COMBAT,yes
+101942,Target Vitals,Combat,1,101942:COMBAT,yes
+101943,Tasha Morgan,Retainer,1,101943:RETAINER,yes
+101944,Taste of Death,Combat,2,101944:COMBAT:qui|101944:COMBAT:QUI,yes
+101945,Taste of Vitae,Combat,1,101945:COMBAT,yes
+101946,Tattoo Signal,Action,1,101946:ACTION,yes
+101947,Taunt the Caged Beast,Action,2,101947:ACTION:ani|101947:ACTION:ANI,yes
+101948,Telepathic Counter,Reaction,2,101948:REACTION:aus|101948:REACTION:AUS,yes
+101949,Telepathic Misdirection,Reaction,2,101949:REACTION:aus|101949:REACTION:AUS,yes
+101950,Telepathic Tracking,Combat,2,101950:COMBAT:aus|101950:COMBAT:AUS,yes
+101951,Telepathic Vote Counting,Action Modifier,2,101951:MODIFIER:aus|101951:MODIFIER:AUS,yes
+101952,Templar,Political Action,1,101952:POLITICAL,yes
+101953,Temple Hunting Ground,Master,1,101953:MASTER,yes
+101954,Temptation,Action,2,101954:ACTION:ser|101954:ACTION:SER,yes
+101955,Temptation of Greater Power,Master,1,101955:MASTER,yes
+101956,Tend the Flock,Master,1,101956:MASTER,yes
+101957,Tenebrous Form,Action Modifier,2,101957:MODIFIER:obt|101957:MODIFIER:OBT,yes
+101958,Tension in the Ranks,Master,1,101958:MASTER,yes
+101959,Terra Incognita,Reaction,1,101959:REACTION,yes
+102343,Terrifying Visage,Master,1,102343:MASTER,yes
+101960,Terror Frenzy,Combat,2,101960:COMBAT:ani|101960:COMBAT:ANI,yes
+101961,Terrorists,Ally,1,101961:ALLY,yes
+101962,"Textbook Damnation, The",Equipment,1,101962:EQUIPMENT,yes
+101963,Thadius Zho,Ally,1,101963:ALLY,yes
+101964,Thanks for the Donation,Action,1,101964:ACTION:dom,yes
+101965,Thaumaturgy,Master,1,101965:MASTER,yes
+101966,Theft of Vitae,Combat,2,101966:COMBAT:tha|101966:COMBAT:THA,yes
+101967,Their Master's Voice,Reaction,1,101967:REACTION,yes
+101968,Therbold Realty,Master,1,101968:MASTER,yes
+101969,Thicker than Blood,Master,1,101969:MASTER,yes
+101970,Thin Blood,Combat,2,101970:COMBAT:qui|101970:COMBAT:QUI,yes
+101971,Thin-Blooded Seer,Action,1,101971:ACTION,yes
+101972,Thing,Action,1,101972:ACTION,yes
+101973,Third Tradition: Progeny,Action,1,101973:ACTION,yes
+101974,Thirst,Event,1,101974:EVENT,yes
+101975,Those Who Endure Judge,Action Modifier,1,101975:MODIFIER,yes
+101976,Thoughts Betrayed,Combat,2,101976:COMBAT:dom|101976:COMBAT:DOM,yes
+101977,Threading the Path of Orpheus,Action,1,101977:ACTION,yes
+101978,Threats,Action Modifier,2,101978:MODIFIER:dom|101978:MODIFIER:DOM,yes
+101979,Three's a Crowd,Combat,1,101979:COMBAT,yes
+101980,Threestar Cab Company,Master,1,101980:MASTER,yes
+101981,Thrones Crumble,Action,2,101981:ACTION:ser|101981:ACTION:SER,yes
+101982,Thrown Gate,Combat,2,101982:COMBAT:pot|101982:COMBAT:POT,yes
+101983,Thrown Sewer Lid,Combat,2,101983:COMBAT:pot|101983:COMBAT:POT,yes
+101984,Tier of Souls,Action,2,101984:ACTION:ani|101984:ACTION:ANI,yes
+101985,Tinglestripe,Equipment,2,101985:EQUIPMENT:myt|101985:EQUIPMENT:MYT,yes
+101986,Tithings,Political Action,1,101986:POLITICAL,yes
+101987,Tomb of Rameses III,Master,1,101987:MASTER,yes
+101988,Tongue of the Serpent,Combat,2,101988:COMBAT:ser|101988:COMBAT:SER,yes
+101989,Toreador Grand Ball,Master,1,101989:MASTER,yes
+101990,Toreador Justicar,Political Action,1,101990:POLITICAL,yes
+101991,Toreador's Bane,Combat,3,101991:COMBAT:pre|101991:COMBAT:mel|101991:COMBAT:MEL,yes
+101992,Torment the Soul,Combat,2,101992:COMBAT:nec|101992:COMBAT:NEC,yes
+101993,Torn Signpost,Combat,2,101993:COMBAT:pot|101993:COMBAT:POT,yes
+101994,Torpid Blood,Event,1,101994:EVENT,yes
+101995,Torrent,Combat,2,101995:COMBAT:cel|101995:COMBAT:CEL,yes
+101996,Tortured Confession,Combat,1,101996:COMBAT,yes
+101997,Total Insanity,Action,2,101997:ACTION:dem|101997:ACTION:DEM,yes
+101998,Touch of Clarity,Action Modifier/Reaction,4,101998:MODIFIER:dem|101998:REACTION:dem|101998:MODIFIER:DEM|101998:REACTION:DEM,no
+102283,Touch of Oblivion,Combat,2,102283:COMBAT:obl|102283:COMBAT:OBL,yes
+101999,Touch of Pain,Reaction,2,101999:REACTION:pot|101999:REACTION:POT,yes
+102262,Touch of Valeren,Action/Combat,3,102262:ACTION:for|102262:COMBAT:for|102262:COMBAT:FOR,yes
+102000,Tourette's Voice,Reaction,3,102000:REACTION:aus|102000:REACTION:mel|102000:REACTION:MEL,yes
+102001,Tower of London,Master,1,102001:MASTER,yes
+102002,Toy Chest Test,Master,1,102002:MASTER,yes
+102003,Tracker's Mark,Combat,1,102003:COMBAT,yes
+102004,Tradition Upheld,Political Action,1,102004:POLITICAL,yes
+102005,Traditionalist,Master,1,102005:MASTER,yes
+102006,Tragic Love Affair,Master,1,102006:MASTER,yes
+102007,Trainer,Action,2,102007:ACTION:ani|102007:ACTION:ANI,yes
+102008,Tranquility,Combat,2,102008:COMBAT:dom|102008:COMBAT:DOM,yes
+102362,Tranquility Shield,Combat,2,102362:COMBAT:for|102362:COMBAT:FOR,yes
+102009,Transcendent Laibon,Master,1,102009:MASTER,yes
+102010,Transfer of Power,Political Action,1,102010:POLITICAL,yes
+102011,Transfusion,Action Modifier,3,102011:MODIFIER:nec|102011:MODIFIER:thn|102011:MODIFIER:THN,yes
+102012,Trap,Combat,1,102012:COMBAT,yes
+102013,Travelers Obey the Tenets,Action,1,102013:ACTION,yes
+102014,Treachery,Reaction,2,102014:REACTION:pre|102014:REACTION:PRE,yes
+102015,Treasured Samadji,Equipment,1,102015:EQUIPMENT,yes
+102016,Treat the Sick Mind,Action/Reaction,3,102016:ACTION:dem|102016:ACTION:obe|102016:REACTION:OBE,yes
+102017,"Treatment, The",Master,1,102017:MASTER,yes
+102018,Treaty of Laibach,Master,1,102018:MASTER,yes
+102019,Treaty of Tyre Enforced,Political Action,1,102019:POLITICAL,yes
+102020,Tremere Convocation,Master,1,102020:MASTER,yes
+102021,Tremere Justicar,Political Action,1,102021:POLITICAL,yes
+102022,Tribunal Judgment,Political Action,1,102022:POLITICAL,yes
+102023,Tribute to the Master,Master,1,102023:MASTER,yes
+102024,"Trick of the Danya, The",Action,1,102024:ACTION:chi,yes
+102025,Triole's Revenge,Action,1,102025:ACTION,yes
+102026,Trochomancy,Action Modifier,3,102026:MODIFIER:nec|102026:MODIFIER:aus+nec|102026:MODIFIER:AUS+NEC,yes
+102027,Trophy: Chosen,Master,1,102027:MASTER,yes
+102028,Trophy: Clan Respect,Master,1,102028:MASTER,yes
+102029,Trophy: Diablerie,Master,1,102029:MASTER,yes
+102030,Trophy: Discipline,Master,1,102030:MASTER,yes
+102031,Trophy: Domain,Master,1,102031:MASTER,yes
+102032,Trophy: Hunting Ground,Master,1,102032:MASTER,yes
+102033,Trophy: Library,Master,1,102033:MASTER,yes
+102034,Trophy: No Questions,Master,1,102034:MASTER,yes
+102035,Trophy: Progeny,Master,1,102035:MASTER,yes
+102036,Trophy: Retainers,Master,1,102036:MASTER,yes
+102037,Trophy: Revered,Master,1,102037:MASTER,yes
+102038,Trophy: Safe Passage,Master,1,102038:MASTER,yes
+102039,Trophy: Wealth,Master,1,102039:MASTER,yes
+102040,True Faith,Master,1,102040:MASTER,yes
+102041,True Love's Face,Action Modifier,2,102041:MODIFIER:obf+pre|102041:MODIFIER:OBF+PRE,yes
+102042,Trumped-Up Charges,Political Action,1,102042:POLITICAL,yes
+102284,Truth in Darkness,Reaction,2,102284:REACTION:obl|102284:REACTION:OBL,yes
+102043,Truth in Ink,Reaction,1,102043:REACTION,yes
+102044,Truth of a Thousand Lies,Action Modifier,2,102044:MODIFIER:ser|102044:MODIFIER:SER,yes
+102045,Truth of Blood,Action,2,102045:ACTION:aus+qui|102045:ACTION:AUS+QUI,yes
+102046,Tumnimos,Action,1,102046:ACTION,yes
+102047,Tunnel Runner,Ally,1,102047:ALLY,yes
+102048,Tutu the Doubly Evil One,Ally,1,102048:ALLY,yes
+102049,Twilight Camp,Master,1,102049:MASTER,yes
+102344,Twisted Bloodhound,Retainer,1,102344:RETAINER,yes
+102050,Twisted Forest,Master,1,102050:MASTER,yes
+102051,Twisting the Knife,Combat,2,102051:COMBAT:pot|102051:COMBAT:POT,yes
+102052,Two Wrongs,Master,1,102052:MASTER,yes
+102053,Tye Cooper,Ally,1,102053:ALLY,yes
+102054,Typhonic Beast,Combat,3,102054:COMBAT:ser|102054:COMBAT:pot+ser|102054:COMBAT:POT+SER,yes
+102306,Umbrous Clutch,Action,2,102306:ACTION:obl|102306:ACTION:OBL,yes
+102055,Unacceptable Appearance,Master,1,102055:MASTER,yes
+102056,Unburdening the Bestial Soul,Action,3,102056:ACTION:ani|102056:ACTION:obe|102056:ACTION:OBE,yes
+102057,"Uncoiling, The",Event,1,102057:EVENT,yes
+102058,Uncontrollable Rage,Action Modifier,2,102058:MODIFIER:pro|102058:MODIFIER:PRO,yes
+102059,Uncontrolled Impulse,Action Modifier,1,102059:MODIFIER,yes
+102060,Undead Persistence,Combat,2,102060:COMBAT:for|102060:COMBAT:FOR,yes
+102061,Undead Strength,Combat,2,102061:COMBAT:pot|102061:COMBAT:POT,yes
+102062,Under My Skin,Action Modifier,3,102062:MODIFIER:obf|102062:MODIFIER:thn|102062:MODIFIER:THN,yes
+102063,Under Siege,Action,1,102063:ACTION,yes
+102064,Under the Skin,Action Modifier,2,102064:MODIFIER:aus+pre|102064:MODIFIER:AUS+PRE,yes
+102065,Underbridge Stray,Ally,2,102065:ALLY:ani|102065:ALLY:ANI,yes
+102066,Underworld Hunting Ground,Master,1,102066:MASTER,yes
+102067,Undue Influence,Action,3,102067:ACTION:chi|102067:ACTION:pre|102067:ACTION:qui,yes
+102068,Undying Tenacity,Combat,2,102068:COMBAT:for|102068:COMBAT:FOR,yes
+102069,Undying Thirst,Reaction,1,102069:REACTION,yes
+102070,Unexpected Coalition,Action Modifier/Reaction,2,102070:MODIFIER|102070:REACTION,no
+102071,Unflinching Persistence,Combat,2,102071:COMBAT:for|102071:COMBAT:FOR,yes
+102072,Unholy Penance,Combat,2,102072:COMBAT:pre|102072:COMBAT:PRE,yes
+102073,Unholy Radiance,Action Modifier/Reaction,2,102073:MODIFIER|102073:REACTION,no
+102345,Unholy Sacrament,Master,1,102345:MASTER,yes
+102074,Unity,Master,1,102074:MASTER,yes
+102075,University Hunting Ground,Master,1,102075:MASTER,yes
+102076,Unleash Hell's Fury,Action,2,102076:ACTION:dai|102076:ACTION:DAI,yes
+102077,Unleash the Hounds,Action Modifier,3,102077:MODIFIER:dom|102077:MODIFIER:vis|102077:MODIFIER:VIS,yes
+102263,Unleashing the Bestial Soul,Action Modifier,2,102263:MODIFIER:dom|102263:MODIFIER:DOM,yes
+102078,Unlicensed Taxicab,Equipment,1,102078:EQUIPMENT,yes
+102079,"Unmasking, The",Event,1,102079:EVENT,yes
+102080,Unnatural Disaster,Master,1,102080:MASTER,yes
+102081,Unseen Hibernation,Reaction,3,102081:REFLEX:abo|102081:REACTION:abo|102081:REACTION:ABO,yes
+102346,Unthinkable Humiliation,Action Modifier,4,102346:MODIFIER:pot|102346:MODIFIER:pre|102346:MODIFIER:POT|102346:MODIFIER:PRE,yes
+102082,Unwholesome Bond,Action,2,102082:ACTION:san|102082:ACTION:SAN,yes
+102083,Up Yours!,Combat,1,102083:COMBAT,yes
+102084,Uptown Hunting Ground,Master,1,102084:MASTER,yes
+102085,Urban Jungle,Event,1,102085:EVENT,yes
+102086,Using the Advantage,Master,1,102086:MASTER,yes
+102087,Vagabond Mystic,Ally,1,102087:ALLY,yes
+102245,"Valerie Diaz, Antigen Commander",Ally,1,102245:ALLY,yes
+102088,Vampiric Disease,Master,1,102088:MASTER,yes
+102089,Vampiric Speed,Combat,2,102089:COMBAT:cel|102089:COMBAT:CEL,yes
+102090,Vanish from the Mind's Eye,Combat,2,102090:COMBAT:obf|102090:COMBAT:OBF,yes
+102091,Vascular Explosion,Combat,2,102091:COMBAT:qui|102091:COMBAT:QUI,yes
+102092,Vast Wealth,Master,1,102092:MASTER,yes
+102093,Vaticination,Action,1,102093:ACTION,yes
+102094,Vaulderie,Action,1,102094:ACTION,yes
+102095,Veil of Darkness,Event,1,102095:EVENT,yes
+102096,Veil of Silence,Reaction,2,102096:REACTION:qui|102096:REACTION:QUI,yes
+102097,Veil the Legions,Action Modifier,2,102097:MODIFIER:obf|102097:MODIFIER:OBF,yes
+102098,Veiled Sight,Reaction,2,102098:REACTION:chi|102098:REACTION:CHI,yes
+102099,Veles' Hunt,Political Action,1,102099:POLITICAL,yes
+102100,Velvet Tongue,Action Modifier/Reaction,4,102100:MODIFIER:ser|102100:REACTION:ser|102100:MODIFIER:SER|102100:REACTION:SER,no
+102101,Vendetta,Reaction,1,102101:REACTION,yes
+102102,Veneficorum Artum Sanguis,Equipment,1,102102:EQUIPMENT,yes
+102103,Veneficti,Ally,1,102103:ALLY,yes
+102104,Venenation,Action Modifier,2,102104:MODIFIER:ser|102104:MODIFIER:SER,yes
+102105,Venetian Conference,Reaction,1,102105:REACTION,yes
+102106,Vengeance of Samiel,Combat,3,102106:COMBAT:pot|102106:COMBAT:val|102106:COMBAT:VAL,yes
+102107,Vengeful Spirit,Retainer,1,102107:RETAINER,yes
+102108,Ventrue Directorate Assembly,Master,1,102108:MASTER,yes
+102109,Ventrue Headquarters,Master,1,102109:MASTER,yes
+102110,Ventrue Investment,Master,1,102110:MASTER,yes
+102111,Ventrue Justicar,Political Action,1,102111:POLITICAL,yes
+102112,Vermin Channel,Action,1,102112:ACTION,yes
+102113,Vessel,Master,1,102113:MASTER,yes
+102114,Vial of Elder Vitae,Equipment,1,102114:EQUIPMENT,yes
+102115,Vial of Garou Blood,Equipment,1,102115:EQUIPMENT,yes
+102116,Vicissitude,Master,1,102116:MASTER,yes
+102117,Vicissitude Poisoning,Master,1,102117:MASTER,yes
+102118,Victim of Habit,Action,1,102118:ACTION,yes
+102119,Vigil: The Thin Line,Master,1,102119:MASTER,yes
+102120,Vigilance,Power,2,102120:MODIFIER|102120:REACTION,yes
+102121,Villein,Master,1,102121:MASTER,yes
+102122,Violation of Trust,Action,1,102122:ACTION,yes
+102123,Virolax Facility,Master,1,102123:MASTER,yes
+102124,Virtuosa,Action Modifier,3,102124:MODIFIER:pre|102124:MODIFIER:mel|102124:MODIFIER:MEL,yes
+102125,Visionquest,Action,1,102125:ACTION,yes
+102264,Visions of Gehenna,Action Modifier,2,102264:MODIFIER:pre|102264:MODIFIER:PRE,yes
+102265,Visions of Zapathasura,Reaction,2,102265:REACTION:obf+pre|102265:REACTION:OBF+PRE,yes
+102126,Visit from the Capuchin,Master,1,102126:MASTER,yes
+102127,Vitae Block,Combat,3,102127:COMBAT:ani|102127:COMBAT:obe|102127:COMBAT:OBE,yes
+102128,Vivienne Géroux,Ally,1,102128:ALLY,yes
+102129,Voice of Madness,Reaction,2,102129:REACTION:dem|102129:REACTION:DEM,yes
+102130,Voices of the Castle,Reaction,3,102130:REACTION:tha|102130:REACTION:vis|102130:REACTION:VIS,yes
+102266,Voracious Vermin,Combat,2,102266:COMBAT:ani|102266:COMBAT:ANI,yes
+102131,Voter Captivation,Action Modifier,2,102131:MODIFIER:pre|102131:MODIFIER:PRE,yes
+102132,Vox Domini,Master,1,102132:MASTER,yes
+102133,Vox Senis,Master,1,102133:MASTER,yes
+102363,"Vozhd of Gravesend, The",Ally,1,102363:ALLY,yes
+102364,"Vozhd of Juiz de Fora, The",Ally,1,102364:ALLY,yes
+102267,"Vozhd of Sofia, The",Ally,1,102267:ALLY,yes
+102365,"Vozhd of Szczecin, The",Ally,1,102365:ALLY,yes
+102134,Vulnerability,Master,1,102134:MASTER,yes
+102135,Vulture's Buffet,Action,3,102135:ACTION:obf|102135:ACTION:spi|102135:ACTION:SPI,yes
+102136,Waiting Game,Event,1,102136:EVENT,yes
+102137,Wake with Evening's Freshness,Reaction,1,102137:REACTION,yes
+102138,Walk of Caine,Action Modifier,2,102138:MODIFIER:san|102138:MODIFIER:SAN,yes
+102139,Walk of Flame,Combat,2,102139:COMBAT:tha|102139:COMBAT:THA,yes
+102140,Walk through Arcadia,Action Modifier,1,102140:MODIFIER,yes
+102141,Walks-With-Might,Ally,1,102141:ALLY,yes
+102347,Wall of Filth,Combat,4,102347:COMBAT:pro|102347:COMBAT:tha|102347:COMBAT:PRO|102347:COMBAT:THA,yes
+102142,"Wall Street Night, Financial Newspaper",Master,1,102142:MASTER,yes
+102143,Wanderer's Counsel,Action Modifier/Reaction,3,102143:MODIFIER:1|102143:REACTION|102143:MODIFIER:2,yes
+102144,War Ghoul,Ally,1,102144:ALLY,yes
+102348,War of Ages,Political Action,1,102348:POLITICAL,yes
+102145,War Party,Action,1,102145:ACTION,yes
+102146,Warding the Beast,Action,3,102146:ACTION:pre|102146:ACTION:val|102146:ACTION:VAL,yes
+102147,Warning Sirens,Master,1,102147:MASTER,yes
+102148,Warrant,Political Action,1,102148:POLITICAL,yes
+102216,"Warrens, The",Reaction,1,102216:REACTION,yes
+102149,Warsaw Station,Master,1,102149:MASTER,yes
+102150,Warzone Hunting Ground,Master,1,102150:MASTER,yes
+102151,Wash,Master,1,102151:MASTER,yes
+102152,"Wasserschloss Anif, Austria",Master,1,102152:MASTER,yes
+102153,Waste Management Operation,Master,1,102153:MASTER,yes
+102154,Watch Commander,Reaction,1,102154:REACTION,yes
+102155,Watchtower: Chosen are Called,Master,1,102155:MASTER,yes
+102156,Watchtower: Four Ride Forth,Master,1,102156:MASTER,yes
+102157,Watchtower: Greatest Fall,Political Action,1,102157:POLITICAL,yes
+102158,Watchtower: The Wolves Feed,Master,1,102158:MASTER,yes
+102159,Waters of Duat,Action,1,102159:ACTION,yes
+102160,Wave of Insanity,Action,2,102160:ACTION:dem|102160:ACTION:DEM,yes
+102161,Wave of Lethargy,Combat,2,102161:COMBAT:qui|102161:COMBAT:QUI,yes
+102162,Waxen Poetica,Equipment,1,102162:EQUIPMENT,yes
+102163,Weakness,Combat,2,102163:COMBAT:qui|102163:COMBAT:QUI,yes
+102164,Weather Control,Combat,2,102164:COMBAT:tha|102164:COMBAT:THA,yes
+102165,Web of Knives Recruit,Action,1,102165:ACTION,yes
+102166,Week of Nightmares,Master,1,102166:MASTER,yes
+102167,Weeping Stone,Master,1,102167:MASTER,yes
+102168,Weigh the Heart,Action Modifier,2,102168:MODIFIER:aus+ser|102168:MODIFIER:AUS+SER,yes
+102169,Weighted Walking Stick,Combat,1,102169:COMBAT,yes
+102170,Weirding Stone,Equipment,1,102170:EQUIPMENT,yes
+102171,Well-Aimed Car,Combat,2,102171:COMBAT:pot|102171:COMBAT:POT,yes
+102172,Well-Marked,Action,1,102172:ACTION,yes
+102173,Wendell Delburton,Ally,1,102173:ALLY,yes
+102174,Werewolf Pack,Ally,1,102174:ALLY,yes
+102285,Where the Veil Thins,Action Modifier,2,102285:MODIFIER:obl|102285:MODIFIER:OBL,yes
+102175,Whispers from the Dead,Action,2,102175:ACTION:nec|102175:ACTION:NEC,yes
+102176,Whispers of the Nictuku,Master,1,102176:MASTER,yes
+102177,Whistling Up the Beast,Combat,3,102177:REFLEX:abo|102177:COMBAT:abo|102177:COMBAT:ABO,yes
+102178,White Nights Massacre,Event,1,102178:EVENT,yes
+102179,White Phosphorus Grenade,Equipment,1,102179:EQUIPMENT,yes
+102180,Wider View,Master,1,102180:MASTER,yes
+102181,"Wildebeest, The",Action,1,102181:ACTION,yes
+102182,Will of the Council,Action,1,102182:ACTION,yes
+102183,Will-o'-the-Wisp,Action Modifier,2,102183:MODIFIER:chi|102183:MODIFIER:CHI,yes
+102184,Winchester Mansion,Equipment,1,102184:EQUIPMENT,yes
+102185,Wind Dance,Combat,2,102185:COMBAT:tha|102185:COMBAT:THA,yes
+102186,Winged Second,Reaction,1,102186:REACTION:FLIGHT,yes
+102187,Wise Spider,Action,1,102187:ACTION,yes
+102188,Withering,Combat,3,102188:COMBAT:ani|102188:COMBAT:thn|102188:COMBAT:THN,yes
+102189,WMRH Talk Radio,Master,1,102189:MASTER,yes
+102190,Wolf Claws,Combat,2,102190:COMBAT:pro|102190:COMBAT:PRO,yes
+102191,Wolf Companion,Retainer,2,102191:RETAINER:ani|102191:RETAINER:ANI,yes
+102192,Wooden Stake,Equipment,1,102192:EQUIPMENT,yes
+102193,"World's a Canvas, The",Action,3,102193:ACTION:dom|102193:ACTION:obf|102193:ACTION:vic,yes
+102194,Wormwood,Event,1,102194:EVENT,yes
+102195,Wrath of the Inner Circle,Political Action,1,102195:POLITICAL,yes
+102196,Writ of Acceptance,Equipment,1,102196:EQUIPMENT,yes
+102197,Wrong and Crosswise,Reaction,2,102197:REACTION:dem|102197:REACTION:DEM,yes
+102198,XTC-Laced Blood,Master,1,102198:MASTER,yes
+102199,Yawp Court,Master,1,102199:MASTER,yes
+102200,Year of Fortune,Political Action,1,102200:POLITICAL,yes
+102201,Yoruba Shrine,Master,1,102201:MASTER,yes
+102202,Young Bloods,Ally,1,102202:ALLY,yes
+102203,Zaire River Ferry,Equipment,1,102203:EQUIPMENT,yes
+102204,Zapaderin,Action Modifier,1,102204:MODIFIER,yes
+102205,Zephyr,Action Modifier,2,102205:MODIFIER:cel|102205:MODIFIER:CEL,yes
+102206,Zillah's Tears,Action,1,102206:ACTION,yes
+102207,Zillah's Valley,Master,1,102207:MASTER,yes
+102208,Zip Gun,Combat,1,102208:COMBAT,yes
+102209,Zip Line,Action,1,102209:ACTION,yes
+102210,Zombie,Retainer,1,102210:RETAINER,yes
+102211,Zoning Board,Master,1,102211:MASTER,yes
+102212,Zoo Hunting Ground,Master,1,102212:MASTER,yes

@@ -1,0 +1,2 @@
+# Generated CSV files intentionally use CRLF record separators.
+csv/modes/*.csv text eol=crlf

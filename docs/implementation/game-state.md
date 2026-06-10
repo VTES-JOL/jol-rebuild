@@ -47,11 +47,59 @@ The turn string has the format `"<round>.<seat>"`:
 
 ### Transfer budget
 
-`transfersRemaining` is a game-level integer tracking how many influence transfers the current player has left this turn. It is set when `AdvancePhase` enters `INFLUENCE`, using the formula:
-- Round 1: `min(seat, 4)` (seat 1 → 1 Transfer, seat 2 → 2 Transfer, seat 3 → 3 Transfer, seat 4+ → 4 Transfer)
+`transfersRemaining` is a game-level integer tracking how many influence transfers the current player has left this turn. It is set when `AdvancePhase` enters `INFLUENCE`, using a formula that depends on the game format:
+
+V5 is mechanically identical to STANDARD — same formula, same phase rules, same player count (4–5). The only format-level difference is deck validation. DUEL shares the same mechanics except for the starting-transfer exception below.
+
+**STANDARD / V5:**
+- Round 1: `min(seat, 4)` (seat 1 → 1 transfer, seat 2 → 2 transfers, seat 3 → 3 transfers, seat 4+ → 4 transfers)
 - Round 2+: always 4
 
+**DUEL:**
+- Round 1, seat 1: 3 transfers
+- All other influence phases: 4 transfers
+
 It is reset to 0 on `NextTurn`. It is sent to clients via `GameStateDto.transfersRemaining`.
+
+### Enforced-mode phase state machine
+
+In rules-enforced mode phase progression is driven by protocol events. `AdvancePhase` and `NextTurn` are permissive-only utilities; in enforced mode the server transitions phases automatically when the current phase resolves. Each phase has defined entry effects, available actions, and an explicit exit condition.
+
+**UNLOCK phase**
+1. Auto-unlock: `buildUnlockEffects` runs — all locked cards in READY and TORPOR belonging to the current player unlock.
+2. Infernal vampires: any infernal vampire still locked after auto-unlock requires a decision — controller pays 1 pool to unlock it, or it stays locked (`InfernalUnlock` command).
+3. Contest upkeep: for each unique card the current player contests, pay 1 pool or yield (`YieldContest`). For each contested title, pay 1 blood or yield.
+4. Edge pool bonus: if the current player holds the Edge, they may claim +1 pool (`CollectEdgePool`), or decline.
+5. Withdrawal check: if the current player has `withdrawalDeclared` set, check whether conditions were met (no pool/blood spent, no minions entered combat since last UNLOCK); if so, award 1 VP and exit without oust.
+6. Exit: phase transitions to MASTER once all entry steps are resolved.
+
+**MASTER phase**
+- Entry: `masterActionsRemaining = 1`.
+- Play one MASTER card from HAND per action. Trifle resolves: `masterActionsRemaining += 1` (one trifle bonus per master phase). Out-of-turn masters played by other Methuselahs consume that player's `masterActionsRemaining` on their next master phase.
+- Exit: `masterActionsRemaining = 0`, or current player explicitly ends phase.
+
+**MINION phase**
+- Each ready unlocked minion may take one independent action via `DeclareAction`. Multiple actions occur sequentially. Each completed action cycle (declare → block window → resolve → after-resolution) stands alone; phase ends when the current player passes with no action pending.
+
+**INFLUENCE phase**
+- Entry: `transfersRemaining` set per seat/round formula (see Transfer budget above).
+- Available: `TransferBlood`, `DrawCryptToUncontrolled`, `InfluenceCard`, `MoveToCrypt` — all gated on `transfersRemaining` and current player identity.
+- Exit: current player passes or budget exhausted.
+
+**DISCARD phase**
+- Entry: `discardActionsRemaining = 1`.
+- Per discard action: discard one card from HAND and draw to replace, or play one EVENT card. Effects can grant additional discard actions; max one Event card per discard phase, and each Event card may be played only once per game.
+- Exit: `discardActionsRemaining = 0` or current player ends phase.
+
+### Phase accounting fields
+
+The following fields are added to `GameData` to support enforced phase protocol:
+
+| Field                     | Type                          | Description                                                                                                                                                                    |
+|---------------------------|-------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `masterActionsRemaining`  | `int`                         | Master phase action budget; set to 1 on MASTER phase entry; decremented per master card played; trifle play increments it                                                      |
+| `discardActionsRemaining` | `int`                         | Discard phase budget; set to 1 on DISCARD phase entry; decremented per discard action                                                                                          |
+| `nraActionsByCardId`      | `Map<String, Set<String>>`    | Per-minion NRA lock: card ID → set of locked action keys (`"BLEED"`, `"POLITICAL"`, named-card name); written when an action reaches resolution; cleared on `NextTurn` — see [Actions](./actions.md) |
 
 ### Impulse and sequencing windows
 
@@ -76,12 +124,15 @@ The acting Methuselah starts with impulse and may play any number of legal cards
 
 #### Command gating
 
-While an impulse window is active, protocol-level game action commands are gated: only the player whose name matches `currentImpulseHolder` may execute commands that represent playing a card or using an effect in that window. Commands exempt from this gate:
+While an impulse or sequencing window is active, protocol-level game action commands are gated: only the player whose name matches the active priority holder may execute commands that represent playing a card or using an effect in that window. The server should expose this through the `ActiveTimingWindow` model described in [Timing Windows](./timing-windows.md#active-timing-window). At most one card/effect timing surface should be active at once.
 
-| Command                                                                     | Reason                |
-|-----------------------------------------------------------------------------|-----------------------|
-| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself |
-| `SetGameNotes` / `SetCardNotes` / `SetChoice`                               | Administrative / meta |
+Commands exempt from this gate:
+
+| Command                                                                     | Reason                   |
+|-----------------------------------------------------------------------------|--------------------------|
+| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself    |
+| `PassSequencing` / `CloseSequencingWindow`                                  | Sequencing system itself |
+| `SetGameNotes` / `SetCardNotes` / `SetChoice`                               | Administrative / meta    |
 
 `AdvancePhase` and `NextTurn` do not create replacement impulse windows. In enforced mode, they should not be used to bypass an open protocol window; the enclosing action/combat/referendum flow should close or abort first.
 
@@ -173,7 +224,7 @@ Non-owning viewers receive **no entry** in the card map for cards in hidden regi
 
 `VAMPIRE`, `IMBUED`, `MASTER`, `ACTION`, `MODIFIER`, `REACTION`, `COMBAT`, `ALLY`, `RETAINER`, `POLITICAL`, `EQUIPMENT`, `EVENT`, `LOCATION`, `NONE`
 
-`CONVICTION` and `POWER` are present in the card CSV but currently map to `NONE` — enum entries are pending addition. `LOCATION` exists in the enum but is unreachable via normal CSV import (location cards are typed as `MASTER` in the data). See [Card Play Rules](../rules/card-play.md) for per-type phase constraints.
+`CONVICTION` and `POWER` exist in the `CardType` enum but `GameInitService.toCardType()` does not yet map to them — cards of these types import as `NONE`. `LOCATION` exists in the enum but is also unreachable via normal CSV import (location cards are typed as `MASTER` in the data). See [Card Play](./card-play.md#missing-enum-values) for the full list of pending mappings.
 
 ---
 
@@ -229,16 +280,16 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 
 ### Card movement
 
-| Command            | Fields (besides `gameId`)                                 | Source → Target                                          | Description                                                                                                                                                  | Phase       |
-|--------------------|-----------------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| `PlayCard`         | `ref`, `targetPlayerName`, `targetRegionType`             | `HAND` or `RESEARCH` → any (default: owner `ASH_HEAP`)   | Move a card to a target region; discards if no target given. Phase-gated per card type — see [Card Play Rules](../rules/card-play.md). **Not yet enforced.** |             |
-| `MoveCard`         | `ref`, `targetPlayerName`, `targetRegionType`, `position` | any → any                                                | Move a card to any region at a given position                                                                                                                |             |
-| `AttachCard`       | `ref`, `targetRef`                                        | any → child of target card (typically `READY`)           | Attach a card to another card (e.g., retainer to vampire)                                                                                                    |             |
-| `InfluenceCard`    | `ref`                                                     | `UNCONTROLLED` → owner `READY`                           | Move a fully influenced vampire/imbued to the Ready region. Actor is the current player, `counters ≥ capacity > 0`. Silently no-ops otherwise.               | `INFLUENCE` |
-| `MoveToCrypt`      | `ref`                                                     | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)                                                                                                              |             |
-| `MoveToTorpor`     | `ref`                                                     | `READY` → owner `TORPOR`                                 | Move a minion to Torpor                                                                                                                                      |             |
-| `RescueFromTorpor` | `ref`                                                     | `TORPOR` → owner `READY`                                 | Move a minion from Torpor to Ready                                                                                                                           |             |
-| `BurnMinion`       | `ref`                                                     | `READY` or `TORPOR` → owner `ASH_HEAP`                   | Remove a minion from play entirely                                                                                                                           |             |
+| Command            | Fields (besides `gameId`)                                 | Source → Target                                          | Description                                                                                                                                                                                            | Phase       |
+|--------------------|-----------------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `PlayCard`         | `ref`, `targetPlayerName`, `targetRegionType`             | `HAND` or `RESEARCH` → active workflow destination       | Play a card through the active timing window. Source, phase, type, actor, priority, mode timing, cost, replacement, and destination are enforced by [Card Play](./card-play.md). **Not yet enforced.** |             |
+| `MoveCard`         | `ref`, `targetPlayerName`, `targetRegionType`, `position` | any → any                                                | Move a card to any region at a given position                                                                                                                                                          |             |
+| `AttachCard`       | `ref`, `targetRef`                                        | any → child of target card (typically `READY`)           | Attach a card to another card (e.g., retainer to vampire)                                                                                                                                              |             |
+| `InfluenceCard`    | `ref`                                                     | `UNCONTROLLED` → owner `READY`                           | Move a fully influenced vampire/imbued to the Ready region. Actor is the current player, `counters ≥ capacity > 0`. Silently no-ops otherwise.                                                         | `INFLUENCE` |
+| `MoveToCrypt`      | `ref`                                                     | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)                                                                                                                                                        |             |
+| `MoveToTorpor`     | `ref`                                                     | `READY` → owner `TORPOR`                                 | Move a minion to Torpor                                                                                                                                                                                |             |
+| `RescueFromTorpor` | `ref`                                                     | `TORPOR` → owner `READY`                                 | Move a vampire from Torpor to Ready                                                                                                                                                                    |             |
+| `BurnMinion`       | `ref`                                                     | `READY` or `TORPOR` → owner `ASH_HEAP`                   | Remove a minion from play entirely                                                                                                                                                                     |             |
 
 ### Card state
 
@@ -253,17 +304,26 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `ContestCard`      | `ref`                     | any                           | Mark a card as contested                                                                                                                                                                             | Any   |
 | `ClearContestCard` | `ref`                     | any                           | Clear the contested flag                                                                                                                                                                             | Any   |
 | `SetTitle`         | `ref`, `title`            | any (typically `READY`)       | Set or clear a vampire's title                                                                                                                                                                       | Any   |
+| `YieldContest`     | `ref`                     | `READY`                       | Yield a contested unique card or title to the ash heap rather than pay upkeep; removes card from play                                                                                               | `UNLOCK` |
+| `CollectEdgePool`  | `playerName`              | —                             | Claim the optional +1 pool from holding the Edge during the unlock phase                                                                                                                            | `UNLOCK` |
+| `InfernalUnlock`   | `ref`                     | `READY`                       | Pay 1 pool to unlock an infernal vampire during the unlock phase; if declined the vampire stays locked for the turn                                                                                 | `UNLOCK` |
+| `ConvertToAnarch`  | `ref`                     | `READY`                       | Convert a ready vampire to Anarch Independent; costs 2 blood, or 1 if controller already has another ready Anarch; updates vampire sect to `ANARCH`                                                | `MINION` |
+| `TransferControl`  | `ref`, `newControllerName` | `READY`                      | Reassign control of an in-play card to a different Methuselah; `CardData.controller` already exists                                                                                                | Any   |
 
 ### Player state
 
 | Command         | Fields (besides `gameId`) | Description                                                                                                                                                                                                                                                                                                         | Phase       |
 |-----------------|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| `SetPool`       | `playerName`, `amount`    | Set a player's pool to an absolute value                                                                                                                                                                                                                                                                            |             |
-| `TransferBlood` | `ref`, `amount`           | Transfer blood between controller's pool and a card. For `UNCONTROLLED` cards: restricted to the current player only; pool → card costs 1 transfer/blood; card → pool costs 2 transfers/blood. Silently no-ops if budget is insufficient.                                                                           | `INFLUENCE` |
-| `GainEdge`      | `playerName`              | Award the edge to a player                                                                                                                                                                                                                                                                                          |             |
-| `OustPlayer`    | `playerName`              | Mark a player as ousted; zeros their pool; awards predator 1 VP + 6 pool. If only one player remains, awards that survivor +1 VP and completes the game. See [Mechanics Gaps — Implementation Priority](./mechanics-gaps.md#implementation-priority) for remaining gaps (simultaneous oust, timeout, GW recording). |             |
-| `SetChoice`     | `playerName`, `choice`    | Set a player's choice flag                                                                                                                                                                                                                                                                                          |             |
-| `ReverseOrder`  | —                         | Toggle the order-of-play reversal flag                                                                                                                                                                                                                                                                              |             |
+| `SetPool`             | `playerName`, `amount`    | Set a player's pool to an absolute value                                                                                                                                                                                                                                                           |             |
+| `TransferBlood`       | `ref`, `amount`           | Transfer blood between controller's pool and a card. For `UNCONTROLLED` cards: restricted to the current player only; pool → card costs 1 transfer/blood; card → pool costs 2 transfers/blood. Silently no-ops if budget is insufficient.                                                          | `INFLUENCE` |
+| `GainEdge`            | `playerName`              | Award the edge to a player                                                                                                                                                                                                                                                                         |             |
+| `OustPlayer`          | `playerName`              | Mark a player as ousted; zeros their pool; awards predator 1 VP + 6 pool. If multiple players are ousted in the same resolution step, all predators whose prey is ousted receive 1 VP but pool awards are withheld. If only one player remains, awards that survivor +1 VP and completes the game. |             |
+| `DeclareTimeout`      | —                         | Trigger timeout scoring: all surviving players receive 0.5 VP each; the last survivor receives the full +1 survivor VP instead; Game Win awarded to the player with ≥ 2 VP who is the sole VP leader                                                                                              |             |
+| `AnnounceWithdrawal`  | `playerName`              | Flag player as attempting withdrawal; only legal during UNLOCK phase when the player's library is exhausted (hand not full at start of turn); sets `PlayerData.withdrawalDeclared = true`                                                                                                          | `UNLOCK`    |
+| `ConfirmWithdrawal`   | `playerName`              | Confirm successful withdrawal: player reached next UNLOCK without losing/spending pool/blood or having minions enter combat; award 1 VP; remove player from game without oust                                                                                                                      | `UNLOCK`    |
+| `CancelWithdrawal`    | `playerName`              | Cancel withdrawal attempt; player took a prohibited action after announcing; clears `withdrawalDeclared`                                                                                                                                                                                           |             |
+| `SetChoice`           | `playerName`, `choice`    | Set a player's choice flag                                                                                                                                                                                                                                                                         |             |
+| `ReverseOrder`        | —                         | Toggle the order-of-play reversal flag                                                                                                                                                                                                                                                             |             |
 
 ### Game state
 
@@ -284,138 +344,64 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 
 ---
 
-## Implementation Gaps
+## Architecture Notes
 
-### Turn and Phase Protocol
+### Enforced-mode phase transitions
 
-Rules-enforced mode currently has impulse/sequencing commands and the basic action skeleton, but most phase and state mutation commands are permissive-only. A complete enforced turn protocol is still missing.
+`AdvancePhase` and `NextTurn` are permissive-only. In enforced mode the server drives phase transitions automatically. The current gap is that `TurnPhaseHandler` opens a generic undirected impulse window on `AdvancePhase` / `NextTurn`; impulse must be opened only by protocol events (action declarations, combat steps, referendum polling), not by entering a phase. This auto-open must be removed when enforced phase protocol is added.
 
-| Mechanic                                                                                          | Notes                                                                                                                                                               |
-|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Legal phase progression in rules-enforced mode                                                    | `AdvancePhase` / `NextTurn` are permissive-only                                                                                                                     |
-| UNLOCK phase automatic effects without opening a generic impulse window                           | `TurnPhaseHandler` currently opens an undirected impulse window on every `AdvancePhase` / `NextTurn`; impulse is opened by protocol events, not by entering a phase |
-| MASTER phase action accounting and legal master-card play                                         | `masterActionsRemaining` not on `GameData` — see [Card Play](./card-play.md)                                                                                        |
-| MINION phase action loop until the current player has finished all legal minion actions           | Not enforced                                                                                                                                                        |
-| INFLUENCE phase transfer budget and influence actions in rules-enforced mode                      | `TransferBlood` and `InfluenceCard` are permissive-only                                                                                                             |
-| DISCARD phase draw-to-hand-size, event play, or discard action in rules-enforced mode             | Not enforced                                                                                                                                                        |
-| Phase advancement blocked while action, combat, referendum, impulse, or sequencing window is open | Not enforced                                                                                                                                                        |
+### Influence phase implementation status
 
-**Proposed work:** Remove phase-level auto impulse windows; open impulse only from protocol events (action/block exchanges, combat steps, referendum polling, card/effect timing conflicts). Add phase-specific enforced commands or server transitions for each phase.
+Transfer budget logic is already implemented and gates `TransferBlood`, `DrawCryptToUncontrolled`, and `InfluenceCard`. These commands are currently permissive-only; in enforced mode they need to be promoted to enforced-only with the same guards.
 
-### Influence Phase
+| Command / mechanic                                                                                          | Status                                                          |
+|-------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------|
+| Transfer budget 1/2/3/4 by seat (STANDARD/V5); DUEL seat-1 round-1 = 3                                     | Budget computed in `AdvancePhase`; permissive-only today        |
+| Pool → UNCONTROLLED 1 transfer/blood; UNCONTROLLED → pool 2 transfers/blood                                 | Guarded in `TransferBlood`; permissive-only today               |
+| `DrawCryptToUncontrolled` — 4 transfers + 1 pool                                                            | Implemented permissive                                          |
+| `MergeAdvanced` — merge base + advanced vampire of same name                                                | Implemented permissive                                          |
 
-**Implemented (permissive mode):**
+### Sequencing and impulse integration
 
-| Mechanic                                                                                | Implementation                                                         | Remaining gap                                                        |
-|-----------------------------------------------------------------------------------------|------------------------------------------------------------------------|----------------------------------------------------------------------|
-| Transfer budget: 1/2/3/4 by seat in round 1; always 4 from round 2                      | `GameData.transfersRemaining` set by `AdvancePhase` on INFLUENCE entry | `AdvancePhase` is permissive-only; rules-enforced equivalent missing |
-| Pool → UNCONTROLLED costs 1 transfer/blood; UNCONTROLLED → pool costs 2 transfers/blood | `TransferBlood` guard                                                  | Permissive-only                                                      |
-| `DrawCryptToUncontrolled` — 4 transfers + 1 pool to pull from crypt                     | Implemented (permissive)                                               | Enforced-mode equivalent missing                                     |
-| `MergeAdvanced` — merge base + advanced vampire                                         | Implemented (permissive; validates name + one advanced)                | Enforced-mode equivalent missing                                     |
+`ImpulseState`, `SequencingWindowState`, and all pass/claim/close commands are implemented. `ResolveAction` already opens the `AFTER_RESOLUTION` sequencing window.
 
-### Unlock Phase — Automatic Effects
+Remaining integration points:
+- `DeclareAction` should open the AS_PLAYED sequencing window (for action-card plays only), then the AS_ANNOUNCED sequencing window, before the block-attempt impulse window — see [Actions](./actions.md). Both `AS_PLAYED` and `ACTION_CONTINUING` must be added to their respective Java enums (`SequencingWindowType` and `ActionStatus`) before these paths can be wired.
+- Block-attempt stealth/intercept exchanges use the existing impulse window with `DIRECTED_SINGLE` or `UNDIRECTED` context. After all eligible Methuselahs decline block attempts, a final Blocks Declined pre-resolution impulse window remains open for legal action modifiers, reactions, and redirects before `ResolveAction` is available — see [Blocking](./blocking.md).
+- Combat timing steps each have their own impulse windows with `COMBAT` context — see [Combat](./combat.md).
+- Referendum polling uses its own sequencing rules — see [Referendums](./referendums.md).
+- `PlayCard` must validate against the current `ActiveTimingWindow` in addition to phase/type/actor gates — see [Card Play](./card-play.md#active-window-legality).
 
-| Mechanic                                                                    | Notes                                                                    |
-|-----------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| Edge holder may choose to gain +1 pool during unlock phase                  | Manual only; proposed `CollectEdgePool` command                          |
-| Contested unique cards cost 1 pool per unlock phase (auto-pay or yield)     | Manual only; proposed `YieldContest` command                             |
-| Contested titles cost 1 blood per unlock phase                              | Manual only                                                              |
-| Infernal vampire — controller pays 1 pool to unlock, or minion stays locked | `CardData.infernal` field exists; enforcement in `AdvancePhase` not done |
+### Game end detection
 
-**Proposed commands:** `YieldContest` (`ref`) — yield a contested card to ash heap; `CollectEdgePool` (`playerName`) — optional claim of +1 pool from holding the Edge.
+`OustPlayer` currently awards predator 1 VP + 6 pool and awards the last survivor +1 VP via `GameCompletedEffect`. The full algorithm for `handleOustPlayer` is:
 
-### Master Phase — Action Accounting
+1. Apply pool delta to ousted player (set to 0); emit `PlayerOustedEffect`.
+2. Collect all players with `pool ≤ 0` after this resolution step.
+3. For each such player P: award predator of P one VP. If P's predator is also being ousted in the same step, withhold the 6-pool award to the predator.
+4. If exactly one non-ousted player remains, award +1 VP to that survivor; emit `GameCompletedEffect`.
+5. If zero non-ousted players remain (last two ousted simultaneously), emit `GameCompletedEffect` with no survivor VP.
 
-| Mechanic                                                                           | Notes        |
-|------------------------------------------------------------------------------------|--------------|
-| Playing a Trifle master card grants one additional master phase action             | Not tracked  |
-| Out-of-turn master uses the playing Methuselah's next master phase action          | Not enforced |
-| No Methuselah may play more than one out-of-turn master between two of their turns | Not enforced |
+`DeclareTimeout` follows a separate path: award 0.5 VP to each surviving player; last survivor gets +1 VP instead; determine Game Win by ≥ 2 VP and sole VP leader; emit `GameCompletedEffect`.
 
-**Proposed additions:** Add `masterActionsRemaining` to `GameData` (default 1 on MASTER phase entry); add `ExtraMasterAction` command when a trifle is played.
+### Withdrawal state
 
-### Withdrawal
+`PlayerData.withdrawalDeclared: boolean` (new field). Withdrawal lifecycle:
+- `AnnounceWithdrawal`: set flag; validate UNLOCK phase and library exhaustion.
+- At each subsequent UNLOCK phase entry, check whether conditions are still met: if the player spent pool/blood or had minions enter combat since last UNLOCK, auto-cancel via `CancelWithdrawal`.
+- `ConfirmWithdrawal`: award 1 VP; remove player from seating order without triggering predator-VP or pool transfer.
 
-| Mechanic                                                                                                    | Notes           |
-|-------------------------------------------------------------------------------------------------------------|-----------------|
-| Announce withdrawal during unlock phase only if library is exhausted                                        | Not implemented |
-| Survive to next unlock phase without losing pool/blood, spending pool/blood, or having minions enter combat | Not implemented |
-| Gain 1 VP on confirmation                                                                                   | Not implemented |
+### Named counter types
 
-**Proposed commands:**
+`AddCounter` / `RemoveCounter` are generic today. Named counters (Corruption, Disease, Surge, Oath, Riddle, etc.) need a `counterType: String` field added to the command and a per-type counter map on `CardData`. Corruption has cross-player ownership semantics — it belongs to the placing Methuselah, not the card's controller. Aye and Orun (Laibon conviction cards) are attached master cards, not counters; the attachment mechanism already works.
 
-| Command              | Fields       | Description                                                         |
-|----------------------|--------------|---------------------------------------------------------------------|
-| `AnnounceWithdrawal` | `playerName` | Flags player as attempting withdrawal                               |
-| `ConfirmWithdrawal`  | `playerName` | Confirms survival; awards 1 VP; marks player withdrawn (not ousted) |
-| `CancelWithdrawal`   | `playerName` | Cancels withdrawal flag (player took a prohibited action)           |
+### Blood capacity overflow
 
-### Sequencing and Impulse
+In rules-enforced mode, `AddCounter` should cap `counters` at `capacity` when `capacity > 0` and the card is `VAMPIRE` or `IMBUED`. The same cap applies in `InfluenceCard` and `RescueFromTorpor`. Excess blood returns to the bank (no effect on other state).
 
-Partially implemented. `ImpulseState` and impulse commands exist; `SequencingWindowState`, `PassSequencing`, and `CloseSequencingWindow` are implemented; `ResolveAction` opens the `AFTER_RESOLUTION` window.
+### Minion traits
 
-**Known mismatches:**
-
-- `AdvancePhase` and `NextTurn` currently open a generic undirected impulse window. This must be removed once enforced phase protocol exists — impulse is opened by protocol events, not by entering a phase.
-- The `AS_ANNOUNCED` window type is defined in the enum but no command opens it — "as it is played" cancellers (e.g. Direct Intervention) have no dedicated engine window.
-- Full integration with combat and referendum protocols is still incomplete.
-
-**Relationship to other systems:**
-- `DeclareAction` should open an action/block impulse window with the appropriate context (`DIRECTED_SINGLE` or `UNDIRECTED`) — see [Actions](./actions.md).
-- Combat timing steps should open context-specific windows; combat is not a generic phase-level window — see [Combat](./combat.md).
-- Referendum polling should use referendum sequencing rules — see [Referendums](./referendums.md).
-
-### Anarch Conversion
-
-| Mechanic                                                                                                | Notes           |
-|---------------------------------------------------------------------------------------------------------|-----------------|
-| Converting a ready vampire to Anarch costs 2 blood, or 1 if controller already has another ready Anarch | Not implemented |
-| Converted vampire becomes Anarch independent                                                            | Not implemented |
-
-**Proposed command:** `ConvertToAnarch` (`ref`) — pay blood cost (checking for existing Anarch discount); update vampire sect to `ANARCH`.
-
-### Game End Detection
-
-`OustPlayer` awards predator 1 VP + 6 pool and awards the last survivor +1 VP; `GameCompletedEffect` fires when one player remains. The following remain missing:
-
-| Mechanic                                                                                                    | Notes                                                                                      |
-|-------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
-| Automatic oust detection when pool reaches 0 from any effect                                                | `PlayerData.isOusted()` derives from pool ≤ 0 but no rules-enforced transition triggers it |
-| Simultaneous oust — predators whose prey was ousted receive VP; those also ousted do not receive the 6 pool | Not checked                                                                                |
-| Timeout scoring — all surviving players gain 0.5 VP; no GW awarded                                          | No mechanism                                                                               |
-| GW winner recording — player with most VP at game end (even if ousted) should be written to the game record | `GameCompletedEffect` fires but no GW field is written                                     |
-| Tournament result propagation — completed game results not ingested back into tournament standings          | Not implemented                                                                            |
-
-### Named Counter Types
-
-`AddCounter` / `RemoveCounter` are generic. Several counter types have specific semantics:
-
-| Counter type                                          | Mechanic                                                                                |
-|-------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| **Corruption**                                        | Cross-player ownership — belongs to the placing Methuselah, not the target's controller |
-| **Disease / Surge / Oath / Riddle / Phobia / Poison** | Named counter types used by specific cards; must not be confused with blood counters    |
-
-**Proposed work:** Add a `counterType` field to `AddCounter` / `RemoveCounter` (or a per-type counter map on `CardState`) so cards can query and spend counters by name.
-
-**Aye and Orun (Laibon conviction cards)** are master cards placed on a Laibon Imbued via `AttachCard` — not counters. The attachment mechanism already works; the gap is in card-text parsing for effects that count attached Aye or Orun cards.
-
-### Minion Traits
-
-Minion traits are part of the general card keyword model. `CardData.infernal` exists today, but the broader parsed trait model and related enforcement hooks are missing.
-
-See [Card Keywords](./card-keywords.md) for proposed `CardData` fields and parsing. Game-state enforcement still needs to apply trait-driven automatic rules during unlock, influence, action declaration, and diablerie.
-
-### Card Control Transfer
-
-`CardData.controller` (a `PlayerData` reference, distinct from `owner`) already exists and is transmitted as `controllerName` in `GameStateDto`. It is initialised to the owner when cards are built. No command can change controller mid-game.
-
-**Proposed command:** `TransferControl` (`playerName`, `ref`, `newControllerName`) — explicitly reassign control of an in-play card to a different Methuselah.
-
-### Blood Capacity Overflow
-
-`AddCounter` and `RemoveCounter` are generic and do not enforce a capacity ceiling. In rules-enforced mode, any blood gain that would push a vampire above their current capacity should silently cap at capacity and return excess to the bank.
-
-**Proposed work:** Add a capacity-overflow check in `CardStateHandler.handleAddCounter` (and in the `InfluenceCard` / `RescueFromTorpor` handlers) that trims `counters` to `capacity` when `capacity > 0` and the card type is `VAMPIRE` or `IMBUED`.
+`CardData.infernal` exists. The full trait model (Scarce, Slave, Sterile, Blood Cursed, etc.) and enforcement hooks are in [Card Keywords](./card-keywords.md). Game-state enforcement during unlock, influence, action declaration, and diablerie depends on those parsed fields being available.
 
 ---
 
