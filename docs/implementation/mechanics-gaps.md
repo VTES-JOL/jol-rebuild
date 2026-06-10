@@ -2,7 +2,7 @@
 
 > For the VTES rules that these gaps relate to, see [VTES Rules](../rules/README.md).
 
-Cross-reference of the [VEKN Rulebook](https://www.vekn.net/rulebook), [rulebook2024 maintained source](https://github.com/GiottoVerducci/rulebook2024/blob/main/README.md), and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) against the current JOL implementation. Source of truth for prioritising new commands and UI features.
+Cross-reference of the [VEKN Rulebook](https://www.vekn.net/rulebook), [rulebook2024 maintained source](https://github.com/GiottoVerducci/rulebook2024/blob/main/content.md), and [Detailed Play Summary](https://www.vekn.net/detailed-play-summary) against the current JOL implementation. Source of truth for prioritising new commands and UI features.
 
 **Status note:** many commands listed as implemented are currently **manual / permissive-mode support**, not full rules-enforced automation. The outstanding gaps are detailed in the individual implementation documents; this file provides the cross-reference index and implementation priority.
 

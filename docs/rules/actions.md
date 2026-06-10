@@ -34,16 +34,23 @@ Any minion may perform these actions without an action card. All actions except 
 
 Basic actions other than bleed are repeatable by the same minion in a turn. NRA does not apply to hunt, equip with different equipment, or recruit different allies/retainers.
 
+### Mandatory Actions
+
+Some actions are mandatory and must be performed before non-mandatory actions. A ready unlocked vampire with no blood must hunt as a mandatory action. If any of your minions have mandatory actions still to perform, none of your minions may perform a non-mandatory action.
+
+If multiple minions have mandatory actions, their controller chooses the order. A minion required to take a mandatory action cannot take any other action. If a minion has two or more different mandatory actions, or has one mandatory action they cannot take, that minion is stuck and cannot perform any action; this does not stop other minions from acting.
+
 ### Torpor-Related Actions
 
 Two additional basic actions involve minions in or adjacent to torpor. These are not in the table above because they have different eligibility requirements.
 
-| Action           | Who                                    | Default stealth | Effect                                                                                                                                                                                                                                                                                                      |
-|------------------|----------------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Leave Torpor** | Torpored vampire only                  | +1              | Costs 2 blood from the acting vampire. If the action succeeds, the vampire moves from torpor to the ready region. If blocked, no combat occurs — the blocking player's controller may instead choose to diablerize the torpored vampire. If they decline, the vampire stays in torpor and the action fails. |
-| **Rescue**       | Any ready minion (not the ally itself) | +1              | Moves a torpored ally controlled by this minion's controller from torpor to the ready region. No blood cost for the rescuing minion. NRA applies — a minion may rescue a given ally only once per turn.                                                                                                     |
+| Action           | Who                   | Default stealth                                         | Effect                                                                                                                                                                                                                                                                                                                     |
+|------------------|-----------------------|---------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Leave Torpor** | Torpored vampire only | +1                                                      | Costs 2 blood from the acting vampire. If the action succeeds, the vampire moves from torpor to the ready region. If blocked, no combat occurs — if the blocker is a vampire, the blocker may instead choose to diablerize the torpored vampire. If they decline or are an ally, the action fails with no cost paid.       |
+| **Rescue**       | Any ready vampire     | +1 if rescuing own vampire; +0 if rescuing another's    | Targets a vampire in torpor. Costs 2 blood, paid by the acting vampire, the rescued vampire, or split between them. If successful, moves the target vampire to the ready region; the rescued vampire does not lock or unlock from being rescued. If blocked, the acting vampire and blocking minion enter combat normally. |
+| **Diablerise**   | Any ready vampire     | +1 if targeting own vampire; +0 if targeting another's  | Targets a vampire in torpor. If successful, the target is diablerized; see [Combat § Diablerie](./combat.md#diablerie). If blocked, the acting vampire and blocking minion enter combat normally.                                                                                                                          |
 
-Leave Torpor is the only action a minion in torpor may take. Rescue applies only to allies (vampires in torpor cannot be rescued this way; they leave torpor through their own Leave Torpor action or via diablerie).
+Leave Torpor is the only action a minion in torpor may take. Rescue and diablerie are actions taken by ready vampires targeting a vampire in torpor.
 
 ### Blood Capacity Overflow
 
@@ -164,7 +171,7 @@ NRA is triggered at the **Complete Action** step: after block attempts are resol
 1. NRA fires; the acting minion is locked out of this action type for the rest of the turn.
 2. Then:
    - **Not blocked** -> pay cost -> resolve action.
-   - **Blocked** -> action card burned (cost not paid) -> blocker locks -> combat begins. If the acting minion is in torpor, there is no combat; the blocking player may choose to diablerize instead. See [Combat § Leave Torpor action](./combat.md#leave-torpor-action).
+   - **Blocked** -> action card burned (cost not paid) -> blocker locks -> combat begins. If the action is Leave Torpor, there is no combat; if the blocker is a vampire, the blocking player may choose to diablerize instead. See [Combat § Leave Torpor action](./combat.md#leave-torpor-action).
 
 ### Two Separate Tracking Mechanisms
 

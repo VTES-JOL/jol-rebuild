@@ -50,7 +50,7 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 
 | Command         | Fields                                        | Rules-enforced validation                                                                                            |
 |-----------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `DeclareAction` | `actorRef`, `actionType`, `targetPlayerName?` | MINION phase; current player; actor in READY, unlocked, not contested; NRA check                                     |
+| `DeclareAction` | `actorRef`, `actionType`, `targetPlayerName?` | MINION phase; current player; actor in READY, unlocked, not contested; mandatory-action gate; NRA check              |
 | `AttemptBlock`  | `blockerRef`                                  | Impulse window active; blocker controller = current impulse holder; blocker eligible — see [Blocking](./blocking.md) |
 | `ResolveAction` | —                                             | Blocks Declined pre-resolution window closed; action status = DURING_ACTION                                          |
 | `AbortAction`   | —                                             | Action in progress; cancels action, unlocks actor, clears all state                                                  |
@@ -114,6 +114,17 @@ After `AS_PLAYED` closes, or immediately for a basic action that did not play a 
 
 ---
 
+## Mandatory Action Gate
+
+Before accepting `DeclareAction`, compute the current player's mandatory actions. At minimum, each ready unlocked vampire with 0 blood has mandatory `HUNT`.
+
+- If no mandatory action exists, declaration proceeds normally.
+- If the actor has mandatory `HUNT`, only `actionType = HUNT` is legal for that actor.
+- If another minion has a mandatory action and the declared action is non-mandatory, reject the declaration.
+- If a minion has multiple different mandatory actions, or one mandatory action they cannot legally take, mark only that minion as stuck for action declaration. Other minions may still act, but non-mandatory actions remain blocked while any non-stuck mandatory action remains available.
+
+---
+
 ## No Repeat Action (NRA) Tracking
 
 NRA is tracked by `GameData.nraActionsByCardId: Map<String, Set<String>>` (cleared on `NextTurn`).
@@ -162,7 +173,7 @@ NRA locks persist through mid-turn unlocks.
 | `RECRUIT_ALLY`    | `CardMovedEffect(ally, actingPlayer, READY)` + add ally card ID to `GameData.recruitedThisTurn: Set<String>`; `DeclareAction` rejects an actor whose card ID is in this set; cleared on `NextTurn`                                                                                                           |
 | `POLITICAL`       | Open `ReferendumState` and suspend action completion until the referendum resolves — see [Referendums](./referendums.md)                                                                                                                                                                                     |
 | `LEAVE_TORPOR`    | `CardCounterChangedEffect(actor, -2)`; then `CardMovedEffect(actor, READY)` — actor must be in TORPOR and have ≥ 2 blood; if cost cannot be paid, action fizzles                                                                                                                                             |
-| `RESCUE`          | `CardMovedEffect(target, actingPlayer, READY)` — target specified in declaration; no blood cost for the rescuing minion                                                                                                                                                                                      |
+| `RESCUE`          | Pay 2 blood from actor, target, or split between them; then `CardMovedEffect(target, READY)` — target must be a vampire in TORPOR. If cost cannot be paid, action fizzles.                                                                                                                                   |
 | `DIABLERISE`      | Full diablerie sequence — see [Combat § Diablerie](./combat.md#diablerie)                                                                                                                                                                                                                                    |
 | `CUSTOM`          | No automatic engine effect; players handle manually                                                                                                                                                                                                                                                          |
 
@@ -192,15 +203,18 @@ For political actions, `ResolveAction(POLITICAL)` opens the referendum subworkfl
 
 For reference when enforcing stealth/intercept:
 
-| Action                               | Default stealth |
-|--------------------------------------|-----------------|
-| Bleed                                | +0              |
-| Hunt                                 | +1              |
-| Equip                                | +1              |
-| Employ Retainer                      | +1              |
-| Recruit Ally                         | +1              |
-| Political Action                     | +1              |
-| Leave Torpor (acting from torpor)    | +1              |
-| Rescue (targeted ally of controller) | +1              |
+| Action                                      | Default stealth |
+|---------------------------------------------|-----------------|
+| Bleed                                       | +0              |
+| Hunt                                        | +1              |
+| Equip                                       | +1              |
+| Employ Retainer                             | +1              |
+| Recruit Ally                                | +1              |
+| Political Action                            | +1              |
+| Leave Torpor (acting from torpor)           | +1              |
+| Rescue own vampire from torpor              | +1              |
+| Rescue another Methuselah's vampire         | +0              |
+| Diablerise own vampire in torpor            | +1              |
+| Diablerise another Methuselah's vampire     | +0              |
 
 Stealth defaults are additive with any modifiers played during the action.

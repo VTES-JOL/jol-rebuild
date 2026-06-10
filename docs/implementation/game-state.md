@@ -88,7 +88,7 @@ In rules-enforced mode phase progression is driven by protocol events. `AdvanceP
 
 **DISCARD phase**
 - Entry: `discardActionsRemaining = 1`.
-- Per discard action: discard one card from HAND and draw to replace, or play one EVENT card. Effects can grant additional discard actions; max one Event card per discard phase.
+- Per discard action: discard one card from HAND and draw to replace, or play one EVENT card. Effects can grant additional discard actions; max one Event card per discard phase, and each Event card may be played only once per game.
 - Exit: `discardActionsRemaining = 0` or current player ends phase.
 
 ### Phase accounting fields
@@ -288,7 +288,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `InfluenceCard`    | `ref`                                                     | `UNCONTROLLED` → owner `READY`                           | Move a fully influenced vampire/imbued to the Ready region. Actor is the current player, `counters ≥ capacity > 0`. Silently no-ops otherwise.                                                         | `INFLUENCE` |
 | `MoveToCrypt`      | `ref`                                                     | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)                                                                                                                                                        |             |
 | `MoveToTorpor`     | `ref`                                                     | `READY` → owner `TORPOR`                                 | Move a minion to Torpor                                                                                                                                                                                |             |
-| `RescueFromTorpor` | `ref`                                                     | `TORPOR` → owner `READY`                                 | Move a minion from Torpor to Ready                                                                                                                                                                     |             |
+| `RescueFromTorpor` | `ref`                                                     | `TORPOR` → owner `READY`                                 | Move a vampire from Torpor to Ready                                                                                                                                                                    |             |
 | `BurnMinion`       | `ref`                                                     | `READY` or `TORPOR` → owner `ASH_HEAP`                   | Remove a minion from play entirely                                                                                                                                                                     |             |
 
 ### Card state

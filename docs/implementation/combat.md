@@ -208,7 +208,9 @@ A vampire with unmended damage at the end of Step 5 moves to TORPOR via `CardMov
 - Is not ready: cannot take actions (except `LEAVE_TORPOR`), block, play reactions, or vote.
 - Is still controlled: passes through the unlock phase normally (unlocks unless infernal or otherwise restricted).
 
-`LEAVE_TORPOR` action: costs 2 blood from the torpored vampire at resolution. Stealth +1. If blocked, the blocking player may choose to diablerize instead of fight. If blocked and blocking player declines to diablerize: the acting vampire stays in torpor, the action fails (no cost paid).
+`LEAVE_TORPOR` action: costs 2 blood from the torpored vampire at resolution. Stealth +1. If blocked, no combat occurs. If the blocker is a vampire, the blocking player may choose to diablerize instead. If the blocker is an ally or the blocking player declines to diablerize, the acting vampire stays in torpor and the action fails with no cost paid.
+
+`RESCUE` action: actor must be a ready vampire and the target must be a vampire in TORPOR. Cost is 2 blood, paid by the acting vampire, the rescued vampire, or split between them. Stealth is +1 if both vampires have the same controller and +0 if they have different controllers. If successful, move the target to READY without locking or unlocking it; if blocked, the acting vampire and blocking minion enter combat normally.
 
 ---
 

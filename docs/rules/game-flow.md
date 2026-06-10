@@ -49,7 +49,7 @@ UNLOCK → MASTER → MINION → INFLUENCE → DISCARD
 | **MASTER**    | This player may play one master card from their hand, plus any extras gained from trifle effects.                                                                                                                                                                      |
 | **MINION**    | Each ready, unlocked minion may take one action. Block attempts, stealth/intercept exchanges, referendums, and combat all occur during this phase.                                                                                                                     |
 | **INFLUENCE** | This player may spend transfer tokens to move blood between their pool and uncontrolled crypt cards, and may move a fully influenced vampire into play.                                                                                                                |
-| **DISCARD**   | This player receives one discard phase action by default. A discard phase action may discard one card from hand and replace it, or play one Event card; effects may grant more discard phase actions, but no more than one Event card may be played per discard phase. |
+| **DISCARD**   | This player receives one discard phase action by default. A discard phase action may discard one card from hand and replace it, or play one Event card; effects may grant more discard phase actions, but no more than one Event card may be played per discard phase. Each Event card may be played only once per game. |
 
 ---
 

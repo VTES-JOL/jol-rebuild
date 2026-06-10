@@ -283,7 +283,16 @@ A vampire who cannot mend all their wounds at the end of damage resolution goes 
 - **Stealth:** +1 (standard action default).
 - **Blockable:** yes.
 - **If unblocked and cost paid:** vampire moves to the ready region and is no longer wounded.
-- **If blocked:** no combat. The blocking player's controller may choose to **diablerize** the torpored vampire. If they decline, the acting vampire stays in torpor and the action fails.
+- **If blocked:** no combat. If the blocker is a vampire, the blocking player's controller may choose to **diablerize** the torpored vampire. If they decline or the blocker is an ally, the acting vampire stays in torpor and the action fails.
+
+### Rescue action
+
+- **Actor:** any ready vampire.
+- **Cost:** 2 blood, paid by the acting vampire, the rescued vampire, or split between them.
+- **Target:** a vampire in torpor.
+- **Stealth:** +1 if the acting vampire and target have the same controller; +0 if they have different controllers.
+- **If unblocked and cost paid:** target vampire moves to the ready region and is no longer wounded. The rescued vampire does not lock or unlock because of being rescued.
+- **If blocked:** acting vampire and blocking minion enter combat normally.
 
 ### Diablerie
 
