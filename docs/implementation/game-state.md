@@ -124,12 +124,15 @@ The acting Methuselah starts with impulse and may play any number of legal cards
 
 #### Command gating
 
-While an impulse window is active, protocol-level game action commands are gated: only the player whose name matches `currentImpulseHolder` may execute commands that represent playing a card or using an effect in that window. Commands exempt from this gate:
+While an impulse or sequencing window is active, protocol-level game action commands are gated: only the player whose name matches the active priority holder may execute commands that represent playing a card or using an effect in that window. The server should expose this through the `ActiveTimingWindow` model described in [Timing Windows](./timing-windows.md#active-timing-window). At most one card/effect timing surface should be active at once.
 
-| Command                                                                     | Reason                |
-|-----------------------------------------------------------------------------|-----------------------|
-| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself |
-| `SetGameNotes` / `SetCardNotes` / `SetChoice`                               | Administrative / meta |
+Commands exempt from this gate:
+
+| Command                                                                     | Reason                   |
+|-----------------------------------------------------------------------------|--------------------------|
+| `OpenImpulseWindow` / `PassImpulse` / `ClaimImpulse` / `CloseImpulseWindow` | Impulse system itself    |
+| `PassSequencing` / `CloseSequencingWindow`                                  | Sequencing system itself |
+| `SetGameNotes` / `SetCardNotes` / `SetChoice`                               | Administrative / meta    |
 
 `AdvancePhase` and `NextTurn` do not create replacement impulse windows. In enforced mode, they should not be used to bypass an open protocol window; the enclosing action/combat/referendum flow should close or abort first.
 
@@ -277,16 +280,16 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 
 ### Card movement
 
-| Command            | Fields (besides `gameId`)                                 | Source → Target                                          | Description                                                                                                                                                  | Phase       |
-|--------------------|-----------------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
-| `PlayCard`         | `ref`, `targetPlayerName`, `targetRegionType`             | `HAND` or `RESEARCH` → any (default: owner `ASH_HEAP`)   | Move a card to a target region; discards if no target given. Phase-gated per card type — see [Card Play Rules](../rules/card-play.md). **Not yet enforced.** |             |
-| `MoveCard`         | `ref`, `targetPlayerName`, `targetRegionType`, `position` | any → any                                                | Move a card to any region at a given position                                                                                                                |             |
-| `AttachCard`       | `ref`, `targetRef`                                        | any → child of target card (typically `READY`)           | Attach a card to another card (e.g., retainer to vampire)                                                                                                    |             |
-| `InfluenceCard`    | `ref`                                                     | `UNCONTROLLED` → owner `READY`                           | Move a fully influenced vampire/imbued to the Ready region. Actor is the current player, `counters ≥ capacity > 0`. Silently no-ops otherwise.               | `INFLUENCE` |
-| `MoveToCrypt`      | `ref`                                                     | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)                                                                                                              |             |
-| `MoveToTorpor`     | `ref`                                                     | `READY` → owner `TORPOR`                                 | Move a minion to Torpor                                                                                                                                      |             |
-| `RescueFromTorpor` | `ref`                                                     | `TORPOR` → owner `READY`                                 | Move a minion from Torpor to Ready                                                                                                                           |             |
-| `BurnMinion`       | `ref`                                                     | `READY` or `TORPOR` → owner `ASH_HEAP`                   | Remove a minion from play entirely                                                                                                                           |             |
+| Command            | Fields (besides `gameId`)                                 | Source → Target                                          | Description                                                                                                                                                                                            | Phase       |
+|--------------------|-----------------------------------------------------------|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| `PlayCard`         | `ref`, `targetPlayerName`, `targetRegionType`             | `HAND` or `RESEARCH` → active workflow destination       | Play a card through the active timing window. Source, phase, type, actor, priority, mode timing, cost, replacement, and destination are enforced by [Card Play](./card-play.md). **Not yet enforced.** |             |
+| `MoveCard`         | `ref`, `targetPlayerName`, `targetRegionType`, `position` | any → any                                                | Move a card to any region at a given position                                                                                                                                                          |             |
+| `AttachCard`       | `ref`, `targetRef`                                        | any → child of target card (typically `READY`)           | Attach a card to another card (e.g., retainer to vampire)                                                                                                                                              |             |
+| `InfluenceCard`    | `ref`                                                     | `UNCONTROLLED` → owner `READY`                           | Move a fully influenced vampire/imbued to the Ready region. Actor is the current player, `counters ≥ capacity > 0`. Silently no-ops otherwise.                                                         | `INFLUENCE` |
+| `MoveToCrypt`      | `ref`                                                     | `UNCONTROLLED` → owner `CRYPT` (bottom, clears counters) | Return a vampire to Crypt (influence cancelled)                                                                                                                                                        |             |
+| `MoveToTorpor`     | `ref`                                                     | `READY` → owner `TORPOR`                                 | Move a minion to Torpor                                                                                                                                                                                |             |
+| `RescueFromTorpor` | `ref`                                                     | `TORPOR` → owner `READY`                                 | Move a minion from Torpor to Ready                                                                                                                                                                     |             |
+| `BurnMinion`       | `ref`                                                     | `READY` or `TORPOR` → owner `ASH_HEAP`                   | Remove a minion from play entirely                                                                                                                                                                     |             |
 
 ### Card state
 
@@ -367,6 +370,7 @@ Remaining integration points:
 - Block-attempt stealth/intercept exchanges use the existing impulse window with `DIRECTED_SINGLE` or `UNDIRECTED` context. After all eligible Methuselahs decline block attempts, a final Blocks Declined pre-resolution impulse window remains open for legal action modifiers, reactions, and redirects before `ResolveAction` is available — see [Blocking](./blocking.md).
 - Combat timing steps each have their own impulse windows with `COMBAT` context — see [Combat](./combat.md).
 - Referendum polling uses its own sequencing rules — see [Referendums](./referendums.md).
+- `PlayCard` must validate against the current `ActiveTimingWindow` in addition to phase/type/actor gates — see [Card Play](./card-play.md#active-window-legality).
 
 ### Game end detection
 

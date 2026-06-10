@@ -15,6 +15,227 @@ See [Card Play](./card-play.md) for type and phase gates, [Actions](./actions.md
 
 ---
 
+## Workflow Ownership
+
+| Concern                                                            | Owning document / state                                    |
+|--------------------------------------------------------------------|------------------------------------------------------------|
+| Card leaves hand, as-played cancellation, replacement, destination | [Card Play](./card-play.md)                                |
+| Declaring actions, NRA, action success, after-resolution           | [Actions](./actions.md) / `PendingActionState`             |
+| Block attempts, stealth/intercept, redirects, blocks declined      | [Blocking](./blocking.md) / `PendingActionState`           |
+| Range, strikes, damage, presses, combat ending                     | [Combat](./combat.md) / `CombatState`                      |
+| Diablerie sequence and blood hunt trigger                          | [Combat](./combat.md#diablerie) or future `DiablerieState` |
+| Political and blood hunt polling/tally                             | [Referendums](./referendums.md) / `ReferendumState`        |
+| Cross-workflow order and canonical window names                    | This document                                              |
+
+The workflow owner opens and closes timing windows. [Card Play](./card-play.md) validates that the chosen card mode is legal in the current window and then handles declaration, cancellation, replacement, cost, and destination.
+
+---
+
+## Active Timing Window
+
+Rules-enforced card play should validate against a single active timing surface. At any moment, at most one of these should be open for card/effect play:
+
+```text
+ActiveTimingWindow
+  workflow: ACTION | BLOCKING | COMBAT | REFERENDUM | DIABLERIE | BLOOD_HUNT
+  windowType: CARD_AS_PLAYED_CANCEL_WINDOW | ACTION_AS_ANNOUNCED | ...
+  prioritySystem: IMPULSE | SEQUENCING | DETERMINISTIC
+  actingPlayer: String
+  priorityHolder: String?
+  sourceStateRef: PendingActionState | CombatState | ReferendumState | DiablerieState?
+  allowedCardTypes: Set<CardType>
+  allowedModePredicates: card-text/mode checks for the exact window
+```
+
+A card mode is playable only if all layers pass:
+
+1. Source region is legal.
+2. Phase, type, and actor gates pass.
+3. Requirements are met and declaration costs are payable.
+4. The current `ActiveTimingWindow` permits that mode.
+5. The player holds the active impulse or sequencing priority, unless the command is deterministic or administrative.
+
+This separates generic card lifecycle from workflow timing. For example, a reaction card is not legal merely because the game is in the minion phase and the player is not the acting player; it must also match the active action, block, referendum, or as-played window.
+
+---
+
+## Unified Action State Diagram
+
+The canonical diagram source is [action-state-machine.puml](./action-state-machine.puml). It is mirrored below as PlantUML for IDEs and Markdown viewers that support PlantUML blocks.
+
+```plantuml
+@startuml
+top to bottom direction
+
+    [*] --> Idle
+    Idle : Empty enforced-mode action state
+    Idle : no PendingActionState
+    Idle : no CombatState
+    Idle : no ReferendumState
+    Idle : no ActiveTimingWindow
+
+    Idle --> ActionDeclaring : DeclareAction or card ability
+
+    state ActionDeclaring {
+        [*] --> BuildPendingAction
+        BuildPendingAction --> CardAsPlayed : action card played
+        BuildPendingAction --> ActionAsAnnounced : basic action or in-play ability
+        CardAsPlayed : CARD_AS_PLAYED_CANCEL_WINDOW
+        CardAsPlayed --> Idle : canceled
+        CardAsPlayed --> ActionAsAnnounced : all pass
+        ActionAsAnnounced : ACTION_AS_ANNOUNCED
+        ActionAsAnnounced --> [*] : all pass
+    }
+
+    ActionDeclaring --> ActionBlockWindow
+
+    state ActionBlockWindow {
+        [*] --> BlockOpportunities
+        BlockOpportunities : ACTION_DURING_ACTION
+        BlockOpportunities : ACTION_BLOCK_ATTEMPT
+        BlockOpportunities : ACTION_STEALTH_INTERCEPT
+        BlockOpportunities --> BlockOpportunities : failed block attempt
+        BlockOpportunities --> BlocksDeclined : all eligible Methuselahs decline
+        BlocksDeclined : ACTION_BLOCKS_DECLINED
+        BlocksDeclined --> BlockOpportunities : target changes or redirect
+        BlocksDeclined --> [*] : all pass, no target change
+        BlockOpportunities --> [*] : block succeeds
+    }
+
+    ActionBlockWindow --> ActionResolution : no successful block
+    ActionBlockWindow --> BlockResolutionPreCombat : block succeeds
+
+    BlockResolutionPreCombat : ACTION_BLOCK_RESOLUTION_PRE_COMBAT
+    BlockResolutionPreCombat --> CombatWorkflow : combat not canceled or replaced
+    BlockResolutionPreCombat --> ActionContinuing : block resolution continues action
+    BlockResolutionPreCombat --> ActionAfterResolution : block/action ends without combat
+
+    state CombatWorkflow {
+        [*] --> CombatBeforeRange
+        CombatBeforeRange : COMBAT_BEFORE_RANGE
+        CombatBeforeRange --> CombatDetermineRange : all pass
+        CombatDetermineRange : COMBAT_DETERMINE_RANGE
+        CombatDetermineRange --> CombatBeforeStrikes : range set
+        CombatBeforeStrikes : COMBAT_BEFORE_STRIKES
+        CombatBeforeStrikes --> CombatStrikeDeclaration : all pass
+        CombatStrikeDeclaration : COMBAT_STRIKE_DECLARATION
+        CombatStrikeDeclaration --> CombatBeforeStrikeResolution
+        CombatBeforeStrikeResolution : COMBAT_BEFORE_STRIKE_RESOLUTION
+        CombatBeforeStrikeResolution --> CombatStrikeResolution
+        CombatStrikeResolution : resolve strikes
+        CombatStrikeResolution --> CombatDamageResolution
+        CombatDamageResolution : COMBAT_DAMAGE_PREVENTION
+        CombatDamageResolution : COMBAT_DAMAGE_RESOLUTION
+        CombatDamageResolution --> CombatWouldGoToTorpor : vampire would go to torpor
+        CombatDamageResolution --> CombatWouldBeBurned : minion would burn
+        CombatDamageResolution --> CombatResultCommitted : no replacement hook
+        CombatWouldGoToTorpor : COMBAT_WOULD_GO_TO_TORPOR
+        CombatWouldBeBurned : COMBAT_WOULD_BE_BURNED
+        CombatWouldGoToTorpor --> DiablerieWorkflow : torpor replaced by diablerie
+        CombatWouldGoToTorpor --> CombatResultCommitted : result not replaced
+        CombatWouldBeBurned --> CombatResultCommitted : result not replaced
+        CombatResultCommitted --> CombatAdditionalStrike : additional strikes remain
+        CombatAdditionalStrike : COMBAT_ADDITIONAL_STRIKE_WINDOW
+        CombatAdditionalStrike --> CombatStrikeDeclaration : declare next strike pair
+        CombatResultCommitted --> CombatPressStep : no additional strikes
+        CombatPressStep : COMBAT_PRESS_STEP
+        CombatPressStep --> CombatBeforeRange : press to continue
+        CombatPressStep --> CombatEnding : no new round
+        CombatStrikeResolution --> CombatEnding : combat ends strike
+        CombatResultCommitted --> CombatEnding : combatant no longer ready
+        CombatEnding : COMBAT_END_OF_ROUND
+        CombatEnding : COMBAT_WOULD_END
+        CombatEnding : COMBAT_ENDS
+        CombatEnding : COMBAT_AFTER_ENDS
+        CombatEnding --> [*] : combat-ending hooks complete
+    }
+
+    CombatWorkflow --> ActionContinuing : continue-the-action effect
+    CombatWorkflow --> ActionAfterResolution : no continuation
+    CombatWorkflow --> BloodHuntWorkflow : combat-caused diablerie completes
+
+    ActionContinuing : ACTION_CONTINUING
+    ActionContinuing --> ActionBlockWindow : reopen block attempts
+
+    state ActionResolution {
+        [*] --> CompleteAction
+        CompleteAction : action reaches resolution
+        CompleteAction : NRA locks before cost
+        CompleteAction --> PoliticalReferendum : political action
+        CompleteAction --> DiablerieWorkflow : diablerie action or effect
+        CompleteAction --> ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
+        ApplyActionEffect --> [*]
+    }
+
+    state PoliticalReferendum {
+        [*] --> ReferendumChooseTerms
+        ReferendumChooseTerms : REFERENDUM_CHOOSE_TERMS
+        ReferendumChooseTerms --> ReferendumBeforeVotes
+        ReferendumBeforeVotes : REFERENDUM_BEFORE_VOTES
+        ReferendumBeforeVotes --> ReferendumPolling
+        ReferendumPolling : REFERENDUM_POLLING
+        ReferendumPolling --> ReferendumResolution
+        ReferendumResolution : REFERENDUM_RESOLUTION
+        ReferendumResolution --> ReferendumAfterResolution
+        ReferendumAfterResolution : REFERENDUM_AFTER_RESOLUTION
+        ReferendumAfterResolution --> [*]
+    }
+
+    PoliticalReferendum --> ActionAfterResolution
+    ActionResolution --> ActionAfterResolution
+
+    state DiablerieWorkflow {
+        [*] --> DiablerieBeingCommitted
+        DiablerieBeingCommitted : DIABLERIE_BEING_COMMITTED
+        DiablerieBeingCommitted --> DiablerieCancelOrReplace
+        DiablerieCancelOrReplace : DIABLERIE_CANCEL_OR_REPLACE
+        DiablerieCancelOrReplace --> [*] : canceled
+        DiablerieCancelOrReplace --> DiablerieResolution : not canceled
+        DiablerieResolution : blood transfer
+        DiablerieResolution : equipment choice
+        DiablerieResolution : victim burned
+        DiablerieResolution : discipline search
+        DiablerieResolution --> DiablerieAfterSuccess
+        DiablerieAfterSuccess : DIABLERIE_AFTER_SUCCESS
+        DiablerieAfterSuccess --> TrophyAward
+        TrophyAward : TROPHY_AWARD_BEFORE_BLOOD_HUNT
+        TrophyAward --> [*]
+    }
+
+    DiablerieWorkflow --> BloodHuntWorkflow : successful diablerie
+    DiablerieWorkflow --> ActionAfterResolution : canceled/no blood hunt
+
+    state BloodHuntWorkflow {
+        [*] --> BloodHuntBeforeVotes
+        BloodHuntBeforeVotes : BLOOD_HUNT_BEFORE_VOTES
+        BloodHuntBeforeVotes --> BloodHuntPolling
+        BloodHuntPolling : BLOOD_HUNT_POLLING
+        BloodHuntPolling --> BloodHuntResolution
+        BloodHuntResolution : BLOOD_HUNT_RESOLUTION
+        BloodHuntResolution --> BloodHuntWouldBurn : passes
+        BloodHuntResolution --> BloodHuntAfterResolution : fails
+        BloodHuntWouldBurn : BLOOD_HUNT_WOULD_BURN_DIABLERIST
+        BloodHuntWouldBurn --> BloodHuntAfterResolution
+        BloodHuntAfterResolution : BLOOD_HUNT_AFTER_RESOLUTION
+        BloodHuntAfterResolution --> [*]
+    }
+
+    BloodHuntWorkflow --> ActionAfterResolution : enclosing action exists
+    BloodHuntWorkflow --> Idle : no enclosing action remains
+
+    ActionAfterResolution : ACTION_AFTER_RESOLUTION
+    ActionAfterResolution --> Idle : all pass, clear action state
+@enduml
+```
+
+Render the standalone file with PlantUML when a static asset is needed:
+
+```bash
+plantuml -tsvg docs/implementation/action-state-machine.puml
+```
+
+---
+
 ## Action Workflow
 
 ```text
@@ -44,7 +265,7 @@ See [Card Play](./card-play.md) for type and phase gates, [Actions](./actions.md
    ACTION_AFTER_RESOLUTION
 ```
 
-`ACTION_BLOCK_RESOLUTION_PRE_COMBAT` is the hook for effects playable after a block succeeds but before the resulting combat starts, including text such as "play before combat" or "when this vampire is successfully blocked."
+`ACTION_BLOCK_RESOLUTION_PRE_COMBAT` is a narrow implementation hook for card text playable after a block succeeds but before the resulting combat starts, including text such as "play before combat" or "when this vampire is successfully blocked." It is not a general official phase where arbitrary action modifiers or reactions become legal.
 
 ---
 
@@ -99,6 +320,10 @@ See [Card Play](./card-play.md) for type and phase gates, [Actions](./actions.md
    COMBAT_WOULD_END
    COMBAT_ENDS
    COMBAT_AFTER_ENDS
+
+16. Return to enclosing workflow
+   - if a card/effect continues the action: ACTION_CONTINUING
+   - otherwise: ACTION_AFTER_RESOLUTION, if combat was nested in an action
 ```
 
 `COMBAT_WOULD_GO_TO_TORPOR` and `COMBAT_WOULD_BE_BURNED` are result-replacement hooks inside combat. They are not diablerie hooks by themselves. Cards such as `Decapitate`, `Amaranth`, `Ashes to Ashes`, and `Reform Body` use these windows because they replace a pending torpor or burn result before it is committed.
@@ -179,6 +404,8 @@ Combat can create diablerie by replacing a torpor result or by another card-spec
 
 For a blocked leave-torpor action, the blocker may choose diablerie instead of combat. That choice enters the diablerie workflow at `DIABLERIE_BEING_COMMITTED`.
 
+The diablerie workflow owns the blood hunt trigger regardless of source. `ResolveAction` may create an action-caused diablerie, but it should not be the only code path that opens blood hunt.
+
 ---
 
 ## Political Referendum Workflow
@@ -198,7 +425,10 @@ For a blocked leave-torpor action, the blocker may choose diablerie instead of c
 5. Tally votes and determine result
    REFERENDUM_RESOLUTION
 
-6. After referendum resolution
+6. Outcome-dependent referendum hooks
+   REFERENDUM_AFTER_RESOLUTION
+
+7. After action resolution
    ACTION_AFTER_RESOLUTION
 ```
 

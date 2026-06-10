@@ -16,26 +16,26 @@ Combat has no formal structure. Players simulate it manually using `MoveToTorpor
 
 ## CombatState
 
-A new `CombatState` object is added to `GameData`. It is set when combat opens and cleared after `EndCombat`.
+A new `CombatState` object is added to `GameData`. It is set when combat opens and cleared after combat-ending hooks finish.
 
-| Field                                   | Type            | Description                                                                                           |
-|-----------------------------------------|-----------------|-------------------------------------------------------------------------------------------------------|
-| `attackerRef`                           | `CardRef`       | The attacking minion (acts first at each step)                                                        |
-| `defenderRef`                           | `CardRef`       | The defending minion                                                                                  |
-| `round`                                 | `int`           | Current round number (starts at 1)                                                                    |
-| `range`                                 | `Range`         | `CLOSE` or `LONG`; default `CLOSE` at start of each round                                            |
-| `step`                                  | `CombatStep`    | Current position in the 7-step sequence                                                               |
-| `attackerStrike`                        | `Strike?`       | Declared strike for this round; null until declared                                                   |
-| `defenderStrike`                        | `Strike?`       | Declared strike for this round; null until declared                                                   |
-| `attackerAdditionalStrikes`             | `int`           | Additional strike count remaining for attacker this round                                             |
-| `defenderAdditionalStrikes`             | `int`           | Additional strike count remaining for defender this round                                             |
-| `additionalStrikeLimitedUsed_attacker`  | `boolean`       | A `(limited)` additional-strike source was already used by attacker this round; reset each new round  |
-| `additionalStrikeLimitedUsed_defender`  | `boolean`       | A `(limited)` additional-strike source was already used by defender this round; reset each new round  |
-| `maneuverLastPlayedBy`                  | `String?`       | Card ID of the last minion to play a maneuver; enforces "cannot play two in a row"                    |
-| `pendingDamage_attacker`                | `int`           | Normal damage accumulator for attacker this resolution step                                           |
-| `pendingDamage_defender`                | `int`           | Normal damage accumulator for defender this resolution step                                           |
-| `pendingAggravated_attacker`            | `int`           | Aggravated damage accumulator for attacker this resolution step                                       |
-| `pendingAggravated_defender`            | `int`           | Aggravated damage accumulator for defender this resolution step                                       |
+| Field                                  | Type         | Description                                                                                          |
+|----------------------------------------|--------------|------------------------------------------------------------------------------------------------------|
+| `attackerRef`                          | `CardRef`    | The attacking minion (acts first at each step)                                                       |
+| `defenderRef`                          | `CardRef`    | The defending minion                                                                                 |
+| `round`                                | `int`        | Current round number (starts at 1)                                                                   |
+| `range`                                | `Range`      | `CLOSE` or `LONG`; default `CLOSE` at start of each round                                            |
+| `step`                                 | `CombatStep` | Current position in the 7-step sequence                                                              |
+| `attackerStrike`                       | `Strike?`    | Declared strike for this round; null until declared                                                  |
+| `defenderStrike`                       | `Strike?`    | Declared strike for this round; null until declared                                                  |
+| `attackerAdditionalStrikes`            | `int`        | Additional strike count remaining for attacker this round                                            |
+| `defenderAdditionalStrikes`            | `int`        | Additional strike count remaining for defender this round                                            |
+| `additionalStrikeLimitedUsed_attacker` | `boolean`    | A `(limited)` additional-strike source was already used by attacker this round; reset each new round |
+| `additionalStrikeLimitedUsed_defender` | `boolean`    | A `(limited)` additional-strike source was already used by defender this round; reset each new round |
+| `maneuverLastPlayedBy`                 | `String?`    | Card ID of the last minion to play a maneuver; enforces "cannot play two in a row"                   |
+| `pendingDamage_attacker`               | `int`        | Normal damage accumulator for attacker this resolution step                                          |
+| `pendingDamage_defender`               | `int`        | Normal damage accumulator for defender this resolution step                                          |
+| `pendingAggravated_attacker`           | `int`        | Aggravated damage accumulator for attacker this resolution step                                      |
+| `pendingAggravated_defender`           | `int`        | Aggravated damage accumulator for defender this resolution step                                      |
 
 ### Enums
 
@@ -51,21 +51,22 @@ A new `CombatState` object is added to `GameData`. It is set when combat opens a
 
 ### Combat queuing
 
-If a card effect creates a new combat while `CombatState` is already active, the new combat is enqueued: `combatQueue: List<CombatPair>` on `GameData`. `StartCombat` appends to the queue when `combatState` is set. `EndCombat` dequeues the next entry if one is waiting.
+If a card effect creates a new combat while `CombatState` is already active, the new combat is enqueued: `combatQueue: List<CombatPair>` on `GameData`. `StartCombat` appends to the queue when `combatState` is set. `ClearCombatState` dequeues the next entry if one is waiting.
 
 ---
 
 ## Commands
 
-| Command               | Fields                                          | Description                                                                                          |
-|-----------------------|-------------------------------------------------|------------------------------------------------------------------------------------------------------|
-| `StartCombat`         | `attackerRef`, `defenderRef`                    | Open `CombatState`; triggered by block success or an "enter combat" action resolution                |
-| `Maneuver`            | `combatantRef`, `toRange`                       | Change range to `CLOSE` or `LONG`; validated against "no two in a row" via `maneuverLastPlayedBy`   |
-| `DeclareStrike`       | `combatantRef`, `strikeType`, `weaponRef?`      | Commit strike for this round; attacker declares first, then defender                                 |
-| `DeclareAdditional`   | `combatantRef`, `strikeType`, `weaponRef?`      | Declare an additional strike for this round after initial strike resolution                          |
-| `PreventDamage`       | `combatantRef`, `amount`                        | Apply damage prevention during damage resolution step                                                |
-| `DeclarePress`        | `combatantRef`, `decision`                      | `CONTINUE` or `END`; if an uncontested `CONTINUE` remains after both players have acted, new round begins |
-| `EndCombat`           | —                                               | Clear `CombatState`; dequeue next pending combat if any; return to action lifecycle                  |
+| Command             | Fields                                     | Description                                                                                               |
+|---------------------|--------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| `StartCombat`       | `attackerRef`, `defenderRef`               | Open `CombatState`; triggered by block success or an "enter combat" action resolution                     |
+| `Maneuver`          | `combatantRef`, `toRange`                  | Change range to `CLOSE` or `LONG`; validated against "no two in a row" via `maneuverLastPlayedBy`         |
+| `DeclareStrike`     | `combatantRef`, `strikeType`, `weaponRef?` | Commit strike for this round; attacker declares first, then defender                                      |
+| `DeclareAdditional` | `combatantRef`, `strikeType`, `weaponRef?` | Declare an additional strike for this round after initial strike resolution                               |
+| `PreventDamage`     | `combatantRef`, `amount`                   | Apply damage prevention during damage resolution step                                                     |
+| `DeclarePress`      | `combatantRef`, `decision`                 | `CONTINUE` or `END`; if an uncontested `CONTINUE` remains after both players have acted, new round begins |
+| `BeginCombatEnding` | —                                          | Enter combat-ending hooks while keeping `CombatState` available                                           |
+| `ClearCombatState`  | —                                          | Clear `CombatState`; dequeue next pending combat if any; return to the enclosing workflow                 |
 
 ---
 
@@ -99,7 +100,7 @@ Cards with "before strikes are chosen" timing; range-dependent effects legal at 
 - **Ranged** (`CardData.ranged = true`, a field to be added): set during card build when card text contains an `R` damage value (e.g. `"2R damage"`, `"Rdamage"`) or the phrase `"can be used at long range"` / `"(long range)"`. The `DeclareStrike` handler reads this flag.
 
 **Resolution order:**
-1. **Combat Ends** — resolves immediately; `EndCombat` fires; Step 7 effects still trigger.
+1. **Combat Ends** — resolves immediately and enters the combat-ending flow; Step 7 effects still trigger before `CombatState` is cleared.
 2. **First Strike** — both first-strikers resolve simultaneously before normal strikes.
 3. **Normal strikes** — all remaining resolve simultaneously.
 
@@ -135,21 +136,40 @@ If an uncontested `CONTINUE` remains → new round begins from Step 1. If no unc
 
 "End of round" effects (e.g. Taste of Vitae, Disarm) fire here, even when combat ended prematurely via Combat Ends. This step fires before combat actually terminates.
 
+### Combat Ending Flow
+
+Combat ending is not the same operation as clearing `CombatState`. The combat context must remain available through end-of-round and end-of-combat card text.
+
+```text
+BeginCombatEnding
+  -> COMBAT_END_OF_ROUND
+  -> COMBAT_WOULD_END
+  -> COMBAT_ENDS
+  -> COMBAT_AFTER_ENDS
+  -> ClearCombatState
+  -> return to enclosing workflow
+```
+
+After `COMBAT_AFTER_ENDS` closes:
+- If a card or effect continues the action, set `PendingActionState.status = ACTION_CONTINUING` and reopen block attempts with accumulated action modifiers preserved.
+- Otherwise, if combat was nested in an action, set `PendingActionState.status = AFTER_RESOLUTION` and open `ACTION_AFTER_RESOLUTION`.
+- If another combat is queued, dequeue it only after the current combat-ending hooks finish.
+
 ---
 
 ## Strike Reference
 
-| Strike type          | Range         | Damage basis                                   | Notes                                                       |
-|----------------------|---------------|------------------------------------------------|-------------------------------------------------------------|
-| Hand strike          | Close only    | Strength (default 1)                           | Can be long-range if text says so                           |
-| Melee weapon         | Close only    | Bearer's strength ± weapon bonus               | Bonus specified in weapon card text (e.g. +1, aggravated)  |
-| Firearm (gun)        | Close or long | Fixed `R` value from card                      | One optional maneuver to long range for most guns           |
-| Other ranged         | Close or long | Fixed `R` value; not classed as gun            | No built-in maneuver unless card text states                |
-| Fixed-damage weapon  | Close only    | Specific value, not strength-based             | Legal at long range only if card has `R` or "ranged" text   |
-| Dodge                | Any           | No damage; cancels opposing strike on dodger   | Does not protect retainers                                  |
-| Combat Ends          | Any           | No damage; ends combat before other strikes    | Always resolves first                                       |
-| First Strike         | Any           | Per weapon/hand formula                        | Resolves before normal strikes; simultaneous with other first strikes |
-| Steal Blood          | Close only    | Moves counters; not damage                     | Cannot be prevented; cancelled by Dodge                     |
+| Strike type         | Range         | Damage basis                                 | Notes                                                                 |
+|---------------------|---------------|----------------------------------------------|-----------------------------------------------------------------------|
+| Hand strike         | Close only    | Strength (default 1)                         | Can be long-range if text says so                                     |
+| Melee weapon        | Close only    | Bearer's strength ± weapon bonus             | Bonus specified in weapon card text (e.g. +1, aggravated)             |
+| Firearm (gun)       | Close or long | Fixed `R` value from card                    | One optional maneuver to long range for most guns                     |
+| Other ranged        | Close or long | Fixed `R` value; not classed as gun          | No built-in maneuver unless card text states                          |
+| Fixed-damage weapon | Close only    | Specific value, not strength-based           | Legal at long range only if card has `R` or "ranged" text             |
+| Dodge               | Any           | No damage; cancels opposing strike on dodger | Does not protect retainers                                            |
+| Combat Ends         | Any           | No damage; ends combat before other strikes  | Always resolves first                                                 |
+| First Strike        | Any           | Per weapon/hand formula                      | Resolves before normal strikes; simultaneous with other first strikes |
+| Steal Blood         | Close only    | Moves counters; not damage                   | Cannot be prevented; cancelled by Dodge                               |
 
 ---
 
@@ -175,6 +195,8 @@ The middle of the sequence is atomic, but card text can create windows immediate
 4. **Discipline search:** if victim's capacity is strictly greater than diablerist's current capacity, diablerist's controller may search hand, library, and ash heap for one master: Discipline card and put it on the diablerist. Capacity increases by 1; no blood added to fill the new capacity.
 5. **Trophy awards:** if the victim is a Red List minion, Trophy awards are resolved before the blood hunt. Controller may search hand/library/ash heap for a master Trophy card to put on the diablerist. Other unawarded Trophies already in play may move to the diablerist at their controller's discretion.
 6. **Blood hunt trigger:** `ReferendumState` is opened automatically with `isBloodHunt = true` and `targetRef` = diablerist — see [Referendums](./referendums.md#blood-hunt-auto-trigger). The blood hunt referendum must fully resolve before the AFTER_RESOLUTION window of the triggering action opens.
+
+The diablerie workflow owns step 6 regardless of source. It opens blood hunt after successful diablerie from a directed action, combat replacement effect, blocked leave-torpor action, or any card text that creates diablerie.
 
 ---
 

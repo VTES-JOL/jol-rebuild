@@ -31,7 +31,8 @@ DeclareAction
                                                → window closes → clear PendingActionState
 
     ── block attempt succeeds ──────────────▶  [status: BLOCKED]
-                                               → StartCombat (see Combat)
+                                               → open ACTION_BLOCK_RESOLUTION_PRE_COMBAT for explicit card-text hooks, if any
+                                               → StartCombat (see Combat), unless block resolution is canceled/replaced
                                                → after combat: status → ACTION_CONTINUING or AFTER_RESOLUTION
                                                → open AFTER_RESOLUTION sequencing window
                                                → window closes → clear PendingActionState
@@ -41,16 +42,18 @@ DeclareAction
 
 For the expanded sequential ordering of action, combat, diablerie, referendum, and blood hunt windows, use [Timing Windows](./timing-windows.md). In particular, a diablerie action enters the diablerie workflow before the triggering action's `AFTER_RESOLUTION` window opens.
 
+`ACTION_BLOCK_RESOLUTION_PRE_COMBAT` is not a general official phase. It is a narrow timing hook for card text explicitly playable after a successful block and before the resulting combat.
+
 ---
 
 ## Commands
 
-| Command         | Fields                                        | Rules-enforced validation                                                                 |
-|-----------------|-----------------------------------------------|-------------------------------------------------------------------------------------------|
-| `DeclareAction` | `actorRef`, `actionType`, `targetPlayerName?` | MINION phase; current player; actor in READY, unlocked, not contested; NRA check          |
+| Command         | Fields                                        | Rules-enforced validation                                                                                            |
+|-----------------|-----------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `DeclareAction` | `actorRef`, `actionType`, `targetPlayerName?` | MINION phase; current player; actor in READY, unlocked, not contested; NRA check                                     |
 | `AttemptBlock`  | `blockerRef`                                  | Impulse window active; blocker controller = current impulse holder; blocker eligible — see [Blocking](./blocking.md) |
-| `ResolveAction` | —                                             | Blocks Declined pre-resolution window closed; action status = DURING_ACTION               |
-| `AbortAction`   | —                                             | Action in progress; cancels action, unlocks actor, clears all state                       |
+| `ResolveAction` | —                                             | Blocks Declined pre-resolution window closed; action status = DURING_ACTION                                          |
+| `AbortAction`   | —                                             | Action in progress; cancels action, unlocks actor, clears all state                                                  |
 
 ---
 
@@ -58,27 +61,27 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 
 `PendingActionState` is stored on `GameData` while an action is in progress. All fields that carry accumulated modifiers persist across block windows and redirects.
 
-| Field                        | Type                        | Notes                                                                                                      |
-|------------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------|
-| `actorRef`                   | `CardRef`                   | Acting minion                                                                                              |
-| `actionType`                 | `ActionType`                | One of the `ActionType` enum values                                                                        |
-| `targetPlayerName`           | `String?`                   | Non-null for directed; null for undirected                                                                 |
-| `status`                     | `ActionStatus`              | `DURING_ACTION` / `BLOCKED` / `AFTER_RESOLUTION` / `ACTION_CONTINUING`                                    |
-| `blockerRef`                 | `CardRef?`                  | Set when a block attempt succeeds                                                                          |
-| `actionCardRef`              | `CardRef?`                  | Card played as the action; remains in limbo until resolution — see [Card Play](./card-play.md)             |
-| `bleedAmount`                | `int`                       | Running bleed total including modifiers; starts at 1 for `BLEED` actions                                  |
-| `reachedResolution`          | `boolean`                   | NRA fires when this becomes true                                                                           |
-| `actionSuccessful`           | `boolean`                   | True if action was not blocked                                                                             |
-| `bleedSuccessful`            | `boolean`                   | True if bleed resolved for ≥ 1 pool; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the ≥ 1 pool condition for Edge transfer. |
-| `referendumSuccessful`       | `boolean`                   | True if referendum passed; drives "after successful referendum" effects                                    |
-| `bleedLimitedUsed`           | `boolean`                   | A `(limited)` bleed modifier has already been played this action                                          |
-| `stealth`                    | `int`                       | Running stealth total; carries across block windows and redirects — see [Blocking](./blocking.md)          |
-| `interceptsByBlockerRef`     | `Map<CardRef, Integer>`     | Per-blocker intercept map; carries across redirects — see [Blocking](./blocking.md)                       |
-| `passedBlockWindowsByPlayer` | `Set<String>`               | Players who passed their current block window; reset on redirect — see [Blocking](./blocking.md)          |
-| `cannotBlockRefs`            | `Set<CardRef>`              | Minions with explicit "cannot block" restrictions for the duration of this action                         |
-| `currentBlockerRef`          | `CardRef?`                  | Active blocker during a current attempt; null when no attempt in progress                                 |
-| `blocksDeclined`             | `boolean`                   | True after all eligible blockers have declined and before action resolution; reset if the action target changes |
-| `wakePermissionByCardId`     | `Set<String>`               | Minion card IDs granted temporary wake permission — see [Blocking](./blocking.md)                         |
+| Field                        | Type                    | Notes                                                                                                                                                                                                                                            |
+|------------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `actorRef`                   | `CardRef`               | Acting minion                                                                                                                                                                                                                                    |
+| `actionType`                 | `ActionType`            | One of the `ActionType` enum values                                                                                                                                                                                                              |
+| `targetPlayerName`           | `String?`               | Non-null for directed; null for undirected                                                                                                                                                                                                       |
+| `status`                     | `ActionStatus`          | `DURING_ACTION` / `BLOCKED` / `AFTER_RESOLUTION` / `ACTION_CONTINUING`                                                                                                                                                                           |
+| `blockerRef`                 | `CardRef?`              | Set when a block attempt succeeds                                                                                                                                                                                                                |
+| `actionCardRef`              | `CardRef?`              | Card played as the action; remains in limbo until resolution — see [Card Play](./card-play.md)                                                                                                                                                   |
+| `bleedAmount`                | `int`                   | Running bleed total including modifiers; starts at 1 for `BLEED` actions                                                                                                                                                                         |
+| `reachedResolution`          | `boolean`               | NRA fires when this becomes true                                                                                                                                                                                                                 |
+| `actionSuccessful`           | `boolean`               | True if action was not blocked                                                                                                                                                                                                                   |
+| `bleedSuccessful`            | `boolean`               | True if bleed resolved for ≥ 1 pool; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the ≥ 1 pool condition for Edge transfer. |
+| `referendumSuccessful`       | `boolean`               | True if referendum passed; drives "after successful referendum" effects                                                                                                                                                                          |
+| `bleedLimitedUsed`           | `boolean`               | A `(limited)` bleed modifier has already been played this action                                                                                                                                                                                 |
+| `stealth`                    | `int`                   | Running stealth total; carries across block windows and redirects — see [Blocking](./blocking.md)                                                                                                                                                |
+| `interceptsByBlockerRef`     | `Map<CardRef, Integer>` | Per-blocker intercept map; carries across redirects — see [Blocking](./blocking.md)                                                                                                                                                              |
+| `passedBlockWindowsByPlayer` | `Set<String>`           | Players who passed their current block window; reset on redirect — see [Blocking](./blocking.md)                                                                                                                                                 |
+| `cannotBlockRefs`            | `Set<CardRef>`          | Minions with explicit "cannot block" restrictions for the duration of this action                                                                                                                                                                |
+| `currentBlockerRef`          | `CardRef?`              | Active blocker during a current attempt; null when no attempt in progress                                                                                                                                                                        |
+| `blocksDeclined`             | `boolean`               | True after all eligible blockers have declined and before action resolution; reset if the action target changes                                                                                                                                  |
+| `wakePermissionByCardId`     | `Set<String>`           | Minion card IDs granted temporary wake permission — see [Blocking](./blocking.md)                                                                                                                                                                |
 
 > **Implementation status:** `actorRef`, `actionType`, `targetPlayerName`, `status`, and `blockerRef` are on the Java class. All other fields in the table above are part of the target design and must be added before the corresponding feature can be enforced.
 
@@ -120,12 +123,12 @@ NRA is tracked by `GameData.nraActionsByCardId: Map<String, Set<String>>` (clear
 
 ### NRA scope — what is locked
 
-| Action                                        | NRA key                              |
-|-----------------------------------------------|--------------------------------------|
-| Basic bleed                                   | `"BLEED"`                            |
-| Political action                              | `"POLITICAL"`                        |
-| Action card from hand                         | Card name (e.g. `"Computer Hacking"`) |
-| Action triggered by an in-play card           | Card name of triggering card         |
+| Action                              | NRA key                               |
+|-------------------------------------|---------------------------------------|
+| Basic bleed                         | `"BLEED"`                             |
+| Political action                    | `"POLITICAL"`                         |
+| Action card from hand               | Card name (e.g. `"Computer Hacking"`) |
+| Action triggered by an in-play card | Card name of triggering card          |
 
 ### NRA scope — what is NOT locked
 
@@ -150,18 +153,18 @@ NRA locks persist through mid-turn unlocks.
 
 `ResolveAction` applies these effects based on `actionType`:
 
-| ActionType        | Resolution effects                                                                                                                                             |
-|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ActionType        | Resolution effects                                                                                                                                                                                                                                                                                           |
+|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `BLEED`           | `PlayerPoolChangedEffect(targetPlayer, -bleedAmount)`; if `bleedAmount ≥ 1` → `EdgeChangedEffect(actingPlayer)` and set `bleedSuccessful = true`. Edge and the flag fire on `bleedAmount ≥ 1` regardless of whether the target has pool remaining — they follow the bleed amount, not the actual pool delta. |
-| `HUNT`            | `CardCounterChangedEffect(actor, +min(1, capacity - counters))` — capped at capacity                                                                          |
-| `EQUIP`           | `CardAttachedEffect(equipment, actor)` — equipment identified in declaration                                                                                  |
-| `EMPLOY_RETAINER` | `CardAttachedEffect(retainer, actor)` — retainer brought in with life counters per card text                                                                   |
-| `RECRUIT_ALLY`    | `CardMovedEffect(ally, actingPlayer, READY)` + add ally card ID to `GameData.recruitedThisTurn: Set<String>`; `DeclareAction` rejects an actor whose card ID is in this set; cleared on `NextTurn` |
-| `POLITICAL`       | Open `ReferendumState` — see [Referendums](./referendums.md)                                                                                                  |
-| `LEAVE_TORPOR`    | `CardCounterChangedEffect(actor, -2)`; then `CardMovedEffect(actor, READY)` — actor must be in TORPOR and have ≥ 2 blood; if cost cannot be paid, action fizzles |
-| `RESCUE`          | `CardMovedEffect(target, actingPlayer, READY)` — target specified in declaration; no blood cost for the rescuing minion                                       |
-| `DIABLERISE`      | Full diablerie sequence — see [Combat § Diablerie](./combat.md#diablerie)                                                                                     |
-| `CUSTOM`          | No automatic engine effect; players handle manually                                                                                                            |
+| `HUNT`            | `CardCounterChangedEffect(actor, +min(1, capacity - counters))` — capped at capacity                                                                                                                                                                                                                         |
+| `EQUIP`           | `CardAttachedEffect(equipment, actor)` — equipment identified in declaration                                                                                                                                                                                                                                 |
+| `EMPLOY_RETAINER` | `CardAttachedEffect(retainer, actor)` — retainer brought in with life counters per card text                                                                                                                                                                                                                 |
+| `RECRUIT_ALLY`    | `CardMovedEffect(ally, actingPlayer, READY)` + add ally card ID to `GameData.recruitedThisTurn: Set<String>`; `DeclareAction` rejects an actor whose card ID is in this set; cleared on `NextTurn`                                                                                                           |
+| `POLITICAL`       | Open `ReferendumState` and suspend action completion until the referendum resolves — see [Referendums](./referendums.md)                                                                                                                                                                                     |
+| `LEAVE_TORPOR`    | `CardCounterChangedEffect(actor, -2)`; then `CardMovedEffect(actor, READY)` — actor must be in TORPOR and have ≥ 2 blood; if cost cannot be paid, action fizzles                                                                                                                                             |
+| `RESCUE`          | `CardMovedEffect(target, actingPlayer, READY)` — target specified in declaration; no blood cost for the rescuing minion                                                                                                                                                                                      |
+| `DIABLERISE`      | Full diablerie sequence — see [Combat § Diablerie](./combat.md#diablerie)                                                                                                                                                                                                                                    |
+| `CUSTOM`          | No automatic engine effect; players handle manually                                                                                                                                                                                                                                                          |
 
 ---
 
@@ -169,17 +172,19 @@ NRA locks persist through mid-turn unlocks.
 
 Three independent success flags on `PendingActionState`:
 
-| Flag                   | True when                                          | Drives                                                         |
-|------------------------|----------------------------------------------------|----------------------------------------------------------------|
-| `actionSuccessful`     | Action reached resolution (not blocked)            | "After a successful action" card effects                       |
-| `bleedSuccessful`      | Bleed action resolved for ≥ 1 pool                 | Edge movement; "after a successful bleed" card effects         |
-| `referendumSuccessful` | Referendum passed at the end of political action   | "After a successful referendum" card effects (e.g. Voter Captivation) |
+| Flag                   | True when                                        | Drives                                                                |
+|------------------------|--------------------------------------------------|-----------------------------------------------------------------------|
+| `actionSuccessful`     | Action reached resolution (not blocked)          | "After a successful action" card effects                              |
+| `bleedSuccessful`      | Bleed action resolved for ≥ 1 pool               | Edge movement; "after a successful bleed" card effects                |
+| `referendumSuccessful` | Referendum passed at the end of political action | "After a successful referendum" card effects (e.g. Voter Captivation) |
 
 ---
 
 ## After-Resolution Window
 
 `ResolveAction` opens a `SequencingWindowState(AFTER_RESOLUTION)` for unblocked actions. Blocked actions open the same window after combat or block resolution completes. Legal effects include "after action resolution", "after this action", "after block resolution" when a block occurred, "after successful action", "after successful bleed", and "after successful referendum" effects whose trigger preconditions are currently true. ABC priority order applies. When the window closes, `PendingActionState` is cleared.
+
+For political actions, `ResolveAction(POLITICAL)` opens the referendum subworkflow and suspends action completion. `ACTION_AFTER_RESOLUTION` opens only after `ClosePolling` resolves the referendum and any outcome-dependent referendum hooks have completed.
 
 ---
 

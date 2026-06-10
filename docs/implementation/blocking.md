@@ -37,7 +37,7 @@ The block-attempt loop is driven by the existing impulse window on `GameData`. I
    a. Set `PendingActionState.currentBlockerRef`.
    b. Suspend impulse pass tracking; enter the stealth/intercept exchange sub-window.
    c. Both players pass without further stealth/intercept plays → comparison resolves.
-   d. **Block succeeds** (`interceptsByBlockerRef[currentBlockerRef] ≥ stealth`): set `status = BLOCKED`, lock blocker, close impulse window, start combat.
+   d. **Block succeeds** (`interceptsByBlockerRef[currentBlockerRef] ≥ stealth`): set `status = BLOCKED`, lock blocker, close the active block-attempt exchange, and open `ACTION_BLOCK_RESOLUTION_PRE_COMBAT` only for explicit card-text hooks. If no effect cancels/replaces block resolution, start combat.
    e. **Block fails** (`stealth > interceptsByBlockerRef[currentBlockerRef]`): blocker does not lock; clear `currentBlockerRef`; return impulse to same holder to try another minion or pass.
 4. **If `PassImpulse`:** advance to next player per pass order.
 5. All eligible players pass consecutively → enter the Blocks Declined window. Do not call `ResolveAction` yet.
@@ -56,6 +56,8 @@ After all eligible Methuselahs have declined block attempts, open/continue an ac
 6. If all players pass in this window with no target change or action-ending effect, close the impulse window and make `ResolveAction` available.
 
 This window is what allows the common sequence: prey declines to block, acting player increases bleed, prey wakes a locked minion, that minion plays Deflection, then block attempts reopen for the new target with the increased bleed amount preserved.
+
+This is an implementation name for the final before-resolution impulse opportunity described by the official action sequence. It is not a separate action resolution step: once this window closes with no target change or action-ending effect, `ResolveAction` completes the action.
 
 ---
 
