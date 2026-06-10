@@ -76,10 +76,9 @@ Cards with "before range is determined" timing. Impulse window with `COMBAT` con
 ### Step 2 — Determine Range
 
 Default range: `CLOSE`. Either combatant may `Maneuver` to change range. Maneuver rules:
-- A minion cannot play two maneuvers in a row (`maneuverLastPlayedBy` check).
-- A minion may maneuver again after the opponent has maneuvered.
+- `maneuverLastPlayedBy` records the card ID of the last combatant to play a maneuver card. A combatant is locked from playing another maneuver until the **other** combatant plays one — passing without playing a maneuver does not reset the lock. If the other combatant passes without maneuvering, the first combatant cannot maneuver again that step.
 - Only one weapon or strike card may maneuver per minion per round.
-- If a maneuver comes from a card that also grants a strike, the minion must use that card's strike as their first strike for this round.
+- If a maneuver comes from a card that also grants a strike, the minion must use that card's strike as their first strike for this round. This is validated at `DeclareStrike` time: if the minion used such a card in Step 2, their first strike must match; any other strike as the first is rejected.
 - Some cards prevent maneuvers.
 
 Both combatants pass without maneuvering → advance to Step 3. Final declared range stands for the rest of the round.
@@ -94,7 +93,8 @@ Cards with "before strikes are chosen" timing; range-dependent effects legal at 
 
 **Strike range validity:**
 - Close-only by default (most hand strikes, melee weapon strikes, Steal Blood).
-- Legal at close or long if the strike type is: ranged (`R` damage), dodge, Combat Ends, or card text says "long range."
+- Legal at close or long if the strike type is: ranged, dodge, Combat Ends, or card text says "long range."
+- **Ranged** (`CardData.ranged = true`, a field to be added): set during card build when card text contains an `R` damage value (e.g. `"2R damage"`, `"Rdamage"`) or the phrase `"can be used at long range"` / `"(long range)"`. The `DeclareStrike` handler reads this flag.
 
 **Resolution order:**
 1. **Combat Ends** — resolves immediately; `EndCombat` fires; Step 7 effects still trigger.
@@ -103,7 +103,7 @@ Cards with "before strikes are chosen" timing; range-dependent effects legal at 
 
 If the defending minion is sent to torpor or burned by a first strike, their normal strike does not resolve.
 
-**Additional strikes:** after initial strike resolution, combatants with additional strikes left declare and resolve one more strike per remaining additional count. Each additional resolution is independent; use same range as initial. Do not repeat Steps 1–3. `(limited)` additional-strike sources: at most one per combatant per round (tracked by `additionalStrikeLimitedUsed_attacker/defender`).
+**Additional strikes:** after all initial strikes (including first strikes) have resolved, if either combatant has `additionalStrikes > 0` the server opens a new declaration sub-window. Both combatants simultaneously declare one additional strike each; a combatant with 0 remaining additional strikes may not declare and is skipped. Both declared strikes resolve simultaneously, then `additionalStrikes` is decremented for each who declared. This repeats until both combatants have 0 remaining. Each additional resolution is independent; use same range as initial. Do not repeat Steps 1–3. `(limited)` additional-strike sources: at most one per combatant per round (tracked by `additionalStrikeLimitedUsed_attacker/defender`).
 
 ### Step 5 — Damage Resolution
 
@@ -119,7 +119,7 @@ Accumulate `pendingDamage` and `pendingAggravated` from all strikes. Prevention 
 
 **Steal Blood:** not damage; not preventable; cancelled by a Dodge. Moves blood/life counters from target to striker.
 
-**Environmental damage:** no minion source; cannot be attributed. Treated as normal unless text says aggravated.
+**Environmental damage:** damage with no `attackerRef` or `defenderRef` — produced by card text that says "this minion takes X damage" without an opposing minion as the source. Applied directly to `pendingDamage` (or `pendingAggravated` if the text says aggravated) for the affected combatant. Prevention cards may reduce it unless the card text says otherwise. Does not trigger "damage from a strike" effects.
 
 ### Step 6 — Press
 
@@ -170,7 +170,7 @@ The sequence is atomic — no interruptions between steps:
 3. **Victim burned:** `CardMovedEffect(victim, ASH_HEAP)`; all remaining attached cards and counters on the victim are burned.
 4. **Discipline search:** if victim's capacity is strictly greater than diablerist's current capacity, diablerist's controller may search hand, library, and ash heap for one master: Discipline card and put it on the diablerist. Capacity increases by 1; no blood added to fill the new capacity.
 5. **Trophy awards:** if the victim is a Red List minion, Trophy awards are resolved before the blood hunt. Controller may search hand/library/ash heap for a master Trophy card to put on the diablerist. Other unawarded Trophies already in play may move to the diablerist at their controller's discretion.
-6. **Blood hunt:** `ReferendumState` is opened automatically with `isBloodHunt = true` and `targetRef` = diablerist — see [Referendums](./referendums.md#blood-hunt-auto-trigger).
+6. **Blood hunt trigger:** `ReferendumState` is opened automatically with `isBloodHunt = true` and `targetRef` = diablerist — see [Referendums](./referendums.md#blood-hunt-auto-trigger). The blood hunt referendum must fully resolve before the AFTER_RESOLUTION window of the triggering action opens.
 
 ---
 

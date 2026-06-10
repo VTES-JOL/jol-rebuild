@@ -41,7 +41,7 @@ A new `ReferendumState` object is added to `GameData`. It is set when a referend
 ### Step 1 — Choose Terms
 
 Triggered by `ResolveAction` for `ActionType.POLITICAL`:
-1. Acting player chooses terms (which effects the referendum decides).
+1. Acting player chooses terms via the `referendumTerms: String?` field on `DeclareAction` (free-text description of what the referendum decides, e.g. "Make Anarch Free State"). The server stores this in `ReferendumState.terms`. For the initial implementation, effect application after `ClosePolling` is CUSTOM (handled manually by players); automated referendum-effect dispatch is a later feature.
 2. `ReferendumState` is opened on `GameData` with `pollingOpen = false`.
 3. A sequencing window opens for "before votes and ballots are cast" effects (ABC priority). When the window closes, `OpenPolling` becomes available.
 
@@ -126,13 +126,13 @@ The Priscus title is a collective Sabbat title. Each ready Priscus casts one bal
 | Majority against      | +3 votes against             |
 | Tied                  | 0 votes                      |
 
-The contribution shifts dynamically as more Priscus ballots are cast. Recompute by setting both Prisci contribution fields back to 0, then setting exactly one of them to 3 when the Prisci ballots have a majority. The final contribution is included only when `ClosePolling` totals base votes plus Prisci votes.
+**Majority definition:** strictly more than half of *ballots cast so far* (not of all ready Priscus). Priscus who have not voted are not counted — their absence is neither FOR nor AGAINST. If 2 of 3 ready Priscus have voted and 1 is FOR and 1 is AGAINST (a tie), the contribution is 0. Recompute by setting both Prisci contribution fields back to 0, then setting exactly one of them to 3 only when the cast ballots have a strict majority. The final contribution is included when `ClosePolling` totals base votes plus Prisci votes.
 
 ---
 
 ## Blood Hunt Auto-Trigger
 
-After the diablerie sequence completes (step 6 of the diablerie resolution in [Combat § Diablerie](./combat.md#diablerie)), `ResolveAction` automatically opens a `ReferendumState` with:
+After the diablerie sequence completes (step 6 — Blood Hunt Trigger — in [Combat § Diablerie](./combat.md#diablerie)), `ResolveAction` automatically opens a `ReferendumState` with:
 
 - `isBloodHunt = true`
 - `targetRef` = the diablerist
@@ -140,6 +140,8 @@ After the diablerie sequence completes (step 6 of the diablerie resolution in [C
 - `terms` = "Blood hunt against [diablerist name]"
 
 If the blood hunt passes: `CardMovedEffect(diablerist, ASH_HEAP)` — the diablerist is burned.
+
+The blood hunt referendum must fully resolve (reach `ClosePolling`) before the AFTER_RESOLUTION sequencing window of the triggering action opens. The overall action lifecycle is: diablerie steps 1–5 → blood hunt referendum (steps 1–3 per above) → AFTER_RESOLUTION window.
 
 ---
 

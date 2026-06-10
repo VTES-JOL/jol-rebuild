@@ -363,7 +363,7 @@ Transfer budget logic is already implemented and gates `TransferBlood`, `DrawCry
 `ImpulseState`, `SequencingWindowState`, and all pass/claim/close commands are implemented. `ResolveAction` already opens the `AFTER_RESOLUTION` sequencing window.
 
 Remaining integration points:
-- `DeclareAction` should open the AS_ANNOUNCED sequencing window before the block-attempt impulse window — see [Actions](./actions.md).
+- `DeclareAction` should open the AS_PLAYED sequencing window (for action-card plays only), then the AS_ANNOUNCED sequencing window, before the block-attempt impulse window — see [Actions](./actions.md). Both `AS_PLAYED` and `ACTION_CONTINUING` must be added to their respective Java enums (`SequencingWindowType` and `ActionStatus`) before these paths can be wired.
 - Block-attempt stealth/intercept exchanges use the existing impulse window with `DIRECTED_SINGLE` or `UNDIRECTED` context — see [Blocking](./blocking.md).
 - Combat timing steps each have their own impulse windows with `COMBAT` context — see [Combat](./combat.md).
 - Referendum polling uses its own sequencing rules — see [Referendums](./referendums.md).

@@ -40,7 +40,7 @@ The playing player declares the card (target, mode, cost). The card **leaves HAN
 
 ### Stage 2 — Limbo
 
-Applies to `ACTION` cards only. While the action is in progress, the card is neither in HAND nor in ASH_HEAP; it is tracked by `PendingActionState.actionCardRef`. All other card types skip limbo — they resolve immediately after the `AS_PLAYED` window closes.
+Applies to `ACTION` cards only. While the action is in progress the card remains in HAND but is flagged `CardData.inLimbo = true` (a field to be added). The `GameStateDto` projection filters limbo cards from the HAND card list and exposes them only via `PendingActionState.actionCardRef`. The card cannot be targeted by effects that address HAND cards. All other card types skip limbo — they resolve immediately after the `AS_PLAYED` window closes.
 
 ### Stage 3 — Resolution
 
@@ -96,7 +96,7 @@ Out-of-turn master cards have `CardData.outOfTurn = true` (populated at card bui
 
 - Cannot play during own turn.
 - Can play only during another Methuselah's turn when the card's timing condition is satisfied.
-- Costs: debits the **playing player's next master phase action**, not the current player's `masterActionsRemaining`. Track this as future-debt state, e.g. `nextMasterActionsReservedByPlayer`, and subtract it when that player's next MASTER phase begins.
+- Costs: debits the **playing player's next master phase action**. Track this as `outOfTurnMasterDebtByPlayer: Map<String, Integer>` on `GameData`, incremented by 1 when any out-of-turn master resolves for that player. At MASTER phase entry (`AdvancePhase` → MASTER for that player), set `masterActionsRemaining = max(0, 1 - outOfTurnMasterDebtByPlayer.getOrDefault(player, 0))` then clear that player's debt entry. This means an out-of-turn master consumes the player's next master phase action; two out-of-turn masters between turns leaves them with 0 actions next phase.
 - One out-of-turn master per window between turns: `outOfTurnMasterPlayedThisWindowByPlayer: Set<String>` on `GameData` (cleared for that player when their own turn begins). This limit applies even if the player later regains a master phase action. Trifle exception follows the card's text and trifle accounting; do not grant a generic extra master phase action just because the card was played out of turn.
 
 ---
@@ -108,7 +108,7 @@ Out-of-turn master cards have `CardData.outOfTurn = true` (populated at card bui
 - Legal source regions: `HAND` or `ASH_HEAP`.
 - Phase: `UNLOCK`.
 - During unlock phase, the current player may play one conviction on each of their imbued from hand or ash heap.
-- Imbued entering play with no conviction counter may gain one conviction from hand/library/ash heap (special gain rule, not ordinary card play — does not consume a play action).
+- Imbued entering play with no conviction counter may gain one conviction immediately when `InfluenceCard` resolves (special gain rule, not ordinary card play — does not consume a play action). The controlling player may choose one conviction card from hand, library, or ash heap and attach it. Choosing from the library does not trigger a reshuffle. The gain is optional; declining leaves the imbued with 0 conviction.
 - From `HAND`: card replaced normally. From `ASH_HEAP`: card is not replaced (it was already spent).
 - Max 5 conviction per imbued; any above 5 are burned.
 - "As played" cancellation window exists, but effects cancelling minion cards cannot cancel conviction unless card text explicitly says so.
@@ -117,7 +117,7 @@ Out-of-turn master cards have `CardData.outOfTurn = true` (populated at card bui
 
 ## Dual-Type Cards
 
-`CardData.types` is the authoritative type list. A dual-type card is playable only when at least one of its types matches the current phase/actor gate. The appropriate effect for the matching type is the one that resolves.
+`CardData.types` is the authoritative type list. A dual-type card is playable only when at least one of its types matches the current phase/actor gate. The `PlayCard` command includes a `playAsType: CardType?` field. If omitted, the server infers the matching type only when exactly one type in `CardData.types` satisfies the current gate; if multiple types match and `playAsType` is absent, the command is rejected. The selected type determines the resolution path, cost, and phase gate applied.
 
 ---
 

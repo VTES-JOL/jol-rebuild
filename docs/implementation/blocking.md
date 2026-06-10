@@ -119,13 +119,13 @@ A locked minion is eligible to play a wake card in the AS_ANNOUNCED window ("as 
 - `passedBlockWindowsByPlayer` is cleared — players who passed in the pre-combat window may attempt again.
 - `cannotBlockRefs` remains — minions that could not block before still cannot block.
 
-`ACTION_CONTINUING` is defined in the `ActionStatus` enum — see [Actions § ActionStatus Enum](./actions.md#actionstatus-enum). The `ACTION_CONTINUING` protocol path (detecting a continue-the-action card play after combat and re-opening the block window) is not yet wired up in the server.
+`ACTION_CONTINUING` must be added to the `ActionStatus` Java enum before this path can be wired — see [Actions § ActionStatus Enum](./actions.md#actionstatus-enum). The detection logic (a continue-the-action card play after combat triggers the status change and re-opens the block window) is not yet implemented.
 
 ---
 
 ## Leave Torpor — Blocked Without Combat
 
-When a `LEAVE_TORPOR` action is blocked, the blocking player's controller may choose to **diablerize** the torpored vampire instead of entering combat. If they decline, the acting vampire stays in torpor and the action fails. This decision is a prompt after `status = BLOCKED` is set — no combat occurs.
+When a `LEAVE_TORPOR` action is blocked, the controller of the blocking minion (the player who controls `blockerRef`) may choose to **diablerize** the torpored vampire instead of entering combat. The decision belongs to the blocking minion's controller regardless of whose impulse it was — this matters in multi-player games where a card grants a third-party minion the right to block. If they decline, the acting vampire stays in torpor and the action fails. This decision is a prompt after `status = BLOCKED` is set — no combat occurs.
 
 ---
 
@@ -139,3 +139,4 @@ A minion may attempt to block if **all** of the following hold:
 4. For directed actions: minion's controller = `targetPlayerName` (or card text explicitly grants them permission).
 5. Minion's card ID is not in `cannotBlockRefs`.
 6. Minion is not the acting minion.
+7. Minion is not contested (`CardData.contested = false`).

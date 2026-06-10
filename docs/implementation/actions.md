@@ -80,14 +80,18 @@ DeclareAction
 
 ## ActionStatus Enum
 
-| Value               | Meaning                                                                       |
-|---------------------|-------------------------------------------------------------------------------|
-| `DURING_ACTION`     | Block-attempt impulse window open; acting minion locked                       |
-| `BLOCKED`           | A block attempt succeeded; combat is in progress                              |
-| `AFTER_RESOLUTION`  | Unblocked action resolved, or blocked action's combat/block resolution finished; AFTER_RESOLUTION sequencing window open |
-| `ACTION_CONTINUING` | "Continue the action" effect fired after combat; re-entering block-attempt loop |
+| Value                | Java enum status  | Meaning                                                                                                                  |
+|----------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------|
+| `DURING_ACTION`      | Exists            | Block-attempt impulse window open; acting minion locked                                                                  |
+| `BLOCKED`            | Exists            | A block attempt succeeded; combat is in progress                                                                         |
+| `AFTER_RESOLUTION`   | Exists            | Unblocked action resolved, or blocked action's combat/block resolution finished; AFTER_RESOLUTION sequencing window open |
+| `ACTION_CONTINUING`  | **Must be added** | "Continue the action" effect fired after combat; re-entering block-attempt loop                                          |
+
+> **Enum gap:** `ACTION_CONTINUING` is not yet in `src/main/java/…/enums/ActionStatus.java`. Add it before wiring the continue-the-action protocol path.
 
 `AS_PLAYED` and `AS_ANNOUNCED` are sequencing-window types, not action statuses. `AS_PLAYED` applies to the card-play cancellation layer; `AS_ANNOUNCED` applies to action-announcement effects after the action exists.
+
+> **Enum gap:** `AS_PLAYED` is not yet in `SequencingWindowType` (currently `AS_ANNOUNCED`, `AFTER_RESOLUTION`). Add it before wiring the declaration sequencing windows.
 
 ---
 
@@ -130,7 +134,7 @@ On `DeclareAction`:
 
 On `ResolveAction`:
 1. Set `reachedResolution = true` and add the NRA key before paying action costs.
-2. If cost cannot be paid or targets are invalid, the action fizzles after the NRA lock is recorded.
+2. If cost cannot be paid or targets are invalid, the action **fizzles**: the action card (if any) moves from limbo to `ASH_HEAP` via `CardMovedEffect`; the acting minion remains locked until the AFTER_RESOLUTION window closes; the AFTER_RESOLUTION sequencing window still opens so "after this action" effects may fire; no pool/blood is paid.
 
 NRA locks persist through mid-turn unlocks.
 
@@ -142,11 +146,11 @@ NRA locks persist through mid-turn unlocks.
 
 | ActionType        | Resolution effects                                                                                                                                             |
 |-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `BLEED`           | `PlayerPoolChangedEffect(targetPlayer, -bleedAmount)`; if `bleedAmount ≥ 1` → `EdgeChangedEffect(actingPlayer)`; set `bleedSuccessful = true`                 |
+| `BLEED`           | `PlayerPoolChangedEffect(targetPlayer, -bleedAmount)`; if `bleedAmount ≥ 1` → `EdgeChangedEffect(actingPlayer)` and set `bleedSuccessful = true`. Edge and the flag fire on `bleedAmount ≥ 1` regardless of whether the target has pool remaining — they follow the bleed amount, not the actual pool delta. |
 | `HUNT`            | `CardCounterChangedEffect(actor, +min(1, capacity - counters))` — capped at capacity                                                                          |
 | `EQUIP`           | `CardAttachedEffect(equipment, actor)` — equipment identified in declaration                                                                                  |
 | `EMPLOY_RETAINER` | `CardAttachedEffect(retainer, actor)` — retainer brought in with life counters per card text                                                                   |
-| `RECRUIT_ALLY`    | `CardMovedEffect(ally, actingPlayer, READY)` + flag ally unable to act this turn                                                                               |
+| `RECRUIT_ALLY`    | `CardMovedEffect(ally, actingPlayer, READY)` + add ally card ID to `GameData.recruitedThisTurn: Set<String>`; `DeclareAction` rejects an actor whose card ID is in this set; cleared on `NextTurn` |
 | `POLITICAL`       | Open `ReferendumState` — see [Referendums](./referendums.md)                                                                                                  |
 | `LEAVE_TORPOR`    | `CardCounterChangedEffect(actor, -2)`; then `CardMovedEffect(actor, READY)` — actor must be in TORPOR and have ≥ 2 blood; if cost cannot be paid, action fizzles |
 | `RESCUE`          | `CardMovedEffect(target, actingPlayer, READY)` — target specified in declaration; no blood cost for the rescuing minion                                       |
