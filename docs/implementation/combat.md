@@ -94,6 +94,8 @@ Cards with "before strikes are chosen" timing; range-dependent effects legal at 
 
 **Declaration:** attacker announces first, then defender. Each names one strike.
 
+If the declared strike uses a combat card and that card is cancelled in `CARD_AS_PLAYED`, Card Play still charges the non-action card cost unless the cancelling effect explicitly waives it. Combat then clears that minion's pending strike and returns them to strike declaration; the replacement strike may come from hand, from another legal strike card, from an equipped weapon, or from the minion's default hand strike, subject to normal strike legality and any active restrictions.
+
 **Strike range validity:**
 - Close-only by default (most hand strikes, melee weapon strikes, Steal Blood).
 - Legal at close or long if the strike type is: ranged, dodge, Combat Ends, or card text says "long range."

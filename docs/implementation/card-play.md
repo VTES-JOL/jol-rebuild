@@ -38,7 +38,7 @@ Every card play in rules-enforced mode moves through four stages.
 
 ### Stage 1 — As Played
 
-The playing player declares the card (target, mode, cost). The card **leaves HAND immediately**. A narrow nested sequencing window, `CARD_AS_PLAYED`, opens for "as it is played" cancellers only. Wake effects needed to play effects in that window are also legal here. No cost is paid yet.
+The playing player declares the card (target, mode, cost). The card **leaves HAND immediately**. A narrow nested sequencing window, `CARD_AS_PLAYED`, opens for "as it is played" cancellers only. Wake effects needed to play effects in that window are also legal here. No cost is paid before this window resolves.
 
 ### Stage 2 — Limbo
 
@@ -46,8 +46,10 @@ Applies to `ACTION` cards only. While the action is in progress, the action card
 
 ### Stage 3 — Resolution
 
-- **Action cards:** if the action reaches resolution (not blocked), the NRA lock is recorded first, then cost is paid here. If cost cannot be paid, or if the targets are no longer valid, the action **fizzles**: card moves to ASH_HEAP with no effect and no cost paid, but the NRA lock remains because the action reached resolution.
-- **All other types:** cost paid immediately at declaration; effect resolves immediately.
+- **Action cards:** if the action reaches resolution (not blocked), the NRA lock is recorded first, then cost is paid here. If cost cannot be paid in full, or if the targets are no longer valid, the action **fizzles**: pay as much of the action cost as possible, move the card to ASH_HEAP, and apply no action effect. The NRA lock remains because the action reached resolution.
+- **Cancelled action cards:** no cost is paid, the acting minion does not lock, no NRA key is recorded, and the same action card can be attempted again this turn.
+- **Non-action cards:** after `CARD_AS_PLAYED` closes, cost is paid as normal even if the card was cancelled, unless the cancelling effect explicitly says the cost is not paid. If not cancelled, the effect resolves immediately.
+- **Cancelled combat strike cards:** pay cost as normal unless the cancelling effect says otherwise, mark the strike declaration invalid, and return the playing minion to strike choice. The replacement strike may come from another legal strike card.
 
 ### Stage 4 — Destination
 
@@ -69,11 +71,14 @@ After the as-played window closes (Stage 1 complete), the playing player draws b
 
 ## Cancelled Cards
 
-A cancelled card is treated as though it was played for the purpose of uniqueness limiting, but:
-- Hand size is not permanently reduced (draw replacement normally)
-- Cost is not paid
-- NRA is not triggered
-- No other effects propagate
+A cancelled card is treated as though it was played for the purpose of uniqueness limiting. The cancelled card moves to `ASH_HEAP`. Hand size is not permanently reduced: draw replacement normally, and ignore any delayed-replacement clause printed on the cancelled card.
+
+Cancellation cost handling is type-specific:
+- `ACTION` cards: do not pay cost; do not lock the acting minion; do not record an NRA key; allow the same action card to be attempted again.
+- Non-action cards: pay cost as normal unless the cancelling effect explicitly says not to pay it.
+- Combat cards used for a strike: pay cost as normal unless the cancelling effect says otherwise; clear the declared strike and reopen strike choice for that minion.
+
+No cancelled card applies its printed effect.
 
 ---
 

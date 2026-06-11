@@ -45,7 +45,8 @@ state "Play Card" as CardPlayWorkflow{
 
     CARD_AS_PLAYED : eg. Direct Intervention, Wash, Sudden Reversal
     ActionCardLimbo : action cards remain pending until action resolution
-    CardPayCost : no cost is paid if canceled
+    CardPayCost : non-action cards pay cost even if canceled
+    CardPayCost : action cards pay only at action resolution
     CardDestination : ash heap, play area, or attachment
     CardPlayReplace : draw if canceled
     CardPlayReplace : draw unless delayed by card text
@@ -56,11 +57,13 @@ state "Play Card" as CardPlayWorkflow{
     [*] --> CARD_AS_PLAYED : card declared from a playable region
     CARD_AS_PLAYED --> CardPlayReplace : canceled
     CARD_AS_PLAYED --> CardPlayReplace : all pass
-    CardPlayReplace --> [*] : canceled, replacement handled
+    CardPlayReplace --> [*] : canceled action card or cost waived
+    CardPlayReplace --> CardPayCost : canceled non-action card, replacement handled
     CardPlayReplace --> ActionCardLimbo : action card, replacement handled
     CardPlayReplace --> CardPayCost : non-action card, replacement handled
     ActionCardLimbo --> [*]
-    CardPayCost --> CardResolveEffect
+    CardPayCost --> [*] : canceled non-action card, no effect
+    CardPayCost --> CardResolveEffect : not canceled
     CardResolveEffect --> CardDestination
     CardDestination --> [*]
 }
@@ -86,6 +89,7 @@ state "How To Perform Actions\n(Detailed Play Guide)" as PerformActionWorkflow {
     state "Run Referendum\nsubworkflow" as RunReferendumWorkflow <<automatic>>
     state "Run Diablerie\nsubworkflow" as RunDiablerieWorkflow <<automatic>>
     state "Run Blood Hunt\nsubworkflow" as RunBloodHuntWorkflow <<automatic>>
+    state "Pay Action Cost" as PayActionCost <<automatic>>
     state "ApplyActionEffect" as ApplyActionEffect <<automatic>>
     state "ACTION_AFTER_RESOLUTION" as ACTION_AFTER_RESOLUTION <<window>>
     state "Clear Action State" as ClearActionState <<automatic>>
@@ -106,6 +110,8 @@ state "How To Perform Actions\n(Detailed Play Guide)" as PerformActionWorkflow {
     ACTION_CONTINUING : stealth/intercept modifiers persist
     CompleteAction : action reaches resolution
     CompleteAction : NRA locks before cost
+    PayActionCost : pay as much cost as possible
+    PayActionCost : fizzle if full cost unpaid or targets invalid
     RunReferendumWorkflow : enter PoliticalReferendum side diagram
     RunDiablerieWorkflow : enter DiablerieWorkflow side diagram
     RunBloodHuntWorkflow : enter BloodHuntWorkflow side diagram
@@ -135,9 +141,11 @@ state "How To Perform Actions\n(Detailed Play Guide)" as PerformActionWorkflow {
     RunCombatWorkflow --> ACTION_CONTINUING : continue-the-action effect
     RunCombatWorkflow --> ACTION_AFTER_RESOLUTION : no continuation
     ACTION_CONTINUING --> ACTION_DURING_ACTION : reopen block attempts
-    CompleteAction --> RunReferendumWorkflow : political action
-    CompleteAction --> RunDiablerieWorkflow : diablerie action or effect
-    CompleteAction --> ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
+    CompleteAction --> PayActionCost : all unblocked actions
+    PayActionCost --> RunReferendumWorkflow : political action
+    PayActionCost --> RunDiablerieWorkflow : diablerie action or effect
+    PayActionCost --> ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
+    PayActionCost --> ACTION_AFTER_RESOLUTION : fizzles, no action effect
     RunReferendumWorkflow --> ACTION_AFTER_RESOLUTION
     RunDiablerieWorkflow --> RunBloodHuntWorkflow : successful diablerie
     RunDiablerieWorkflow --> ACTION_AFTER_RESOLUTION : canceled/no blood hunt

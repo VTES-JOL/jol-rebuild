@@ -90,6 +90,8 @@ A strike declaration names the **type** and, where relevant, the **strength or d
 - Weapon strikes use the formula defined in the weapon's card text.
 - Special strikes (dodge, Combat Ends, steal blood) are named by type.
 
+If a combat card used for a strike is cancelled as it is played, that combat card has no effect, but the minion who played it must choose a strike again. The new strike may come from another legal strike card. The cancelled non-action card's cost is still paid as normal unless the cancelling effect explicitly says otherwise; see [Card Timing and Card Types § Cancelled Cards](./card-play.md#cancelled-cards).
+
 #### Strike range defaults
 
 Most strikes are effective only at close range. A strike is effective at either close or long range only if it is identified as ranged, does `R` damage, is a defensive strike such as dodge or Combat Ends, or card text otherwise says it is usable at long range.
