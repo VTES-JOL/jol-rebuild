@@ -14,8 +14,8 @@ Every action in rules-enforced mode moves through the following states, tracked 
 
 ```
 DeclareAction
-  → if an action card is played: open AS_PLAYED cancellation window
-  → open AS_ANNOUNCED sequencing window (action-announcement effects only)
+  → if an action card is played: run CardPlayWorkflow, which opens CARD_AS_PLAYED
+  → open ACTION_AS_ANNOUNCED sequencing window (action-announcement effects only)
   → open block-attempt impulse window (DIRECTED_SINGLE or UNDIRECTED)
   [status: DURING_ACTION]
 
@@ -98,19 +98,19 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 
 > **Enum gap:** `ACTION_CONTINUING` is not yet in `src/main/java/…/enums/ActionStatus.java`. Add it before wiring the continue-the-action protocol path.
 
-`AS_PLAYED` and `AS_ANNOUNCED` are sequencing-window types, not action statuses. `AS_PLAYED` applies to the card-play cancellation layer; `AS_ANNOUNCED` applies to action-announcement effects after the action exists.
+`CARD_AS_PLAYED` and `ACTION_AS_ANNOUNCED` are sequencing-window types, not action statuses. `CARD_AS_PLAYED` belongs to the generic card-play lifecycle and opens only when a card is actually played. `ACTION_AS_ANNOUNCED` belongs to the action workflow and opens for every action, including basic actions and abilities from cards already in play.
 
-> **Enum gap:** `AS_PLAYED` is not yet in `SequencingWindowType` (currently `AS_ANNOUNCED`, `AFTER_RESOLUTION`). Add it before wiring the declaration sequencing windows.
+> **Enum gap:** `CARD_AS_PLAYED` is not yet in `SequencingWindowType`; the existing legacy action-announcement sequencing value should become `ACTION_AS_ANNOUNCED` when the declaration sequencing windows are wired.
 
 ---
 
 ## Declaration Sequencing Windows
 
-If an action card is played to declare the action, a `SequencingWindowState(AS_PLAYED)` opens first. This restricted window is for "as it is played" cancellers only (e.g. Direct Intervention) and wake effects needed to play effects in that window. The action card is not replaced until this window closes.
+If an action card is played to declare the action, the declaration invokes the generic Card Play workflow first. That workflow opens `CARD_AS_PLAYED`, a restricted window for "as it is played" cancellers only (e.g. Direct Intervention) and wake effects needed to play effects in that window. The action card is not replaced until this window closes.
 
-After `AS_PLAYED` closes, or immediately for a basic action that did not play a card, a `SequencingWindowState(AS_ANNOUNCED)` opens. This window is for effects usable as the action is announced. All players pass -> window closes -> block-attempt impulse window opens.
+After the action card's `CARD_AS_PLAYED` window closes, or immediately for a basic action or in-play ability that did not play a card, a `SequencingWindowState(ACTION_AS_ANNOUNCED)` opens. This window is for effects usable as the action is announced. All players pass -> window closes -> block-attempt impulse window opens.
 
-> **Gap:** `DeclareAction` currently opens the block-attempt impulse window directly, skipping both declaration windows. Inserting `AS_PLAYED` and `AS_ANNOUNCED` before the block-attempt window is tracked in [Mechanics Gaps](./mechanics-gaps.md) (P4 — AS_ANNOUNCED sequencing window).
+> **Gap:** `DeclareAction` currently opens the block-attempt impulse window directly, skipping the action-card Card Play workflow and the `ACTION_AS_ANNOUNCED` declaration window. Inserting both before the block-attempt window is tracked in [Mechanics Gaps](./mechanics-gaps.md).
 
 ---
 

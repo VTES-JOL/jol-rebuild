@@ -71,8 +71,8 @@ A blood hunt referendum is automatically called after any diablerie occurs. It d
 - It is **not** initiated by a political action card; no card is played.
 - The **acting Methuselah** for impulse and sequencing is the Methuselah whose vampire was diablerized (the victim's controller).
 - The terms are fixed: the referendum targets the diablerist. If it passes, the diablerist is burned.
-- The blood hunt referendum follows the same three-step structure and the same vote sources as any other referendum, except that it is not an action: it cannot be blocked, and action modifiers and reaction cards cannot be played.
-- Legal vote sources include votes and ballots from ready titled vampires, the Edge, one political action card burned from hand per Methuselah, and in-play card effects that are usable during the current referendum.
+- The blood hunt referendum follows the same three-step structure, except that it is not an action: it cannot be blocked, and action modifiers and reaction cards cannot be played.
+- Legal vote sources include votes and ballots from ready titled vampires, one political action card burned from hand per Methuselah, the Edge, and in-play card effects that are usable during the current blood hunt referendum.
 - Do not allow vote modifiers from hand unless the card text explicitly says it is usable during a blood hunt referendum or otherwise overrides the normal blood hunt restriction. Effects restricted to "a political action" or "the polling step of a political action" are not usable during a blood hunt.
 - Trophy awards for Red List minions, if applicable, are resolved **before** the blood hunt referendum is called. See [Card Keywords § Minion Traits](./card-keywords.md#minion-traits).
 

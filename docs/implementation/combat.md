@@ -106,7 +106,7 @@ Cards with "before strikes are chosen" timing; range-dependent effects legal at 
 
 If the defending minion is sent to torpor or burned by a first strike, their normal strike does not resolve.
 
-**Additional strikes:** after all initial strikes (including first strikes) have resolved, if either combatant has `additionalStrikes > 0` the server opens a new declaration sub-window. Both combatants simultaneously declare one additional strike each; a combatant with 0 remaining additional strikes may not declare and is skipped. Both declared strikes resolve simultaneously, then `additionalStrikes` is decremented for each who declared. This repeats until both combatants have 0 remaining. Each additional resolution is independent; use same range as initial. Do not repeat Steps 1–3. `(limited)` additional-strike sources: at most one per combatant per round (tracked by `additionalStrikeLimitedUsed_attacker/defender`).
+**Additional strikes:** after all initial strikes (including first strikes) and their damage/result handling have resolved, if both combatants are still ready, the server opens `COMBAT_ADDITIONAL_STRIKE`. In that window, combatants may play cards or use effects that grant additional strikes. If an additional strike is gained or used, the server opens a new declaration sub-window. Both combatants simultaneously declare one additional strike each; a combatant with no available additional strike may not declare and is skipped. Both declared strikes resolve simultaneously, then spent additional strikes are decremented. After that strike resolution and damage/result handling, the additional-strike window opens again if combat can continue. When the window closes with no additional strike gained or used, proceed to the press step. Each additional resolution is independent; use same range as initial. Do not repeat Steps 1–3. `(limited)` additional-strike sources: at most one per combatant per round (tracked by `additionalStrikeLimitedUsed_attacker/defender`).
 
 ### Step 5 — Damage Resolution
 
@@ -189,7 +189,7 @@ Blood Cursed vampires cannot commit diablerie — validated on `DeclareAction` f
 
 ### Diablerie Resolution Sequence
 
-The middle of the sequence is atomic, but card text can create windows immediately before or after the atomic resolution. Enter this workflow at `DIABLERIE_BEING_COMMITTED`, then allow `DIABLERIE_CANCEL_OR_REPLACE` effects before step 1. After step 5, allow `DIABLERIE_AFTER_SUCCESS` effects before the blood hunt trigger.
+The middle of the sequence is atomic, but card text can create windows immediately before or after the atomic resolution. When the diablerie attempt begins, enter `DIABLERIE_CANCEL_OR_REPLACE` for effects usable when a vampire attempts to commit diablerie or is being diablerized. After step 5, allow `DIABLERIE_AFTER_SUCCESS` effects before the blood hunt trigger.
 
 1. **Blood transfer:** all victim's remaining blood moves to the diablerist via `CardCounterChangedEffect`; blood exceeding the diablerist's capacity is burned (lost to the bank).
 2. **Equipment choice:** the diablerist's controller chooses which equipment on the victim to take (if any); `CardAttachedEffect` for each taken item.

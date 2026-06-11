@@ -38,11 +38,11 @@ Every card play in rules-enforced mode moves through four stages.
 
 ### Stage 1 — As Played
 
-The playing player declares the card (target, mode, cost). The card **leaves HAND immediately**. A narrow sequencing window opens (`AS_PLAYED`) for "as it is played" cancellers only. Wake effects needed to play effects in that window are also legal here. No cost is paid yet.
+The playing player declares the card (target, mode, cost). The card **leaves HAND immediately**. A narrow nested sequencing window, `CARD_AS_PLAYED`, opens for "as it is played" cancellers only. Wake effects needed to play effects in that window are also legal here. No cost is paid yet.
 
 ### Stage 2 — Limbo
 
-Applies to `ACTION` cards only. While the action is in progress, the action card is in action limbo: not in hand, not in play, and not in the ash heap. The server represents this via `PendingActionState.actionCardRef`; projection must exclude the card from HAND and expose it only through the pending action. The card cannot be targeted by effects that address HAND cards or cards in play. All other card types skip action limbo — they resolve immediately after the `AS_PLAYED` window closes.
+Applies to `ACTION` cards only. While the action is in progress, the action card is in action limbo: not in hand, not in play, and not in the ash heap. The server represents this via `PendingActionState.actionCardRef`; projection must exclude the card from HAND and expose it only through the pending action. The card cannot be targeted by effects that address HAND cards or cards in play. All other card types skip action limbo — they resolve immediately after their as-played cancellation window closes.
 
 ### Stage 3 — Resolution
 
@@ -63,7 +63,7 @@ After resolution the card goes to its final location:
 
 ## Replacement Timing
 
-After the `AS_PLAYED` window closes (Stage 1 complete), the playing player draws back to their maximum hand size (default 7). If card text says "do not replace until [condition]," hand size stays reduced until that condition is met. Cancellation voids any "do not replace" clause — hand is replaced immediately at the end of the `AS_PLAYED` window.
+After the as-played window closes (Stage 1 complete), the playing player draws back to their maximum hand size (default 7). If card text says "do not replace until [condition]," hand size stays reduced until that condition is met. Cancellation voids any "do not replace" clause — hand is replaced immediately at the end of the as-played window.
 
 ---
 
@@ -125,12 +125,12 @@ Out-of-turn master cards have `CardData.outOfTurn = true` (populated at card bui
 
 ## Active Window Legality
 
-Phase, type, and actor checks are only the first legality layer. A card mode must also be legal in the current `ActiveTimingWindow` described in [Timing Windows](./timing-windows.md#active-timing-window). The workflow that opened the window owns the allowed timing; Card Play owns the common declaration, cancellation, replacement, cost, and destination procedure.
+Phase, type, and actor checks are only the first legality layer. A card mode must also be legal in the current `ActiveTimingWindow` described in [Timing Windows](./timing-windows.md#active-timing-window). The workflow that opened the enclosing window owns the allowed timing; Card Play owns the common declaration, `CARD_AS_PLAYED` cancellation, replacement, cost, and destination procedure.
 
 Examples:
-- A reaction card is not playable merely because the game is in the MINION phase and the player is not the acting player. It must match the active action, block, referendum, or as-played window.
+- A reaction card is not playable merely because the game is in the MINION phase and the player is not the acting player. It must match the active action, block, referendum, or other enclosing timing window.
 - A combat card is not playable merely because a `CombatState` exists. It must match the active combat step, such as `COMBAT_BEFORE_RANGE`, `COMBAT_STRIKE_DECLARATION`, or `COMBAT_DAMAGE_RESOLUTION`.
-- An "as it is played" canceller is legal only in `CARD_AS_PLAYED_CANCEL_WINDOW`, plus any wake effect needed to enable that canceller.
+- An "as it is played" canceller is legal only in the nested `CARD_AS_PLAYED` workflow for the card being canceled, plus any wake effect needed to enable that canceller.
 
 ---
 
@@ -157,7 +157,7 @@ The following `CardType` enum values must be added before phase enforcement can 
 4. Active-window check: the selected card mode must be legal in the current `ActiveTimingWindow`.
 5. Priority check: the playing player must be the current impulse or sequencing holder for that window.
 6. Card limbo: for `ACTION` type, move card to action limbo (`PendingActionState.actionCardRef`) rather than ASH_HEAP immediately.
-7. Replacement draw: after `AS_PLAYED` window closes, emit `DrawCard(1)` if hand below max.
+7. Replacement draw: after the as-played window closes, emit `DrawCard(1)` if hand below max.
 8. Limited flag: check and set `bleedLimitedUsed` for `(limited)` bleed modifiers.
 
 `outOfTurn: boolean` must be added to `CardData` and populated in `GameInitService.buildCard()`.
