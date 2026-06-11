@@ -103,8 +103,8 @@ Out-of-turn master cards have `CardData.outOfTurn = true` (populated at card bui
 
 - Cannot play during own turn.
 - Can play only during another Methuselah's turn when the card's timing condition is satisfied.
-- Costs: debits the **playing player's next master phase action**. Track this as `outOfTurnMasterDebtByPlayer: Map<String, Integer>` on `GameData`, incremented by 1 when any out-of-turn master resolves for that player. At MASTER phase entry (`AdvancePhase` → MASTER for that player), set `masterActionsRemaining = max(0, 1 - outOfTurnMasterDebtByPlayer.getOrDefault(player, 0))` then clear that player's debt entry. This means an out-of-turn master consumes the player's next master phase action; two out-of-turn masters between turns leaves them with 0 actions next phase.
-- One out-of-turn master per window between turns: `outOfTurnMasterPlayedThisWindowByPlayer: Set<String>` on `GameData` (cleared for that player when their own turn begins). This limit applies even if the player later regains a master phase action. Trifle exception follows the card's text and trifle accounting; do not grant a generic extra master phase action just because the card was played out of turn.
+- Cost: debits the **playing player's next master phase action**, even if the out-of-turn master card is cancelled. Track this as `outOfTurnMasterDebtByPlayer: Set<String>` or `Map<String, Boolean>` on `GameData`, set as soon as the out-of-turn master play is accepted into `CARD_AS_PLAYED`, not when it resolves. At MASTER phase entry (`AdvancePhase` -> MASTER for that player), set `masterActionsRemaining = max(0, 1 - (debt ? 1 : 0))`, then clear that player's debt entry.
+- Limit: one out-of-turn master before the player's next master phase. Track `outOfTurnMasterPlayedThisWindowByPlayer: Set<String>` on `GameData`, set as soon as the play is accepted and clear it when that player's own turn begins. Reject any second out-of-turn master while the player is in this set, even if the previous one was cancelled or the player later regains a master phase action. Trifle exception follows the card's text and trifle accounting; do not grant a generic extra master phase action just because the card was played out of turn.
 
 ---
 
@@ -158,15 +158,16 @@ The following `CardType` enum values must be added before phase enforcement can 
 
 1. Source-region check: card must be in `PLAYABLE_REGIONS`, or `ASH_HEAP` for `CONVICTION`.
 2. Phase check: card type must match the current phase per the gate table.
-3. Actor check: `MODIFIER` requires acting player; `REACTION` requires non-acting player; `COMBAT` requires an active `CombatState`.
+3. Actor check: `MODIFIER` requires the acting minion unless card text explicitly permits another same-controller minion; `REACTION` requires a ready unlocked non-acting minion unless wake-style permission applies; `COMBAT` requires an active `CombatState`.
 4. Active-window check: the selected card mode must be legal in the current `ActiveTimingWindow`.
 5. Priority check: the playing player must be the current impulse or sequencing holder for that window.
 6. Card limbo: for `ACTION` type, move card to action limbo (`PendingActionState.actionCardRef`) rather than ASH_HEAP immediately.
 7. Replacement draw: after the as-played window closes, emit `DrawCard(1)` if hand below max.
-8. Limited flag: check and set `bleedLimitedUsed` for `(limited)` bleed modifiers.
+8. Per-action card-use limits: for `MODIFIER` and `REACTION`, reject if the playing minion has already played the same card name during this action; otherwise record the name on `PendingActionState`.
+9. Limited flag: check and set `bleedLimitedUsed` for `(limited)` bleed modifiers.
 
 `outOfTurn: boolean` must be added to `CardData` and populated in `GameInitService.buildCard()`.
 
-`masterActionsRemaining` is on `GameData` for the current master phase (see [Game State](./game-state.md#phase-accounting-fields)); out-of-turn masters need separate future-debt tracking against the playing player's next master phase.
+`masterActionsRemaining` is on `GameData` for the current master phase (see [Game State](./game-state.md#phase-accounting-fields)); out-of-turn masters need separate future-debt tracking against the playing player's next master phase. Because out-of-turn master debt is binary under the one-out-of-turn-master limit, do not model it as a counter that can accumulate multiple debts.
 
 See [Card Keywords](./card-keywords.md) for keyword parsing required to determine Trifle, out-of-turn, and conviction sub-type routing.

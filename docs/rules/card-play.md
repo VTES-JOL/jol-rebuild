@@ -137,8 +137,8 @@ A Master card is out-of-turn if its card text contains the string `"out-of-turn"
 
 These two types are explicitly asymmetric:
 
-- **Action Modifier** - only the **acting player** may play these. They supplement the action their minion is taking, such as adding stealth or changing a target.
-- **Reaction** - any player **except** the acting player may play these in response to the declared action.
+- **Action Modifier** - only the **acting minion** may play these, except when card text explicitly allows another minion controlled by the same Methuselah to play the modifier. A minion cannot play the same action modifier card more than once during a single action, even at a different Discipline level.
+- **Reaction** - only ready unlocked minions controlled by Methuselahs other than the acting Methuselah may play these in response to the declared action, except when a wake-style effect or card text grants permission. A minion cannot play the same reaction card more than once during a single action.
 
 ### Combat Cards
 

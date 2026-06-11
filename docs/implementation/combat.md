@@ -61,7 +61,7 @@ Do not use `combatQueue` for effects that extend the current combat by starting 
 
 | Command             | Fields                                     | Description                                                                                               |
 |---------------------|--------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| `StartCombat`       | `attackerRef`, `defenderRef`               | Open `CombatState`; triggered by block success or an "enter combat" action resolution                     |
+| `StartCombat`       | `attackerRef`, `defenderRef`               | Open `CombatState`; triggered by block success or an "enter combat" action resolution; requires two ready minions with different controllers |
 | `Maneuver`          | `combatantRef`, `toRange`                  | Change range to `CLOSE` or `LONG`; validated against "no two in a row" via `maneuverLastPlayedBy`         |
 | `DeclareStrike`     | `combatantRef`, `strikeType`, `weaponRef?` | Commit strike for this round; attacker declares first, then defender                                      |
 | `DeclareAdditional` | `combatantRef`, `strikeType`, `weaponRef?` | Declare an additional strike for this round after initial strike resolution                               |
@@ -69,6 +69,12 @@ Do not use `combatQueue` for effects that extend the current combat by starting 
 | `DeclarePress`      | `combatantRef`, `decision`                 | `CONTINUE` or `END`; if an uncontested `CONTINUE` remains after both players have acted, new round begins |
 | `BeginCombatEnding` | —                                          | Enter combat-ending hooks while keeping `CombatState` available                                           |
 | `ClearCombatState`  | —                                          | Clear `CombatState`; dequeue next pending combat if any; return to the enclosing workflow                 |
+
+---
+
+### StartCombat validation
+
+`StartCombat` is legal only when both referenced cards are ready minions and their controllers are different. If either minion is not ready, has left play, or both minions have the same controller, reject the combat start and return to the enclosing workflow's normal failure or fizzle path for the effect that tried to create combat.
 
 ---
 

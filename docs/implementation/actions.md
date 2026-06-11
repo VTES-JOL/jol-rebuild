@@ -75,6 +75,8 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 | `bleedSuccessful`            | `boolean`               | True if bleed resolved for ≥ 1 pool; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the ≥ 1 pool condition for Edge transfer. |
 | `referendumSuccessful`       | `boolean`               | True if referendum passed; drives "after successful referendum" effects                                                                                                                                                                          |
 | `bleedLimitedUsed`           | `boolean`               | A `(limited)` bleed modifier has already been played this action                                                                                                                                                                                 |
+| `actionModifierNamesByMinionRef` | `Map<CardRef, Set<String>>` | Action modifier card names played by each minion during this action; enforces one use of the same action modifier per minion per action, even at a different Discipline level.                                                                  |
+| `reactionNamesByMinionRef`   | `Map<CardRef, Set<String>>` | Reaction card names played by each reacting minion during this action; enforces one use of the same reaction per minion per action.                                                                                                             |
 | `stealth`                    | `int`                   | Running stealth total; carries across block windows and redirects — see [Blocking](./blocking.md)                                                                                                                                                |
 | `interceptsByBlockerRef`     | `Map<CardRef, Integer>` | Per-blocker intercept map; carries across redirects — see [Blocking](./blocking.md)                                                                                                                                                              |
 | `passedBlockWindowsByPlayer` | `Set<String>`           | Players who passed their current block window; reset on redirect — see [Blocking](./blocking.md)                                                                                                                                                 |
@@ -158,6 +160,16 @@ On `ResolveAction`:
 3. If cost cannot be paid in full or targets are invalid, the action **fizzles**: pay as much of the action cost as possible, move the action card (if any) from limbo to `ASH_HEAP` via `CardMovedEffect`, apply no action effect, keep the acting minion locked until the AFTER_RESOLUTION window closes, and still open the AFTER_RESOLUTION sequencing window so "after this action" effects may fire.
 
 NRA locks persist through mid-turn unlocks.
+
+---
+
+## Per-Action Card-Use Limits
+
+During a single action, a minion cannot play the same action modifier card or reaction card more than once, even if using a different Discipline level. This is independent of the `(limited)` bleed-increase rule.
+
+On each accepted `MODIFIER` play, add the card name to `actionModifierNamesByMinionRef[playingMinionRef]`; reject the play if that set already contains the name.
+
+On each accepted `REACTION` play, add the card name to `reactionNamesByMinionRef[playingMinionRef]`; reject the play if that set already contains the name. Wake effects only grant permission for a locked minion to react or block; they do not reset this per-action card-use limit.
 
 ---
 
