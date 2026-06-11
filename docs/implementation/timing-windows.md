@@ -37,8 +37,8 @@ Rules-enforced card play should validate against a single active timing surface.
 
 ```text
 ActiveTimingWindow
-  workflow: ACTION | BLOCKING | COMBAT | REFERENDUM | DIABLERIE | BLOOD_HUNT
-  windowType: CARD_AS_PLAYED_CANCEL_WINDOW | ACTION_AS_ANNOUNCED | ...
+  workflow: CARD_PLAY | ACTION | BLOCKING | COMBAT | REFERENDUM | DIABLERIE | BLOOD_HUNT
+  windowType: CARD_AS_PLAYED | ACTION_AS_ANNOUNCED | ...
   prioritySystem: IMPULSE | SEQUENCING | DETERMINISTIC
   actingPlayer: String
   priorityHolder: String?
@@ -55,7 +55,9 @@ A card mode is playable only if all layers pass:
 4. The current `ActiveTimingWindow` permits that mode.
 5. The player holds the active impulse or sequencing priority, unless the command is deterministic or administrative.
 
-This separates generic card lifecycle from workflow timing. For example, a reaction card is not legal merely because the game is in the minion phase and the player is not the acting player; it must also match the active action, block, referendum, or as-played window.
+This separates generic card lifecycle from workflow timing. For example, a reaction card is not legal merely because the game is in the minion phase and the player is not the acting player; it must also match the active action, block, referendum, combat, or other enclosing timing window.
+
+`CARD_AS_PLAYED` is not an action window. It is the nested card-play cancellation stage opened by any card play, regardless of whether the card was played during an action, combat, referendum, master phase, or another legal timing window. `ACTION_AS_ANNOUNCED` is the action-specific declaration window and opens for all action sources, including basic actions and in-play abilities.
 
 ---
 
@@ -74,7 +76,7 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
 ```text
 1. Declare action
    - If an action card is played:
-     CARD_AS_PLAYED_CANCEL_WINDOW
+     run CardPlayWorkflow, which opens CARD_AS_PLAYED
      — e.g. Direct Intervention (out-of-turn master, cancel an action card as played)
 
 2. Action is announced
@@ -154,24 +156,34 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
    - minion moves to ASH_HEAP
    - minion remains ready
 
-12. Additional strikes, if applicable
-   COMBAT_ADDITIONAL_STRIKE_WINDOW
+12. Additional-strike opportunity, if both combatants are still ready
+   COMBAT_ADDITIONAL_STRIKE
    — e.g. Blur [CEL sup] (2 additional strikes)
-   -> repeat strike declaration and resolution for additional strikes
+   -> if an additional strike is gained or used, repeat strike declaration and resolution
+   -> if all pass with no additional strike, continue to press step
 
 13. Press step
    COMBAT_PRESS_STEP
-   — e.g. Psyche! (press to continue combat if both combatants are still ready)
+   — e.g. Psyche! [cel] or Telepathic Tracking [aus] as press effects
 
 14. End of round
    COMBAT_END_OF_ROUND
 
 15. If no new round
    COMBAT_WOULD_END
+   — e.g. Telepathic Tracking [AUS] (instead start a new round)
+   -> if combat ending is replaced by a new round, return to Before Range and do not continue to "about to end"
+
+16. If combat would still end
+   COMBAT_ABOUT_TO_END
+   — e.g. Psyche! [CEL] (after this round, begin another combat)
+   -> cannot queue a combat if another combat is already queued
+
+17. Combat ends
    COMBAT_ENDS
    COMBAT_AFTER_ENDS
 
-16. Return to enclosing workflow
+18. Return to enclosing workflow
    - if a card/effect continues the action: ACTION_CONTINUING
    - otherwise: ACTION_AFTER_RESOLUTION, if combat was nested in an action
 ```
@@ -190,17 +202,55 @@ Combat can create diablerie by replacing a torpor result or by another card-spec
 
 2. A card or effect replaces torpor with diablerie
 
-3. Diablerie begins
-   DIABLERIE_BEING_COMMITTED
-
-4. Diablerie cancellation/replacement
+3. Diablerie attempt begins
    DIABLERIE_CANCEL_OR_REPLACE
+   — effects usable when a vampire attempts to commit diablerie or is being diablerized
 
-5. If not canceled, resolve diablerie
+4. If not canceled, resolve diablerie
    - transfer victim blood
    - diablerist may take equipment
    - burn victim
    - discipline search, if applicable
+
+5. After successful diablerie
+   DIABLERIE_AFTER_SUCCESS
+
+6. Red List Trophy award, if applicable
+   TROPHY_AWARD_BEFORE_BLOOD_HUNT
+
+7. Blood hunt referendum begins
+   -> enter Blood Hunt Workflow
+
+8. After the blood hunt fully resolves
+   -> return to Combat Ending Flow, starting at COMBAT_END_OF_ROUND
+```
+
+`DIABLERIE_CANCEL_OR_REPLACE` belongs to the diablerie workflow, regardless of whether diablerie came from combat, a directed action, a blocked leave-torpor action, or card text. It is the first meaningful timing surface in the workflow; there is no separate implementation state for "diablerie has begun."
+
+Combat-caused diablerie does not skip combat-ending hooks. The diablerie and blood hunt are immediate once the combat result creates diablerie, but after the blood hunt finishes the enclosing combat still ends because at least one combatant is no longer ready. The workflow then runs `COMBAT_END_OF_ROUND`, `COMBAT_WOULD_END`, `COMBAT_ABOUT_TO_END`, `COMBAT_ENDS`, and `COMBAT_AFTER_ENDS` before returning to the enclosing action.
+
+---
+
+## Action-Caused Diablerie Workflow
+
+```text
+1. Declare diablerie action or action effect
+   If a card is played, run CardPlayWorkflow, which opens CARD_AS_PLAYED
+
+2. Run normal action workflow
+   ACTION_AS_ANNOUNCED
+   ACTION_DURING_ACTION
+   ACTION_BLOCK_ATTEMPT
+   ACTION_BLOCKS_DECLINED
+
+3. If the action succeeds
+   ACTION_RESOLUTION_SUCCESS
+
+4. Diablerie attempt begins
+   DIABLERIE_CANCEL_OR_REPLACE
+   — effects usable when a vampire attempts to commit diablerie or is being diablerized
+
+5. Resolve diablerie
 
 6. After successful diablerie
    DIABLERIE_AFTER_SUCCESS
@@ -212,52 +262,10 @@ Combat can create diablerie by replacing a torpor result or by another card-spec
    -> enter Blood Hunt Workflow
 
 9. After the blood hunt fully resolves
-   -> return to Combat Ending Flow, starting at COMBAT_END_OF_ROUND
-```
-
-`DIABLERIE_BEING_COMMITTED` belongs to the diablerie workflow, regardless of whether diablerie came from combat, a directed action, a blocked leave-torpor action, or card text.
-
-Combat-caused diablerie does not skip combat-ending hooks. The diablerie and blood hunt are immediate once the combat result creates diablerie, but after the blood hunt finishes the enclosing combat still ends because at least one combatant is no longer ready. The workflow then runs `COMBAT_END_OF_ROUND`, `COMBAT_WOULD_END`, `COMBAT_ENDS`, and `COMBAT_AFTER_ENDS` before returning to the enclosing action.
-
----
-
-## Action-Caused Diablerie Workflow
-
-```text
-1. Declare diablerie action or action effect
-   CARD_AS_PLAYED_CANCEL_WINDOW, if a card is played
-
-2. Run normal action workflow
-   ACTION_AS_ANNOUNCED
-   ACTION_DURING_ACTION
-   ACTION_BLOCK_ATTEMPT
-   ACTION_BLOCKS_DECLINED
-
-3. If the action succeeds
-   ACTION_RESOLUTION_SUCCESS
-
-4. Diablerie begins
-   DIABLERIE_BEING_COMMITTED
-
-5. Diablerie cancellation/replacement
-   DIABLERIE_CANCEL_OR_REPLACE
-
-6. Resolve diablerie
-
-7. After successful diablerie
-   DIABLERIE_AFTER_SUCCESS
-
-8. Red List Trophy award, if applicable
-   TROPHY_AWARD_BEFORE_BLOOD_HUNT
-
-9. Blood hunt referendum begins
-   -> enter Blood Hunt Workflow
-
-10. After the blood hunt fully resolves
    ACTION_AFTER_RESOLUTION
 ```
 
-For a blocked leave-torpor action, the blocker may choose diablerie instead of combat. That choice enters the diablerie workflow at `DIABLERIE_BEING_COMMITTED`.
+For a blocked leave-torpor action, the blocker may choose diablerie instead of combat. That choice enters the diablerie workflow at `DIABLERIE_CANCEL_OR_REPLACE`.
 
 The diablerie workflow owns the blood hunt trigger regardless of source. `ResolveAction` may create an action-caused diablerie, but it should not be the only code path that opens blood hunt.
 
@@ -278,6 +286,7 @@ The diablerie workflow owns the blood hunt trigger regardless of source. `Resolv
 4. Polling
    REFERENDUM_POLLING
    — e.g. Absolute Tyranny [POT+PRE] (during polling step, +3 votes)
+   — card/effect polling window; referendum cards and effects legal in this step may be played
 
 5. Tally votes and determine result
    REFERENDUM_RESOLUTION
@@ -301,25 +310,21 @@ Blood hunt is referendum-like, but it is not a political action.
 ```text
 1. Blood hunt is called after diablerie
 
-2. Before votes and ballots
-   BLOOD_HUNT_BEFORE_VOTES
-
-3. Polling
+2. Polling
    BLOOD_HUNT_POLLING
+   — vote-source polling; count titled vampires, ballots, political action cards burned for votes, table effects, and optional Edge burn
+   — do not open action modifier or reaction card-play windows
 
-4. Tally votes and determine result
+3. Tally votes and determine result
    BLOOD_HUNT_RESOLUTION
 
-5. If the blood hunt passes and would burn the diablerist
+4. If the blood hunt passes and would burn the diablerist
    BLOOD_HUNT_WOULD_BURN_DIABLERIST
    — e.g. Lay Low (anarch diablerist avoids being burned by the blood hunt)
 
-6. Commit final result
+5. Commit final result
    - diablerist burns
    - diablerist survives
-
-7. After blood hunt
-   BLOOD_HUNT_AFTER_RESOLUTION
 ```
 
 `BLOOD_HUNT_WOULD_BURN_DIABLERIST` is distinct from `COMBAT_WOULD_BE_BURNED`. The former is caused by a referendum result after diablerie; the latter is caused by combat damage or combat effects before the combat result is committed.
@@ -333,7 +338,7 @@ Blood hunt is referendum-like, but it is not a political action.
 | `.44 Magnum` as Equipment                   | `MINION_PHASE_DECLARE_ACTION`          | Later strike/maneuver text is generated by the equipped card       |
 | Standard Master                             | `MASTER_PHASE`                         | Unless card text says out-of-turn                                  |
 | Event                                       | `DISCARD_PHASE_EVENT`                  | Uses the discard phase event play                                  |
-| `Direct Intervention` style canceller       | `CARD_AS_PLAYED_CANCEL_WINDOW`         | Restricted cancellation layer                                      |
+| `Direct Intervention` style canceller       | `CARD_AS_PLAYED`         | Restricted cancellation layer                                      |
 | `Consign to Oblivion`                       | `ACTION_AS_ANNOUNCED`                  | Cancel an action as it is announced                                |
 | `Day Operation`                             | `ACTION_AS_ANNOUNCED`                  | Prevent blocks by playing at announcement; caster goes to torpor   |
 | `Conditioning`                              | `ACTION_DURING_ACTION`                 | Bleed modifier; only usable during a bleed action                  |
@@ -347,11 +352,14 @@ Blood hunt is referendum-like, but it is not a political action.
 | `Immortal Grapple`                          | `COMBAT_BEFORE_STRIKES`                | Grapple; only at close range before strikes are chosen             |
 | `Theft of Vitae`                            | `COMBAT_STRIKE_DECLARATION`            | Strike: steal 2 blood from opposing vampire                        |
 | `Forearm Block`                             | `COMBAT_DAMAGE_PREVENTION`             | Prevent 2 damage from opposing minion's next hand strike           |
-| `Blur`                                      | `COMBAT_ADDITIONAL_STRIKE_WINDOW`      | Additional-strike source                                           |
+| `Blur`                                      | `COMBAT_ADDITIONAL_STRIKE`      | Additional-strike source                                           |
 | `Amaranth`                                  | `COMBAT_WOULD_GO_TO_TORPOR`            | Replaces pending torpor with diablerie                             |
 | `Reform Body`                               | `COMBAT_WOULD_BE_BURNED`               | Usable if this vampire would be burned; avoid the burn             |
-| `Psyche!`                                   | `COMBAT_PRESS_STEP`                    | Press to continue combat if both combatants are still ready        |
-| `Crimson Fury`                              | `DIABLERIE_BEING_COMMITTED`            | Responds to a vampire being diablerized                            |
+| `Psyche!` [cel]                             | `COMBAT_PRESS_STEP`                    | Press to continue combat                                           |
+| `Psyche!` [CEL]                             | `COMBAT_ABOUT_TO_END`                  | Queue another combat after this round; illegal if a combat is already queued |
+| `Telepathic Tracking` [aus]                 | `COMBAT_PRESS_STEP`                    | Press to continue combat                                           |
+| `Telepathic Tracking` [AUS]                 | `COMBAT_WOULD_END`                     | Replace combat ending with a new round                             |
+| `Crimson Fury`                              | `DIABLERIE_CANCEL_OR_REPLACE`          | Responds to a vampire being diablerized                            |
 | `Absolute Tyranny` [POT+PRE]                | `REFERENDUM_POLLING`                   | During polling step, +3 votes                                      |
 | `Akunanse Kholo`                            | `REFERENDUM_BEFORE_VOTES`              | Usable during referendum before votes and ballots are cast         |
 | `Amici Noctis`                              | `REFERENDUM_AFTER_RESOLUTION`          | After referendum passes, recover the political action card         |
@@ -367,7 +375,7 @@ Prefer specific workflow windows over broad "interrupt" names. Specific names ma
 |------------------------------------|--------------------------------------------|
 | `COMBAT_WOULD_GO_TO_TORPOR`        | `COMBAT_BURN_OR_TORPOR_REPLACEMENT`        |
 | `COMBAT_WOULD_BE_BURNED`           | `COMBAT_EVENT_REPLACEMENT_OR_INTERRUPTION` |
-| `DIABLERIE_BEING_COMMITTED`        | `COMBAT_DIABLERIE_INTERRUPT`               |
+| `DIABLERIE_CANCEL_OR_REPLACE`      | `COMBAT_DIABLERIE_INTERRUPT`               |
 | `BLOOD_HUNT_WOULD_BURN_DIABLERIST` | `REFERENDUM_INTERRUPT`                     |
 
 Broad names can still be useful for CSV review buckets, but the engine should expose the narrower window that matches the workflow step.

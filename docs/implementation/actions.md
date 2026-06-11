@@ -14,18 +14,18 @@ Every action in rules-enforced mode moves through the following states, tracked 
 
 ```
 DeclareAction
-  → if an action card is played: open AS_PLAYED cancellation window
-  → open AS_ANNOUNCED sequencing window (action-announcement effects only)
+  → if an action card is played: run CardPlayWorkflow, which opens CARD_AS_PLAYED
+  → open ACTION_AS_ANNOUNCED sequencing window (action-announcement effects only)
   → open block-attempt impulse window (DIRECTED_SINGLE or UNDIRECTED)
   [status: DURING_ACTION]
 
     ── all players pass without blocking ──▶  open BLOCKS_DECLINED pre-resolution impulse window
                                                → if target changes: return to block-attempt impulse window
                                                → all players pass with no target change
-                                               → ResolveAction
-                                               → apply resolution effects
-                                               → set actionSuccessful = true
                                                → set reachedResolution = true (NRA locks)
+                                               → set actionSuccessful = true
+                                               → pay action cost
+                                               → apply resolution effects
                                                [status: AFTER_RESOLUTION]
                                                → open AFTER_RESOLUTION sequencing window
                                                → window closes → clear PendingActionState
@@ -75,6 +75,8 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 | `bleedSuccessful`            | `boolean`               | True if bleed resolved for ≥ 1 pool; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the ≥ 1 pool condition for Edge transfer. |
 | `referendumSuccessful`       | `boolean`               | True if referendum passed; drives "after successful referendum" effects                                                                                                                                                                          |
 | `bleedLimitedUsed`           | `boolean`               | A `(limited)` bleed modifier has already been played this action                                                                                                                                                                                 |
+| `actionModifierNamesByMinionRef` | `Map<CardRef, Set<String>>` | Action modifier card names played by each minion during this action; enforces one use of the same action modifier per minion per action, even at a different Discipline level.                                                                  |
+| `reactionNamesByMinionRef`   | `Map<CardRef, Set<String>>` | Reaction card names played by each reacting minion during this action; enforces one use of the same reaction per minion per action.                                                                                                             |
 | `stealth`                    | `int`                   | Running stealth total; carries across block windows and redirects — see [Blocking](./blocking.md)                                                                                                                                                |
 | `interceptsByBlockerRef`     | `Map<CardRef, Integer>` | Per-blocker intercept map; carries across redirects — see [Blocking](./blocking.md)                                                                                                                                                              |
 | `passedBlockWindowsByPlayer` | `Set<String>`           | Players who passed their current block window; reset on redirect — see [Blocking](./blocking.md)                                                                                                                                                 |
@@ -98,19 +100,19 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 
 > **Enum gap:** `ACTION_CONTINUING` is not yet in `src/main/java/…/enums/ActionStatus.java`. Add it before wiring the continue-the-action protocol path.
 
-`AS_PLAYED` and `AS_ANNOUNCED` are sequencing-window types, not action statuses. `AS_PLAYED` applies to the card-play cancellation layer; `AS_ANNOUNCED` applies to action-announcement effects after the action exists.
+`CARD_AS_PLAYED` and `ACTION_AS_ANNOUNCED` are sequencing-window types, not action statuses. `CARD_AS_PLAYED` belongs to the generic card-play lifecycle and opens only when a card is actually played. `ACTION_AS_ANNOUNCED` belongs to the action workflow and opens for every action, including basic actions and abilities from cards already in play.
 
-> **Enum gap:** `AS_PLAYED` is not yet in `SequencingWindowType` (currently `AS_ANNOUNCED`, `AFTER_RESOLUTION`). Add it before wiring the declaration sequencing windows.
+> **Enum gap:** `CARD_AS_PLAYED` is not yet in `SequencingWindowType`; the existing legacy action-announcement sequencing value should become `ACTION_AS_ANNOUNCED` when the declaration sequencing windows are wired.
 
 ---
 
 ## Declaration Sequencing Windows
 
-If an action card is played to declare the action, a `SequencingWindowState(AS_PLAYED)` opens first. This restricted window is for "as it is played" cancellers only (e.g. Direct Intervention) and wake effects needed to play effects in that window. The action card is not replaced until this window closes.
+If an action card is played to declare the action, the declaration invokes the generic Card Play workflow first. That workflow opens `CARD_AS_PLAYED`, a restricted window for "as it is played" cancellers only (e.g. Direct Intervention) and wake effects needed to play effects in that window. The action card is not replaced until this window closes. If the action card is cancelled in this window, the action ends before `ACTION_AS_ANNOUNCED`: the minion does not lock, no action cost is paid, and no NRA key is recorded.
 
-After `AS_PLAYED` closes, or immediately for a basic action that did not play a card, a `SequencingWindowState(AS_ANNOUNCED)` opens. This window is for effects usable as the action is announced. All players pass -> window closes -> block-attempt impulse window opens.
+After the action card's `CARD_AS_PLAYED` window closes, or immediately for a basic action or in-play ability that did not play a card, a `SequencingWindowState(ACTION_AS_ANNOUNCED)` opens. This window is for effects usable as the action is announced. All players pass -> window closes -> block-attempt impulse window opens.
 
-> **Gap:** `DeclareAction` currently opens the block-attempt impulse window directly, skipping both declaration windows. Inserting `AS_PLAYED` and `AS_ANNOUNCED` before the block-attempt window is tracked in [Mechanics Gaps](./mechanics-gaps.md) (P4 — AS_ANNOUNCED sequencing window).
+> **Gap:** `DeclareAction` currently opens the block-attempt impulse window directly, skipping the action-card Card Play workflow and the `ACTION_AS_ANNOUNCED` declaration window. Inserting both before the block-attempt window is tracked in [Mechanics Gaps](./mechanics-gaps.md).
 
 ---
 
@@ -144,7 +146,7 @@ NRA is tracked by `GameData.nraActionsByCardId: Map<String, Set<String>>` (clear
 ### NRA scope — what is NOT locked
 
 - HUNT, EQUIP (a different equipment card), EMPLOY_RETAINER (a different retainer), RECRUIT_ALLY (a different ally) — these are repeatable basic actions.
-- Cancelled actions (never reach `reachedResolution`).
+- Cancelled action cards (never reach `reachedResolution`; the minion does not lock and may attempt the same action card again).
 
 ### NRA enforcement
 
@@ -154,9 +156,20 @@ On `DeclareAction`:
 
 On `ResolveAction`:
 1. Set `reachedResolution = true` and add the NRA key before paying action costs.
-2. If cost cannot be paid or targets are invalid, the action **fizzles**: the action card (if any) moves from limbo to `ASH_HEAP` via `CardMovedEffect`; the acting minion remains locked until the AFTER_RESOLUTION window closes; the AFTER_RESOLUTION sequencing window still opens so "after this action" effects may fire; no pool/blood is paid.
+2. For unblocked actions, pay the action cost immediately after the NRA lock is recorded, before applying the action effect.
+3. If cost cannot be paid in full or targets are invalid, the action **fizzles**: pay as much of the action cost as possible, move the action card (if any) from limbo to `ASH_HEAP` via `CardMovedEffect`, apply no action effect, keep the acting minion locked until the AFTER_RESOLUTION window closes, and still open the AFTER_RESOLUTION sequencing window so "after this action" effects may fire.
 
 NRA locks persist through mid-turn unlocks.
+
+---
+
+## Per-Action Card-Use Limits
+
+During a single action, a minion cannot play the same action modifier card or reaction card more than once, even if using a different Discipline level. This is independent of the `(limited)` bleed-increase rule.
+
+On each accepted `MODIFIER` play, add the card name to `actionModifierNamesByMinionRef[playingMinionRef]`; reject the play if that set already contains the name.
+
+On each accepted `REACTION` play, add the card name to `reactionNamesByMinionRef[playingMinionRef]`; reject the play if that set already contains the name. Wake effects only grant permission for a locked minion to react or block; they do not reset this per-action card-use limit.
 
 ---
 
@@ -171,7 +184,7 @@ NRA locks persist through mid-turn unlocks.
 | `EQUIP`           | `CardAttachedEffect(equipment, actor)` — equipment identified in declaration                                                                                                                                                                                                                                 |
 | `EMPLOY_RETAINER` | `CardAttachedEffect(retainer, actor)` — retainer brought in with life counters per card text                                                                                                                                                                                                                 |
 | `RECRUIT_ALLY`    | `CardMovedEffect(ally, actingPlayer, READY)` + add ally card ID to `GameData.recruitedThisTurn: Set<String>`; `DeclareAction` rejects an actor whose card ID is in this set; cleared on `NextTurn`                                                                                                           |
-| `POLITICAL`       | Open `ReferendumState` and suspend action completion until the referendum resolves — see [Referendums](./referendums.md)                                                                                                                                                                                     |
+| `POLITICAL`       | After action cost is paid, open `ReferendumState` and suspend action completion until the referendum resolves — see [Referendums](./referendums.md)                                                                                                                                                           |
 | `LEAVE_TORPOR`    | `CardCounterChangedEffect(actor, -2)`; then `CardMovedEffect(actor, READY)` — actor must be in TORPOR and have ≥ 2 blood; if cost cannot be paid, action fizzles                                                                                                                                             |
 | `RESCUE`          | Pay 2 blood from actor, target, or split between them; then `CardMovedEffect(target, READY)` — target must be a vampire in TORPOR. If cost cannot be paid, action fizzles.                                                                                                                                   |
 | `DIABLERISE`      | Full diablerie sequence — see [Combat § Diablerie](./combat.md#diablerie)                                                                                                                                                                                                                                    |
@@ -195,7 +208,7 @@ Three independent success flags on `PendingActionState`:
 
 `ResolveAction` opens a `SequencingWindowState(AFTER_RESOLUTION)` for unblocked actions. Blocked actions open the same window after combat or block resolution completes. Legal effects include "after action resolution", "after this action", "after block resolution" when a block occurred, "after successful action", "after successful bleed", and "after successful referendum" effects whose trigger preconditions are currently true. ABC priority order applies. When the window closes, `PendingActionState` is cleared.
 
-For political actions, `ResolveAction(POLITICAL)` opens the referendum subworkflow and suspends action completion. `ACTION_AFTER_RESOLUTION` opens only after `ClosePolling` resolves the referendum and any outcome-dependent referendum hooks have completed.
+For political actions, `ResolveAction(POLITICAL)` records the NRA lock, pays the action cost, then opens the referendum subworkflow and suspends action completion. `ACTION_AFTER_RESOLUTION` opens only after `ClosePolling` resolves the referendum and any outcome-dependent referendum hooks have completed.
 
 ---
 

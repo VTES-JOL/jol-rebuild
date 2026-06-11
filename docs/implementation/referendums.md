@@ -57,7 +57,7 @@ Blood hunt referendums skip term choice — terms are fixed (`targetRef` = diabl
 - Votes are irreversible once cast.
 - Cards "only usable during political action" are legal only during this polling.
 
-Blood hunt referendums: action modifiers and reactions not legal; only vote sources (titles, Edge, one PA card per Methuselah, in-play card effects explicitly usable during blood hunt) are accepted.
+Blood hunt referendums use a narrower polling model. `BLOOD_HUNT_POLLING` allows vote-source mechanics, including burning one political action card from hand for 1 vote, but it does not open action modifier or reaction card-play windows. Accepted vote sources are ready titled vampires, Prisci ballots if relevant, one political action card burned from hand per Methuselah, the Edge, and in-play effects explicitly usable during a blood hunt.
 
 ### Step 3 — Resolution
 
@@ -75,7 +75,7 @@ Set `PendingActionState.referendumSuccessful` accordingly for political actions.
 |--------------------|---------------------------------------------------|-------------------------------------------------------------------------------------------------|
 | `OpenPolling`      | —                                                 | Transition from "before votes" window to active polling; sets `pollingOpen = true`              |
 | `CastVotes`        | `playerName`, `cardRef`, `amount`, `forOrAgainst` | Cast votes from a titled ready vampire; validates vote amount against title and readiness       |
-| `BurnCardForVote`  | `playerName`, `cardRef`, `forOrAgainst`           | Burn one political action card from hand for 1 vote; once per player per referendum             |
+| `BurnCardForVote`  | `playerName`, `cardRef`, `forOrAgainst`           | Burn one political action card from hand for 1 vote; once per player per referendum, including blood hunts |
 | `BurnEdgeForVote`  | `playerName`, `forOrAgainst`                      | Burn the Edge for 1 vote; clears the Edge holder                                                |
 | `CastPrisciBallot` | `cardRef`, `forOrAgainst`                         | Cast one ballot for a ready Priscus in the sub-referendum; recomputes Prisci block contribution |
 | `ClosePolling`     | —                                                 | Tally and resolve the referendum; clear `ReferendumState`                                       |
@@ -141,7 +141,7 @@ After the diablerie sequence completes (step 6 — Blood Hunt Trigger — in [Co
 
 If the blood hunt passes: `CardMovedEffect(diablerist, ASH_HEAP)` — the diablerist is burned.
 
-Before applying that burn, open `BLOOD_HUNT_WOULD_BURN_DIABLERIST`. This is a blood-hunt result hook, not a combat burn hook; it applies even when the diablerie was caused by combat.
+Before applying that burn, open `BLOOD_HUNT_WOULD_BURN_DIABLERIST`. This is a blood-hunt result hook, not a combat burn hook; it applies even when the diablerie was caused by combat. If the window closes without a replacement/prevention effect, automatically burn the diablerist.
 
 The blood hunt referendum must fully resolve (reach `ClosePolling` and complete `BLOOD_HUNT_WOULD_BURN_DIABLERIST`, if applicable) before the AFTER_RESOLUTION sequencing window of the triggering action opens. The overall lifecycle is: diablerie steps 1–5 → blood hunt referendum (steps 1–3 per above) → blood-hunt result hooks → enclosing workflow return.
 

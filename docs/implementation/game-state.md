@@ -339,7 +339,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 | `PassImpulse`           | `playerName`              | Player declines to play; advances `currentImpulseHolder`. Auto-closes when all pass consecutively   |
 | `ClaimImpulse`          | `playerName`              | Player plays a card/effect; returns impulse to the acting Methuselah and resets `consecutivePasses` |
 | `CloseImpulseWindow`    | —                         | Explicitly close the window                                                                         |
-| `PassSequencing`        | `playerName`              | Pass in a sequencing window (After Resolution, AS_ANNOUNCED, etc.)                                  |
+| `PassSequencing`        | `playerName`              | Pass in a sequencing window (After Resolution, ACTION_AS_ANNOUNCED, etc.)                           |
 | `CloseSequencingWindow` | —                         | Close the open sequencing window                                                                    |
 
 ---
@@ -366,7 +366,7 @@ Transfer budget logic is already implemented and gates `TransferBlood`, `DrawCry
 `ImpulseState`, `SequencingWindowState`, and all pass/claim/close commands are implemented. `ResolveAction` already opens the `AFTER_RESOLUTION` sequencing window.
 
 Remaining integration points:
-- `DeclareAction` should open the AS_PLAYED sequencing window (for action-card plays only), then the AS_ANNOUNCED sequencing window, before the block-attempt impulse window — see [Actions](./actions.md). Both `AS_PLAYED` and `ACTION_CONTINUING` must be added to their respective Java enums (`SequencingWindowType` and `ActionStatus`) before these paths can be wired.
+- `DeclareAction` should invoke the Card Play workflow for action cards from hand, then open the `ACTION_AS_ANNOUNCED` sequencing window before the block-attempt impulse window — see [Actions](./actions.md). `CARD_AS_PLAYED`, `ACTION_AS_ANNOUNCED`, and `ACTION_CONTINUING` must be added/renamed in their respective Java enums before these paths can be wired.
 - Block-attempt stealth/intercept exchanges use the existing impulse window with `DIRECTED_SINGLE` or `UNDIRECTED` context. After all eligible Methuselahs decline block attempts, a final Blocks Declined pre-resolution impulse window remains open for legal action modifiers, reactions, and redirects before `ResolveAction` is available — see [Blocking](./blocking.md).
 - Combat timing steps each have their own impulse windows with `COMBAT` context — see [Combat](./combat.md).
 - Referendum polling uses its own sequencing rules — see [Referendums](./referendums.md).

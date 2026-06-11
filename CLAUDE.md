@@ -32,6 +32,7 @@ Each topic has a paired rules doc and implementation doc. Rules docs explain tab
 | —                                                     | [Board Layouts](docs/implementation/board-layouts.md)                                        |
 | —                                                     | [Chat System](docs/implementation/chat.md)                                                   |
 | —                                                     | [Card Text Parsing](docs/implementation/card-text-parsing.md)                                |
+| —                                                     | [Card Language](docs/implementation/card-language.md)                                        |
 | —                                                     | [Mechanics Gaps](docs/implementation/mechanics-gaps.md)                                      |
 
 ## Commands

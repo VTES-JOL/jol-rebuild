@@ -90,6 +90,8 @@ A strike declaration names the **type** and, where relevant, the **strength or d
 - Weapon strikes use the formula defined in the weapon's card text.
 - Special strikes (dodge, Combat Ends, steal blood) are named by type.
 
+If a combat card used for a strike is cancelled as it is played, that combat card has no effect, but the minion who played it must choose a strike again. The new strike may come from another legal strike card. The cancelled non-action card's cost is still paid as normal unless the cancelling effect explicitly says otherwise; see [Card Timing and Card Types § Cancelled Cards](./card-play.md#cancelled-cards).
+
 #### Strike range defaults
 
 Most strikes are effective only at close range. A strike is effective at either close or long range only if it is identified as ranged, does `R` damage, is a defensive strike such as dodge or Combat Ends, or card text otherwise says it is usable at long range.
@@ -258,7 +260,9 @@ Combat ends when:
 The official combat sequence has an **End of Round** step, not a separately numbered End of Combat step. That step is still reached when combat ends prematurely.
 
 Card text and rulings also create timing around combat ending:
-- Effects usable **when combat is about to end** or **when combat would end** are used before combat actually ends and can replace or interrupt the end of combat (for example, Psyche! or Telepathic Tracking).
+- Effects usable **when combat would end** are used before effects usable **when combat is about to end**. These are separate ordered windows.
+- Effects usable **when combat would end** can replace the end of combat with a new round (for example, superior Telepathic Tracking). If such an effect starts a new round, combat is no longer about to end, so later "about to end" effects cannot be played.
+- Effects usable **when combat is about to end** can queue a new combat after this combat ends (for example, superior Psyche!). They cannot be played if another combat is already queued.
 - Effects that happen **before combat ends** resolve before the combat-ending point.
 - Effects that happen **at the end of combat** or **after combat ends** resolve at the combat-ending point or immediately after it, as their card text states.
 

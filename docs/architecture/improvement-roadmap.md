@@ -168,4 +168,4 @@ Rules-enforced features also need new command types and controls as their backen
 8. Blocking correctness: stealth/intercept, directed/undirected eligibility, redirects, wake effects, action continuation
 9. Diablerie full resolution and rule-bearing minion trait enforcement
 10. Combat system and combat panel
-11. Remaining P3/P4 mechanics from [Mechanics Gaps](../implementation/mechanics-gaps.md#implementation-priority): master action accounting, unlock-phase automatic effects, named counters, keyword/subtype parsing, anarch conversion, control transfer, hunting-ground effects, blood capacity overflow, and AS_ANNOUNCED.
+11. Remaining P3/P4 mechanics from [Mechanics Gaps](../implementation/mechanics-gaps.md#implementation-priority): master action accounting, unlock-phase automatic effects, named counters, keyword/subtype parsing, anarch conversion, control transfer, hunting-ground effects, blood capacity overflow, and ACTION_AS_ANNOUNCED.

@@ -31,11 +31,11 @@ These cancellers form a restricted card-play window before the played card is re
 
 Timing depends on the card category:
 
-| Category                                    | When cost is paid                              | When effect resolves                  | Notes                                                                                                                                        |
-|---------------------------------------------|------------------------------------------------|---------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| **Action** (card or ability)                | Only if the action is successful (not blocked) | At successful action resolution       | If cost cannot be paid at resolution, or targets are no longer valid, the action fizzles: pay as much cost as possible, effect has no effect |
-| **Strike** (combat)                         | Immediately on play                            | At the appropriate combat timing step | Card is not in play until resolution completes                                                                                               |
-| **All others** (modifiers, reactions, etc.) | Immediately                                    | Immediately                           | If the card goes "in play," it is in limbo until its condition is met                                                                        |
+| Category                                    | When cost is paid                                                                 | When effect resolves                  | Notes                                                                                                                                        |
+|---------------------------------------------|-----------------------------------------------------------------------------------|---------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| **Action** (card or ability)                | Only if the action is successful (not blocked), after NRA locks at resolution      | At successful action resolution       | If cost cannot be paid at resolution, or targets are no longer valid, the action fizzles: pay as much cost as possible, effect has no effect |
+| **Strike** (combat)                         | As normal after the as-played cancellation window, even if cancelled               | At the appropriate combat timing step | Card is not in play until resolution completes. If cancelled, no effect; if it was used for a strike, choose a strike again                 |
+| **All others** (modifiers, reactions, etc.) | As normal after the as-played cancellation window, even if cancelled               | Immediately                           | If the card goes "in play," it is in limbo until its condition is met                                                                        |
 
 For action cards and action abilities, the action's cost is not paid when the action is blocked. A blocked action burns the action card, if any, and proceeds to block resolution/combat instead of paying the action cost or applying the action effect.
 
@@ -49,9 +49,13 @@ A card cancelled "as it is played":
 
 - **Is** considered "played" by **card name** for any rule that limits how often a card can be played.
 - **Does not** reduce hand size permanently; the card goes to the ash heap and the draw-to-max rule replaces it.
-- **Does not** pay any cost.
-- **Does not** trigger the NRA lock; the same action type may be attempted again this turn.
 - No other effects propagate. The play attempt simply ends.
+
+Cost and action consequences depend on card type and the cancelling effect:
+
+- **Action card cancelled:** the acting minion does not lock, does not pay the action card cost, does not trigger the NRA lock, and may attempt the same action card again this turn.
+- **Non-action card cancelled:** the card has no effect, but its cost is paid as normal unless the cancelling effect explicitly says otherwise.
+- **Combat card used for a strike cancelled:** pay its cost as normal unless the cancelling effect says otherwise, then the minion who played it chooses a strike again. The replacement strike may come from another legal strike card.
 
 ---
 
@@ -133,8 +137,8 @@ A Master card is out-of-turn if its card text contains the string `"out-of-turn"
 
 These two types are explicitly asymmetric:
 
-- **Action Modifier** - only the **acting player** may play these. They supplement the action their minion is taking, such as adding stealth or changing a target.
-- **Reaction** - any player **except** the acting player may play these in response to the declared action.
+- **Action Modifier** - only the **acting minion** may play these, except when card text explicitly allows another minion controlled by the same Methuselah to play the modifier. A minion cannot play the same action modifier card more than once during a single action, even at a different Discipline level.
+- **Reaction** - only ready unlocked minions controlled by Methuselahs other than the acting Methuselah may play these in response to the declared action, except when a wake-style effect or card text grants permission. A minion cannot play the same reaction card more than once during a single action.
 
 ### Combat Cards
 
