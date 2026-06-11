@@ -1,4 +1,5 @@
 @startuml
+!pragma layout smetana
 top to bottom direction
 
 skinparam nodesep 8
@@ -32,7 +33,7 @@ note top of Idle
   empty action state
 end note
 
-Idle --> ActionDeclaring : DeclareAction or card ability
+Idle --> BuildPendingAction : DeclareAction or card ability
 
 state "Play Card" as CardPlayWorkflow{
     state "CARD_AS_PLAYED" as CARD_AS_PLAYED <<window>>
@@ -64,66 +65,93 @@ state "Play Card" as CardPlayWorkflow{
     CardDestination --> [*]
 }
 
-note right of CardPlayWorkflow
+note top of CardPlayWorkflow
   Any card played inside any timing window runs this
   nested workflow. The enclosing action/combat/referendum
   window determines whether the card is legal to play.
 end note
 
-state "Perform Action" as ActionDeclaring {
+state "How To Perform Actions\n(Detailed Play Guide)" as PerformActionWorkflow {
     state "Declaration" as BuildPendingAction <<decision>>
     state "Play Action Card" as PlayActionCard <<automatic>>
     state "ACTION_AS_ANNOUNCED" as ACTION_AS_ANNOUNCED <<window>>
-
-    PlayActionCard : run CardPlayWorkflow
-    PlayActionCard : only for action cards from hand
-    ACTION_AS_ANNOUNCED : eg. Seduction, Day Operation, Car Bomb
-    BuildPendingAction : Declare all targets, modes, cost
-
-    [*] --> BuildPendingAction
-    BuildPendingAction --> PlayActionCard : action card played
-    BuildPendingAction --> ACTION_AS_ANNOUNCED : basic action or in-play ability
-    PlayActionCard --> [*] : canceled, clear action state
-    PlayActionCard --> ACTION_AS_ANNOUNCED : card not canceled
-    ACTION_AS_ANNOUNCED --> [*] : all pass
-}
-
-ActionDeclaring --> ActionBlockWindow
-[*] -[hidden]-> Idle
-Idle -[hidden]-> ActionDeclaring
-ActionDeclaring -[hidden]-> ActionBlockWindow
-
-state "Resolve Block Attempts" as ActionBlockWindow {
     state "ACTION_DURING_ACTION" as ACTION_DURING_ACTION <<window>>
     state "ACTION_BLOCK_ATTEMPT" as ACTION_BLOCK_ATTEMPT <<window>>
     state "ACTION_STEALTH_INTERCEPT" as ACTION_STEALTH_INTERCEPT <<window>>
     state "ACTION_BLOCKS_DECLINED" as ACTION_BLOCKS_DECLINED <<window>>
+    state "ACTION_BLOCK_RESOLUTION_PRE_COMBAT" as ACTION_BLOCK_RESOLUTION_PRE_COMBAT <<window>>
+    state "Run Combat\nsubworkflow" as RunCombatWorkflow <<automatic>>
+    state "ACTION_CONTINUING" as ACTION_CONTINUING <<window>>
+    state "Complete Action" as CompleteAction <<automatic>>
+    state "Run Referendum\nsubworkflow" as RunReferendumWorkflow <<automatic>>
+    state "Run Diablerie\nsubworkflow" as RunDiablerieWorkflow <<automatic>>
+    state "Run Blood Hunt\nsubworkflow" as RunBloodHuntWorkflow <<automatic>>
+    state "ApplyActionEffect" as ApplyActionEffect <<automatic>>
+    state "ACTION_AFTER_RESOLUTION" as ACTION_AFTER_RESOLUTION <<window>>
+    state "Clear Action State" as ClearActionState <<automatic>>
 
+    BuildPendingAction : Declare all targets, modes, cost
+    PlayActionCard : run CardPlayWorkflow
+    PlayActionCard : only for action cards from hand
+    ACTION_AS_ANNOUNCED : eg. Seduction, Day Operation, Car Bomb
     ACTION_DURING_ACTION : eg. Conditioning
     ACTION_BLOCK_ATTEMPT : eg. Eagle's Sight
     ACTION_STEALTH_INTERCEPT : eg. Lost in Crowds, Precognition
     ACTION_BLOCKS_DECLINED : eg. Deflection, Threats
+    ACTION_BLOCK_RESOLUTION_PRE_COMBAT : eg. Massassi's Honor, Minor Irritation
+    RunCombatWorkflow : enter CombatWorkflow side diagram
+    RunCombatWorkflow : may run diablerie/blood hunt internally
+    ACTION_CONTINUING : eg. Form of Mist
+    ACTION_CONTINUING : block cycle resumes after combat
+    ACTION_CONTINUING : stealth/intercept modifiers persist
+    CompleteAction : action reaches resolution
+    CompleteAction : NRA locks before cost
+    RunReferendumWorkflow : enter PoliticalReferendum side diagram
+    RunDiablerieWorkflow : enter DiablerieWorkflow side diagram
+    RunBloodHuntWorkflow : enter BloodHuntWorkflow side diagram
+    ApplyActionEffect : resolve by ActionType
+    ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
+    ACTION_AFTER_RESOLUTION : eg. Freak Drive
+    ClearActionState : clear PendingActionState
+    ClearActionState : close active action timing window
+    ClearActionState : return to Idle
 
-    [*] --> ACTION_DURING_ACTION
+    BuildPendingAction --> PlayActionCard : action card from hand
+    BuildPendingAction --> ACTION_AS_ANNOUNCED : basic action or in-play ability
+    PlayActionCard --> ClearActionState : canceled
+    PlayActionCard --> ACTION_AS_ANNOUNCED : card not canceled
+    ACTION_AS_ANNOUNCED --> ACTION_DURING_ACTION : all pass
     ACTION_DURING_ACTION --> ACTION_BLOCK_ATTEMPT : block declared
     ACTION_BLOCK_ATTEMPT --> ACTION_STEALTH_INTERCEPT : stealth/intercept needed
     ACTION_STEALTH_INTERCEPT --> ACTION_DURING_ACTION : failed block attempt
     ACTION_DURING_ACTION --> ACTION_BLOCKS_DECLINED : all eligible Methuselahs decline
     ACTION_BLOCKS_DECLINED --> ACTION_DURING_ACTION : target changes or redirect
-    ACTION_BLOCKS_DECLINED --> [*] : all pass, no target change
-    ACTION_BLOCK_ATTEMPT --> [*] : block succeeds
-    ACTION_STEALTH_INTERCEPT --> [*] : block succeeds
+    ACTION_BLOCK_ATTEMPT --> ACTION_BLOCK_RESOLUTION_PRE_COMBAT : block succeeds
+    ACTION_STEALTH_INTERCEPT --> ACTION_BLOCK_RESOLUTION_PRE_COMBAT : block succeeds
+    ACTION_BLOCKS_DECLINED --> CompleteAction : all pass, no block
+    ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> RunCombatWorkflow : combat not canceled or replaced
+    ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_CONTINUING : block resolution continues action
+    ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_AFTER_RESOLUTION : block/action ends without combat
+    RunCombatWorkflow --> ACTION_CONTINUING : continue-the-action effect
+    RunCombatWorkflow --> ACTION_AFTER_RESOLUTION : no continuation
+    ACTION_CONTINUING --> ACTION_DURING_ACTION : reopen block attempts
+    CompleteAction --> RunReferendumWorkflow : political action
+    CompleteAction --> RunDiablerieWorkflow : diablerie action or effect
+    CompleteAction --> ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
+    RunReferendumWorkflow --> ACTION_AFTER_RESOLUTION
+    RunDiablerieWorkflow --> RunBloodHuntWorkflow : successful diablerie
+    RunDiablerieWorkflow --> ACTION_AFTER_RESOLUTION : canceled/no blood hunt
+    RunBloodHuntWorkflow --> ACTION_AFTER_RESOLUTION : enclosing action remains
+    RunBloodHuntWorkflow --> ClearActionState : no enclosing action remains
+    ApplyActionEffect --> ACTION_AFTER_RESOLUTION
+    ACTION_AFTER_RESOLUTION --> ClearActionState : all pass
 }
 
-ActionBlockWindow --> ActionResolution : no successful block
-ActionBlockWindow --> ACTION_BLOCK_RESOLUTION_PRE_COMBAT : block succeeds
-ActionBlockWindow -[hidden]-> ActionResolution
-
-state "ACTION_BLOCK_RESOLUTION_PRE_COMBAT" as ACTION_BLOCK_RESOLUTION_PRE_COMBAT <<window>>
-ACTION_BLOCK_RESOLUTION_PRE_COMBAT : eg. Massassi's Honor, Minor Irritation
-ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> CombatWorkflow : combat not canceled or replaced
-ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_CONTINUING : block resolution continues action
-ACTION_BLOCK_RESOLUTION_PRE_COMBAT --> ACTION_AFTER_RESOLUTION : block/action ends without combat
+note top of PerformActionWorkflow
+  This is the Detailed Play Guide "How to Perform Actions"
+  workflow. Nodes named "Run ... subworkflow" are handoff
+  points to the side diagrams, not inline expansions.
+end note
 
 state "Combat" as CombatWorkflow {
     state "COMBAT_BEFORE_RANGE" as COMBAT_BEFORE_RANGE <<window>>
@@ -136,6 +164,7 @@ state "Combat" as CombatWorkflow {
     state "COMBAT_DAMAGE_RESOLUTION" as COMBAT_DAMAGE_RESOLUTION <<window>>
     state "COMBAT_WOULD_GO_TO_TORPOR" as COMBAT_WOULD_GO_TO_TORPOR <<window>>
     state "COMBAT_WOULD_BE_BURNED" as COMBAT_WOULD_BE_BURNED <<window>>
+    state "Run Diablerie/Blood Hunt\nsubworkflows" as RunCombatDiablerieWorkflow <<automatic>>
     state "Commit Combat Result" as CommitCombatResult <<automatic>>
     state "COMBAT_ADDITIONAL_STRIKE" as COMBAT_ADDITIONAL_STRIKE <<window>>
     state "COMBAT_PRESS_STEP" as COMBAT_PRESS_STEP <<window>>
@@ -159,6 +188,8 @@ state "Combat" as CombatWorkflow {
     COMBAT_DAMAGE_RESOLUTION: eg. Twisting the Knife
     COMBAT_ENDS: //Effect: combat is ending//
     COMBAT_AFTER_ENDS: eg. Form of Mist
+    RunCombatDiablerieWorkflow: enter DiablerieWorkflow side diagram
+    RunCombatDiablerieWorkflow: enter BloodHuntWorkflow if diablerie succeeds
     ResolveDeclaredStrikes: * Check strike order
     ResolveDeclaredStrikes: * Assign strike effects
     ResolveDeclaredStrikes: * Apply non-damage effects, or queue them
@@ -177,9 +208,11 @@ state "Combat" as CombatWorkflow {
     COMBAT_DAMAGE_RESOLUTION --> COMBAT_WOULD_GO_TO_TORPOR : vampire would go to torpor
     COMBAT_DAMAGE_RESOLUTION --> COMBAT_WOULD_BE_BURNED : minion would burn
     COMBAT_DAMAGE_RESOLUTION --> CommitCombatResult : no replacement hook
-    COMBAT_WOULD_GO_TO_TORPOR --> DiablerieWorkflow : torpor replaced by diablerie
+    COMBAT_WOULD_GO_TO_TORPOR --> RunCombatDiablerieWorkflow : diablerie replaces torpor
     COMBAT_WOULD_GO_TO_TORPOR --> CommitCombatResult : result not replaced
     COMBAT_WOULD_BE_BURNED --> CommitCombatResult : result not replaced
+    RunCombatDiablerieWorkflow --> COMBAT_END_OF_ROUND : subworkflows complete
+    RunCombatDiablerieWorkflow --> CommitCombatResult : diablerie canceled
     CommitCombatResult --> COMBAT_ADDITIONAL_STRIKE : combatants still ready
     COMBAT_ADDITIONAL_STRIKE --> COMBAT_STRIKE_DECLARATION : additional strike gained/used
     COMBAT_ADDITIONAL_STRIKE --> COMBAT_PRESS_STEP : all pass, no additional strike
@@ -191,30 +224,6 @@ state "Combat" as CombatWorkflow {
     COMBAT_WOULD_END --> COMBAT_ENDS
     COMBAT_ENDS --> COMBAT_AFTER_ENDS
     COMBAT_AFTER_ENDS --> [*] : combat-ending hooks complete
-}
-
-CombatWorkflow --> ACTION_CONTINUING : continue-the-action effect
-CombatWorkflow --> ACTION_AFTER_RESOLUTION : no continuation
-
-state "ACTION_CONTINUING" as ACTION_CONTINUING <<window>>
-ACTION_CONTINUING : eg. Form of Mist
-ACTION_CONTINUING : block cycle resumes after combat
-ACTION_CONTINUING : stealth/intercept modifiers persist
-ACTION_CONTINUING --> ActionBlockWindow : reopen block attempts
-
-state "Action Resolution" as ActionResolution {
-    state "CompleteAction" as CompleteAction <<automatic>>
-    state "ApplyActionEffect" as ApplyActionEffect <<automatic>>
-
-    [*] --> CompleteAction
-    CompleteAction : action reaches resolution
-    CompleteAction : NRA locks before cost
-    ApplyActionEffect : resolve by ActionType
-    ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
-    CompleteAction --> PoliticalReferendum : political action
-    CompleteAction --> DiablerieWorkflow : diablerie action or effect
-    CompleteAction --> ApplyActionEffect : bleed, hunt, equip, recruit, rescue, custom
-    ApplyActionEffect --> [*]
 }
 
 state "Political Referendum" as PoliticalReferendum {
@@ -240,11 +249,6 @@ state "Political Referendum" as PoliticalReferendum {
     REFERENDUM_AFTER_RESOLUTION --> [*]
 }
 
-PoliticalReferendum --> ACTION_AFTER_RESOLUTION
-ActionResolution --> ACTION_AFTER_RESOLUTION
-ActionResolution -[hidden]-> ACTION_AFTER_RESOLUTION
-ACTION_AFTER_RESOLUTION -[hidden]-> DiablerieWorkflow
-
 state "Diablerie" as DiablerieWorkflow {
     state "DIABLERIE_CANCEL_OR_REPLACE" as DIABLERIE_CANCEL_OR_REPLACE <<window>>
     state "Diablerie Blood Transfer" as DiablerieBloodTransfer <<automatic>>
@@ -253,6 +257,7 @@ state "Diablerie" as DiablerieWorkflow {
     state "Discipline Search" as DiablerieDisciplineSearch <<decision>>
     state "DIABLERIE_AFTER_SUCCESS" as DIABLERIE_AFTER_SUCCESS <<window>>
     state "TROPHY_AWARD_BEFORE_BLOOD_HUNT" as TROPHY_AWARD_BEFORE_BLOOD_HUNT <<decision>>
+    state "Run Blood Hunt\nsubworkflow" as RunBloodHuntAfterDiablerie <<automatic>>
 
     DIABLERIE_AFTER_SUCCESS: eg. Rebirth
     TROPHY_AWARD_BEFORE_BLOOD_HUNT: eg. Trophy: Diablerie
@@ -264,6 +269,7 @@ state "Diablerie" as DiablerieWorkflow {
     DiablerieBurnVictim: burn remaining attached cards/counters
     DiablerieDisciplineSearch: optional if victim capacity is higher
     DiablerieDisciplineSearch: search hand/library/ash heap
+    RunBloodHuntAfterDiablerie: enter BloodHuntWorkflow side diagram
 
     [*] --> DIABLERIE_CANCEL_OR_REPLACE : diablerie attempt begins
     DIABLERIE_CANCEL_OR_REPLACE --> [*] : canceled
@@ -273,12 +279,9 @@ state "Diablerie" as DiablerieWorkflow {
     DiablerieBurnVictim --> DiablerieDisciplineSearch
     DiablerieDisciplineSearch --> DIABLERIE_AFTER_SUCCESS
     DIABLERIE_AFTER_SUCCESS --> TROPHY_AWARD_BEFORE_BLOOD_HUNT
-    TROPHY_AWARD_BEFORE_BLOOD_HUNT --> [*]
+    TROPHY_AWARD_BEFORE_BLOOD_HUNT --> RunBloodHuntAfterDiablerie
+    RunBloodHuntAfterDiablerie --> [*]
 }
-
-DiablerieWorkflow --> BloodHuntWorkflow : successful diablerie
-DiablerieWorkflow --> ACTION_AFTER_RESOLUTION : canceled/no blood hunt
-DiablerieWorkflow -[hidden]-> BloodHuntWorkflow
 
 state "Blood Hunt" as BloodHuntWorkflow {
     state "BLOOD_HUNT_POLLING\n(vote sources only)" as BLOOD_HUNT_POLLING <<decision>>
@@ -304,11 +307,9 @@ state "Blood Hunt" as BloodHuntWorkflow {
     BurnDiablerist --> [*]
 }
 
-BloodHuntWorkflow --> COMBAT_END_OF_ROUND : enclosing combat exists
-BloodHuntWorkflow --> ACTION_AFTER_RESOLUTION : enclosing action exists
-BloodHuntWorkflow --> [*] : no enclosing action remains
-
-state "ACTION_AFTER_RESOLUTION" as ACTION_AFTER_RESOLUTION <<window>>
-ACTION_AFTER_RESOLUTION : eg. Freak Drive
-ACTION_AFTER_RESOLUTION --> [*] : all pass, clear action state
+PerformActionWorkflow -[hidden]down-> CardPlayWorkflow
+PerformActionWorkflow -[hidden]down-> CombatWorkflow
+PerformActionWorkflow -[hidden]down-> PoliticalReferendum
+PerformActionWorkflow -[hidden]down-> DiablerieWorkflow
+PerformActionWorkflow -[hidden]down-> BloodHuntWorkflow
 @enduml
