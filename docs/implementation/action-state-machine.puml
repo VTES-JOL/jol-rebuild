@@ -178,6 +178,7 @@ state "Combat" as CombatWorkflow {
     state "COMBAT_PRESS_STEP" as COMBAT_PRESS_STEP <<window>>
     state "COMBAT_END_OF_ROUND" as COMBAT_END_OF_ROUND <<window>>
     state "COMBAT_WOULD_END" as COMBAT_WOULD_END <<window>>
+    state "COMBAT_ABOUT_TO_END" as COMBAT_ABOUT_TO_END <<window>>
     state "COMBAT_ENDS" as COMBAT_ENDS <<automatic>>
     state "COMBAT_AFTER_ENDS" as COMBAT_AFTER_ENDS <<window>>
 
@@ -190,9 +191,10 @@ state "Combat" as CombatWorkflow {
     COMBAT_WOULD_GO_TO_TORPOR : eg. Amaranth
     COMBAT_WOULD_BE_BURNED : eg. Reform Body
     COMBAT_ADDITIONAL_STRIKE : eg. Blur
-    COMBAT_PRESS_STEP : eg. Psyche!
+    COMBAT_PRESS_STEP : eg. Psyche! [cel], Telepathic Tracking [aus]
     COMBAT_END_OF_ROUND : eg. Taste of Vitae
     COMBAT_WOULD_END: eg. Telepathic Tracking
+    COMBAT_ABOUT_TO_END: eg. Psyche!
     COMBAT_DAMAGE_RESOLUTION: eg. Twisting the Knife
     COMBAT_ENDS: //Effect: combat is ending//
     COMBAT_AFTER_ENDS: eg. Form of Mist
@@ -229,7 +231,9 @@ state "Combat" as CombatWorkflow {
     ResolveDeclaredStrikes --> COMBAT_END_OF_ROUND : combat ends strike
     CommitCombatResult --> COMBAT_END_OF_ROUND : combatant no longer ready
     COMBAT_END_OF_ROUND --> COMBAT_WOULD_END
-    COMBAT_WOULD_END --> COMBAT_ENDS
+    COMBAT_WOULD_END --> COMBAT_BEFORE_RANGE : end replaced by new round
+    COMBAT_WOULD_END --> COMBAT_ABOUT_TO_END : still ending
+    COMBAT_ABOUT_TO_END --> COMBAT_ENDS
     COMBAT_ENDS --> COMBAT_AFTER_ENDS
     COMBAT_AFTER_ENDS --> [*] : combat-ending hooks complete
 }

@@ -51,7 +51,9 @@ A new `CombatState` object is added to `GameData`. It is set when combat opens a
 
 ### Combat queuing
 
-If a card effect creates a new combat while `CombatState` is already active, the new combat is enqueued: `combatQueue: List<CombatPair>` on `GameData`. `StartCombat` appends to the queue when `combatState` is set. `ClearCombatState` dequeues the next entry if one is waiting.
+If a card effect starts or schedules a distinct combat while `CombatState` is already active, the new combat is enqueued: `combatQueue: List<CombatPair>` on `GameData`. `StartCombat` appends to the queue when `combatState` is set. `ClearCombatState` dequeues the next entry if one is waiting.
+
+Do not use `combatQueue` for effects that extend the current combat by starting a new round, such as superior Telepathic Tracking. Those effects replace the current combat-ending attempt and return the same `CombatState` to Step 1.
 
 ---
 
@@ -148,11 +150,16 @@ Combat ending is not the same operation as clearing `CombatState`. The combat co
 BeginCombatEnding
   -> COMBAT_END_OF_ROUND
   -> COMBAT_WOULD_END
+  -> COMBAT_ABOUT_TO_END
   -> COMBAT_ENDS
   -> COMBAT_AFTER_ENDS
   -> ClearCombatState
   -> return to enclosing workflow
 ```
+
+`COMBAT_WOULD_END` and `COMBAT_ABOUT_TO_END` are distinct ordered windows. Superior Telepathic Tracking and equivalent "combat would end; instead start a new round" effects are legal in `COMBAT_WOULD_END`. If one resolves, set the combat-ending attempt to replaced and return to Step 1; do not open `COMBAT_ABOUT_TO_END`.
+
+Superior Psyche! and equivalent "combat is about to end; after this round/combat, begin another combat" effects are legal in `COMBAT_ABOUT_TO_END`, after `COMBAT_WOULD_END` has closed. They queue a new combat rather than extending the current one. Reject them if `GameData.combatQueue` is already non-empty.
 
 After `COMBAT_AFTER_ENDS` closes:
 - If a card or effect continues the action, set `PendingActionState.status = ACTION_CONTINUING` and reopen block attempts with accumulated action modifiers preserved.

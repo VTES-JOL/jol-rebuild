@@ -164,17 +164,26 @@ plantuml -tsvg docs/implementation/action-state-machine.puml
 
 13. Press step
    COMBAT_PRESS_STEP
-   — e.g. Psyche! (press to continue combat if both combatants are still ready)
+   — e.g. Psyche! [cel] or Telepathic Tracking [aus] as press effects
 
 14. End of round
    COMBAT_END_OF_ROUND
 
 15. If no new round
    COMBAT_WOULD_END
+   — e.g. Telepathic Tracking [AUS] (instead start a new round)
+   -> if combat ending is replaced by a new round, return to Before Range and do not continue to "about to end"
+
+16. If combat would still end
+   COMBAT_ABOUT_TO_END
+   — e.g. Psyche! [CEL] (after this round, begin another combat)
+   -> cannot queue a combat if another combat is already queued
+
+17. Combat ends
    COMBAT_ENDS
    COMBAT_AFTER_ENDS
 
-16. Return to enclosing workflow
+18. Return to enclosing workflow
    - if a card/effect continues the action: ACTION_CONTINUING
    - otherwise: ACTION_AFTER_RESOLUTION, if combat was nested in an action
 ```
@@ -218,7 +227,7 @@ Combat can create diablerie by replacing a torpor result or by another card-spec
 
 `DIABLERIE_CANCEL_OR_REPLACE` belongs to the diablerie workflow, regardless of whether diablerie came from combat, a directed action, a blocked leave-torpor action, or card text. It is the first meaningful timing surface in the workflow; there is no separate implementation state for "diablerie has begun."
 
-Combat-caused diablerie does not skip combat-ending hooks. The diablerie and blood hunt are immediate once the combat result creates diablerie, but after the blood hunt finishes the enclosing combat still ends because at least one combatant is no longer ready. The workflow then runs `COMBAT_END_OF_ROUND`, `COMBAT_WOULD_END`, `COMBAT_ENDS`, and `COMBAT_AFTER_ENDS` before returning to the enclosing action.
+Combat-caused diablerie does not skip combat-ending hooks. The diablerie and blood hunt are immediate once the combat result creates diablerie, but after the blood hunt finishes the enclosing combat still ends because at least one combatant is no longer ready. The workflow then runs `COMBAT_END_OF_ROUND`, `COMBAT_WOULD_END`, `COMBAT_ABOUT_TO_END`, `COMBAT_ENDS`, and `COMBAT_AFTER_ENDS` before returning to the enclosing action.
 
 ---
 
@@ -346,7 +355,10 @@ Blood hunt is referendum-like, but it is not a political action.
 | `Blur`                                      | `COMBAT_ADDITIONAL_STRIKE`      | Additional-strike source                                           |
 | `Amaranth`                                  | `COMBAT_WOULD_GO_TO_TORPOR`            | Replaces pending torpor with diablerie                             |
 | `Reform Body`                               | `COMBAT_WOULD_BE_BURNED`               | Usable if this vampire would be burned; avoid the burn             |
-| `Psyche!`                                   | `COMBAT_PRESS_STEP`                    | Press to continue combat if both combatants are still ready        |
+| `Psyche!` [cel]                             | `COMBAT_PRESS_STEP`                    | Press to continue combat                                           |
+| `Psyche!` [CEL]                             | `COMBAT_ABOUT_TO_END`                  | Queue another combat after this round; illegal if a combat is already queued |
+| `Telepathic Tracking` [aus]                 | `COMBAT_PRESS_STEP`                    | Press to continue combat                                           |
+| `Telepathic Tracking` [AUS]                 | `COMBAT_WOULD_END`                     | Replace combat ending with a new round                             |
 | `Crimson Fury`                              | `DIABLERIE_CANCEL_OR_REPLACE`          | Responds to a vampire being diablerized                            |
 | `Absolute Tyranny` [POT+PRE]                | `REFERENDUM_POLLING`                   | During polling step, +3 votes                                      |
 | `Akunanse Kholo`                            | `REFERENDUM_BEFORE_VOTES`              | Usable during referendum before votes and ballots are cast         |
