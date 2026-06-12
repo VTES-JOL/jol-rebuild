@@ -34,7 +34,7 @@ public final class TurnPhaseHandler {
         List<GameEffect> effects = new ArrayList<>();
         effects.add(new PhaseChangedEffect(nextPhase.name()));
         String currentPlayerName = game.getCurrentPlayerName();
-        if (currentPlayerName != null) {
+        if (currentPlayerName != null && !game.isRulesEnforced()) {
             effects.add(buildAutoImpulseEffect(game, currentPlayerName));
         }
         String msg = actor + " advanced to " + nextPhase.getDescription() + " phase";
@@ -82,7 +82,9 @@ public final class TurnPhaseHandler {
         effects.add(new TurnChangedEffect(turn, nextPlayer.getName()));
         effects.add(new PhaseChangedEffect(Phase.UNLOCK.name()));
         effects.addAll(HandlerUtils.buildUnlockEffects(nextPlayer));
-        effects.add(buildAutoImpulseEffect(game, nextPlayer.getName()));
+        if (!game.isRulesEnforced()) {
+            effects.add(buildAutoImpulseEffect(game, nextPlayer.getName()));
+        }
         return effects;
     }
 

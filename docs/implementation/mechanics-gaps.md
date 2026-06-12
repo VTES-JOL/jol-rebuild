@@ -87,16 +87,14 @@ The frontend mirrors the current Java command set, but several rules-enforced co
 
 The fastest route from the current permissive command set to a rules engine is to land small, testable vertical slices. Each tranche should update backend state/commands, projection DTOs, TypeScript command types, and focused tests before moving to the next tranche.
 
-### Tranche 0 — Rules/Data Correctness Baseline
+### ~~Tranche 0 — Rules/Data Correctness Baseline~~ ✓ Complete
 
-These tasks are small but prevent the engine from building on known drift.
-
-| Task | Scope | Done when |
-|------|-------|-----------|
-| Crypt group validation | Enforce single-group / two-consecutive-group crypt construction in `BaseValidator` or a shared validator helper; ignore `ANY` group | Standard and V5 validators reject non-consecutive crypts; tests cover `ANY`, single group, adjacent groups, and non-adjacent groups |
-| Card type mapping | Map `Conviction` and `Power` in `GameInitService.toCardType()`; keep `CardData.types` authoritative for dual-type cards | No Conviction/Power cards import as `NONE`; tests cover primary and secondary type lists |
-| DUEL contest rule tracking | Document and model the two-player variant exceptions: contested crypt cards remain usable and duplicate vampire titles are not contested | DUEL-specific contest behavior is represented in implementation docs and has a backend decision point before contest enforcement is automated |
-| Phase impulse cleanup | Stop automatic phase-entry impulse creation in enforced mode; impulse windows should open from protocol events only | Tests show `AdvancePhase` / `NextTurn` do not create replacement impulse windows for enforced flow |
+| Task                              | Outcome                                                                                                                                                                                     |
+|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ~~Crypt group validation~~        | `BaseValidator.validateCryptGroups()` rejects non-consecutive groups; `ANY` cards exempt; 6 tests added to `DeckValidatorTest`                                                              |
+| ~~Card type mapping~~             | `GameInitService.toCardType()` now maps `"Conviction"` → `CONVICTION` and `"Power"` → `POWER`; test in `GameInitServiceTest` confirms neither imports as `NONE`                             |
+| ~~DUEL contest rule tracking~~    | Documented in [Game State § DUEL contest exceptions](./game-state.md#duel-contest-exceptions); `ContestHandler.isDuelContestExempt()` is the enforcement branch point; `GameData.format` added |
+| ~~Phase impulse cleanup~~         | `TurnPhaseHandler` gates `buildAutoImpulseEffect` on `!game.isRulesEnforced()`; 3 tests added to `GameCommandStateTest`                                                                    |
 
 ### Tranche 1 — Enforced Influence Phase
 

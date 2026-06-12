@@ -3,6 +3,7 @@ package net.deckserver.jol.game;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.command.CardRef;
@@ -36,6 +37,7 @@ public class GameData {
     private SequencingWindowState sequencingWindow;
     private boolean completed = false;
     private boolean rulesEnforced = false;
+    private GameFormat format;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -205,6 +207,8 @@ public class GameData {
     public void setCompleted(boolean completed) { this.completed = completed; }
     public boolean isRulesEnforced() { return rulesEnforced; }
     public void setRulesEnforced(boolean rulesEnforced) { this.rulesEnforced = rulesEnforced; }
+    public GameFormat getFormat() { return format; }
+    public void setFormat(GameFormat format) { this.format = format; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);

@@ -58,6 +58,7 @@ public class GameInitService {
         }
 
         GameData gameData = new GameData(game.id, game.name);
+        gameData.setFormat(game.gameFormat);
 
         for (Registration reg : registrations) {
             String username = reg.user.username;
@@ -158,6 +159,8 @@ public class GameInitService {
             case "Equipment"         -> CardType.EQUIPMENT;
             case "Event"             -> CardType.EVENT;
             case "Location"          -> CardType.LOCATION;
+            case "Conviction"        -> CardType.CONVICTION;
+            case "Power"             -> CardType.POWER;
             default                  -> CardType.NONE;
         };
     }

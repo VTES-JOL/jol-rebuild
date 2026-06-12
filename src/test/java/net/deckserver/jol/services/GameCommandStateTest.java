@@ -10,6 +10,8 @@ import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
+import net.deckserver.jol.services.handler.TurnPhaseHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,6 +95,34 @@ class GameCommandStateTest {
         assertNotEquals(first, gameData.getCurrentPlayerName());
         assertEquals("1.2", gameData.getTurn());
         assertEquals(Phase.UNLOCK, gameData.getPhase());
+    }
+
+    @Test
+    void advancePhase_permissive_createsImpulseWindow() {
+        String actor = gameData.getCurrentPlayerName();
+        gameCommandService.execute(actor, new AdvancePhase(gameId));
+        assertNotNull(gameData.getImpulseWindow(), "Permissive advance should open an impulse window");
+        assertTrue(gameData.getImpulseWindow().isActive());
+    }
+
+    @Test
+    void advancePhase_enforced_doesNotCreateImpulseWindow() {
+        gameData.setRulesEnforced(true);
+        String actor = gameData.getCurrentPlayerName();
+        var result = TurnPhaseHandler.handleAdvancePhase(gameData, new AdvancePhase(gameId), actor);
+        boolean hasImpulse = result.effects().stream()
+                .anyMatch(e -> e instanceof ImpulseWindowChangedEffect i && i.active());
+        assertFalse(hasImpulse, "Enforced advance must not include an active ImpulseWindowChangedEffect");
+    }
+
+    @Test
+    void nextTurn_enforced_doesNotCreateImpulseWindow() {
+        gameData.setRulesEnforced(true);
+        String actor = gameData.getCurrentPlayerName();
+        var result = TurnPhaseHandler.handleNextTurn(gameData, new NextTurn(gameId), actor);
+        boolean hasImpulse = result.effects().stream()
+                .anyMatch(e -> e instanceof ImpulseWindowChangedEffect i && i.active());
+        assertFalse(hasImpulse, "Enforced NextTurn must not include an active ImpulseWindowChangedEffect");
     }
 
     // ── Pool ──────────────────────────────────────────────────────────────────

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class BaseValidator implements DeckValidator {
@@ -44,6 +45,7 @@ public class BaseValidator implements DeckValidator {
 
         errors.addAll(containsBannedCards(deck));
         errors.addAll(outsideWhitelistCards(deck));
+        errors.addAll(validateCryptGroups(deck));
 
         return new ValidationResult(format, errors.isEmpty(), errors);
     }
@@ -64,6 +66,20 @@ public class BaseValidator implements DeckValidator {
                 .filter(card -> !whitelist.contains(card.id()))
                 .map(card -> card.name() + " is not allowed in this format.")
                 .toList();
+    }
+
+    List<String> validateCryptGroups(KrcgDeck deck) {
+        TreeSet<Integer> groups = deck.cryptCards().stream()
+                .map(card -> service.getCryptGroup(card.id()))
+                .filter(g -> g != null && !g.equals("ANY"))
+                .map(Integer::parseInt)
+                .collect(Collectors.toCollection(TreeSet::new));
+
+        if (groups.size() <= 1) return Collections.emptyList();
+        int min = groups.first();
+        int max = groups.last();
+        if (groups.size() == 2 && max - min == 1) return Collections.emptyList();
+        return List.of("Crypt must use vampires from one group or two consecutive groups.");
     }
 
     /** Override in subclasses to provide an ID-based card whitelist. */
