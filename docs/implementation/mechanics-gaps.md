@@ -83,6 +83,76 @@ The frontend mirrors the current Java command set, but several rules-enforced co
 
 ---
 
+## Rules Engine Starter Tranches
+
+The fastest route from the current permissive command set to a rules engine is to land small, testable vertical slices. Each tranche should update backend state/commands, projection DTOs, TypeScript command types, and focused tests before moving to the next tranche.
+
+### Tranche 0 — Rules/Data Correctness Baseline
+
+These tasks are small but prevent the engine from building on known drift.
+
+| Task | Scope | Done when |
+|------|-------|-----------|
+| Crypt group validation | Enforce single-group / two-consecutive-group crypt construction in `BaseValidator` or a shared validator helper; ignore `ANY` group | Standard and V5 validators reject non-consecutive crypts; tests cover `ANY`, single group, adjacent groups, and non-adjacent groups |
+| Card type mapping | Map `Conviction` and `Power` in `GameInitService.toCardType()`; keep `CardData.types` authoritative for dual-type cards | No Conviction/Power cards import as `NONE`; tests cover primary and secondary type lists |
+| DUEL contest rule tracking | Document and model the two-player variant exceptions: contested crypt cards remain usable and duplicate vampire titles are not contested | DUEL-specific contest behavior is represented in implementation docs and has a backend decision point before contest enforcement is automated |
+| Phase impulse cleanup | Stop automatic phase-entry impulse creation in enforced mode; impulse windows should open from protocol events only | Tests show `AdvancePhase` / `NextTurn` do not create replacement impulse windows for enforced flow |
+
+### Tranche 1 — Enforced Influence Phase
+
+Influence is the lowest-complexity full phase because the commands already exist and have partial guards.
+
+| Task | Scope | Done when |
+|------|-------|-----------|
+| Phase transition entry | Extract phase-entry calculation for `transfersRemaining`, including STANDARD/V5 and DUEL first-turn formulas | Entering INFLUENCE sets the official transfer budget deterministically |
+| Influence command ownership | Require current player ownership/controller consistency for `TransferBlood`, `InfluenceCard`, `DrawCryptToUncontrolled`, and `MoveToCrypt` | Non-current players and unrelated regions are rejected in enforced mode |
+| Blood capacity ceiling | Prevent uncontrolled/ready vampires from exceeding capacity via influence and generic blood-gain paths | Excess counters return to bank; tests cover influence and manual counter attempts in enforced mode |
+| Influence UI parity | Add TypeScript command types and controls for `DrawCryptToUncontrolled` and `MergeAdvanced` | Frontend can execute all backend influence commands without raw/manual fallbacks |
+
+### Tranche 2 — Action Skeleton to Legal Basic Actions
+
+Keep this limited to basic actions before card text automation.
+
+| Task | Scope | Done when |
+|------|-------|-----------|
+| Action declaration legality | Validate actor readiness, controller, phase, mandatory hunt, torpor-only leave-torpor, and basic target requirements | Illegal basic actions are rejected before windows open |
+| Basic action resolution | Resolve bleed, hunt, rescue, leave torpor, equip/recruit/employ shell, and diablerie placeholder effects by `ActionType` | `ResolveAction` applies deterministic effects instead of only opening after-resolution |
+| NRA tracking | Add per-minion per-turn NRA keys and clear them on turn advance | Bleed, political action, action cards, and in-play actions cannot repeat after resolution |
+| Block eligibility baseline | Enforce directed/undirected eligible Methuselah order and ready/unlocked blocker requirements | A player cannot block outside their eligible block opportunity |
+
+### Tranche 3 — Card Play Lifecycle
+
+Card play should be implemented before referendum and combat depth because those systems depend on shared timing, cost, replacement, and cancellation behavior.
+
+| Task | Scope | Done when |
+|------|-------|-----------|
+| `PlayCard` legality gate | Validate source region, phase/type, actor, and active timing window before moving a card | `PlayCard` no longer acts as generic movement in enforced mode |
+| As-played window | Add `CARD_AS_PLAYED` sequencing/impulse state for cancellers and wake effects | Direct Intervention-style timing can be represented without resolving the played card first |
+| Replacement timing | Draw replacement after the as-played window, respecting delayed replacement flags | Hand size behavior is testable independently from card effects |
+| Action-card limbo | Store pending action card outside hand/ash/play until action resolution | Action cards are not targetable as hand or in-play cards while pending |
+
+### Tranche 4 — Referendum Before Full Combat
+
+Referendums unblock political decks and blood hunt handling, while staying more deterministic than combat.
+
+| Task | Scope | Done when |
+|------|-------|-----------|
+| Referendum state | Add pending referendum state, vote source model, Edge vote, and pass/fail resolution | Political actions can resolve a referendum without manual notes/counters |
+| Prisci sub-referendum | Model Prisci ballots separately from normal votes | Prisci result contributes the correct single ballot |
+| Blood hunt hook | Diablerie can open a mandatory blood hunt referendum | Diablerie no longer requires manual referendum bookkeeping |
+
+### Tranche 5 — Combat and Advanced Interactions
+
+Combat remains a larger subsystem and should build on the shared card-play and timing primitives.
+
+| Task | Scope | Done when |
+|------|-------|-----------|
+| Combat state machine | Add range, maneuver, strike, damage prevention, press, and end-of-round state | Blocked/rush actions can enter and leave combat deterministically |
+| Damage and torpor | Apply normal/aggravated damage, prevention, mending, torpor, and burning | Minion survival no longer requires manual movement |
+| Action continuing | Implement continued block windows after effects such as Form of Mist | Continued actions preserve prior block/action context correctly |
+
+---
+
 ## Implementation Priority
 
 | Priority | Area                                                                       | Rationale                                                                                                                                                                                                                           |
@@ -91,7 +161,8 @@ The frontend mirrors the current Java command set, but several rules-enforced co
 | ~~P1~~   | ~~Impulse / sequencing state primitives~~                                  | **Partially done** — `ImpulseState`, `SequencingWindowState`, and pass/claim/close commands exist. Protocol integration is still incomplete, ACTION_AS_ANNOUNCED is missing, and phase-level auto impulse must be removed.          |
 | ~~P2~~   | ~~Formal action declaration — basic structure~~                            | **Done as a skeleton** — `DeclareAction`, `AttemptBlock`, `ResolveAction`, `AbortAction`, and `PendingActionState` exist. Action-specific effects, block legality, stealth/intercept, NRA, redirect, and continuation remain open.  |
 | ~~P4~~   | ~~Advanced vampire merge~~                                                 | **Done in permissive mode** — `MergeAdvanced` command validates same name + one advanced.                                                                                                                                           |
-| **P1**   | Rules-enforced turn and phase protocol                                     | Without this, rules-enforced mode cannot run a legal full turn; most existing phase and state commands are permissive-only. See [Game State](./game-state.md#turn-and-phase-protocol).                                              |
+| **P0**   | Rules/data correctness baseline                                            | Crypt group validation, Conviction/Power mapping, DUEL contest rule representation, and phase impulse cleanup are small correctness fixes that prevent later protocol work from encoding known drift. See [Rules Engine Starter Tranches](#rules-engine-starter-tranches). |
+| **P1**   | Rules-enforced influence phase                                             | Influence has existing command coverage and partial guards, making it the best first full rules-enforced phase. See [Tranche 1](#tranche-1--enforced-influence-phase).                                                              |
 | **P1**   | Basic action resolution by `ActionType`                                    | Bleed, hunt, equip, employ retainer, recruit ally, political, leave torpor, rescue, diablerie, and rush effects are not resolved. See [Actions](./actions.md).                                                                      |
 | **P1**   | Card play legality and lifecycle                                           | Prevents illegal plays; prerequisite for modifiers, reactions, combat cards, cancellation, replacement timing, and action-card limbo. See [Card Play](./card-play.md).                                                              |
 | **P1**   | Voting / Referendum engine                                                 | Required for political-action decks and mandatory blood hunt after diablerie. See [Referendums](./referendums.md).                                                                                                                  |
@@ -110,7 +181,7 @@ The frontend mirrors the current Java command set, but several rules-enforced co
 | **P3**   | Limited effect enforcement                                                 | Requires per-action and per-combat-round tracking of limited sources. See [Card Play](./card-play.md).                                                                                                                              |
 | **P3**   | Card keyword and subtype parsing                                           | Keyword parsing prerequisite for correct in-play behaviour. See [Card Keywords](./card-keywords.md).                                                                                                                                |
 | **P3**   | Frontend legal action UI                                                   | Backend protocol changes need matching UI command types, panels, and legality gating. See [§ Frontend](#frontend-command-surface-and-legal-action-ui).                                                                              |
-| **P4**   | Crypt group validation in `DeckValidatorService`                           | `BaseValidator` checks size, ban, and whitelist only; single-group / two-consecutive-groups rule not enforced at deck import. See `StandardDeckValidator`.                                                                          |
+| ~~P4~~   | ~~Crypt group validation in `DeckValidatorService`~~                       | Promoted to **P0** because deck legality is isolated, testable, and currently out of sync with official rules.                                                                                                                       |
 | **P4**   | Anarch conversion command                                                  | Currently achievable via manual counter + `SetTitle`; should be explicit for rules-enforced mode. See [Game State](./game-state.md#anarch-conversion).                                                                              |
 | **P4**   | Card control transfer — `TransferControl` command                          | `controller` field exists; only the transfer command is missing. See [Game State](./game-state.md#card-control-transfer).                                                                                                           |
 | **P4**   | Hunting ground card-effect handling                                        | Hunting Ground is a card-text keyword/family marker, not a universal hunt bonus. Specific card text should be handled through general card-effect support. See [Card Keywords](./card-keywords.md#non-goals).                       |
