@@ -150,6 +150,8 @@ A reaction card that unlocks a minion but does not grant wake-style "as though u
 
 `ACTION_CONTINUING` must be added to the `ActionStatus` Java enum before this path can be wired — see [Actions § ActionStatus Enum](./actions.md#actionstatus-enum). The detection logic (a continue-the-action card play after combat triggers the status change and re-opens the block window) is not yet implemented.
 
+In the `ACTION_CONTINUING` window, "after combat ends" and "after block resolution" effects triggered by the preceding block are playable alongside the continue-the-action effect. There is no mandatory ordering between them. The continue-the-action effect itself opens this window; other eligible "after combat ends" / "after block resolution" effects may also be played here before block attempts re-open.
+
 ---
 
 ## Leave Torpor — Blocked Without Combat

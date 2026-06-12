@@ -71,7 +71,7 @@ After the as-played window closes (Stage 1 complete), the playing player draws b
 
 ## Cancelled Cards
 
-A cancelled card is treated as though it was played for the purpose of uniqueness limiting. The cancelled card moves to `ASH_HEAP`. Hand size is not permanently reduced: draw replacement normally, and ignore any delayed-replacement clause printed on the cancelled card.
+A cancelled card is treated as though it was played by card name for any rule that limits how often a card can be played (uniqueness, once-per-game limits, once-per-action limits, etc.). The cancelled card moves to `ASH_HEAP`. Hand size is not permanently reduced: draw replacement normally, and ignore any delayed-replacement clause printed on the cancelled card.
 
 Cancellation cost handling is type-specific:
 - `ACTION` cards: do not pay cost; do not lock the acting minion; do not record an NRA key; allow the same action card to be attempted again.

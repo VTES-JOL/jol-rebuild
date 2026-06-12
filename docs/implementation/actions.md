@@ -30,7 +30,8 @@ DeclareAction
                                                → open AFTER_RESOLUTION sequencing window
                                                → window closes → clear PendingActionState
 
-    ── block attempt succeeds ──────────────▶  [status: BLOCKED]
+    ── block attempt succeeds ──────────────▶  set reachedResolution = true (NRA locks)
+                                               [status: BLOCKED]
                                                → open ACTION_BLOCK_RESOLUTION_PRE_COMBAT for explicit card-text hooks, if any
                                                → StartCombat (see Combat), unless block resolution is canceled/replaced
                                                → after combat: status → ACTION_CONTINUING or AFTER_RESOLUTION
@@ -72,7 +73,7 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 | `bleedAmount`                | `int`                   | Running bleed total including modifiers; starts at 1 for `BLEED` actions                                                                                                                                                                         |
 | `reachedResolution`          | `boolean`               | NRA fires when this becomes true                                                                                                                                                                                                                 |
 | `actionSuccessful`           | `boolean`               | True if action was not blocked                                                                                                                                                                                                                   |
-| `bleedSuccessful`            | `boolean`               | True if bleed resolved for ≥ 1 pool; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the ≥ 1 pool condition for Edge transfer. |
+| `bleedSuccessful`            | `boolean`               | True if bleed resolved with `bleedAmount ≥ 1`; drives Edge movement. Note: VEKN card text saying "successful bleed" usually means the action was not blocked (`actionSuccessful`); this flag specifically covers the bleed-amount condition for Edge transfer — it fires on `bleedAmount ≥ 1` regardless of whether the target had pool remaining. |
 | `referendumSuccessful`       | `boolean`               | True if referendum passed; drives "after successful referendum" effects                                                                                                                                                                          |
 | `bleedLimitedUsed`           | `boolean`               | A `(limited)` bleed modifier has already been played this action                                                                                                                                                                                 |
 | `actionModifierNamesByMinionRef` | `Map<CardRef, Set<String>>` | Action modifier card names played by each minion during this action; enforces one use of the same action modifier per minion per action, even at a different Discipline level.                                                                  |
@@ -154,9 +155,12 @@ On `DeclareAction`:
 1. Compute the NRA key for this action/card.
 2. If the minion's set in `nraActionsByCardId` already contains this key, reject the action.
 
-On `ResolveAction`:
+When a block attempt succeeds (action becomes BLOCKED):
+1. Set `reachedResolution = true` and add the NRA key — NRA fires for blocked actions as well as unblocked ones.
+
+On `ResolveAction` (unblocked path):
 1. Set `reachedResolution = true` and add the NRA key before paying action costs.
-2. For unblocked actions, pay the action cost immediately after the NRA lock is recorded, before applying the action effect.
+2. Pay the action cost immediately after the NRA lock is recorded, before applying the action effect.
 3. If cost cannot be paid in full or targets are invalid, the action **fizzles**: pay as much of the action cost as possible, move the action card (if any) from limbo to `ASH_HEAP` via `CardMovedEffect`, apply no action effect, keep the acting minion locked until the AFTER_RESOLUTION window closes, and still open the AFTER_RESOLUTION sequencing window so "after this action" effects may fire.
 
 NRA locks persist through mid-turn unlocks.

@@ -58,7 +58,7 @@ Priscus is a collective Sabbat title. A ready Priscus provides **one ballot**, n
 1. During polling, each ready Priscus may cast one ballot in the Prisci sub-referendum.
 2. Only Prisci ballots participate in this sub-referendum.
 3. The Prisci block contributes three votes to the main referendum according to the current result of the Prisci ballots.
-4. As more Prisci cast ballots, the block may shift between for, against, or no contribution if the ballots are tied.
+4. Majority is determined by **ballots actually cast**, not by the total number of ready Priscus. Priscus who have not yet voted are not counted. As more Prisci cast ballots, the block may shift between for, against, or no contribution if the cast ballots are tied.
 
 The Prisci block is resolved as part of polling before the main referendum outcome is finalized.
 
