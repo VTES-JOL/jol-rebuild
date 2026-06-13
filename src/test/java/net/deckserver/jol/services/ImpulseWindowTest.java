@@ -120,7 +120,7 @@ class ImpulseWindowTest {
         gameCommandService.execute("Dave",  new PassImpulse(gameId, "Dave"));
         gameCommandService.execute("Carol", new PassImpulse(gameId, "Carol"));
 
-        assertFalse(game.getImpulseWindow().isActive());
+        assertNull(game.getImpulseWindow());
     }
 
     // ── Claim impulse ─────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ package net.deckserver.jol.services.handler;
 import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.ImpulseEngine;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.AdvancePhase;
@@ -89,13 +90,7 @@ public final class TurnPhaseHandler {
     }
 
     static ImpulseWindowChangedEffect buildAutoImpulseEffect(GameData game, String actingPlayer) {
-        ImpulseState state = new ImpulseState();
-        state.setActive(true);
-        state.setContext(ImpulseContext.UNDIRECTED);
-        state.setActingPlayer(actingPlayer);
-        state.setCurrentImpulseHolder(actingPlayer);
-        state.setConsecutivePasses(0);
-        state.setPassOrder(HandlerUtils.buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null));
+        ImpulseState state = ImpulseEngine.open(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
         return new ImpulseWindowChangedEffect(true, state);
     }
 }

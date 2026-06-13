@@ -43,13 +43,7 @@ public final class ActionHandler {
         ImpulseContext context = cmd.targetPlayerName() != null
                 ? ImpulseContext.DIRECTED_SINGLE
                 : ImpulseContext.UNDIRECTED;
-        ImpulseState impulse = new ImpulseState();
-        impulse.setActive(true);
-        impulse.setContext(context);
-        impulse.setActingPlayer(actor);
-        impulse.setCurrentImpulseHolder(actor);
-        impulse.setConsecutivePasses(0);
-        impulse.setPassOrder(HandlerUtils.buildPassOrder(game, context, actor, cmd.targetPlayerName()));
+        ImpulseState impulse = ImpulseEngine.open(game, context, actor, cmd.targetPlayerName());
 
         String actionLabel = cmd.actionType().name().toLowerCase().replace('_', ' ');
         String targetSuffix = cmd.targetPlayerName() != null ? " targeting " + cmd.targetPlayerName() : "";
@@ -107,7 +101,7 @@ public final class ActionHandler {
         PendingActionState resolved = pending.withStatus(ActionStatus.AFTER_RESOLUTION);
 
         String actingPlayer = pending.getActorRef() != null ? pending.getActorRef().playerName() : actor;
-        List<String> passOrder = HandlerUtils.buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
+        List<String> passOrder = ImpulseEngine.buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
 
         SequencingWindowState seq = new SequencingWindowState();
         seq.setActive(true);

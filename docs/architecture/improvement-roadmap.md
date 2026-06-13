@@ -8,21 +8,9 @@ The rules-engine implementation plan now lives in [Mechanics Gaps](../implementa
 
 ## Backend
 
-### 1. `ImpulseEngine` Extraction (high priority; Tranche 0/3 dependency)
+### ~~1. `ImpulseEngine` Extraction~~ — **Done 2026-06**
 
-`ImpulseState` is still mutated in two places: auto-open during `TurnPhaseHandler` and explicit commands in `ImpulseHandler`. `buildPassOrder` lives in `HandlerUtils`. Consolidate into a single `ImpulseEngine` class:
-
-```java
-class ImpulseEngine {
-    static ImpulseState open(GameData game, ImpulseContext ctx, String actingPlayer, String targetPlayer);
-    static ImpulseState pass(ImpulseState state);     // returns null when window closes
-    static ImpulseState claim(ImpulseState state);
-}
-```
-
-This makes the sequencing engine independently testable and co-located.
-
-This should land with the phase impulse cleanup in [Mechanics Gaps Tranche 0](../implementation/mechanics-gaps.md#tranche-0--rulesdata-correctness-baseline). Enforced mode should not open generic phase-entry impulse windows; later card-play work should use this engine for `CARD_AS_PLAYED` and action/referendum/combat windows.
+`ImpulseEngine` is extracted to `net.deckserver.jol.game.ImpulseEngine` with `open()`, `pass()` (returns `null` when all players pass), and `claim()`. `buildPassOrder` is public static on the engine. `ImpulseHandler`, `TurnPhaseHandler`, and `ActionHandler` all delegate to it; `HandlerUtils.buildPassOrder` is removed. 11 plain JUnit5 unit tests in `ImpulseEngineTest` cover all methods independently of the HTTP stack. Later card-play work should use this engine for `CARD_AS_PLAYED` and action/referendum/combat windows.
 
 ### 2. Phase State Machine (high priority; Tranche 1 dependency)
 
@@ -172,11 +160,12 @@ Rules-enforced features also need new command types and controls as their backen
 
 1. ~~Backend refactor (handlers + GameRules)~~ — **Done 2026-05**
 2. ~~Game end detection~~ — **Done 2026-05**
-3. Rules/data correctness baseline:
-   - crypt group deck validation
-   - Conviction/Power type mapping
-   - DUEL contest-rule representation
-   - enforced-mode phase impulse cleanup
+3. ~~Rules/data correctness baseline~~ — **Done 2026-06**
+   - ~~crypt group deck validation~~
+   - ~~Conviction/Power type mapping~~
+   - ~~DUEL contest-rule representation~~
+   - ~~enforced-mode phase impulse cleanup~~
+   - ~~`ImpulseEngine` extraction~~
 4. Enforced influence phase:
    - phase-entry transfer budget
    - ownership/current-player gates

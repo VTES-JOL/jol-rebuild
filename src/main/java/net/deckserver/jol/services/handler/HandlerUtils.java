@@ -1,6 +1,5 @@
 package net.deckserver.jol.services.handler;
 
-import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
@@ -11,7 +10,6 @@ import net.deckserver.jol.game.effect.CardLockedEffect;
 import net.deckserver.jol.game.effect.GameEffect;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 
 final class HandlerUtils {
@@ -56,36 +54,4 @@ final class HandlerUtils {
         return effects;
     }
 
-    static List<String> buildPassOrder(GameData game, ImpulseContext context, String actingPlayer, String targetPlayerName) {
-        List<String> active = game.getCurrentPlayers().stream()
-                .map(PlayerData::getName)
-                .toList();
-        if (!active.contains(actingPlayer)) return List.of(actingPlayer);
-
-        LinkedHashSet<String> order = new LinkedHashSet<>();
-        order.add(actingPlayer);
-
-        int actingIdx = active.indexOf(actingPlayer);
-        int n = active.size();
-
-        PlayerData acting = game.getPlayer(actingPlayer);
-        String prey = acting.getPrey() != null ? acting.getPrey().getName() : null;
-        String predator = acting.getPredator() != null ? acting.getPredator().getName() : null;
-
-        switch (context) {
-            case UNDIRECTED -> {
-                if (prey != null && active.contains(prey)) order.add(prey);
-                if (predator != null && active.contains(predator)) order.add(predator);
-                for (int i = 1; i < n; i++) order.add(active.get((actingIdx + i) % n));
-            }
-            case DIRECTED_SINGLE, COMBAT -> {
-                if (targetPlayerName != null && active.contains(targetPlayerName)) order.add(targetPlayerName);
-                for (int i = 1; i < n; i++) order.add(active.get((actingIdx + i) % n));
-            }
-            case DIRECTED_MULTI -> {
-                for (int i = 1; i < n; i++) order.add(active.get((actingIdx + i) % n));
-            }
-        }
-        return List.copyOf(order);
-    }
 }
