@@ -14,6 +14,7 @@ import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
 import net.deckserver.jol.game.effect.PhaseChangedEffect;
 import net.deckserver.jol.game.effect.TurnChangedEffect;
 import net.deckserver.jol.services.CommandResult;
+import net.deckserver.jol.services.GameRules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public final class TurnPhaseHandler {
     private TurnPhaseHandler() {}
 
     public static CommandResult handleAdvancePhase(GameData game, AdvancePhase cmd, String actor) {
+        if (game.isRulesEnforced()) GameRules.requireCurrentPlayer(game, actor);
         Phase[] phases = Phase.values();
         int current = game.getPhase() != null ? game.getPhase().ordinal() : 0;
         int next = (current + 1) % phases.length;
@@ -43,6 +45,7 @@ public final class TurnPhaseHandler {
     }
 
     public static CommandResult handleNextTurn(GameData game, NextTurn cmd, String actor) {
+        if (game.isRulesEnforced()) GameRules.requireCurrentPlayer(game, actor);
         List<GameEffect> effects = computeNextTurnEffects(game, cmd.gameId(), Set.of(), actor);
         if (effects.isEmpty()) return CommandResult.silent(game);
         TurnChangedEffect turnEffect = (TurnChangedEffect) effects.getFirst();

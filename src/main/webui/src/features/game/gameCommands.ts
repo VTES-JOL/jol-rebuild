@@ -43,6 +43,8 @@ export type GainEdgeCommand = { type: 'GAIN_EDGE'; gameId: string };
 export type TransferBloodCommand = { type: 'TRANSFER_BLOOD'; gameId: string; ref: CardRef; amount: number };
 export type InfluenceCardCommand = { type: 'INFLUENCE_CARD'; gameId: string; ref: CardRef };
 export type MoveToCryptCommand = { type: 'MOVE_TO_CRYPT'; gameId: string; ref: CardRef };
+export type DrawCryptToUncontrolledCommand = { type: 'DRAW_CRYPT_TO_UNCONTROLLED'; gameId: string };
+export type MergeAdvancedCommand = { type: 'MERGE_ADVANCED'; gameId: string; ref: CardRef; targetRef: CardRef };
 export type MoveToTorporCommand = { type: 'MOVE_TO_TORPOR'; gameId: string; ref: CardRef };
 export type RescueFromTorporCommand = { type: 'RESCUE_FROM_TORPOR'; gameId: string; ref: CardRef };
 export type BurnMinionCommand = { type: 'BURN_MINION'; gameId: string; ref: CardRef };
@@ -85,6 +87,7 @@ export type GameCommand =
     | AddCounterCommand | RemoveCounterCommand | SetCardNotesCommand
     | SetPoolCommand | GainEdgeCommand
     | TransferBloodCommand | InfluenceCardCommand | MoveToCryptCommand
+    | DrawCryptToUncontrolledCommand | MergeAdvancedCommand
     | MoveToTorporCommand | RescueFromTorporCommand | BurnMinionCommand
     | ContestCardCommand | ClearContestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand
@@ -135,6 +138,14 @@ export function rescueFromTorpor(gameId: string, ref: CardRef): RescueFromTorpor
 
 export function moveToCrypt(gameId: string, ref: CardRef): MoveToCryptCommand {
     return {type: 'MOVE_TO_CRYPT', gameId, ref};
+}
+
+export function drawCryptToUncontrolled(gameId: string): DrawCryptToUncontrolledCommand {
+    return {type: 'DRAW_CRYPT_TO_UNCONTROLLED', gameId};
+}
+
+export function mergeAdvanced(gameId: string, ref: CardRef, targetRef: CardRef): MergeAdvancedCommand {
+    return {type: 'MERGE_ADVANCED', gameId, ref, targetRef};
 }
 
 export function burnMinion(gameId: string, ref: CardRef): BurnMinionCommand {

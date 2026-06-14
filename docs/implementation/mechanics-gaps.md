@@ -97,16 +97,15 @@ The fastest route from the current permissive command set to a rules engine is t
 | ~~Phase impulse cleanup~~         | `TurnPhaseHandler` gates `buildAutoImpulseEffect` on `!game.isRulesEnforced()`; 3 tests added to `GameCommandStateTest`                                                                    |
 | ~~`ImpulseEngine` extraction~~    | `ImpulseEngine.open/pass/claim` consolidate all `ImpulseState` mutations; `buildPassOrder` moved from `HandlerUtils`; `ImpulseHandler`, `TurnPhaseHandler`, `ActionHandler` delegate to it; 11 unit tests in `ImpulseEngineTest` |
 
-### Tranche 1 — Enforced Influence Phase
+### ~~Tranche 1 — Enforced Influence Phase~~ ✓ Complete
 
-Influence is the lowest-complexity full phase because the commands already exist and have partial guards.
-
-| Task | Scope | Done when |
-|------|-------|-----------|
-| Phase transition entry | Extract phase-entry calculation for `transfersRemaining`, including STANDARD/V5 and DUEL first-turn formulas | Entering INFLUENCE sets the official transfer budget deterministically |
-| Influence command ownership | Require current player ownership/controller consistency for `TransferBlood`, `InfluenceCard`, `DrawCryptToUncontrolled`, and `MoveToCrypt` | Non-current players and unrelated regions are rejected in enforced mode |
-| Blood capacity ceiling | Prevent uncontrolled/ready vampires from exceeding capacity via influence and generic blood-gain paths | Excess counters return to bank; tests cover influence and manual counter attempts in enforced mode |
-| Influence UI parity | Add TypeScript command types and controls for `DrawCryptToUncontrolled` and `MergeAdvanced` | Frontend can execute all backend influence commands without raw/manual fallbacks |
+| Task | Outcome |
+|------|---------|
+| ~~Phase transition entry~~ | `GameEffectApplicator.computeTransferBudget` handles STANDARD/V5 ramp (1/2/3/4 by seat) and DUEL exception (3 on first turn, 4 thereafter); 3 DUEL budget tests added |
+| ~~Influence command ownership~~ | `isPermissiveOnly()` removed from `TransferBlood`, `InfluenceCard`, `DrawCryptToUncontrolled`, `MoveToCrypt`, `MergeAdvanced`; existing `requirePhase` + `requireCurrentPlayer` guards enforce ownership |
+| ~~Blood capacity ceiling~~ | `InfluenceHandler.handleTransferBlood` rejects transfers that exceed `card.getCapacity()` in enforced mode; permissive mode is unaffected; tests verify both paths |
+| ~~Influence UI parity~~ | `DrawCryptToUncontrolledCommand` and `MergeAdvancedCommand` TypeScript types + helpers added to `gameCommands.ts` |
+| ~~Phase progression in enforced mode~~ | `AdvancePhase` and `NextTurn` are no longer permissive-only; `TurnPhaseHandler` adds `requireCurrentPlayer` guard in enforced mode; non-current-player rejection tested |
 
 ### Tranche 2 — Action Skeleton to Legal Basic Actions
 
@@ -161,7 +160,7 @@ Combat remains a larger subsystem and should build on the shared card-play and t
 | ~~P2~~   | ~~Formal action declaration — basic structure~~                            | **Done as a skeleton** — `DeclareAction`, `AttemptBlock`, `ResolveAction`, `AbortAction`, and `PendingActionState` exist. Action-specific effects, block legality, stealth/intercept, NRA, redirect, and continuation remain open.  |
 | ~~P4~~   | ~~Advanced vampire merge~~                                                 | **Done in permissive mode** — `MergeAdvanced` command validates same name + one advanced.                                                                                                                                           |
 | **P0**   | Rules/data correctness baseline                                            | Crypt group validation, Conviction/Power mapping, DUEL contest rule representation, and phase impulse cleanup are small correctness fixes that prevent later protocol work from encoding known drift. See [Rules Engine Starter Tranches](#rules-engine-starter-tranches). |
-| **P1**   | Rules-enforced influence phase                                             | Influence has existing command coverage and partial guards, making it the best first full rules-enforced phase. See [Tranche 1](#tranche-1--enforced-influence-phase).                                                              |
+| ~~P1~~   | ~~Rules-enforced influence phase~~                                         | **Done** — `AdvancePhase`/`NextTurn` available in enforced mode with current-player guard; influence commands open in both modes; DUEL budget formula corrected; blood capacity ceiling enforced. See [Tranche 1](#tranche-1--enforced-influence-phase-complete). |
 | **P1**   | Basic action resolution by `ActionType`                                    | Bleed, hunt, equip, employ retainer, recruit ally, political, leave torpor, rescue, diablerie, and rush effects are not resolved. See [Actions](./actions.md).                                                                      |
 | **P1**   | Card play legality and lifecycle                                           | Prevents illegal plays; prerequisite for modifiers, reactions, combat cards, cancellation, replacement timing, and action-card limbo. See [Card Play](./card-play.md).                                                              |
 | **P1**   | Voting / Referendum engine                                                 | Required for political-action decks and mandatory blood hunt after diablerie. See [Referendums](./referendums.md).                                                                                                                  |

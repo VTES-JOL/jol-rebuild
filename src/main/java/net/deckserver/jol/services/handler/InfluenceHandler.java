@@ -31,6 +31,10 @@ public final class InfluenceHandler {
             GameRules.requireTransferBudget(game, cost);
             effects.add(new TransfersRemainingChangedEffect(game.getTransfersRemaining() - cost));
         }
+        if (game.isRulesEnforced() && amount > 0 && card.getCapacity() > 0
+                && card.getCounters() + amount > card.getCapacity()) {
+            throw new GameRuleException("Cannot exceed vampire blood capacity of " + card.getCapacity());
+        }
 
         effects.add(new PlayerPoolChangedEffect(controller.getName(), -amount));
         effects.add(new CardCounterChangedEffect(card.getId(), amount));

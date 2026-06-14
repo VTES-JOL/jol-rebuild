@@ -1,5 +1,6 @@
 package net.deckserver.jol.game.effect;
 
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
@@ -186,6 +187,9 @@ public final class GameEffectApplicator {
         int major = Integer.parseInt(parts[0]);
         if (major >= 2) return 4;
         int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+        if (game.getFormat() == GameFormat.DUEL) {
+            return minor == 1 ? 3 : 4;
+        }
         return Math.min(minor, 4);
     }
 }

@@ -5,5 +5,4 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 /** Return a vampire from UNCONTROLLED back to CRYPT (influence cancelled). */
 @RegisterForReflection
 public record MoveToCrypt(String gameId, CardRef ref) implements GameCommand {
-    @Override public boolean isPermissiveOnly() { return true; }
 }

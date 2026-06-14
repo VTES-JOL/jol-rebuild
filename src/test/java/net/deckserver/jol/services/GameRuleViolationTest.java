@@ -146,7 +146,7 @@ class GameRuleViolationTest {
     void permissiveOnlyCommand_rejectedInEnforcedMode() {
         gameData.setRulesEnforced(true);
         GameRuleException ex = assertThrows(GameRuleException.class,
-                () -> gameCommandService.execute(ACTOR, new AdvancePhase(gameId)));
+                () -> gameCommandService.execute(ACTOR, new DrawCard(gameId, 1)));
         assertTrue(ex.getMessage().contains("rules-enforced"), "Error should mention rules-enforced mode, got: " + ex.getMessage());
     }
 
