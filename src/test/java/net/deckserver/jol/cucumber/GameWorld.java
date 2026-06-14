@@ -15,4 +15,8 @@ public class GameWorld {
     public final Map<String, CardRef> minionRefs = new LinkedHashMap<>();
     /** Snapshot of a player's pool before the current When step, for "decrease by" assertions. */
     public final Map<String, Integer> poolBefore = new LinkedHashMap<>();
+    /** Maps card name → card UUID for non-minion cards added to hand/library. */
+    public final Map<String, String> cardIdByName = new LinkedHashMap<>();
+    /** Snapshot of hand size before an action for "increase by" assertions. */
+    public final Map<String, Integer> handSizeBefore = new LinkedHashMap<>();
 }

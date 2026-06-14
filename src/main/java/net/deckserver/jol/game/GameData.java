@@ -40,6 +40,7 @@ public class GameData {
     private GameFormat format;
     private Map<String, Set<String>> nraActionsByCardId = new HashMap<>();
     private Set<String> recruitedThisTurn = new HashSet<>();
+    private CardPlayState cardPlayState;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -215,6 +216,9 @@ public class GameData {
     public void setNraActionsByCardId(Map<String, Set<String>> nraActionsByCardId) { this.nraActionsByCardId = nraActionsByCardId; }
     public Set<String> getRecruitedThisTurn() { return recruitedThisTurn; }
     public void setRecruitedThisTurn(Set<String> recruitedThisTurn) { this.recruitedThisTurn = recruitedThisTurn; }
+
+    public CardPlayState getCardPlayState() { return cardPlayState; }
+    public void setCardPlayState(CardPlayState cardPlayState) { this.cardPlayState = cardPlayState; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);

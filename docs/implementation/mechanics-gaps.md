@@ -116,16 +116,14 @@ The fastest route from the current permissive command set to a rules engine is t
 | ~~NRA tracking~~ | `GameData.nraActionsByCardId` (BLEED/POLITICAL keys); `NraRecordedEffect` applied by `GameEffectApplicator`; cleared in `applyTurnChanged`; recorded on both blocked and resolved paths; 16 new tests in `ActionWindowTest` |
 | ~~Block eligibility baseline~~ | `ActionHandler.enforceBlockEligibility` rejects blocks when actor ≠ current impulse holder; directed actions reject non-target blockers |
 
-### Tranche 3 — Card Play Lifecycle
+### ~~Tranche 3 — Card Play Lifecycle~~ ✓ Complete
 
-Card play should be implemented before referendum and combat depth because those systems depend on shared timing, cost, replacement, and cancellation behavior.
-
-| Task | Scope | Done when |
-|------|-------|-----------|
-| `PlayCard` legality gate | Validate source region, phase/type, actor, and active timing window before moving a card | `PlayCard` no longer acts as generic movement in enforced mode |
-| As-played window | Add `CARD_AS_PLAYED` sequencing/impulse state for cancellers and wake effects | Direct Intervention-style timing can be represented without resolving the played card first |
-| Replacement timing | Draw replacement after the as-played window, respecting delayed replacement flags | Hand size behavior is testable independently from card effects |
-| Action-card limbo | Store pending action card outside hand/ash/play until action resolution | Action cards are not targetable as hand or in-play cards while pending |
+| Task | Outcome |
+|------|---------|
+| ~~`PlayCard` legality gate~~ | `CardMovementHandler.handlePlayCard` enforces source-region (PLAYABLE_REGIONS), phase/type gate (MASTER→MASTER, EVENT→DISCARD, ACTION/MODIFIER/REACTION/etc.→MINION), and actor gate (MODIFIER requires acting player, REACTION requires non-acting player, others require current player); `PlayCard.playAsType` added for dual-type selection; `outOfTurn` flag populated on `CardData` from card text |
+| ~~As-played window~~ | `SequencingWindowType.CARD_AS_PLAYED` added; `handlePlayCard` opens a full-player sequencing window on every card play; `CardPlayState` + `CardPlayChangedEffect` track the active card-play window on `GameData` |
+| ~~Replacement timing~~ | `SequencingHandler.addWindowCloseEffects` emits `DrawCardEffect` when CARD_AS_PLAYED closes and player's hand < 7; `DrawCardEffect` applicator moves top LIBRARY card(s) to HAND |
+| ~~Action-card limbo~~ | ACTION cards set `PendingActionState.actionCardId`; card moves to ASH_HEAP (limbo); 10 new Cucumber scenarios in `card_play_lifecycle.feature` and `card_play_phase_gate.feature` confirm all four tasks |
 
 ### Tranche 4 — Referendum Before Full Combat
 

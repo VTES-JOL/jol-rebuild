@@ -141,6 +141,9 @@ public class GameInitService {
             card.setType(types.isEmpty() ? CardType.NONE : types.getFirst());
             card.setTypes(types);
             card.setUnique(false);
+            if (l.cardText() != null && l.cardText().toLowerCase().contains("out of turn")) {
+                card.setOutOfTurn(true);
+            }
         }
 
         return card;

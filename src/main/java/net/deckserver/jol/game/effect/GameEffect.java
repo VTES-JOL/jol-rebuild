@@ -13,7 +13,8 @@ public sealed interface GameEffect
                 EdgeChangedEffect, PhaseChangedEffect, TurnChangedEffect,
                 TransfersRemainingChangedEffect,
                 ImpulseWindowChangedEffect, PendingActionChangedEffect,
-                SequencingWindowChangedEffect, GameNotesChangedEffect,
+                SequencingWindowChangedEffect, CardPlayChangedEffect, DrawCardEffect,
+                GameNotesChangedEffect,
                 GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect,
                 NraRecordedEffect {
 }

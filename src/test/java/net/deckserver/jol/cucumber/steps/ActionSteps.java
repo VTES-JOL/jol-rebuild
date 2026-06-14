@@ -5,6 +5,10 @@ import io.cucumber.java.en.When;
 import io.quarkus.arc.Arc;
 import net.deckserver.jol.cucumber.GameWorld;
 import net.deckserver.jol.enums.ActionType;
+import net.deckserver.jol.enums.CardType;
+import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.game.CardData;
+import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.services.GameCommandService;
 
@@ -121,7 +125,56 @@ public class ActionSteps {
         }
     }
 
+    @When("{string} plays {string} as {word} {word} card")
+    public void playCard(String player, String cardName, String article, String cardTypeName) {
+        world.lastException = null;
+        String cardId = world.cardIdByName.get(cardName);
+        if (cardId == null) {
+            world.lastException = new IllegalStateException("No card registered with name: " + cardName);
+            return;
+        }
+        CardRef ref = findCardRefInHand(player, cardId);
+        if (ref == null) {
+            world.lastException = new IllegalStateException("Card '" + cardName + "' not found in " + player + "'s hand");
+            return;
+        }
+        try {
+            commandService.execute(player, new PlayCard(world.gameId, ref, null, null, CardType.valueOf(cardTypeName)));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @And("{string} snapshots {word} hand size")
+    public void snapshotHandSize(String player, String pronoun) {
+        world.lastException = null;
+        int size = world.game.getPlayer(player).getRegion(RegionType.HAND).getCards().size();
+        world.handSizeBefore.put(player, size);
+    }
+
+    @And("all players pass the card-as-played window")
+    public void passCardAsPlayedWindow() {
+        world.lastException = null;
+        try {
+            commandService.execute(world.game.getCurrentPlayerName(),
+                    new CloseSequencingWindow(world.gameId));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private CardRef findCardRefInHand(String player, String cardId) {
+        RegionData hand = world.game.getPlayer(player).getRegion(RegionType.HAND);
+        java.util.List<CardData> cards = hand.getCards();
+        for (int i = 0; i < cards.size(); i++) {
+            if (cardId.equals(cards.get(i).getId())) {
+                return new CardRef(player, RegionType.HAND, i, -1);
+            }
+        }
+        return null;
+    }
 
     /** Returns the CardRef of the first minion registered for the given player. */
     private CardRef firstMinionOf(String player) {

@@ -4,6 +4,8 @@ import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import net.deckserver.jol.cucumber.GameWorld;
 import net.deckserver.jol.enums.ActionStatus;
+import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.enums.SequencingWindowType;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.command.CardRef;
@@ -86,6 +88,33 @@ public class AssertionSteps {
         assertNotNull(card, "Card not found for minion '" + minionName + "'");
         assertEquals(expectedBlood, card.getCounters(),
                 minionName + " should have " + expectedBlood + " blood");
+    }
+
+    @Then("the CARD_AS_PLAYED window should be open")
+    public void assertCardAsPlayedWindowOpen() {
+        assertNotNull(world.game.getSequencingWindow(), "No sequencing window is open");
+        assertTrue(world.game.getSequencingWindow().isActive(), "Sequencing window is not active");
+        assertEquals(SequencingWindowType.CARD_AS_PLAYED, world.game.getSequencingWindow().getWindowType(),
+                "Sequencing window type should be CARD_AS_PLAYED");
+    }
+
+    @Then("{string} should be in action limbo")
+    public void assertInActionLimbo(String cardName) {
+        assertNotNull(world.game.getPendingAction(), "No pending action");
+        String limboId = world.game.getPendingAction().getActionCardId();
+        assertNotNull(limboId, "No action card in limbo");
+        CardData card = world.game.getCard(limboId);
+        assertNotNull(card, "Action limbo card not found in game");
+        assertEquals(cardName, card.getName(),
+                "Expected '" + cardName + "' in action limbo but found '" + card.getName() + "'");
+    }
+
+    @Then("{string}'s hand size should increase by {int}")
+    public void assertHandSizeIncrease(String player, int delta) {
+        int before = world.handSizeBefore.getOrDefault(player, 0);
+        int after = world.game.getPlayer(player).getRegion(RegionType.HAND).getCards().size();
+        assertEquals(before + delta, after,
+                player + "'s hand size should have increased by " + delta + " (was " + before + ", now " + after + ")");
     }
 
     @And("{string} should be NRA-locked from {string}")

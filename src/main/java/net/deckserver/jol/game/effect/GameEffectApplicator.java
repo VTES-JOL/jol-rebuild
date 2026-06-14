@@ -8,6 +8,8 @@ import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 
+import java.util.List;
+
 /**
  * Applies a GameEffect to a GameData instance and returns a human-readable description
  * of what changed, suitable for the effect log. Returns null for changes that should
@@ -39,6 +41,8 @@ public final class GameEffectApplicator {
             case GameCompletedEffect e          -> applyGameCompleted(game, e);
             case OrderOfPlayReversedEffect e    -> applyOrderReversed(game, e);
             case NraRecordedEffect e            -> applyNraRecorded(game, e);
+            case CardPlayChangedEffect e        -> applyCardPlayChanged(game, e);
+            case DrawCardEffect e               -> applyDrawCard(game, e);
         };
     }
 
@@ -190,6 +194,29 @@ public final class GameEffectApplicator {
                 .computeIfAbsent(e.cardId(), k -> new java.util.HashSet<>())
                 .add(e.nraKey());
         return null;
+    }
+
+    private static String applyCardPlayChanged(GameData game, CardPlayChangedEffect e) {
+        game.setCardPlayState(e.active() ? e.cardPlayState() : null);
+        if (e.active() && e.cardPlayState() != null) {
+            CardData card = game.getCard(e.cardPlayState().getCardId());
+            String name = card != null ? card.getName() : e.cardPlayState().getCardId();
+            return e.cardPlayState().getActingPlayer() + " played " + name + " — CARD_AS_PLAYED window open";
+        }
+        return null;
+    }
+
+    private static String applyDrawCard(GameData game, DrawCardEffect e) {
+        PlayerData player = game.getPlayer(e.playerName());
+        if (player == null) return null;
+        List<CardData> library = player.getRegion(RegionType.LIBRARY).getCards();
+        RegionData hand = player.getRegion(RegionType.HAND);
+        int drawn = 0;
+        for (int i = 0; i < e.count() && !library.isEmpty(); i++) {
+            hand.addCard(library.get(0), false);
+            drawn++;
+        }
+        return drawn > 0 ? e.playerName() + " drew " + drawn + " replacement card(s)" : null;
     }
 
     static int computeTransferBudget(GameData game) {

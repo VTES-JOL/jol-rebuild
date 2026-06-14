@@ -11,6 +11,7 @@ import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.CardRef;
 import net.deckserver.jol.services.GameStateStore;
@@ -81,7 +82,28 @@ public class GameSetupSteps {
         }
     }
 
+    @Given("{string} has {word} {string} {word} card in hand")
+    public void addCardToHand(String player, String article, String cardName, String cardTypeName) {
+        addCardToRegion(player, cardName, cardTypeName, RegionType.HAND);
+    }
+
+    @Given("{string} has {word} {string} {word} card in library")
+    public void addCardToLibrary(String player, String article, String cardName, String cardTypeName) {
+        addCardToRegion(player, cardName, cardTypeName, RegionType.LIBRARY);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void addCardToRegion(String player, String cardName, String cardTypeName, RegionType region) {
+        CardType cardType = CardType.valueOf(cardTypeName);
+        PlayerData playerData = world.game.getPlayer(player);
+        CardData card = new CardData("tpl-" + cardName, playerData);
+        card.setName(cardName);
+        card.setType(cardType);
+        world.game.registerCard(card);
+        playerData.getRegion(region).addCard(card, false);
+        world.cardIdByName.put(cardName, card.getId());
+    }
 
     private void addVampire(String player, String name, int blood, int capacity, RegionType region) {
         CardData card = new CardData("card-" + name, world.game.getPlayer(player));

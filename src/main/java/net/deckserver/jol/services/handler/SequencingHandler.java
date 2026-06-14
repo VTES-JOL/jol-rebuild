@@ -1,15 +1,14 @@
 package net.deckserver.jol.services.handler;
 
 import net.deckserver.jol.enums.ActionStatus;
+import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.enums.SequencingWindowType;
 import net.deckserver.jol.exception.GameRuleException;
-import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.PendingActionState;
-import net.deckserver.jol.game.SequencingWindowState;
+import net.deckserver.jol.game.*;
 import net.deckserver.jol.game.command.CloseSequencingWindow;
 import net.deckserver.jol.game.command.CommandLogData;
 import net.deckserver.jol.game.command.PassSequencing;
-import net.deckserver.jol.game.effect.PendingActionChangedEffect;
-import net.deckserver.jol.game.effect.SequencingWindowChangedEffect;
+import net.deckserver.jol.game.effect.*;
 import net.deckserver.jol.services.CommandResult;
 
 import java.util.ArrayList;
@@ -27,12 +26,9 @@ public final class SequencingHandler {
 
         int passes = seq.getConsecutivePasses() + 1;
         if (passes >= seq.getPassOrder().size()) {
-            List<net.deckserver.jol.game.effect.GameEffect> effects = new ArrayList<>();
+            List<GameEffect> effects = new ArrayList<>();
             effects.add(new SequencingWindowChangedEffect(false));
-            PendingActionState pending = game.getPendingAction();
-            if (pending != null && pending.getStatus() == ActionStatus.AFTER_RESOLUTION) {
-                effects.add(new PendingActionChangedEffect(false));
-            }
+            addWindowCloseEffects(game, seq.getWindowType(), effects);
             String msg = actor + " passed — all players have passed; sequencing window closes";
             return new CommandResult(game, msg, new CommandLogData.PassSequencingLog(actor), effects);
         }
@@ -54,13 +50,37 @@ public final class SequencingHandler {
     }
 
     public static CommandResult handleCloseSequencingWindow(GameData game, CloseSequencingWindow cmd, String actor) {
-        List<net.deckserver.jol.game.effect.GameEffect> effects = new ArrayList<>();
+        SequencingWindowState seq = game.getSequencingWindow();
+        SequencingWindowType windowType = seq != null ? seq.getWindowType() : null;
+
+        List<GameEffect> effects = new ArrayList<>();
         effects.add(new SequencingWindowChangedEffect(false));
-        PendingActionState pending = game.getPendingAction();
-        if (pending != null && pending.getStatus() == ActionStatus.AFTER_RESOLUTION) {
-            effects.add(new PendingActionChangedEffect(false));
-        }
+        addWindowCloseEffects(game, windowType, effects);
+
         String msg = actor + " closed the sequencing window";
         return new CommandResult(game, msg, new CommandLogData.CloseSequencingWindowLog(actor), effects);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static void addWindowCloseEffects(GameData game, SequencingWindowType windowType, List<GameEffect> effects) {
+        if (windowType == SequencingWindowType.CARD_AS_PLAYED) {
+            effects.add(new CardPlayChangedEffect(false));
+            CardPlayState cps = game.getCardPlayState();
+            if (cps != null) {
+                PlayerData player = game.getPlayer(cps.getActingPlayer());
+                if (player != null) {
+                    int handSize = player.getRegion(RegionType.HAND).getCards().size();
+                    if (handSize < CardMovementHandler.MAX_HAND_SIZE) {
+                        effects.add(new DrawCardEffect(cps.getActingPlayer(), 1));
+                    }
+                }
+            }
+        } else {
+            PendingActionState pending = game.getPendingAction();
+            if (pending != null && pending.getStatus() == ActionStatus.AFTER_RESOLUTION) {
+                effects.add(new PendingActionChangedEffect(false));
+            }
+        }
     }
 }

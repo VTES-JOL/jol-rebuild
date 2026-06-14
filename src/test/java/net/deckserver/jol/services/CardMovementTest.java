@@ -80,7 +80,7 @@ class CardMovementTest {
 
     @Test
     void playCard_withoutTarget_movesCardToAshHeap() {
-        gameCommandService.execute("Alice", new PlayCard(gameId, handRef, null, null));
+        gameCommandService.execute("Alice", new PlayCard(gameId, handRef, null, null, null));
 
         assertFalse(alice().getRegion(RegionType.HAND).getCards().contains(handCard));
         assertTrue(alice().getRegion(RegionType.ASH_HEAP).getCards().contains(handCard));
@@ -88,7 +88,7 @@ class CardMovementTest {
 
     @Test
     void playCard_withTarget_movesCardToTargetRegion() {
-        gameCommandService.execute("Alice", new PlayCard(gameId, handRef, "Alice", RegionType.READY));
+        gameCommandService.execute("Alice", new PlayCard(gameId, handRef, "Alice", RegionType.READY, null));
 
         assertFalse(alice().getRegion(RegionType.HAND).getCards().contains(handCard));
         assertTrue(alice().getRegion(RegionType.READY).getCards().contains(handCard));
@@ -96,7 +96,7 @@ class CardMovementTest {
 
     @Test
     void playCard_toAnotherPlayer_movesCardToTheirRegion() {
-        gameCommandService.execute("Alice", new PlayCard(gameId, handRef, "Bob", RegionType.READY));
+        gameCommandService.execute("Alice", new PlayCard(gameId, handRef, "Bob", RegionType.READY, null));
 
         assertFalse(alice().getRegion(RegionType.HAND).getCards().contains(handCard));
         assertTrue(game.getPlayer("Bob").getRegion(RegionType.READY).getCards().contains(handCard));
@@ -106,7 +106,7 @@ class CardMovementTest {
     void playCard_invalidTargetPlayer_throwsGameRuleException() {
         assertThrows(GameRuleException.class,
                 () -> gameCommandService.execute("Alice",
-                        new PlayCard(gameId, handRef, "Nobody", RegionType.READY)));
+                        new PlayCard(gameId, handRef, "Nobody", RegionType.READY, null)));
     }
 
     // ── MoveCard ──────────────────────────────────────────────────────────────

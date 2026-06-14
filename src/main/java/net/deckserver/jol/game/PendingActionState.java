@@ -16,6 +16,9 @@ public class PendingActionState {
     private boolean actionSuccessful;
     private boolean bleedSuccessful;
     private int bleedAmount;
+    private String actionCardId;
+    private boolean bleedLimitedUsed;
+    private java.util.Set<String> playedCardNames = new java.util.HashSet<>();
 
     public PendingActionState() {}
 
@@ -29,6 +32,9 @@ public class PendingActionState {
         this.actionSuccessful = src.actionSuccessful;
         this.bleedSuccessful = src.bleedSuccessful;
         this.bleedAmount = src.bleedAmount;
+        this.actionCardId = src.actionCardId;
+        this.bleedLimitedUsed = src.bleedLimitedUsed;
+        this.playedCardNames = new java.util.HashSet<>(src.playedCardNames);
     }
 
     public PendingActionState withStatus(ActionStatus newStatus) {
@@ -63,4 +69,13 @@ public class PendingActionState {
 
     public int getBleedAmount() { return bleedAmount; }
     public void setBleedAmount(int bleedAmount) { this.bleedAmount = bleedAmount; }
+
+    public String getActionCardId() { return actionCardId; }
+    public void setActionCardId(String actionCardId) { this.actionCardId = actionCardId; }
+
+    public boolean isBleedLimitedUsed() { return bleedLimitedUsed; }
+    public void setBleedLimitedUsed(boolean bleedLimitedUsed) { this.bleedLimitedUsed = bleedLimitedUsed; }
+
+    public java.util.Set<String> getPlayedCardNames() { return playedCardNames; }
+    public void setPlayedCardNames(java.util.Set<String> playedCardNames) { this.playedCardNames = playedCardNames; }
 }
