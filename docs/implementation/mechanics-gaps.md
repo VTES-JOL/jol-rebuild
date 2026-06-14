@@ -107,16 +107,14 @@ The fastest route from the current permissive command set to a rules engine is t
 | ~~Influence UI parity~~ | `DrawCryptToUncontrolledCommand` and `MergeAdvancedCommand` TypeScript types + helpers added to `gameCommands.ts` |
 | ~~Phase progression in enforced mode~~ | `AdvancePhase` and `NextTurn` are no longer permissive-only; `TurnPhaseHandler` adds `requireCurrentPlayer` guard in enforced mode; non-current-player rejection tested |
 
-### Tranche 2 — Action Skeleton to Legal Basic Actions
+### ~~Tranche 2 — Action Skeleton to Legal Basic Actions~~ ✓ Complete
 
-Keep this limited to basic actions before card text automation.
-
-| Task | Scope | Done when |
-|------|-------|-----------|
-| Action declaration legality | Validate actor readiness, controller, phase, mandatory hunt, torpor-only leave-torpor, and basic target requirements | Illegal basic actions are rejected before windows open |
-| Basic action resolution | Resolve bleed, hunt, rescue, leave torpor, equip/recruit/employ shell, and diablerie placeholder effects by `ActionType` | `ResolveAction` applies deterministic effects instead of only opening after-resolution |
-| NRA tracking | Add per-minion per-turn NRA keys and clear them on turn advance | Bleed, political action, action cards, and in-play actions cannot repeat after resolution |
-| Block eligibility baseline | Enforce directed/undirected eligible Methuselah order and ready/unlocked blocker requirements | A player cannot block outside their eligible block opportunity |
+| Task | Outcome |
+|------|---------|
+| ~~Action declaration legality~~ | `ActionHandler.enforceDeclarationRules` validates NRA, mandatory hunt, recruited-ally gate, and LEAVE_TORPOR requires actor in TORPOR; all guards enforce-mode-gated |
+| ~~Basic action resolution~~ | `ResolveAction` applies per-`ActionType` effects in enforced mode: BLEED deducts target pool + moves Edge; HUNT grants blood capped at capacity; LEAVE_TORPOR costs 2 blood and moves actor to READY; other types are stubs; `actionSuccessful`, `reachedResolution`, `bleedSuccessful` set on `PendingActionState` |
+| ~~NRA tracking~~ | `GameData.nraActionsByCardId` (BLEED/POLITICAL keys); `NraRecordedEffect` applied by `GameEffectApplicator`; cleared in `applyTurnChanged`; recorded on both blocked and resolved paths; 16 new tests in `ActionWindowTest` |
+| ~~Block eligibility baseline~~ | `ActionHandler.enforceBlockEligibility` rejects blocks when actor ≠ current impulse holder; directed actions reject non-target blockers |
 
 ### Tranche 3 — Card Play Lifecycle
 
@@ -161,7 +159,7 @@ Combat remains a larger subsystem and should build on the shared card-play and t
 | ~~P4~~   | ~~Advanced vampire merge~~                                                 | **Done in permissive mode** — `MergeAdvanced` command validates same name + one advanced.                                                                                                                                           |
 | **P0**   | Rules/data correctness baseline                                            | Crypt group validation, Conviction/Power mapping, DUEL contest rule representation, and phase impulse cleanup are small correctness fixes that prevent later protocol work from encoding known drift. See [Rules Engine Starter Tranches](#rules-engine-starter-tranches). |
 | ~~P1~~   | ~~Rules-enforced influence phase~~                                         | **Done** — `AdvancePhase`/`NextTurn` available in enforced mode with current-player guard; influence commands open in both modes; DUEL budget formula corrected; blood capacity ceiling enforced. See [Tranche 1](#tranche-1--enforced-influence-phase-complete). |
-| **P1**   | Basic action resolution by `ActionType`                                    | Bleed, hunt, equip, employ retainer, recruit ally, political, leave torpor, rescue, diablerie, and rush effects are not resolved. See [Actions](./actions.md).                                                                      |
+| ~~P1~~   | ~~Basic action resolution by `ActionType`~~                                | **Done (BLEED + HUNT fully; LEAVE_TORPOR partially; others stubbed)** — `ResolveAction` applies deterministic effects in enforced mode; NRA tracking, mandatory hunt, and block eligibility baseline complete. See [Tranche 2](#tranche-2--action-skeleton-to-legal-basic-actions-complete). |
 | **P1**   | Card play legality and lifecycle                                           | Prevents illegal plays; prerequisite for modifiers, reactions, combat cards, cancellation, replacement timing, and action-card limbo. See [Card Play](./card-play.md).                                                              |
 | **P1**   | Voting / Referendum engine                                                 | Required for political-action decks and mandatory blood hunt after diablerie. See [Referendums](./referendums.md).                                                                                                                  |
 | **P1**   | Game end — simultaneous oust, timeout, GW recording                        | Predator VP+pool and last-survivor VP are partially done; simultaneous oust pool-withholding, timeout scoring, and GW field still missing. See [Game State](./game-state.md#game-end-detection).                                    |

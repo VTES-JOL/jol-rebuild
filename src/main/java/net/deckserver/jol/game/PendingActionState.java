@@ -12,6 +12,10 @@ public class PendingActionState {
     private String targetPlayerName;
     private ActionStatus status;
     private CardRef blockerRef;
+    private boolean reachedResolution;
+    private boolean actionSuccessful;
+    private boolean bleedSuccessful;
+    private int bleedAmount;
 
     public PendingActionState() {}
 
@@ -21,6 +25,10 @@ public class PendingActionState {
         this.targetPlayerName = src.targetPlayerName;
         this.status = src.status;
         this.blockerRef = src.blockerRef;
+        this.reachedResolution = src.reachedResolution;
+        this.actionSuccessful = src.actionSuccessful;
+        this.bleedSuccessful = src.bleedSuccessful;
+        this.bleedAmount = src.bleedAmount;
     }
 
     public PendingActionState withStatus(ActionStatus newStatus) {
@@ -43,4 +51,16 @@ public class PendingActionState {
 
     public CardRef getBlockerRef() { return blockerRef; }
     public void setBlockerRef(CardRef blockerRef) { this.blockerRef = blockerRef; }
+
+    public boolean isReachedResolution() { return reachedResolution; }
+    public void setReachedResolution(boolean reachedResolution) { this.reachedResolution = reachedResolution; }
+
+    public boolean isActionSuccessful() { return actionSuccessful; }
+    public void setActionSuccessful(boolean actionSuccessful) { this.actionSuccessful = actionSuccessful; }
+
+    public boolean isBleedSuccessful() { return bleedSuccessful; }
+    public void setBleedSuccessful(boolean bleedSuccessful) { this.bleedSuccessful = bleedSuccessful; }
+
+    public int getBleedAmount() { return bleedAmount; }
+    public void setBleedAmount(int bleedAmount) { this.bleedAmount = bleedAmount; }
 }

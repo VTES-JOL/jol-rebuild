@@ -38,6 +38,7 @@ public final class GameEffectApplicator {
             case GameModeChangedEffect e        -> applyGameMode(game, e);
             case GameCompletedEffect e          -> applyGameCompleted(game, e);
             case OrderOfPlayReversedEffect e    -> applyOrderReversed(game, e);
+            case NraRecordedEffect e            -> applyNraRecorded(game, e);
         };
     }
 
@@ -139,6 +140,8 @@ public final class GameEffectApplicator {
         PlayerData player = game.getPlayer(e.currentPlayerName());
         if (player != null) game.setCurrentPlayer(player);
         game.setTransfersRemaining(0);
+        game.getNraActionsByCardId().clear();
+        game.getRecruitedThisTurn().clear();
         return "Turn " + e.turn() + " — " + e.currentPlayerName() + " begins";
     }
 
@@ -180,6 +183,13 @@ public final class GameEffectApplicator {
     private static String applyOrderReversed(GameData game, OrderOfPlayReversedEffect e) {
         game.setOrderOfPlayReversed(e.reversed());
         return "Order of play is now " + (e.reversed() ? "reversed" : "normal");
+    }
+
+    private static String applyNraRecorded(GameData game, NraRecordedEffect e) {
+        game.getNraActionsByCardId()
+                .computeIfAbsent(e.cardId(), k -> new java.util.HashSet<>())
+                .add(e.nraKey());
+        return null;
     }
 
     static int computeTransferBudget(GameData game) {

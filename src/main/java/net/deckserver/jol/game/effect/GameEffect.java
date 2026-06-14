@@ -14,5 +14,6 @@ public sealed interface GameEffect
                 TransfersRemainingChangedEffect,
                 ImpulseWindowChangedEffect, PendingActionChangedEffect,
                 SequencingWindowChangedEffect, GameNotesChangedEffect,
-                GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect {
+                GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect,
+                NraRecordedEffect {
 }

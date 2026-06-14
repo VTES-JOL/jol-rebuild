@@ -5,5 +5,7 @@ public enum ActionStatus {
     AS_ANNOUNCED,
     DURING_ACTION,
     BLOCKED,
-    AFTER_RESOLUTION
+    AFTER_RESOLUTION,
+    /** Set when a "continue the action" effect fires after combat; re-enters block-attempt loop. */
+    ACTION_CONTINUING
 }

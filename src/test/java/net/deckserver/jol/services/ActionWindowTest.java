@@ -5,6 +5,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.ActionType;
+import net.deckserver.jol.enums.CardType;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.exception.GameRuleException;
@@ -202,6 +203,220 @@ class ActionWindowTest {
     void abortAction_failsWhenNoPendingAction() {
         assertThrows(GameRuleException.class,
                 () -> gameCommandService.execute("Alice", new AbortAction(gameId)));
+    }
+
+    // ── NRA tracking ─────────────────────────────────────────────────────────
+
+    @Test
+    void resolveAction_bleed_recordsNraKey() {
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+
+        CardData card = game.getCardByRef(aliceMinion);
+        assertTrue(game.getNraActionsByCardId()
+                .getOrDefault(card.getId(), java.util.Set.of())
+                .contains("BLEED"));
+    }
+
+    @Test
+    void declareAction_bleed_rejectedAfterNraLocksIn() {
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+        gameCommandService.execute("Alice",
+                new net.deckserver.jol.game.command.CloseSequencingWindow(gameId));
+        game.getCardByRef(aliceMinion).setLocked(false);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null)));
+    }
+
+    @Test
+    void declareAction_hunt_repeatable_afterNraDoesNotLockHunt() {
+        // HUNT is not NRA-locked, so the same minion may hunt again (if unlocked)
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.HUNT, null));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+        gameCommandService.execute("Alice",
+                new net.deckserver.jol.game.command.CloseSequencingWindow(gameId));
+
+        // Unlock the minion so it can act again
+        game.getCardByRef(aliceMinion).setLocked(false);
+
+        assertDoesNotThrow(() ->
+                gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.HUNT, null)));
+    }
+
+    @Test
+    void attemptBlock_blocked_recordsNraForActingMinion() {
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null));
+        gameCommandService.execute("Alice", new PassImpulse(gameId, "Alice"));
+        gameCommandService.execute("Bob", new AttemptBlock(gameId, bobMinion));
+
+        CardData aliceCard = game.getCardByRef(aliceMinion);
+        assertTrue(game.getPendingAction().isReachedResolution());
+        assertTrue(game.getNraActionsByCardId()
+                .getOrDefault(aliceCard.getId(), java.util.Set.of())
+                .contains("BLEED"));
+    }
+
+    // ── Mandatory hunt gate ───────────────────────────────────────────────────
+
+    @Test
+    void declareAction_nonHunt_rejectedWhenActorHasNoBlood() {
+        // Give the vampire a capacity so the mandatory hunt check fires
+        game.getCardByRef(aliceMinion).setCapacity(5);
+        game.getCardByRef(aliceMinion).setCounters(0);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Alice",
+                        new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null)));
+    }
+
+    @Test
+    void declareAction_hunt_allowedWhenActorHasNoBlood() {
+        game.getCardByRef(aliceMinion).setCapacity(5);
+        game.getCardByRef(aliceMinion).setCounters(0);
+
+        assertDoesNotThrow(() ->
+                gameCommandService.execute("Alice",
+                        new DeclareAction(gameId, aliceMinion, ActionType.HUNT, null)));
+    }
+
+    @Test
+    void declareAction_nonHunt_rejectedWhenOtherVampireHasMandatoryHunt() {
+        // Add a second vampire for Alice with no blood
+        CardData vampire2 = new CardData("vamp-extra", game.getPlayer("Alice"));
+        vampire2.setName("HungryVamp");
+        vampire2.setMinion(true);
+        vampire2.setType(CardType.VAMPIRE);
+        vampire2.setCapacity(4);
+        vampire2.setCounters(0);
+        game.getPlayer("Alice").getRegion(RegionType.READY).addCard(vampire2, false);
+        game.registerCard(vampire2);
+
+        // Alice's first minion has blood, so it's not the mandatory hunter
+        game.getCardByRef(aliceMinion).setCapacity(5);
+        game.getCardByRef(aliceMinion).setCounters(3);
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Alice",
+                        new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null)));
+    }
+
+    // ── BLEED resolution ──────────────────────────────────────────────────────
+
+    @Test
+    void resolveAction_bleed_targetLosesPool() {
+        int bobPoolBefore = game.getPlayer("Bob").getPool();
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, "Bob"));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+
+        assertEquals(bobPoolBefore - 1, game.getPlayer("Bob").getPool());
+    }
+
+    @Test
+    void resolveAction_bleed_actingPlayerGainsEdge() {
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, "Bob"));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+
+        assertEquals("Alice", game.getEdgePlayer());
+        assertTrue(game.getPendingAction().isBleedSuccessful());
+    }
+
+    @Test
+    void resolveAction_bleed_setsActionSuccessful() {
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, "Bob"));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+
+        assertTrue(game.getPendingAction().isActionSuccessful());
+        assertTrue(game.getPendingAction().isReachedResolution());
+    }
+
+    // ── HUNT resolution ───────────────────────────────────────────────────────
+
+    @Test
+    void resolveAction_hunt_addsBloodUpToCapacity() {
+        game.getCardByRef(aliceMinion).setCapacity(5);
+        game.getCardByRef(aliceMinion).setCounters(3);
+
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.HUNT, null));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+
+        assertEquals(4, game.getCardByRef(aliceMinion).getCounters());
+    }
+
+    @Test
+    void resolveAction_hunt_doesNotExceedCapacity() {
+        game.getCardByRef(aliceMinion).setCapacity(5);
+        game.getCardByRef(aliceMinion).setCounters(5);
+
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.HUNT, null));
+        closeImpulse();
+        gameCommandService.execute("Alice", new ResolveAction(gameId));
+
+        assertEquals(5, game.getCardByRef(aliceMinion).getCounters());
+    }
+
+    // ── LEAVE_TORPOR declaration ──────────────────────────────────────────────
+
+    @Test
+    void declareAction_leaveTorpor_acceptedForTorporedVampire() {
+        CardData torporVamp = new CardData("vamp-torpor", game.getPlayer("Alice"));
+        torporVamp.setName("TorporVamp");
+        torporVamp.setMinion(true);
+        torporVamp.setType(CardType.VAMPIRE);
+        torporVamp.setCapacity(5);
+        torporVamp.setCounters(3);
+        game.getPlayer("Alice").getRegion(RegionType.TORPOR).addCard(torporVamp, false);
+        game.registerCard(torporVamp);
+
+        CardRef torporRef = new CardRef("Alice", RegionType.TORPOR, 0, -1);
+        assertDoesNotThrow(() ->
+                gameCommandService.execute("Alice",
+                        new DeclareAction(gameId, torporRef, ActionType.LEAVE_TORPOR, null)));
+    }
+
+    @Test
+    void declareAction_leaveTorpor_rejectedForReadyVampire() {
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Alice",
+                        new DeclareAction(gameId, aliceMinion, ActionType.LEAVE_TORPOR, null)));
+    }
+
+    // ── Block eligibility ─────────────────────────────────────────────────────
+
+    @Test
+    void attemptBlock_rejectedWhenNotCurrentImpulseHolder() {
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null));
+        // Impulse is with Alice; Bob has not yet received it
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Bob", new AttemptBlock(gameId, bobMinion)));
+    }
+
+    @Test
+    void attemptBlock_rejectedWhenDirectedActionAndNotTarget() {
+        // Alice bleeds Bob (directed); Carol should not be able to block
+        CardData carolMinion = new CardData("vamp-carol", game.getPlayer("Carol"));
+        carolMinion.setName("Isanwayen");
+        carolMinion.setMinion(true);
+        game.getPlayer("Carol").getRegion(RegionType.READY).addCard(carolMinion, false);
+        game.registerCard(carolMinion);
+
+        gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, "Bob"));
+        // Pass impulse through Alice → Bob would be next, but skip to Carol for testing
+        gameCommandService.execute("Alice", new PassImpulse(gameId, "Alice"));
+        gameCommandService.execute("Bob", new PassImpulse(gameId, "Bob"));
+
+        CardRef carolRef = new CardRef("Carol", RegionType.READY, 0, -1);
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute("Carol", new AttemptBlock(gameId, carolRef)));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

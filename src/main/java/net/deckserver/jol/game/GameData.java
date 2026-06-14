@@ -38,6 +38,8 @@ public class GameData {
     private boolean completed = false;
     private boolean rulesEnforced = false;
     private GameFormat format;
+    private Map<String, Set<String>> nraActionsByCardId = new HashMap<>();
+    private Set<String> recruitedThisTurn = new HashSet<>();
 
     public GameData(String id, String name) {
         this.id = id;
@@ -209,6 +211,10 @@ public class GameData {
     public void setRulesEnforced(boolean rulesEnforced) { this.rulesEnforced = rulesEnforced; }
     public GameFormat getFormat() { return format; }
     public void setFormat(GameFormat format) { this.format = format; }
+    public Map<String, Set<String>> getNraActionsByCardId() { return nraActionsByCardId; }
+    public void setNraActionsByCardId(Map<String, Set<String>> nraActionsByCardId) { this.nraActionsByCardId = nraActionsByCardId; }
+    public Set<String> getRecruitedThisTurn() { return recruitedThisTurn; }
+    public void setRecruitedThisTurn(Set<String> recruitedThisTurn) { this.recruitedThisTurn = recruitedThisTurn; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);
