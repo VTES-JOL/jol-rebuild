@@ -16,5 +16,5 @@ public sealed interface GameEffect
                 SequencingWindowChangedEffect, CardPlayChangedEffect, DrawCardEffect,
                 GameNotesChangedEffect,
                 GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect,
-                NraRecordedEffect {
+                NraRecordedEffect, RestrictionAddedEffect {
 }

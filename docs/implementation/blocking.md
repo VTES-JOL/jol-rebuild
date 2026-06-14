@@ -72,14 +72,14 @@ Both totals accumulate on `PendingActionState` and carry across all block window
 
 ### State fields on `PendingActionState`
 
-| Field                        | Type                    | Description                                                                               |
-|------------------------------|-------------------------|-------------------------------------------------------------------------------------------|
-| `stealth`                    | `int`                   | Action-wide running stealth total                                                         |
-| `interceptsByBlockerRef`     | `Map<CardRef, Integer>` | Per-blocker intercept; each blocker has their own accumulator; carries forward on redirect |
-| `passedBlockWindowsByPlayer` | `Set<String>`           | Players who have passed in the current block window; reset when a redirect opens a new window |
-| `cannotBlockRefs`            | `Set<CardRef>`          | Minions prohibited from blocking for the duration of this action                         |
-| `currentBlockerRef`          | `CardRef?`              | Active blocker in a current attempt; null when no attempt in progress                    |
-| `blocksDeclined`             | `boolean`               | True after all eligible Methuselahs have declined block attempts and before action resolution; reset on redirect |
+| Field                        | Type                                         | Description                                                                               |
+|------------------------------|----------------------------------------------|-------------------------------------------------------------------------------------------|
+| `stealth`                    | `int`                                        | Action-wide running stealth total                                                         |
+| `interceptsByBlockerRef`     | `Map<CardRef, Integer>`                      | Per-blocker intercept; each blocker has their own accumulator; carries forward on redirect |
+| `passedBlockWindowsByPlayer` | `Set<String>`                                | Players who have passed in the current block window; reset when a redirect opens a new window |
+| `actionRestrictions`         | `Map<RestrictionType, Set<CardRef>>`         | Per-type set of restricted minions; use `CANNOT_BLOCK` key for block restriction. Replaces the earlier `cannotBlockRefs` design. See [Action Restrictions](./action-restrictions.md). |
+| `currentBlockerRef`          | `CardRef?`                                   | Active blocker in a current attempt; null when no attempt in progress                    |
+| `blocksDeclined`             | `boolean`                                    | True after all eligible Methuselahs have declined block attempts and before action resolution; reset on redirect |
 
 ### Comparison rule
 
@@ -105,7 +105,7 @@ When a reaction card redirects an action to a new target:
 1. Update `PendingActionState.targetPlayerName` to the new target.
 2. Carry all accumulated modifiers: `stealth`, `interceptsByBlockerRef`, `bleedAmount`.
 3. Clear `passedBlockWindowsByPlayer` — players who passed in the previous window may attempt again.
-4. Minions in `cannotBlockRefs` remain ineligible for the full action.
+4. Minions in `actionRestrictions[CANNOT_BLOCK]` remain ineligible for the full action.
 5. Set `blocksDeclined = false`.
 6. Re-open the block-attempt impulse window with the appropriate context for the new target.
 
@@ -146,7 +146,7 @@ A reaction card that unlocks a minion but does not grant wake-style "as though u
 
 - All accumulated modifiers (`stealth`, `interceptsByBlockerRef`, `bleedAmount`) are preserved.
 - `passedBlockWindowsByPlayer` is cleared — players who passed in the pre-combat window may attempt again.
-- `cannotBlockRefs` remains — minions that could not block before still cannot block.
+- `actionRestrictions[CANNOT_BLOCK]` remains — minions that could not block before still cannot block.
 
 `ACTION_CONTINUING` must be added to the `ActionStatus` Java enum before this path can be wired — see [Actions § ActionStatus Enum](./actions.md#actionstatus-enum). The detection logic (a continue-the-action card play after combat triggers the status change and re-opens the block window) is not yet implemented.
 
@@ -168,6 +168,6 @@ A minion may attempt to block if **all** of the following hold:
 2. Minion is unlocked, **or** the minion is in `wakePermissionByCardId`.
 3. Minion's controller is the current `currentImpulseHolder`.
 4. For directed actions: minion's controller = `targetPlayerName` (or card text explicitly grants them permission).
-5. Minion's card ID is not in `cannotBlockRefs`.
+5. Minion is not in `actionRestrictions[CANNOT_BLOCK]` (see [Action Restrictions](./action-restrictions.md)).
 6. Minion is not the acting minion.
 7. Minion is not contested (`CardData.contested = false`).

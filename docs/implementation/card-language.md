@@ -335,9 +335,10 @@ effects:
 Guidelines:
 
 - Use `applies` for numeric modifiers such as bleed, stealth, intercept, strength, hand size, or cost reduction.
-- Use `permission` when the text changes eligibility or legal actions.
-- Use `restrictChoices` when a resolving effect narrows future legal options for a duration.
-- Use `grantPermission` if a resolving effect temporarily broadens future legal options.
+- Use `permission` on a `passive` ability when a card permanently changes eligibility while it remains in play (e.g. Pentex Subversion's `block: allowed: false`, Signet of King Saul's capacity gate). Passive permission is evaluated live at eligibility-check time via `PassiveRestrictionChecker`.
+- Use `restrict` as a one-shot effect when a card imposes an action-scoped or combat-scoped eligibility ban on a specific minion as it resolves (e.g. Seduction's `cannot-block`, Elder Impersonation's `cannot-block`). This records a `RestrictionAddedEffect` that lives until the action or combat ends.
+- Use `restrictChoices` when a resolving effect narrows the *set of legal variants* within a category rather than eliminating the category entirely (e.g. Immortal Grapple forces hand strikes — the minion may still declare a strike, just not a ranged one).
+- Use `grantPermission` if a resolving effect temporarily broadens future legal options (e.g. wake effects).
 
 ---
 
@@ -496,6 +497,7 @@ effects:
   - unlock: {}
   - pool: -2
   - blood: -1
+  - restrict: {}
   - restrictChoices: {}
   - createObligation: {}
   - createDelayedEffect: {}
@@ -504,6 +506,31 @@ effects:
   - modifyHandSize: {}
   - modifyCost: {}
 ```
+
+### restrict
+
+`restrict` removes a minion's eligibility to perform an entire capability category for the duration of the current action or combat. This is distinct from `restrictChoices`, which narrows legal options *within* a category rather than eliminating it entirely.
+
+```yaml
+effects:
+  - restrict:
+      target: blocker | self | chosen-target | both-combatants
+      type: cannot-block | cannot-react | cannot-play-modifier | cannot-vote
+               | cannot-maneuver | cannot-press
+               | cannot-use-strike-hand | cannot-use-strike-ranged
+               | cannot-use-additional-strike
+      duration: action | combat | combat-round
+```
+
+`duration: action` — restriction lives for the rest of the current action; cleared when the action ends. Maps to `PendingActionState.actionRestrictions[type]`.
+
+`duration: combat` — restriction lives for the current combat instance; cleared when `CombatState` is cleared. Maps to `CombatState.combatRestrictions[type]` (implemented when the combat tranche lands).
+
+`duration: combat-round` — restriction covers only the current combat round; reset at `END_OF_ROUND`.
+
+Passive block prevention that persists while a card is in play belongs in a `passive` ability's `permission` block (see the Pentex Subversion worked example), not in `restrict`. Use `restrict` only for one-shot effects that impose the restriction as part of resolving a card.
+
+`restrictChoices` remains the correct form when a minion may still perform the category but is limited in which variant is legal — for example, may still strike but only with hand strikes.
 
 ---
 
@@ -1096,6 +1123,104 @@ abilities:
           target: pending-damage
           aggravated: false
           duration: this-combat
+```
+
+---
+
+## Worked Example: Action-Scoped Restriction (Seduction / Elder Impersonation)
+
+Seduction is a reaction card that cancels a block attempt and prevents the same minion from blocking again for the rest of the action.
+
+```yaml
+id: 101842
+name: Seduction
+kind: library
+types: [reaction]
+automation:
+  status: partial
+  reason: draft-example
+
+abilities:
+  - id: cancel-block
+    kind: declaration
+    source: hand
+    timing: [ACTION_BLOCK_ATTEMPT]
+    user: controller
+    requirements:
+      action: has-active-block-attempt
+    effects:
+      - cancelBlockAttempt: {}
+      - restrict:
+          target: blocker
+          type: cannot-block
+          duration: action
+```
+
+Elder Impersonation (action modifier) produces the same restriction from the acting player's side:
+
+```yaml
+id: 100698
+name: Elder Impersonation
+kind: library
+types: [modifier]
+automation:
+  status: partial
+  reason: draft-example
+
+abilities:
+  - id: cancel-block
+    kind: declaration
+    source: hand
+    timing: [ACTION_BLOCK_ATTEMPT]
+    user: actor
+    requirements:
+      action: has-active-block-attempt
+    effects:
+      - cancelBlockAttempt: {}
+      - restrict:
+          target: blocker
+          type: cannot-block
+          duration: action
+```
+
+The Signet of King Saul demonstrates a passive block restriction from equipment. Unlike Seduction this is not a one-shot effect — it applies continuously while the equipment is attached, so it belongs in a `passive` ability using `permission` rather than in a `restrict` effect:
+
+```yaml
+id: 101909
+name: The Signet of King Saul
+kind: library
+types: [equipment]
+keywords: [unique, weapon, melee]
+automation:
+  status: partial
+  reason: draft-example
+
+abilities:
+  - id: play
+    kind: declaration
+    source: hand
+    timing: [MINION_PHASE_DECLARE_ACTION]
+    user: actor
+    cost:
+      pool: 1
+    effects:
+      - attach:
+          card: self
+          to: actor
+
+  - id: capacity-block-gate
+    kind: passive
+    source: attached-card
+    user: controller
+    permission:
+      block:
+        allowed: false
+    condition:
+      blockAttempt:
+        blocker:
+          capacityAtLeast: 8
+        action:
+          actor: bearer
 ```
 
 ---

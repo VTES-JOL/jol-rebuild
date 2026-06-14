@@ -179,3 +179,168 @@ Questions for reviewers:
   - After the blood hunt, should combat still run its ending hooks?
 ```
 
+---
+
+## Alternative Visual Layouts
+
+The PlantUML state diagram is useful as a canonical implementation map, but it is dense for rules review. These alternate image layouts can make the same mechanics easier to review.
+
+For concrete PlantUML sketches of each option, see [Timing Window Visual Examples](./timing-window-visual-examples.md).
+
+### 1. Swimlane Sequence
+
+Best for the full action workflow.
+
+Show each owner as a horizontal lane:
+
+| Lane | Contains |
+|------|----------|
+| Acting minion / controller | Declare action, choose terms, pay cost, resolve effect |
+| Other Methuselahs | Block attempts, reactions, votes, cancels |
+| Card Play | `CARD_AS_PLAYED`, replacement, cost, destination |
+| Combat | Combat subworkflow when a block succeeds |
+| Referendum / Blood Hunt | Polling, tally, outcome hooks |
+
+This layout makes ownership clear: reviewers can see when control moves from action handling into card play, combat, referendum, diablerie, or blood hunt.
+
+Use for:
+
+- Full "how to perform an action" overview
+- Explaining why `CARD_AS_PLAYED` is nested inside other windows
+- Showing return points after combat, referendum, or blood hunt
+
+### 2. Subway Map
+
+Best for high-level player-facing orientation.
+
+Draw each workflow as a colored route:
+
+| Route | Stops |
+|-------|-------|
+| Action line | announce, action in progress, block attempt, blocks declined, resolution, after resolution |
+| Combat branch | before range, range, strikes, damage, press, end |
+| Referendum branch | terms, before votes, polling, tally, after referendum |
+| Diablerie branch | attempt, success, trophy, blood hunt |
+| Card-play loop | as-played cancel, replacement, cost, destination |
+
+Branches make nested workflows easier to understand than a full state-machine box. Use arrows back to the main line for return points.
+
+Use for:
+
+- One-page handout for players
+- Showing common paths without every implementation edge
+- Comparing normal action, political action, blocked action, and diablerie action
+
+### 3. Timing Ladder
+
+Best for a focused subset such as combat.
+
+Use a vertical ladder where each rung is a timing surface in strict order. Put example cards beside each rung and replacement hooks beside the pending result they modify.
+
+Example combat ladder:
+
+```text
+Before range          Carrion Crows
+Determine range       Flash
+Before strikes        Immortal Grapple
+Declare strikes       Theft of Vitae
+Before strike result  Blood to Water
+Damage prevention     Forearm Block
+Damage resolution
+Would go to torpor    Amaranth
+Would be burned       Reform Body
+Additional strikes    Blur
+Press                 Psyche! [cel]
+End of round          Taste of Vitae
+Would end             Telepathic Tracking [AUS]
+About to end          Psyche! [CEL]
+After ends            Form of Mist
+```
+
+Use for:
+
+- Combat review
+- Referendum review
+- Blood hunt review
+- Card-text timing classification
+
+### 4. Scenario Trace Card
+
+Best for reviewing edge cases one at a time.
+
+Create one small image per scenario. Each card shows:
+
+| Section | Content |
+|---------|---------|
+| Setup | One sentence describing the board state |
+| Trace | 5-8 numbered boxes |
+| Interventions | Small callouts for legal card windows |
+| Return | Final box showing where the enclosing workflow resumes |
+| Reviewer questions | 2-3 checks to confirm rules agreement |
+
+Use for:
+
+- Amaranth causing diablerie during combat
+- Political action entering referendum
+- Deflection after blocks are declined
+- Blocked action continuing after combat
+- Blood hunt passing and being replaced by Lay Low
+
+### 5. Decision Tree
+
+Best for answering "what happens next?"
+
+Start from a single player-visible event and branch only on important outcomes:
+
+```text
+Action declared
+  -> canceled as played?
+  -> announced
+     -> blocked?
+        -> combat
+           -> action continues?
+           -> action ends?
+     -> all decline?
+        -> redirected?
+        -> resolves?
+```
+
+This is less precise than the state diagram, but more digestible for readers who need to validate table behavior before implementation details.
+
+Use for:
+
+- Player-facing rules explanation
+- Onboarding contributors
+- Finding missing outcome branches
+
+### 6. Window Matrix
+
+Best for card-classification review.
+
+Use a grid with workflows as columns and timing windows as rows or grouped cells. Put card examples inside each cell.
+
+| Workflow | Early | Middle | Result / replacement | After |
+|----------|-------|--------|----------------------|-------|
+| Action | `ACTION_AS_ANNOUNCED` | `ACTION_DURING_ACTION`, block windows | `ACTION_RESOLUTION_SUCCESS` | `ACTION_AFTER_RESOLUTION` |
+| Combat | `COMBAT_BEFORE_RANGE` | strikes, damage | torpor/burn replacement | end hooks |
+| Referendum | choose terms | before votes, polling | resolution | after referendum |
+| Diablerie | cancel/replace | resolve diablerie | trophy, blood hunt | enclosing return |
+
+Use for:
+
+- Auditing CSV timing buckets
+- Identifying overloaded or missing windows
+- Explaining which window owns a card text phrase
+
+### Recommended Image Set
+
+For external review, create a small set instead of one master diagram:
+
+1. Subway map: full action workflow and branches.
+2. Swimlane: action with nested card play, combat, referendum, diablerie, and blood hunt ownership.
+3. Combat timing ladder: detailed combat window order.
+4. Political action trace: action success into referendum, then return to action after-resolution.
+5. Diablerie trace: combat-caused or action-caused diablerie into blood hunt, then return point.
+6. Window matrix: card-text classification reference.
+
+This gives reviewers both a broad mental model and focused images for the areas where timing mistakes are most likely.

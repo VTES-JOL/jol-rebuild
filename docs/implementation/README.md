@@ -21,6 +21,7 @@ For the game rules themselves, see [VTES Rules](../rules/README.md).
 | [Card Play](./card-play.md)               | Phase gating, card lifecycle, limited effects, and missing enum values                                                      |
 | [Timing Windows](./timing-windows.md)     | Sequential action, combat, diablerie, referendum, and blood hunt play windows; includes the unified action state diagram    |
 | [Timing Window Review Guide](./timing-window-review-guide.md) | Reviewer-facing scenario checklists and common-path tables for auditing timing-window mechanics                              |
+| [Timing Window Visual Examples](./timing-window-visual-examples.md) | PlantUML sketches for swimlane, subway-map, timing-ladder, scenario-trace, decision-tree, and matrix workflow layouts         |
 | [Card Keywords](./card-keywords.md)       | Keyword parsing, proposed `CardData` fields, enforcement hooks, and non-goals                                               |
 | [Card Language](./card-language.md)       | Draft structured source-of-truth language for card automation, generated abilities, passive modifiers, limits, and obligations |
 | [Combat](./combat.md)                     | Combat system gaps, proposed commands, diablerie resolution                                                                 |

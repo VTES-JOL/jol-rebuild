@@ -3,7 +3,13 @@ package net.deckserver.jol.game;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.ActionType;
+import net.deckserver.jol.enums.RestrictionType;
 import net.deckserver.jol.game.command.CardRef;
+
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @RegisterForReflection
 public class PendingActionState {
@@ -18,7 +24,8 @@ public class PendingActionState {
     private int bleedAmount;
     private String actionCardId;
     private boolean bleedLimitedUsed;
-    private java.util.Set<String> playedCardNames = new java.util.HashSet<>();
+    private Set<String> playedCardNames = new HashSet<>();
+    private Map<RestrictionType, Set<CardRef>> actionRestrictions = new EnumMap<>(RestrictionType.class);
 
     public PendingActionState() {}
 
@@ -34,7 +41,9 @@ public class PendingActionState {
         this.bleedAmount = src.bleedAmount;
         this.actionCardId = src.actionCardId;
         this.bleedLimitedUsed = src.bleedLimitedUsed;
-        this.playedCardNames = new java.util.HashSet<>(src.playedCardNames);
+        this.playedCardNames = new HashSet<>(src.playedCardNames);
+        this.actionRestrictions = new EnumMap<>(RestrictionType.class);
+        src.actionRestrictions.forEach((k, v) -> this.actionRestrictions.put(k, new HashSet<>(v)));
     }
 
     public PendingActionState withStatus(ActionStatus newStatus) {
@@ -76,6 +85,13 @@ public class PendingActionState {
     public boolean isBleedLimitedUsed() { return bleedLimitedUsed; }
     public void setBleedLimitedUsed(boolean bleedLimitedUsed) { this.bleedLimitedUsed = bleedLimitedUsed; }
 
-    public java.util.Set<String> getPlayedCardNames() { return playedCardNames; }
-    public void setPlayedCardNames(java.util.Set<String> playedCardNames) { this.playedCardNames = playedCardNames; }
+    public Set<String> getPlayedCardNames() { return playedCardNames; }
+    public void setPlayedCardNames(Set<String> playedCardNames) { this.playedCardNames = playedCardNames; }
+
+    public Map<RestrictionType, Set<CardRef>> getActionRestrictions() { return actionRestrictions; }
+    public void setActionRestrictions(Map<RestrictionType, Set<CardRef>> actionRestrictions) { this.actionRestrictions = actionRestrictions; }
+
+    public boolean isRestricted(RestrictionType type, CardRef ref) {
+        return actionRestrictions.getOrDefault(type, Set.of()).contains(ref);
+    }
 }

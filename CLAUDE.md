@@ -34,6 +34,7 @@ Each topic has a paired rules doc and implementation doc. Rules docs explain tab
 | —                                                     | [Card Text Parsing](docs/implementation/card-text-parsing.md)                                |
 | —                                                     | [Card Language](docs/implementation/card-language.md)                                        |
 | —                                                     | [Mechanics Gaps](docs/implementation/mechanics-gaps.md)                                      |
+| —                                                     | [Action Restrictions](docs/implementation/action-restrictions.md)                            |
 
 ## Commands
 

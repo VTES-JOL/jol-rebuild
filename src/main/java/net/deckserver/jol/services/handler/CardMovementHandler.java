@@ -1,18 +1,12 @@
 package net.deckserver.jol.services.handler;
 
-import net.deckserver.jol.enums.CardType;
-import net.deckserver.jol.enums.Phase;
-import net.deckserver.jol.enums.RegionType;
-import net.deckserver.jol.enums.SequencingWindowType;
+import net.deckserver.jol.enums.*;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.*;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.game.effect.*;
 import net.deckserver.jol.services.CommandResult;
 import net.deckserver.jol.services.GameRules;
-import net.deckserver.jol.enums.ActionStatus;
-import net.deckserver.jol.game.ImpulseEngine;
-import net.deckserver.jol.enums.ImpulseContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,6 +183,8 @@ public final class CardMovementHandler {
                 if (actor.equals(actingPlayer)) {
                     throw new GameRuleException("Reaction cards cannot be played by the acting player");
                 }
+                // CANNOT_REACT restriction check: deferred until PlayCard carries a minionRef
+                // so the per-minion restriction in pending.actionRestrictions can be evaluated.
             }
             default -> {
                 if (!actor.equals(currentPlayer)) {

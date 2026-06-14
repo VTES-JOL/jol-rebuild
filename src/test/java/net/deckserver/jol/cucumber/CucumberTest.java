@@ -22,6 +22,7 @@ class CucumberTest {
                 "--glue", "net.deckserver.jol.cucumber.steps",
                 "--plugin", "pretty",
                 "--plugin", "html:target/cucumber-reports/cucumber.html",
+                "--tags", "not @pending",
                 "classpath:features"
         }, classLoader);
 

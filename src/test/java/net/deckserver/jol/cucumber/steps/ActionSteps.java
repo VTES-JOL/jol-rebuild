@@ -7,9 +7,12 @@ import net.deckserver.jol.cucumber.GameWorld;
 import net.deckserver.jol.enums.ActionType;
 import net.deckserver.jol.enums.CardType;
 import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.enums.RestrictionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.RegionData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.GameEffectApplicator;
+import net.deckserver.jol.game.effect.RestrictionAddedEffect;
 import net.deckserver.jol.services.GameCommandService;
 
 public class ActionSteps {
@@ -161,6 +164,18 @@ public class ActionSteps {
         } catch (Exception e) {
             world.lastException = e;
         }
+    }
+
+    @And("a {word} restriction is applied to {string} with reason {string}")
+    public void applyRestriction(String restrictionTypeName, String minionName, String reason) {
+        world.lastException = null;
+        CardRef ref = world.minionRefs.get(minionName);
+        if (ref == null) {
+            world.lastException = new IllegalStateException("No ref registered for minion: " + minionName);
+            return;
+        }
+        RestrictionType type = RestrictionType.valueOf(restrictionTypeName);
+        GameEffectApplicator.apply(world.game, new RestrictionAddedEffect(type, ref, null, reason));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

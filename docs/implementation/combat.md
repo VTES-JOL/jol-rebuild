@@ -36,6 +36,7 @@ A new `CombatState` object is added to `GameData`. It is set when combat opens a
 | `pendingDamage_defender`               | `int`        | Normal damage accumulator for defender this resolution step                                          |
 | `pendingAggravated_attacker`           | `int`        | Aggravated damage accumulator for attacker this resolution step                                      |
 | `pendingAggravated_defender`           | `int`        | Aggravated damage accumulator for defender this resolution step                                      |
+| `combatRestrictions`                   | `Map<RestrictionType, Set<CardRef>>` | Per-type sets of combat-scoped restrictions (e.g. `CANNOT_MANEUVER`, `CANNOT_USE_STRIKE_HAND`). Recorded via `RestrictionAddedEffect`; cleared when `CombatState` is cleared. See [Action Restrictions](./action-restrictions.md). |
 
 ### Enums
 

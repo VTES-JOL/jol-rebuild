@@ -3,10 +3,7 @@ package net.deckserver.jol.game.effect;
 import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
-import net.deckserver.jol.game.CardData;
-import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.PlayerData;
-import net.deckserver.jol.game.RegionData;
+import net.deckserver.jol.game.*;
 
 import java.util.List;
 
@@ -43,6 +40,7 @@ public final class GameEffectApplicator {
             case NraRecordedEffect e            -> applyNraRecorded(game, e);
             case CardPlayChangedEffect e        -> applyCardPlayChanged(game, e);
             case DrawCardEffect e               -> applyDrawCard(game, e);
+            case RestrictionAddedEffect e       -> applyRestrictionAdded(game, e);
         };
     }
 
@@ -204,6 +202,17 @@ public final class GameEffectApplicator {
             return e.cardPlayState().getActingPlayer() + " played " + name + " — CARD_AS_PLAYED window open";
         }
         return null;
+    }
+
+    private static String applyRestrictionAdded(GameData game, RestrictionAddedEffect e) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null) return null;
+        pending.getActionRestrictions()
+                .computeIfAbsent(e.type(), k -> new java.util.HashSet<>())
+                .add(e.targetRef());
+        CardData card = game.getCardByRef(e.targetRef());
+        String name = card != null ? card.getName() : e.targetRef().toString();
+        return name + " restricted: " + e.reason();
     }
 
     private static String applyDrawCard(GameData game, DrawCardEffect e) {

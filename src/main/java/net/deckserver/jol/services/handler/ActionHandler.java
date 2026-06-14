@@ -92,6 +92,8 @@ public final class ActionHandler {
 
         if (game.isRulesEnforced()) {
             enforceBlockEligibility(game, pending, actor);
+            enforceNotRestricted(pending, cmd.blockerRef(), RestrictionType.CANNOT_BLOCK,
+                    "This minion cannot block this action");
         }
 
         CardData actorCard = game.getCardByRef(pending.getActorRef());
@@ -233,6 +235,12 @@ public final class ActionHandler {
         String target = pending.getTargetPlayerName();
         if (target != null && !actor.equals(target)) {
             throw new GameRuleException("Only the target Methuselah's minions may block a directed action");
+        }
+    }
+
+    static void enforceNotRestricted(PendingActionState pending, CardRef ref, RestrictionType type, String message) {
+        if (pending != null && pending.isRestricted(type, ref)) {
+            throw new GameRuleException(message);
         }
     }
 

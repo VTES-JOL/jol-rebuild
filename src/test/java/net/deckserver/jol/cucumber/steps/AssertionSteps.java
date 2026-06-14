@@ -5,9 +5,11 @@ import io.cucumber.java.en.Then;
 import net.deckserver.jol.cucumber.GameWorld;
 import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.RegionType;
+import net.deckserver.jol.enums.RestrictionType;
 import net.deckserver.jol.enums.SequencingWindowType;
 import net.deckserver.jol.exception.GameRuleException;
 import net.deckserver.jol.game.CardData;
+import net.deckserver.jol.game.PendingActionState;
 import net.deckserver.jol.game.command.CardRef;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -115,6 +117,25 @@ public class AssertionSteps {
         int after = world.game.getPlayer(player).getRegion(RegionType.HAND).getCards().size();
         assertEquals(before + delta, after,
                 player + "'s hand size should have increased by " + delta + " (was " + before + ", now " + after + ")");
+    }
+
+    @Then("{string} should be restricted from {word} this action")
+    public void assertRestricted(String minionName, String restrictionTypeName) {
+        CardRef ref = world.minionRefs.get(minionName);
+        assertNotNull(ref, "No ref registered for minion '" + minionName + "'");
+        PendingActionState pending = world.game.getPendingAction();
+        assertNotNull(pending, "No pending action");
+        RestrictionType type = RestrictionType.valueOf(restrictionTypeName);
+        assertTrue(pending.isRestricted(type, ref),
+                minionName + " should be restricted from " + restrictionTypeName + " but is not");
+    }
+
+    @Then("no action restrictions should be recorded")
+    public void assertNoRestrictions() {
+        PendingActionState pending = world.game.getPendingAction();
+        assertNotNull(pending, "No pending action");
+        assertTrue(pending.getActionRestrictions().isEmpty(),
+                "Expected no action restrictions but found: " + pending.getActionRestrictions());
     }
 
     @And("{string} should be NRA-locked from {string}")
