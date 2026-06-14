@@ -226,10 +226,11 @@ public final class ActionHandler {
 
     private static void enforceBlockEligibility(GameData game, PendingActionState pending, String actor) {
         ImpulseState impulse = game.getImpulseWindow();
-        if (impulse != null && impulse.isActive()) {
-            if (!actor.equals(impulse.getCurrentImpulseHolder())) {
-                throw new GameRuleException("It is not your turn to act in the impulse window");
-            }
+        if (impulse == null || !impulse.isActive()) {
+            throw new GameRuleException("The impulse window has closed; blocking is no longer permitted");
+        }
+        if (!actor.equals(impulse.getCurrentImpulseHolder())) {
+            throw new GameRuleException("It is not your turn to act in the impulse window");
         }
         // Directed action: only the target Methuselah's minions may block
         String target = pending.getTargetPlayerName();

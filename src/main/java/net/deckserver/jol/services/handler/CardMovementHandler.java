@@ -94,7 +94,12 @@ public final class CardMovementHandler {
         CardPlayState cps = new CardPlayState(card.getId(), effectiveType, actor);
         effects.add(new CardPlayChangedEffect(true, cps));
 
-        List<String> passOrder = ImpulseEngine.buildPassOrder(game, ImpulseContext.UNDIRECTED, actor, null);
+        // Mirror the pending action's direction so the target player retains priority in directed actions.
+        ImpulseContext cardContext = (pending != null && pending.getTargetPlayerName() != null)
+                ? ImpulseContext.DIRECTED_SINGLE
+                : ImpulseContext.UNDIRECTED;
+        String cardTarget = (pending != null) ? pending.getTargetPlayerName() : null;
+        List<String> passOrder = ImpulseEngine.buildPassOrder(game, cardContext, actor, cardTarget);
         SequencingWindowState seq = new SequencingWindowState();
         seq.setActive(true);
         seq.setWindowType(SequencingWindowType.CARD_AS_PLAYED);
@@ -164,27 +169,24 @@ public final class CardMovementHandler {
         String currentPlayer = game.getCurrentPlayerName();
 
         switch (effectiveType) {
-            case MODIFIER -> {
+            case MODIFIER, REACTION -> {
                 if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
-                    throw new GameRuleException("Modifier cards can only be played during an active action");
+                    throw new GameRuleException(effectiveType == CardType.MODIFIER
+                            ? "Modifier cards can only be played during an active action"
+                            : "Reaction cards can only be played during an active action");
                 }
                 CardData actorCard = game.getCardByRef(pending.getActorRef());
                 String actingPlayer = actorCard != null ? actorCard.getOwnerName() : null;
-                if (!actor.equals(actingPlayer)) {
-                    throw new GameRuleException("Modifier cards can only be played by the acting player");
+                if (effectiveType == CardType.MODIFIER) {
+                    if (!actor.equals(actingPlayer)) {
+                        throw new GameRuleException("Modifier cards can only be played by the acting player");
+                    }
+                } else {
+                    if (actor.equals(actingPlayer)) {
+                        throw new GameRuleException("Reaction cards cannot be played by the acting player");
+                    }
+                    // CANNOT_REACT restriction check: deferred until PlayCard carries a minionRef
                 }
-            }
-            case REACTION -> {
-                if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
-                    throw new GameRuleException("Reaction cards can only be played during an active action");
-                }
-                CardData actorCard = game.getCardByRef(pending.getActorRef());
-                String actingPlayer = actorCard != null ? actorCard.getOwnerName() : null;
-                if (actor.equals(actingPlayer)) {
-                    throw new GameRuleException("Reaction cards cannot be played by the acting player");
-                }
-                // CANNOT_REACT restriction check: deferred until PlayCard carries a minionRef
-                // so the per-minion restriction in pending.actionRestrictions can be evaluated.
             }
             default -> {
                 if (!actor.equals(currentPlayer)) {

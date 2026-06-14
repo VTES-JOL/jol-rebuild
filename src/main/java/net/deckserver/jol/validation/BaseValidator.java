@@ -65,17 +65,27 @@ public class BaseValidator implements DeckValidator {
     }
 
     List<String> validateCryptGroups(KrcgDeck deck) {
-        TreeSet<Integer> groups = deck.cryptCards().stream()
-                .map(card -> service.getCryptGroup(card.id()))
-                .filter(g -> g != null && !g.equals("ANY"))
-                .map(Integer::parseInt)
-                .collect(Collectors.toCollection(TreeSet::new));
+        List<String> errors = new ArrayList<>();
+        TreeSet<Integer> groups = new TreeSet<>();
 
-        if (groups.size() <= 1) return Collections.emptyList();
-        int min = groups.first();
-        int max = groups.last();
-        if (groups.size() == 2 && max - min == 1) return Collections.emptyList();
-        return List.of("Crypt must use vampires from one group or two consecutive groups.");
+        for (KrcgCard card : deck.cryptCards()) {
+            String group = service.getCryptGroup(card.id());
+            if (group == null) {
+                errors.add("Unrecognised crypt card '" + card.name() + "' — group could not be verified.");
+            } else if (!group.equals("ANY")) {
+                groups.add(Integer.parseInt(group));
+            }
+        }
+
+        if (groups.size() >= 2) {
+            int min = groups.first();
+            int max = groups.last();
+            if (!(groups.size() == 2 && max - min == 1)) {
+                errors.add("Crypt must use vampires from one group or two consecutive groups.");
+            }
+        }
+
+        return errors;
     }
 
     /** Override in subclasses to provide an ID-based card whitelist. */

@@ -27,6 +27,10 @@ public final class ImpulseEngine {
         }
         List<String> order = state.getPassOrder();
         int idx = order.indexOf(state.getCurrentImpulseHolder());
+        if (idx < 0) {
+            throw new IllegalStateException(
+                    "Impulse holder '" + state.getCurrentImpulseHolder() + "' is not in the pass order");
+        }
         String nextHolder = order.get((idx + 1) % order.size());
         ImpulseState updated = new ImpulseState(state);
         updated.setCurrentImpulseHolder(nextHolder);

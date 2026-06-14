@@ -76,11 +76,11 @@ public final class SequencingHandler {
                     }
                 }
             }
-        } else {
-            PendingActionState pending = game.getPendingAction();
-            if (pending != null && pending.getStatus() == ActionStatus.AFTER_RESOLUTION) {
-                effects.add(new PendingActionChangedEffect(false));
-            }
+        }
+        // Always clear a pending action that reached after-resolution, regardless of which window closed.
+        PendingActionState pending = game.getPendingAction();
+        if (pending != null && pending.getStatus() == ActionStatus.AFTER_RESOLUTION) {
+            effects.add(new PendingActionChangedEffect(false));
         }
     }
 }
