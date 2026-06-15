@@ -42,7 +42,18 @@ public final class GameEffectApplicator {
             case DrawCardEffect e               -> applyDrawCard(game, e);
             case RestrictionAddedEffect e       -> applyRestrictionAdded(game, e);
             case ReferendumStateChangedEffect e -> applyReferendumChanged(game, e);
+            case CombatStateChangedEffect e     -> applyCombatStateChanged(game, e);
+            case CombatQueueChangedEffect e -> {
+                game.setCombatQueue(new java.util.ArrayList<>(e.queue()));
+                yield null;
+            }
         };
+    }
+
+    private static String applyCombatStateChanged(GameData game, CombatStateChangedEffect e) {
+        game.setCombatState(e.combatState());
+        if (e.combatState() == null) return "Combat state cleared";
+        return "Combat: " + e.combatState().getAttackerRef() + " vs " + e.combatState().getDefenderRef();
     }
 
     private static String applyCardMoved(GameData game, CardMovedEffect e) {

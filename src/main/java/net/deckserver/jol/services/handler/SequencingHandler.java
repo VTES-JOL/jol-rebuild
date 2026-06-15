@@ -78,6 +78,28 @@ public final class SequencingHandler {
             }
         } else if (windowType == SequencingWindowType.BLOCK_ATTEMPT) {
             effects.addAll(ActionHandler.resolveBlockAttempt(game));
+        } else if (windowType != null) {
+            switch (windowType) {
+                case COMBAT_DAMAGE_PREVENTION -> effects.addAll(CombatHandler.applyDamageAndAdvance(game));
+                case COMBAT_END_OF_ROUND -> {
+                    SequencingWindowState next = CombatHandler.buildCombatWindow(game, SequencingWindowType.COMBAT_WOULD_END);
+                    if (next != null) effects.add(new SequencingWindowChangedEffect(true, next));
+                }
+                case COMBAT_WOULD_END -> {
+                    SequencingWindowState next = CombatHandler.buildCombatWindow(game, SequencingWindowType.COMBAT_ABOUT_TO_END);
+                    if (next != null) effects.add(new SequencingWindowChangedEffect(true, next));
+                }
+                case COMBAT_ABOUT_TO_END -> {
+                    SequencingWindowState next = CombatHandler.buildCombatWindow(game, SequencingWindowType.COMBAT_ENDS);
+                    if (next != null) effects.add(new SequencingWindowChangedEffect(true, next));
+                }
+                case COMBAT_ENDS -> {
+                    SequencingWindowState next = CombatHandler.buildCombatWindow(game, SequencingWindowType.COMBAT_AFTER_ENDS);
+                    if (next != null) effects.add(new SequencingWindowChangedEffect(true, next));
+                }
+                case COMBAT_AFTER_ENDS -> effects.addAll(CombatHandler.clearCombatEffects(game));
+                default -> { /* no extra effects */ }
+            }
         }
         // Always clear a pending action that reached after-resolution, regardless of which window closed.
         PendingActionState pending = game.getPendingAction();

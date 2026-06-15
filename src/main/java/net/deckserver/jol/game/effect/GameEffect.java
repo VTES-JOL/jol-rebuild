@@ -17,5 +17,6 @@ public sealed interface GameEffect
                 GameNotesChangedEffect,
                 GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect,
                 NraRecordedEffect, RestrictionAddedEffect,
-                ReferendumStateChangedEffect {
+                ReferendumStateChangedEffect,
+                CombatStateChangedEffect, CombatQueueChangedEffect {
 }

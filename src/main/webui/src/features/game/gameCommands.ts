@@ -101,7 +101,9 @@ export type GameCommand =
     | AddStealthCommand | AddInterceptCommand | RedirectActionCommand | GrantWakeCommand
     | SetRulesModeCommand
     | OpenPollingCommand | CastVotesCommand | BurnCardForVoteCommand
-    | BurnEdgeForVoteCommand | CastPrisciBallotCommand | ClosePollingCommand;
+    | BurnEdgeForVoteCommand | CastPrisciBallotCommand | ClosePollingCommand
+    | StartCombatCommand | ManeuverCommand | DeclareStrikeCommand | PreventDamageCommand
+    | DeclarePressCommand | BeginCombatEndingCommand | ClearCombatStateCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
     return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
@@ -297,6 +299,46 @@ export type BurnCardForVoteCommand = { type: 'BURN_CARD_FOR_VOTE'; gameId: strin
 export type BurnEdgeForVoteCommand = { type: 'BURN_EDGE_FOR_VOTE'; gameId: string; playerName: string; forOrAgainst: 'FOR' | 'AGAINST' };
 export type CastPrisciBallotCommand = { type: 'CAST_PRISCI_BALLOT'; gameId: string; cardRef: CardRef; forOrAgainst: 'FOR' | 'AGAINST' };
 export type ClosePollingCommand = { type: 'CLOSE_POLLING'; gameId: string };
+
+export type Range = 'CLOSE' | 'LONG';
+export type StrikeType = 'HAND' | 'MELEE_WEAPON' | 'FIREARM' | 'OTHER_RANGED' | 'FIXED_DAMAGE' | 'DODGE' | 'COMBAT_ENDS' | 'FIRST_STRIKE' | 'STEAL_BLOOD';
+export type PressDecision = 'CONTINUE' | 'END';
+
+export type StartCombatCommand = { type: 'START_COMBAT'; gameId: string; attackerRef: CardRef; defenderRef: CardRef };
+export type ManeuverCommand = { type: 'MANEUVER'; gameId: string; combatantRef: CardRef; toRange: Range };
+export type DeclareStrikeCommand = { type: 'DECLARE_STRIKE'; gameId: string; combatantRef: CardRef; strikeType: StrikeType; weaponRef?: CardRef | null };
+export type PreventDamageCommand = { type: 'PREVENT_DAMAGE'; gameId: string; combatantRef: CardRef; amount: number };
+export type DeclarePressCommand = { type: 'DECLARE_PRESS'; gameId: string; combatantRef: CardRef; decision: PressDecision };
+export type BeginCombatEndingCommand = { type: 'BEGIN_COMBAT_ENDING'; gameId: string };
+export type ClearCombatStateCommand = { type: 'CLEAR_COMBAT_STATE'; gameId: string };
+
+export function startCombat(gameId: string, attackerRef: CardRef, defenderRef: CardRef): StartCombatCommand {
+    return {type: 'START_COMBAT', gameId, attackerRef, defenderRef};
+}
+
+export function maneuver(gameId: string, combatantRef: CardRef, toRange: Range): ManeuverCommand {
+    return {type: 'MANEUVER', gameId, combatantRef, toRange};
+}
+
+export function declareStrike(gameId: string, combatantRef: CardRef, strikeType: StrikeType, weaponRef?: CardRef | null): DeclareStrikeCommand {
+    return {type: 'DECLARE_STRIKE', gameId, combatantRef, strikeType, weaponRef};
+}
+
+export function preventDamage(gameId: string, combatantRef: CardRef, amount: number): PreventDamageCommand {
+    return {type: 'PREVENT_DAMAGE', gameId, combatantRef, amount};
+}
+
+export function declarePress(gameId: string, combatantRef: CardRef, decision: PressDecision): DeclarePressCommand {
+    return {type: 'DECLARE_PRESS', gameId, combatantRef, decision};
+}
+
+export function beginCombatEnding(gameId: string): BeginCombatEndingCommand {
+    return {type: 'BEGIN_COMBAT_ENDING', gameId};
+}
+
+export function clearCombatState(gameId: string): ClearCombatStateCommand {
+    return {type: 'CLEAR_COMBAT_STATE', gameId};
+}
 
 export type SetRulesModeCommand = { type: 'SET_RULES_MODE'; gameId: string; enforced: boolean };
 

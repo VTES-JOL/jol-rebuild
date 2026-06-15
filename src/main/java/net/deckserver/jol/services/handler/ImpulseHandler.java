@@ -32,6 +32,13 @@ public final class ImpulseHandler {
 
         ImpulseState updated = ImpulseEngine.pass(current);
         if (updated == null) {
+            if (current.getContext() == ImpulseContext.COMBAT && game.getCombatState() != null) {
+                java.util.List<net.deckserver.jol.game.effect.GameEffect> effects = new java.util.ArrayList<>();
+                effects.add(new ImpulseWindowChangedEffect(false));
+                effects.addAll(CombatHandler.advanceCombatStepAfterImpulse(game));
+                return new CommandResult(game, actor + " passed — advancing combat step",
+                        new CommandLogData.PassImpulseLog(actor), effects);
+            }
             PendingActionState pending = game.getPendingAction();
             if (pending != null && pending.getStatus() == ActionStatus.DURING_ACTION
                     && pending.getCurrentBlockerRef() == null) {

@@ -143,6 +143,13 @@ public class GameCommandService {
             case BurnEdgeForVote c      -> ReferendumHandler.handleBurnEdgeForVote(game, c, actor);
             case CastPrisciBallot c     -> ReferendumHandler.handleCastPrisciBallot(game, c, actor);
             case ClosePolling c         -> ReferendumHandler.handleClosePolling(game, c, actor);
+            case StartCombat c          -> CombatHandler.handleStartCombat(game, c, actor);
+            case Maneuver c             -> CombatHandler.handleManeuver(game, c, actor);
+            case DeclareStrike c        -> CombatHandler.handleDeclareStrike(game, c, actor);
+            case PreventDamage c        -> CombatHandler.handlePreventDamage(game, c, actor);
+            case DeclarePress c         -> CombatHandler.handleDeclarePress(game, c, actor);
+            case BeginCombatEnding c    -> CombatHandler.handleBeginCombatEnding(game, c, actor);
+            case ClearCombatState c     -> CombatHandler.handleClearCombatState(game, c, actor);
             case SetRulesMode c         -> { // available in both modes — intentionally not permissive-only or enforced-only
                 String label = c.enforced() ? "rules-enforced" : "permissive";
                 yield new CommandResult(game, actor + " switched the game to " + label + " mode",

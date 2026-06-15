@@ -61,6 +61,13 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = AddIntercept.class,             name = "ADD_INTERCEPT"),
     @JsonSubTypes.Type(value = RedirectAction.class,           name = "REDIRECT_ACTION"),
     @JsonSubTypes.Type(value = GrantWake.class,                name = "GRANT_WAKE"),
+    @JsonSubTypes.Type(value = StartCombat.class,              name = "START_COMBAT"),
+    @JsonSubTypes.Type(value = Maneuver.class,                 name = "MANEUVER"),
+    @JsonSubTypes.Type(value = DeclareStrike.class,            name = "DECLARE_STRIKE"),
+    @JsonSubTypes.Type(value = PreventDamage.class,            name = "PREVENT_DAMAGE"),
+    @JsonSubTypes.Type(value = DeclarePress.class,             name = "DECLARE_PRESS"),
+    @JsonSubTypes.Type(value = BeginCombatEnding.class,        name = "BEGIN_COMBAT_ENDING"),
+    @JsonSubTypes.Type(value = ClearCombatState.class,         name = "CLEAR_COMBAT_STATE"),
 })
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
@@ -78,7 +85,9 @@ public sealed interface GameCommand
             PassSequencing, CloseSequencingWindow,
             SetRulesMode,
             OpenPolling, CastVotes, BurnCardForVote, BurnEdgeForVote, CastPrisciBallot, ClosePolling,
-            AddStealth, AddIntercept, RedirectAction, GrantWake {
+            AddStealth, AddIntercept, RedirectAction, GrantWake,
+            StartCombat, Maneuver, DeclareStrike, PreventDamage, DeclarePress,
+            BeginCombatEnding, ClearCombatState {
 
     String gameId();
 

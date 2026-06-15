@@ -10,7 +10,7 @@ import net.deckserver.jol.game.command.CardRef;
 
 import java.util.*;
 
-@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "referendum", "cards", "players", "currentPlayer", "edge"})
+@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "referendum", "combatState", "combatQueue", "cards", "players", "currentPlayer", "edge"})
 public class GameData {
     private String id;
     private String name;
@@ -42,6 +42,8 @@ public class GameData {
     private Set<String> recruitedThisTurn = new HashSet<>();
     private CardPlayState cardPlayState;
     private ReferendumState referendum;
+    private CombatState combatState;
+    private List<CombatPair> combatQueue = new ArrayList<>();
 
     public GameData(String id, String name) {
         this.id = id;
@@ -223,6 +225,12 @@ public class GameData {
 
     public ReferendumState getReferendum() { return referendum; }
     public void setReferendum(ReferendumState referendum) { this.referendum = referendum; }
+
+    public CombatState getCombatState() { return combatState; }
+    public void setCombatState(CombatState combatState) { this.combatState = combatState; }
+
+    public List<CombatPair> getCombatQueue() { return combatQueue; }
+    public void setCombatQueue(List<CombatPair> combatQueue) { this.combatQueue = combatQueue; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);
