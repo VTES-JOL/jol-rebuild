@@ -179,6 +179,7 @@ public final class ReferendumHandler {
 
     public static CommandResult handleClosePolling(GameData game, ClosePolling cmd, String actor) {
         ReferendumState ref = requireReferendum(game);
+        requirePollingOpen(ref);
 
         PendingActionState pending = game.getPendingAction();
         if (pending == null) {
@@ -211,10 +212,6 @@ public final class ReferendumHandler {
         ref.setActingPlayerName(actingPlayer);
         ref.setTerms(terms != null ? terms : "");
         ref.setPollingOpen(false);
-        // The political action card itself grants the acting player 1 vote
-        ref.setBaseVotesFor(1);
-        int[] playerVotes = {1, 0};
-        ref.getVotesByPlayer().put(actingPlayer, playerVotes);
         return ref;
     }
 

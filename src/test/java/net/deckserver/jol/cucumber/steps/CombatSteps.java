@@ -97,7 +97,7 @@ public class CombatSteps {
         world.lastException = null;
         CardRef ref = world.minionRefs.get(combatant);
         try {
-            commandService.execute(player, new DeclareStrike(world.gameId, ref, StrikeType.valueOf(strikeType), null));
+            commandService.execute(player, new DeclareStrike(world.gameId, ref, StrikeType.valueOf(strikeType), null, 1));
         } catch (Exception e) {
             world.lastException = e;
         }
@@ -223,7 +223,7 @@ public class CombatSteps {
     private void declareStrikeRef(String player, CardRef ref) {
         world.lastException = null;
         try {
-            commandService.execute(player, new DeclareStrike(world.gameId, ref, StrikeType.HAND, null));
+            commandService.execute(player, new DeclareStrike(world.gameId, ref, StrikeType.HAND, null, 1));
         } catch (Exception e) {
             world.lastException = e;
         }

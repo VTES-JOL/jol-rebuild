@@ -85,7 +85,7 @@ public final class CombatHandler {
 
         boolean isAttacker = isAttacker(combat, cmd.combatantRef());
         CombatState updated = new CombatState(combat);
-        Strike strike = new Strike(cmd.strikeType(), cmd.weaponRef());
+        Strike strike = new Strike(cmd.strikeType(), cmd.weaponRef(), cmd.damage());
         if (isAttacker) {
             updated.setAttackerStrike(strike);
         } else {
@@ -252,25 +252,33 @@ public final class CombatHandler {
         if (combat == null) return List.of();
         List<GameEffect> effects = new ArrayList<>();
 
-        applyDamageToCombatant(game, combat.getAttackerRef(), combat.getPendingDamageAttacker(), effects);
-        applyDamageToCombatant(game, combat.getDefenderRef(), combat.getPendingDamageDefender(), effects);
+        applyDamageToCombatant(game, combat.getAttackerRef(),
+                combat.getPendingDamageAttacker(), combat.getPendingAggravatedAttacker(), effects);
+        applyDamageToCombatant(game, combat.getDefenderRef(),
+                combat.getPendingDamageDefender(), combat.getPendingAggravatedDefender(), effects);
 
         CombatState updated = new CombatState(combat);
         updated.setPendingDamageAttacker(0);
         updated.setPendingDamageDefender(0);
+        updated.setPendingAggravatedAttacker(0);
+        updated.setPendingAggravatedDefender(0);
         updated.setStep(CombatStep.PRESS);
         effects.add(new CombatStateChangedEffect(updated));
         return effects;
     }
 
-    private static void applyDamageToCombatant(GameData game, CardRef ref, int damage, List<GameEffect> effects) {
-        if (ref == null || damage <= 0) return;
+    private static void applyDamageToCombatant(GameData game, CardRef ref,
+                                               int damage, int aggravated, List<GameEffect> effects) {
+        if (ref == null || (damage <= 0 && aggravated <= 0)) return;
         CardData card = game.getCardByRef(ref);
         if (card == null) return;
         if (card.getType() == CardType.VAMPIRE) {
             int blood = card.getCounters();
-            if (damage >= blood) {
-                // Vampire is sent to torpor; its blood is set to 0.
+            // Aggravated damage always sends the vampire to torpor regardless of blood or prevention.
+            if (aggravated > 0) {
+                if (blood > 0) effects.add(new CardCounterChangedEffect(card.getId(), -blood));
+                effects.add(new CardMovedEffect(card.getId(), card.getOwnerName(), RegionType.TORPOR.name()));
+            } else if (damage >= blood) {
                 if (blood > 0) effects.add(new CardCounterChangedEffect(card.getId(), -blood));
                 effects.add(new CardMovedEffect(card.getId(), card.getOwnerName(), RegionType.TORPOR.name()));
             } else {
@@ -279,11 +287,12 @@ public final class CombatHandler {
         } else {
             // Allies/retainers track life as counters; reduce, burn if depleted.
             int life = card.getCounters();
-            if (damage >= life) {
+            int totalDamage = damage + aggravated;
+            if (totalDamage >= life) {
                 if (life > 0) effects.add(new CardCounterChangedEffect(card.getId(), -life));
                 effects.add(new CardMovedEffect(card.getId(), card.getOwnerName(), RegionType.ASH_HEAP.name()));
             } else {
-                effects.add(new CardCounterChangedEffect(card.getId(), -damage));
+                effects.add(new CardCounterChangedEffect(card.getId(), -totalDamage));
             }
         }
     }
@@ -383,7 +392,7 @@ public final class CombatHandler {
     }
 
     private static CardData requireCombatant(GameData game, CombatState combat, CardRef ref) {
-        if (!ref.equals(combat.getAttackerRef()) && !ref.equals(combat.getDefenderRef())) {
+        if (ref == null || (!ref.equals(combat.getAttackerRef()) && !ref.equals(combat.getDefenderRef()))) {
             throw new GameRuleException("That minion is not part of this combat");
         }
         return GameRules.requireCard(game, ref);
@@ -408,7 +417,8 @@ public final class CombatHandler {
 
     private static int strikeDamage(StrikeType type, Strike strike) {
         return switch (type) {
-            case HAND, MELEE_WEAPON, FIREARM, OTHER_RANGED, FIXED_DAMAGE, FIRST_STRIKE -> 1;
+            case FIXED_DAMAGE -> strike.getDamage();
+            case HAND, MELEE_WEAPON, FIREARM, OTHER_RANGED, FIRST_STRIKE -> 1;
             case DODGE, COMBAT_ENDS, STEAL_BLOOD -> 0;
         };
     }

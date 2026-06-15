@@ -8,17 +8,20 @@ import net.deckserver.jol.game.command.CardRef;
 public class Strike {
     private StrikeType strikeType;
     private CardRef weaponRef; // nullable
+    private int damage = 1;
 
     public Strike() {}
 
-    public Strike(StrikeType strikeType, CardRef weaponRef) {
+    public Strike(StrikeType strikeType, CardRef weaponRef, int damage) {
         this.strikeType = strikeType;
         this.weaponRef = weaponRef;
+        this.damage = damage;
     }
 
     public Strike(Strike src) {
         this.strikeType = src.strikeType;
         this.weaponRef = src.weaponRef;
+        this.damage = src.damage;
     }
 
     public StrikeType getStrikeType() { return strikeType; }
@@ -26,4 +29,7 @@ public class Strike {
 
     public CardRef getWeaponRef() { return weaponRef; }
     public void setWeaponRef(CardRef weaponRef) { this.weaponRef = weaponRef; }
+
+    public int getDamage() { return damage; }
+    public void setDamage(int damage) { this.damage = damage; }
 }

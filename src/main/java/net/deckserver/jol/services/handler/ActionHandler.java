@@ -159,7 +159,7 @@ public final class ActionHandler {
             throw new GameRuleException("Intercept can only be added during an active block attempt");
         }
         int currentIntercept = pending.getInterceptsByBlockerRef().getOrDefault(blockerId, 0);
-        if (currentIntercept >= pending.getStealth()) {
+        if (currentIntercept > pending.getStealth()) {
             throw new GameRuleException("Intercept is not needed — the blocker already has enough intercept to succeed");
         }
 
@@ -272,6 +272,7 @@ public final class ActionHandler {
         if (seq != null && seq.isActive() && seq.getWindowType() == SequencingWindowType.BLOCK_ATTEMPT) {
             List<String> order = seq.getPassOrder();
             int idx = order.indexOf(actor);
+            if (idx < 0) return;
             String nextHolder = order.get((idx + 1) % order.size());
             SequencingWindowState reset = new SequencingWindowState();
             reset.setActive(true);
@@ -387,7 +388,8 @@ public final class ActionHandler {
             }
             boolean otherHasMandatoryHunt = mandatoryHunters.stream()
                     .anyMatch(m -> !m.getId().equals(actorCard.getId()));
-            if (otherHasMandatoryHunt && cmd.actionType() != ActionType.HUNT) {
+            if (otherHasMandatoryHunt && cmd.actionType() != ActionType.HUNT
+                    && cmd.actionType() != ActionType.LEAVE_TORPOR) {
                 throw new GameRuleException("Another vampire must hunt before a non-mandatory action can be taken");
             }
         }

@@ -306,7 +306,7 @@ export type PressDecision = 'CONTINUE' | 'END';
 
 export type StartCombatCommand = { type: 'START_COMBAT'; gameId: string; attackerRef: CardRef; defenderRef: CardRef };
 export type ManeuverCommand = { type: 'MANEUVER'; gameId: string; combatantRef: CardRef; toRange: Range };
-export type DeclareStrikeCommand = { type: 'DECLARE_STRIKE'; gameId: string; combatantRef: CardRef; strikeType: StrikeType; weaponRef?: CardRef | null };
+export type DeclareStrikeCommand = { type: 'DECLARE_STRIKE'; gameId: string; combatantRef: CardRef; strikeType: StrikeType; weaponRef?: CardRef | null; damage: number };
 export type PreventDamageCommand = { type: 'PREVENT_DAMAGE'; gameId: string; combatantRef: CardRef; amount: number };
 export type DeclarePressCommand = { type: 'DECLARE_PRESS'; gameId: string; combatantRef: CardRef; decision: PressDecision };
 export type BeginCombatEndingCommand = { type: 'BEGIN_COMBAT_ENDING'; gameId: string };
@@ -320,8 +320,8 @@ export function maneuver(gameId: string, combatantRef: CardRef, toRange: Range):
     return {type: 'MANEUVER', gameId, combatantRef, toRange};
 }
 
-export function declareStrike(gameId: string, combatantRef: CardRef, strikeType: StrikeType, weaponRef?: CardRef | null): DeclareStrikeCommand {
-    return {type: 'DECLARE_STRIKE', gameId, combatantRef, strikeType, weaponRef};
+export function declareStrike(gameId: string, combatantRef: CardRef, strikeType: StrikeType, weaponRef?: CardRef | null, damage: number = 1): DeclareStrikeCommand {
+    return {type: 'DECLARE_STRIKE', gameId, combatantRef, strikeType, weaponRef, damage};
 }
 
 export function preventDamage(gameId: string, combatantRef: CardRef, amount: number): PreventDamageCommand {

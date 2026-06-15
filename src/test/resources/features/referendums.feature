@@ -3,14 +3,13 @@ Feature: Referendum engine
   Background:
     Given a 4-player game in "MINION" phase with rules enforced
 
-  Scenario: Political action opens a referendum with acting player's 1 built-in vote
+  Scenario: Political action opens a referendum with no pre-seeded votes
     Given "Alice" controls a ready vampire "Dima" with 3 blood and capacity 5
     When "Alice" declares a POLITICAL action
     And all players pass the impulse window
     And "Alice" resolves the action
     Then a referendum should be open
     And the referendum should not be in polling yet
-    And "Alice" should have 1 vote for in the referendum
     And no rule violation should occur
 
   Scenario: OpenPolling transitions referendum to polling state
@@ -31,7 +30,7 @@ Feature: Referendum engine
     And "Alice" resolves the action
     And "Alice" opens polling
     And "Alice" casts 2 votes FOR with "Maris Streck"
-    Then the referendum should have 3 votes for and 0 against
+    Then the referendum should have 2 votes for and 0 against
     And no rule violation should occur
 
   Scenario: A titled vampire cannot cast more votes than its title allows
@@ -53,7 +52,7 @@ Feature: Referendum engine
     And "Alice" resolves the action
     And "Alice" opens polling
     And "Alice" burns "Kine Resources Contested" FOR a vote
-    Then the referendum should have 2 votes for and 0 against
+    Then the referendum should have 1 votes for and 0 against
     And "Kine Resources Contested" should be in the ash heap
     And no rule violation should occur
 
@@ -77,7 +76,7 @@ Feature: Referendum engine
     And "Alice" resolves the action
     And "Alice" opens polling
     And "Alice" burns the Edge FOR a vote
-    Then the referendum should have 2 votes for and 0 against
+    Then the referendum should have 1 votes for and 0 against
     And no player should hold the Edge
     And no rule violation should occur
 
