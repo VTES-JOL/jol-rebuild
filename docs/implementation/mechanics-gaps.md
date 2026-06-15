@@ -125,15 +125,16 @@ The fastest route from the current permissive command set to a rules engine is t
 | ~~Replacement timing~~ | `SequencingHandler.addWindowCloseEffects` emits `DrawCardEffect` when CARD_AS_PLAYED closes and player's hand < 7; `DrawCardEffect` applicator moves top LIBRARY card(s) to HAND |
 | ~~Action-card limbo~~ | ACTION cards set `PendingActionState.actionCardId`; card moves to ASH_HEAP (limbo); 10 new Cucumber scenarios in `card_play_lifecycle.feature` and `card_play_phase_gate.feature` confirm all four tasks |
 
-### Tranche 4 — Referendum Before Full Combat
+### ~~Tranche 4 — Referendum Before Full Combat~~ ✓ Complete
 
-Referendums unblock political decks and blood hunt handling, while staying more deterministic than combat.
-
-| Task | Scope | Done when |
-|------|-------|-----------|
-| Referendum state | Add pending referendum state, vote source model, Edge vote, and pass/fail resolution | Political actions can resolve a referendum without manual notes/counters |
-| Prisci sub-referendum | Model Prisci ballots separately from normal votes | Prisci result contributes the correct single ballot |
-| Blood hunt hook | Diablerie can open a mandatory blood hunt referendum | Diablerie no longer requires manual referendum bookkeeping |
+| Task | Outcome |
+|------|---------|
+| ~~Referendum state~~ | `ReferendumState` added to `GameData`; `ReferendumStateChangedEffect` applied by `GameEffectApplicator`; `ResolveAction(POLITICAL)` opens referendum with 1 built-in acting-player vote; `OpenPolling`, `CastVotes`, `ClosePolling` commands fully implemented |
+| ~~Vote source model~~ | Title → vote count lookup (Primogen/Bishop=1, Prince/Archbishop/Baron=2, Justicar/Cardinal=3, Inner Circle/Regent=4); per-card budget enforced; `BurnCardForVote` (one POLITICAL card per Methuselah per referendum); `BurnEdgeForVote` clears Edge holder |
+| ~~Prisci sub-referendum~~ | `CastPrisciBallot` records Priscus-only ballots; strict majority of cast ballots → 3 votes contribution; tied → 0; recomputed after each ballot |
+| ~~Blood hunt hook~~ | `ReferendumState.isBloodHunt` field and `targetRef` ready; auto-trigger from diablerie deferred to Tranche 5 combat; `ReferendumHandler.openReferendum` is a reusable entry point for both political and blood hunt referendums |
+| ~~TypeScript mirror~~ | `OpenPollingCommand`, `CastVotesCommand`, `BurnCardForVoteCommand`, `BurnEdgeForVoteCommand`, `CastPrisciBallotCommand`, `ClosePollingCommand` added to `gameCommands.ts` |
+| ~~Tests~~ | 11 new Cucumber scenarios in `referendums.feature`; all 366 tests pass |
 
 ### Tranche 5 — Combat and Advanced Interactions
 

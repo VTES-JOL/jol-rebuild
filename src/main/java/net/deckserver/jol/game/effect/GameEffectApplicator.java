@@ -41,6 +41,7 @@ public final class GameEffectApplicator {
             case CardPlayChangedEffect e        -> applyCardPlayChanged(game, e);
             case DrawCardEffect e               -> applyDrawCard(game, e);
             case RestrictionAddedEffect e       -> applyRestrictionAdded(game, e);
+            case ReferendumStateChangedEffect e -> applyReferendumChanged(game, e);
         };
     }
 
@@ -226,6 +227,12 @@ public final class GameEffectApplicator {
             drawn++;
         }
         return drawn > 0 ? e.playerName() + " drew " + drawn + " replacement card(s)" : null;
+    }
+
+    private static String applyReferendumChanged(GameData game, ReferendumStateChangedEffect e) {
+        game.setReferendum(e.referendum());
+        if (e.referendum() == null) return "Referendum closed";
+        return "Referendum opened: " + e.referendum().getTerms();
     }
 
     static int computeTransferBudget(GameData game) {

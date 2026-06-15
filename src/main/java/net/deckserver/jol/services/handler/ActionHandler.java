@@ -52,6 +52,9 @@ public final class ActionHandler {
         pending.setTargetPlayerName(cmd.targetPlayerName());
         pending.setStatus(ActionStatus.DURING_ACTION);
         pending.setBleedAmount(cmd.actionType() == ActionType.BLEED ? 1 : 0);
+        if (cmd.actionType() == ActionType.POLITICAL) {
+            pending.setReferendumTerms(cmd.referendumTerms());
+        }
 
         ImpulseContext context = cmd.targetPlayerName() != null
                 ? ImpulseContext.DIRECTED_SINGLE
@@ -285,7 +288,11 @@ public final class ActionHandler {
                     // If insufficient blood, action fizzles — no movement, no counter change
                 }
             }
-            case EQUIP, EMPLOY_RETAINER, RECRUIT_ALLY, POLITICAL, RESCUE, DIABLERISE, CUSTOM -> {
+            case POLITICAL -> {
+                ReferendumState ref = ReferendumHandler.openReferendum(game, actingPlayer, pending.getReferendumTerms());
+                effects.add(new ReferendumStateChangedEffect(ref));
+            }
+            case EQUIP, EMPLOY_RETAINER, RECRUIT_ALLY, RESCUE, DIABLERISE, CUSTOM -> {
                 // Stubs: no automatic effect in this tranche
             }
         }

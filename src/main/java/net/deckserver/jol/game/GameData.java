@@ -10,7 +10,7 @@ import net.deckserver.jol.game.command.CardRef;
 
 import java.util.*;
 
-@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "cards", "players", "currentPlayer", "edge"})
+@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "referendum", "cards", "players", "currentPlayer", "edge"})
 public class GameData {
     private String id;
     private String name;
@@ -41,6 +41,7 @@ public class GameData {
     private Map<String, Set<String>> nraActionsByCardId = new HashMap<>();
     private Set<String> recruitedThisTurn = new HashSet<>();
     private CardPlayState cardPlayState;
+    private ReferendumState referendum;
 
     public GameData(String id, String name) {
         this.id = id;
@@ -219,6 +220,9 @@ public class GameData {
 
     public CardPlayState getCardPlayState() { return cardPlayState; }
     public void setCardPlayState(CardPlayState cardPlayState) { this.cardPlayState = cardPlayState; }
+
+    public ReferendumState getReferendum() { return referendum; }
+    public void setReferendum(ReferendumState referendum) { this.referendum = referendum; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);

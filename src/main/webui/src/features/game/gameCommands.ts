@@ -94,7 +94,9 @@ export type GameCommand =
     | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand
     | DeclareActionCommand | AttemptBlockCommand | ResolveActionCommand | AbortActionCommand
     | PassSequencingCommand | CloseSequencingWindowCommand
-    | SetRulesModeCommand;
+    | SetRulesModeCommand
+    | OpenPollingCommand | CastVotesCommand | BurnCardForVoteCommand
+    | BurnEdgeForVoteCommand | CastPrisciBallotCommand | ClosePollingCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
     return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
@@ -268,8 +270,39 @@ export function closeSequencingWindow(gameId: string): CloseSequencingWindowComm
     return {type: 'CLOSE_SEQUENCING_WINDOW', gameId};
 }
 
+export type OpenPollingCommand = { type: 'OPEN_POLLING'; gameId: string };
+export type CastVotesCommand = { type: 'CAST_VOTES'; gameId: string; playerName: string; cardRef: CardRef; amount: number; forOrAgainst: 'FOR' | 'AGAINST' };
+export type BurnCardForVoteCommand = { type: 'BURN_CARD_FOR_VOTE'; gameId: string; playerName: string; cardRef: CardRef; forOrAgainst: 'FOR' | 'AGAINST' };
+export type BurnEdgeForVoteCommand = { type: 'BURN_EDGE_FOR_VOTE'; gameId: string; playerName: string; forOrAgainst: 'FOR' | 'AGAINST' };
+export type CastPrisciBallotCommand = { type: 'CAST_PRISCI_BALLOT'; gameId: string; cardRef: CardRef; forOrAgainst: 'FOR' | 'AGAINST' };
+export type ClosePollingCommand = { type: 'CLOSE_POLLING'; gameId: string };
+
 export type SetRulesModeCommand = { type: 'SET_RULES_MODE'; gameId: string; enforced: boolean };
 
 export function setRulesMode(gameId: string, enforced: boolean): SetRulesModeCommand {
     return {type: 'SET_RULES_MODE', gameId, enforced};
+}
+
+export function openPolling(gameId: string): OpenPollingCommand {
+    return {type: 'OPEN_POLLING', gameId};
+}
+
+export function castVotes(gameId: string, playerName: string, cardRef: CardRef, amount: number, forOrAgainst: 'FOR' | 'AGAINST'): CastVotesCommand {
+    return {type: 'CAST_VOTES', gameId, playerName, cardRef, amount, forOrAgainst};
+}
+
+export function burnCardForVote(gameId: string, playerName: string, cardRef: CardRef, forOrAgainst: 'FOR' | 'AGAINST'): BurnCardForVoteCommand {
+    return {type: 'BURN_CARD_FOR_VOTE', gameId, playerName, cardRef, forOrAgainst};
+}
+
+export function burnEdgeForVote(gameId: string, playerName: string, forOrAgainst: 'FOR' | 'AGAINST'): BurnEdgeForVoteCommand {
+    return {type: 'BURN_EDGE_FOR_VOTE', gameId, playerName, forOrAgainst};
+}
+
+export function castPrisciBallot(gameId: string, cardRef: CardRef, forOrAgainst: 'FOR' | 'AGAINST'): CastPrisciBallotCommand {
+    return {type: 'CAST_PRISCI_BALLOT', gameId, cardRef, forOrAgainst};
+}
+
+export function closePolling(gameId: string): ClosePollingCommand {
+    return {type: 'CLOSE_POLLING', gameId};
 }

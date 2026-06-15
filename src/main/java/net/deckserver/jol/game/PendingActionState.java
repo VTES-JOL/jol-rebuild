@@ -24,6 +24,8 @@ public class PendingActionState {
     private int bleedAmount;
     private String actionCardId;
     private boolean bleedLimitedUsed;
+    private boolean referendumSuccessful;
+    private String referendumTerms;
     private Set<String> playedCardNames = new HashSet<>();
     private Map<RestrictionType, Set<CardRef>> actionRestrictions = new EnumMap<>(RestrictionType.class);
 
@@ -41,6 +43,8 @@ public class PendingActionState {
         this.bleedAmount = src.bleedAmount;
         this.actionCardId = src.actionCardId;
         this.bleedLimitedUsed = src.bleedLimitedUsed;
+        this.referendumSuccessful = src.referendumSuccessful;
+        this.referendumTerms = src.referendumTerms;
         this.playedCardNames = new HashSet<>(src.playedCardNames);
         this.actionRestrictions = new EnumMap<>(RestrictionType.class);
         src.actionRestrictions.forEach((k, v) -> this.actionRestrictions.put(k, new HashSet<>(v)));
@@ -84,6 +88,12 @@ public class PendingActionState {
 
     public boolean isBleedLimitedUsed() { return bleedLimitedUsed; }
     public void setBleedLimitedUsed(boolean bleedLimitedUsed) { this.bleedLimitedUsed = bleedLimitedUsed; }
+
+    public boolean isReferendumSuccessful() { return referendumSuccessful; }
+    public void setReferendumSuccessful(boolean referendumSuccessful) { this.referendumSuccessful = referendumSuccessful; }
+
+    public String getReferendumTerms() { return referendumTerms; }
+    public void setReferendumTerms(String referendumTerms) { this.referendumTerms = referendumTerms; }
 
     public Set<String> getPlayedCardNames() { return playedCardNames; }
     public void setPlayedCardNames(Set<String> playedCardNames) { this.playedCardNames = playedCardNames; }
