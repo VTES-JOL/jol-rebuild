@@ -134,7 +134,10 @@ Wake effects are reaction cards, so they can be played during normal reaction-ca
 
 That includes the Blocks Declined pre-resolution window. For example, after a bleed's block attempts have been declined and before `ResolveAction`, a locked minion can play a wake effect, then play a legal bleed-redirect reaction such as Deflection.
 
-Wake effects also have one special timing permission: a locked minion may play a wake effect during the nested `CARD_AS_PLAYED` workflow when that wake effect is needed to play another reaction/effect that itself is legal there (for example, an "as it is played" canceller). This is not the `ACTION_AS_ANNOUNCED` window. Cards playable "as the action is announced" use `ACTION_AS_ANNOUNCED`; wake effects do not automatically use that window unless their own card text says so.
+Wake effects have two special timing permissions beyond normal reaction-card windows:
+
+1. **`CARD_AS_PLAYED` window:** a locked minion may play a wake effect during the nested `CARD_AS_PLAYED` workflow when that wake effect is needed to play another reaction/effect that itself is legal there (for example, an "as it is played" canceller).
+2. **`ACTION_AS_ANNOUNCED` window:** a locked minion may play a wake effect as the action is announced when needed to play another effect that itself must be played in that `ACTION_AS_ANNOUNCED` window.
 
 A reaction card that unlocks a minion but does not grant wake-style "as though unlocked" permission does not get the as-played exception.
 

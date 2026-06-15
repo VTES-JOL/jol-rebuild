@@ -46,7 +46,7 @@ Two additional basic actions involve minions in or adjacent to torpor. These are
 
 | Action           | Who                   | Default stealth                                         | Effect                                                                                                                                                                                                                                                                                                                     |
 |------------------|-----------------------|---------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Leave Torpor** | Torpored vampire only | +1                                                      | Costs 2 blood from the acting vampire. If the action succeeds, the vampire moves from torpor to the ready region. If blocked, no combat occurs — if the blocker is a vampire, the blocker may instead choose to diablerize the torpored vampire. If they decline or are an ally, the action fails with no cost paid.       |
+| **Leave Torpor** | Torpored vampire only | +1                                                      | Costs 2 blood from the acting vampire. If the action succeeds, the vampire moves from torpor to the ready region. If blocked, no combat occurs — if the blocker is a vampire, the controller of the blocking vampire may instead choose to diablerize the torpored vampire. If they decline or the blocker is an ally, the action fails with no cost paid.       |
 | **Rescue**       | Any ready vampire     | +1 if rescuing own vampire; +0 if rescuing another's    | Targets a vampire in torpor. Costs 2 blood, paid by the acting vampire, the rescued vampire, or split between them. If successful, moves the target vampire to the ready region; the rescued vampire does not lock or unlock from being rescued. If blocked, the acting vampire and blocking minion enter combat normally. |
 | **Diablerise**   | Any ready vampire     | +1 if targeting own vampire; +0 if targeting another's  | Targets a vampire in torpor. If successful, the target is diablerized; see [Combat § Diablerie](./combat.md#diablerie). If blocked, the acting vampire and blocking minion enter combat normally.                                                                                                                          |
 
@@ -118,9 +118,11 @@ An action is **successful** if it reaches the resolution phase, i.e. it was not 
 
 ### Bleed Action and Edge Movement
 
-A bleed action is successful if the action is not blocked. Edge movement uses a separate rule: the acting Methuselah takes the Edge only when the successful bleed has a bleed amount of 1 or more.
+A **successful bleed** is a bleed action whose final bleed amount is 1 or more at the moment the action resolves. This is distinct from action-level success (reaching resolution unblocked): a bleed action can be a successful action yet not a successful bleed if the bleed amount is reduced to 0 or less by reactions or other effects before resolution.
 
-Card text that refers to a "successful bleed" should be interpreted according to the current VEKN wording/rulings for that card. Do not use Edge movement as the generic definition of bleed-action success.
+The acting Methuselah takes the Edge when the bleed is a successful bleed (amount ≥ 1) and the action resolves unblocked.
+
+Card text that refers to a "successful bleed" uses the bleed-amount definition above, not just action-level success. Card text that refers to a "successful action" uses the action-level definition.
 
 ### Referendum Success
 

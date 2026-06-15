@@ -139,14 +139,9 @@ Examples:
 
 ---
 
-## Missing Enum Values
+## CardType Enum Notes
 
-The following `CardType` enum values must be added before phase enforcement can be implemented:
-
-| Type         | Current state                                              |
-|--------------|------------------------------------------------------------|
-| `CONVICTION` | Maps to `CardType.NONE` in `GameInitService.toCardType()`  |
-| `POWER`      | Maps to `CardType.NONE` in `GameInitService.toCardType()`  |
+`CONVICTION` and `POWER` are correctly mapped in `GameInitService.toCardType()` (resolved in Tranche 0).
 
 `CardType.LOCATION` exists in the enum but is unreachable via normal CSV import (location cards arrive typed as `MASTER`). See [Card Keywords](./card-keywords.md) for keyword parsing.
 

@@ -126,8 +126,8 @@ Action modifiers and reactions are asymmetric:
 A **wake effect** is a special reaction card (e.g. On the Qui Vive, Forced Awakening) that allows a locked minion to react during another Methuselah's action as though unlocked:
 
 - Wake cards are reaction cards. They may be played during normal reaction-card timing before action resolution, as allowed by their card text and the current timing window.
-- Wake cards also have a special timing permission in the **"as a card is played" / As Played** window: a locked minion may play a wake effect there when needed to play another reaction or effect that itself must be played in that As Played window, such as an "as it is played" canceller.
-- This special As Played permission is not the same as the **As Announced** window for cards playable "as the action is announced." Wake effects do not automatically belong to As Announced unless their own card text creates that timing.
+- Wake cards have a special timing permission in the **"as a card is played" / As Played** window: a locked minion may play a wake effect there when needed to play another reaction or effect that itself must be played in that As Played window, such as an "as it is played" canceller.
+- Wake cards also have special timing permission in the **As Announced** window: a locked minion may play a wake effect as the action is announced when needed to play another effect that itself must be played in that As Announced window.
 - A reaction that unlocks a minion but does not wake it is not a wake effect and does not get the special As Played timing permission.
 - A wake effect does not unlock the minion or change its ready/locked state. It grants permission for the minion to play further reaction cards and attempt to block as though unlocked for the duration specified by the card.
 - If the minion blocks and combat results, they remain engaged in combat normally.
