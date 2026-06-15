@@ -35,26 +35,26 @@ Protocol-driven play. Players use higher-level commands that enforce VTES rules 
 | Command                                    | Permissive | Enforced | Notes                                                          |
 |--------------------------------------------|:----------:|:--------:|----------------------------------------------------------------|
 | **Phase / Turn**                           |            |          |                                                                |
-| `ADVANCE_PHASE`                            |     ✓      |    —     | Direct phase skip; not available in protocol-driven play       |
-| `NEXT_TURN`                                |     ✓      |    —     | Direct turn advance                                            |
+| `ADVANCE_PHASE`                            |     ✓      |    ✓     | Enforced mode requires current player                          |
+| `NEXT_TURN`                                |     ✓      |    ✓     | Enforced mode requires current player                          |
 | **Card Movement**                          |            |          |                                                                |
 | `MOVE_CARD`                                |     ✓      |    —     | Arbitrary region-to-region move                                |
 | `DRAW_CARD`                                |     ✓      |    —     |                                                                |
 | `DRAW_CRYPT`                               |     ✓      |    —     |                                                                |
-| `DRAW_CRYPT_TO_UNCONTROLLED`               |     ✓      |    —     | Costs 4 transfers + 1 pool; rules checked                      |
+| `DRAW_CRYPT_TO_UNCONTROLLED`               |     ✓      |    ✓     | Costs 4 transfers + 1 pool; rules checked                      |
 | `DISCARD_CARD`                             |     ✓      |    —     |                                                                |
-| `PLAY_CARD`                                |     ✓      |    —     |                                                                |
+| `PLAY_CARD`                                |     ✓      |    ✓     | Enforced mode applies phase/type/actor gates                   |
 | `ATTACH_CARD`                              |     ✓      |    —     |                                                                |
 | `MOVE_TO_TORPOR`                           |     ✓      |    —     | Direct; use action protocol in enforced mode                   |
 | `RESCUE_FROM_TORPOR`                       |     ✓      |    —     | Direct                                                         |
-| `MOVE_TO_CRYPT`                            |     ✓      |    —     | Direct return to crypt                                         |
+| `MOVE_TO_CRYPT`                            |     ✓      |    ✓     | Return vampire from UNCONTROLLED to CRYPT                      |
 | `BURN_MINION`                              |     ✓      |    —     | Direct burn                                                    |
-| `MERGE_ADVANCED`                           |     ✓      |    —     | Rules checked (name match, one must be advanced)               |
+| `MERGE_ADVANCED`                           |     ✓      |    ✓     | Rules checked (name match, one must be advanced)               |
 | **Economy**                                |            |          |                                                                |
 | `SET_POOL`                                 |     ✓      |    —     | Judge-style direct pool set                                    |
 | `GAIN_EDGE`                                |     ✓      |    —     |                                                                |
-| `TRANSFER_BLOOD`                           |     ✓      |    —     | Rules checked for UNCONTROLLED (phase + budget)                |
-| `INFLUENCE_CARD`                           |     ✓      |    —     | Rules checked (capacity, phase, current player)                |
+| `TRANSFER_BLOOD`                           |     ✓      |    ✓     | Rules checked for UNCONTROLLED (phase + budget)                |
+| `INFLUENCE_CARD`                           |     ✓      |    ✓     | Rules checked (capacity, phase, current player)                |
 | `OUST_PLAYER`                              |     ✓      |    —     | Direct oust                                                    |
 | **Impulse / Priority**                     |            |          |                                                                |
 | `OPEN_IMPULSE_WINDOW`                      |     —      |    ✓     | Manual impulse window; part of action protocol                 |
@@ -68,6 +68,26 @@ Protocol-driven play. Players use higher-level commands that enforce VTES rules 
 | `ABORT_ACTION`                             |     —      |    ✓     |                                                                |
 | `PASS_SEQUENCING`                          |     —      |    ✓     |                                                                |
 | `CLOSE_SEQUENCING_WINDOW`                  |     —      |    ✓     |                                                                |
+| **Referendum**                             |            |          |                                                                |
+| `OPEN_POLLING`                             |     —      |    ✓     | Opens vote tally; impulse + sequencing exempt                  |
+| `CAST_VOTES`                               |     —      |    ✓     | Player casts votes for/against                                 |
+| `BURN_CARD_FOR_VOTE`                       |     —      |    ✓     | Burn a card to gain extra vote                                 |
+| `BURN_EDGE_FOR_VOTE`                       |     —      |    ✓     | Burn edge to gain extra vote                                   |
+| `CAST_PRISCI_BALLOT`                       |     —      |    ✓     | Prisci sub-referendum ballot                                   |
+| `CLOSE_POLLING`                            |     —      |    ✓     | Tallies votes and resolves referendum                          |
+| **Stealth / Intercept / Wake**             |            |          |                                                                |
+| `ADD_STEALTH`                              |     —      |    ✓     | Increase stealth on pending action                             |
+| `ADD_INTERCEPT`                            |     —      |    ✓     | Increase intercept on attempting blocker                       |
+| `REDIRECT_ACTION`                          |     —      |    ✓     | Change target of pending action; impulse + sequencing exempt   |
+| `GRANT_WAKE`                               |     —      |    ✓     | Allow a tapped minion to attempt block                         |
+| **Combat**                                 |            |          |                                                                |
+| `START_COMBAT`                             |     —      |    ✓     | Begin combat between attacker and defender; impulse + sequencing exempt |
+| `MANEUVER`                                 |     —      |    ✓     | Change range; impulse + sequencing exempt                      |
+| `DECLARE_STRIKE`                           |     —      |    ✓     | Declare strike type (hand, weapon, dodge, etc.)                |
+| `PREVENT_DAMAGE`                           |     —      |    ✓     | Reduce incoming damage; sequencing exempt                      |
+| `DECLARE_PRESS`                            |     —      |    ✓     | Continue or end combat after a round                           |
+| `BEGIN_COMBAT_ENDING`                      |     —      |    ✓     | Signal start of combat-end sequence                            |
+| `CLEAR_COMBAT_STATE`                       |     —      |    ✓     | Clear resolved combat state                                    |
 | **Universal (both modes)**                 |            |          |                                                                |
 | `LOCK_CARD` / `UNLOCK_CARD` / `UNLOCK_ALL` |     ✓      |    ✓     |                                                                |
 | `ADD_COUNTER` / `REMOVE_COUNTER`           |     ✓      |    ✓     |                                                                |
@@ -109,7 +129,9 @@ Commands are dispatched by `GameCommandService` and produce `CommandResult`, whi
 `PlayerVictoryPointsChangedEffect`, `EdgeChangedEffect`, `PhaseChangedEffect`, `TurnChangedEffect`,
 `TransfersRemainingChangedEffect`, `ImpulseWindowChangedEffect`, `PendingActionChangedEffect`,
 `SequencingWindowChangedEffect`, `GameNotesChangedEffect`, `GameModeChangedEffect`,
-`GameCompletedEffect`, `OrderOfPlayReversedEffect`.
+`GameCompletedEffect`, `OrderOfPlayReversedEffect`, `DrawCardEffect`,
+`ReferendumStateChangedEffect`, `CombatStateChangedEffect`, `CombatQueueChangedEffect`,
+`CardPlayChangedEffect`, `RestrictionAddedEffect`, `NraRecordedEffect`.
 
 Handlers are pure functions: they validate, read state, and return `CommandResult` carrying a `List<GameEffect>` — no direct mutations. `GameEffectApplicator` is the sole mutation path; it applies each effect and returns a human-readable change-log string broadcast to all clients.
 

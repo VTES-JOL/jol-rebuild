@@ -97,13 +97,11 @@ For the expanded sequential ordering of action, combat, diablerie, referendum, a
 | `DURING_ACTION`      | Exists            | Block-attempt impulse window open; acting minion locked                                                                  |
 | `BLOCKED`            | Exists            | A block attempt succeeded; combat is in progress                                                                         |
 | `AFTER_RESOLUTION`   | Exists            | Unblocked action resolved, or blocked action's combat/block resolution finished; AFTER_RESOLUTION sequencing window open |
-| `ACTION_CONTINUING`  | **Must be added** | "Continue the action" effect fired after combat; re-entering block-attempt loop                                          |
-
-> **Enum gap:** `ACTION_CONTINUING` is not yet in `src/main/java/…/enums/ActionStatus.java`. Add it before wiring the continue-the-action protocol path.
+| `ACTION_CONTINUING`  | Exists            | "Continue the action" effect fired after combat; re-entering block-attempt loop                                          |
 
 `CARD_AS_PLAYED` and `ACTION_AS_ANNOUNCED` are sequencing-window types, not action statuses. `CARD_AS_PLAYED` belongs to the generic card-play lifecycle and opens only when a card is actually played. `ACTION_AS_ANNOUNCED` belongs to the action workflow and opens for every action, including basic actions and abilities from cards already in play.
 
-> **Enum gap:** `CARD_AS_PLAYED` is not yet in `SequencingWindowType`; the existing legacy action-announcement sequencing value should become `ACTION_AS_ANNOUNCED` when the declaration sequencing windows are wired.
+> **Partial gap:** `CARD_AS_PLAYED` exists in `SequencingWindowType` (added in Tranche 3). `ACTION_AS_ANNOUNCED` is not yet added; the declaration sequencing window for "as the action is announced" effects remains unimplemented.
 
 ---
 

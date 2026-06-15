@@ -155,8 +155,8 @@ Combat remains a larger subsystem and should build on the shared card-play and t
 
 | Task | Scope | Done when |
 |------|-------|-----------|
-| Combat state machine | Add range, maneuver, strike, damage prevention, press, and end-of-round state | Blocked/rush actions can enter and leave combat deterministically |
-| Damage and torpor | Apply normal/aggravated damage, prevention, mending, torpor, and burning | Minion survival no longer requires manual movement |
+| ~~Combat state machine~~ | ~~Add range, maneuver, strike, damage prevention, press, and end-of-round state~~ | `CombatState`, 8 commands (`StartCombat`, `Maneuver`, `DeclareStrike`, `PreventDamage`, `DeclarePress`, `BeginCombatEnding`, `ClearCombatState`), 7-step round, and `CombatQueueChangedEffect` implemented |
+| ~~Damage and torpor~~ | ~~Apply normal/aggravated damage, prevention, mending, torpor, and burning~~ | Damage application, torpor movement, and burn on zero blood implemented in `CombatHandler` |
 | Action continuing | Implement continued block windows after effects such as Form of Mist | Continued actions preserve prior block/action context correctly |
 
 ---
@@ -181,7 +181,7 @@ Combat remains a larger subsystem and should build on the shared card-play and t
 | **P2**   | Withdrawal and timeout lifecycle                                           | Common end-game scenarios; timeout also affects GW assignment. See [Game State](./game-state.md#withdrawal).                                                                                                                        |
 | **P2**   | Diablerie full resolution                                                  | Blood transfer, equipment choice, discipline gain, Red List timing, Blood Cursed restriction, blood hunt. See [Combat](./combat.md#diablerie).                                                                                      |
 | **P2**   | Rule-bearing minion trait enforcement                                      | `infernal` field exists; broader trait parsing and enforcement are missing. See [Card Keywords](./card-keywords.md#enforcement-hooks) and [Game State](./game-state.md#minion-traits).                                              |
-| **P3**   | Combat system                                                              | Complex but required for complete rules enforcement. See [Combat](./combat.md).                                                                                                                                                     |
+| ~~P3~~   | ~~Combat system~~                                                          | **Partially done** — state machine, 8 commands, damage, torpor, and combat queue complete (Tranche 6). Action continuing (continued block windows after combat) still open. See [Combat](./combat.md).                              |
 | **P3**   | Master phase action accounting (trifle / out-of-turn)                      | Needed for legal master-card play. See [Game State](./game-state.md#master-phase--action-accounting) and [Card Play](./card-play.md).                                                                                               |
 | **P3**   | Unlock phase auto-effects and optional windows (Edge pool, contest upkeep) | Needed for rule-correct automated phase handling. See [Game State](./game-state.md#unlock-phase--automatic-effects).                                                                                                                |
 | **P3**   | Requirement-marker trait parsing                                           | Required for card requirement checks and Red List / Trophy mechanics. See [Card Keywords](./card-keywords.md).                                                                                                                      |
