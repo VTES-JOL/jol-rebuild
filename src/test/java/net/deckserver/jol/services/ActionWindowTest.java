@@ -127,6 +127,8 @@ class ActionWindowTest {
                 new net.deckserver.jol.game.command.PassImpulse(gameId, "Alice"));
 
         gameCommandService.execute("Bob", new AttemptBlock(gameId, bobMinion));
+        gameCommandService.execute("Alice", new PassSequencing(gameId, "Alice"));
+        gameCommandService.execute("Bob", new PassSequencing(gameId, "Bob"));
 
         assertNotNull(game.getPendingAction());
         assertEquals(ActionStatus.BLOCKED, game.getPendingAction().getStatus());
@@ -253,6 +255,8 @@ class ActionWindowTest {
         gameCommandService.execute("Alice", new DeclareAction(gameId, aliceMinion, ActionType.BLEED, null));
         gameCommandService.execute("Alice", new PassImpulse(gameId, "Alice"));
         gameCommandService.execute("Bob", new AttemptBlock(gameId, bobMinion));
+        gameCommandService.execute("Alice", new PassSequencing(gameId, "Alice"));
+        gameCommandService.execute("Bob", new PassSequencing(gameId, "Bob"));
 
         CardData aliceCard = game.getCardByRef(aliceMinion);
         assertTrue(game.getPendingAction().isReachedResolution());

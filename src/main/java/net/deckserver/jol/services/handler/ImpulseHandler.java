@@ -1,11 +1,12 @@
 package net.deckserver.jol.services.handler;
 
+import net.deckserver.jol.enums.ActionStatus;
+import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.exception.GameRuleException;
-import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.ImpulseEngine;
-import net.deckserver.jol.game.ImpulseState;
+import net.deckserver.jol.game.*;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
+import net.deckserver.jol.game.effect.PendingActionChangedEffect;
 import net.deckserver.jol.services.CommandResult;
 
 import java.util.List;
@@ -31,8 +32,28 @@ public final class ImpulseHandler {
 
         ImpulseState updated = ImpulseEngine.pass(current);
         if (updated == null) {
-            String msg = actor + " passed — all players have passed; impulse window closes";
-            return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
+            PendingActionState pending = game.getPendingAction();
+            if (pending != null && pending.getStatus() == ActionStatus.DURING_ACTION
+                    && pending.getCurrentBlockerRef() == null) {
+                if (!pending.isBlocksDeclined()) {
+                    // All players passed the block window — open blocks-declined window
+                    PendingActionState withDeclined = new PendingActionState(pending);
+                    withDeclined.setBlocksDeclined(true);
+                    String actingPlayer = pending.getActorRef().playerName();
+                    ImpulseState declinedWindow = ImpulseEngine.open(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
+                    String msg = actor + " passed — blocks declined; acting player has priority before resolution";
+                    return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
+                            List.of(new PendingActionChangedEffect(true, withDeclined),
+                                    new ImpulseWindowChangedEffect(true, declinedWindow)));
+                } else {
+                    // All players passed the blocks-declined window — close; ResolveAction is now available
+                    String msg = actor + " passed — impulse window closes; action may now be resolved";
+                    return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
+                            List.of(new ImpulseWindowChangedEffect(false)));
+                }
+            }
+            String closeMsg = actor + " passed — all players have passed; impulse window closes";
+            return new CommandResult(game, closeMsg, new CommandLogData.PassImpulseLog(actor),
                     List.of(new ImpulseWindowChangedEffect(false)));
         }
 

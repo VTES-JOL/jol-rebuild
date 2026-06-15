@@ -129,6 +129,10 @@ public class GameCommandService {
             case CloseImpulseWindow c   -> ImpulseHandler.handleCloseImpulseWindow(game, c, actor);
             case DeclareAction c        -> ActionHandler.handleDeclareAction(game, c, actor);
             case AttemptBlock c         -> ActionHandler.handleAttemptBlock(game, c, actor);
+            case AddStealth c           -> ActionHandler.handleAddStealth(game, c, actor);
+            case AddIntercept c         -> ActionHandler.handleAddIntercept(game, c, actor);
+            case RedirectAction c       -> ActionHandler.handleRedirectAction(game, c, actor);
+            case GrantWake c            -> ActionHandler.handleGrantWake(game, c, actor);
             case ResolveAction c        -> ActionHandler.handleResolveAction(game, c, actor);
             case AbortAction c          -> ActionHandler.handleAbortAction(game, c, actor);
             case PassSequencing c       -> SequencingHandler.handlePassSequencing(game, c, actor);

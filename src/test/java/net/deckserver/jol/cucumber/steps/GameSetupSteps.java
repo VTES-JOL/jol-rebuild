@@ -63,6 +63,17 @@ public class GameSetupSteps {
         addVampire(player, name, blood, capacity, RegionType.TORPOR);
     }
 
+    @Given("{string} has a locked vampire {string} with {int} blood and capacity {int}")
+    public void addLockedVampire(String player, String name, int blood, int capacity) {
+        addVampire(player, name, blood, capacity, RegionType.READY);
+        // Lock the vampire directly in the game state
+        CardRef ref = world.minionRefs.get(name);
+        if (ref != null) {
+            CardData card = world.game.getCardByRef(ref);
+            if (card != null) card.setLocked(true);
+        }
+    }
+
     @Given("{string} controls a ready vampire {string} with {int} blood and capacity {int} in ready")
     public void addReadyVampireAlt(String player, String name, int blood, int capacity) {
         addVampire(player, name, blood, capacity, RegionType.READY);

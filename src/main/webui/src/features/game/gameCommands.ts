@@ -78,6 +78,10 @@ export type ResolveActionCommand = { type: 'RESOLVE_ACTION'; gameId: string };
 export type AbortActionCommand = { type: 'ABORT_ACTION'; gameId: string };
 export type PassSequencingCommand = { type: 'PASS_SEQUENCING'; gameId: string; playerName: string };
 export type CloseSequencingWindowCommand = { type: 'CLOSE_SEQUENCING_WINDOW'; gameId: string };
+export type AddStealthCommand = { type: 'ADD_STEALTH'; gameId: string; actorRef: import('./types').CardRef; amount: number };
+export type AddInterceptCommand = { type: 'ADD_INTERCEPT'; gameId: string; blockerRef: import('./types').CardRef; amount: number };
+export type RedirectActionCommand = { type: 'REDIRECT_ACTION'; gameId: string; newTargetPlayer: string };
+export type GrantWakeCommand = { type: 'GRANT_WAKE'; gameId: string; minionRef: import('./types').CardRef };
 
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
@@ -94,6 +98,7 @@ export type GameCommand =
     | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand
     | DeclareActionCommand | AttemptBlockCommand | ResolveActionCommand | AbortActionCommand
     | PassSequencingCommand | CloseSequencingWindowCommand
+    | AddStealthCommand | AddInterceptCommand | RedirectActionCommand | GrantWakeCommand
     | SetRulesModeCommand
     | OpenPollingCommand | CastVotesCommand | BurnCardForVoteCommand
     | BurnEdgeForVoteCommand | CastPrisciBallotCommand | ClosePollingCommand;
@@ -268,6 +273,22 @@ export function passSequencing(gameId: string, playerName: string): PassSequenci
 
 export function closeSequencingWindow(gameId: string): CloseSequencingWindowCommand {
     return {type: 'CLOSE_SEQUENCING_WINDOW', gameId};
+}
+
+export function addStealth(gameId: string, actorRef: import('./types').CardRef, amount: number): AddStealthCommand {
+    return {type: 'ADD_STEALTH', gameId, actorRef, amount};
+}
+
+export function addIntercept(gameId: string, blockerRef: import('./types').CardRef, amount: number): AddInterceptCommand {
+    return {type: 'ADD_INTERCEPT', gameId, blockerRef, amount};
+}
+
+export function redirectAction(gameId: string, newTargetPlayer: string): RedirectActionCommand {
+    return {type: 'REDIRECT_ACTION', gameId, newTargetPlayer};
+}
+
+export function grantWake(gameId: string, minionRef: import('./types').CardRef): GrantWakeCommand {
+    return {type: 'GRANT_WAKE', gameId, minionRef};
 }
 
 export type OpenPollingCommand = { type: 'OPEN_POLLING'; gameId: string };

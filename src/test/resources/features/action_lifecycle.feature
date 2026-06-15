@@ -34,5 +34,7 @@ Feature: Basic action lifecycle
     When "Alice" declares a BLEED action
     And "Alice" passes the impulse
     And "Bob" attempts to block with "Meridian"
+    And "Alice" passes sequencing
+    And "Bob" passes sequencing
     Then the action status should be "BLOCKED"
     And no rule violation should occur

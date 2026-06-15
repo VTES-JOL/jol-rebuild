@@ -136,7 +136,20 @@ The fastest route from the current permissive command set to a rules engine is t
 | ~~TypeScript mirror~~ | `OpenPollingCommand`, `CastVotesCommand`, `BurnCardForVoteCommand`, `BurnEdgeForVoteCommand`, `CastPrisciBallotCommand`, `ClosePollingCommand` added to `gameCommands.ts` |
 | ~~Tests~~ | 11 new Cucumber scenarios in `referendums.feature`; all 366 tests pass |
 
-### Tranche 5 — Combat and Advanced Interactions
+### ~~Tranche 5 — Blocking Correctness~~ ✓ Complete
+
+| Task | Outcome |
+|------|---------|
+| ~~Stealth / intercept accumulation~~ | `PendingActionState.stealth` + `interceptsByBlockerRef` (per-blocker); `AddStealth` and `AddIntercept` commands enforce "only when needed" rule |
+| ~~Block attempt sub-window~~ | `SequencingWindowType.BLOCK_ATTEMPT` opened on `AttemptBlock`; `SequencingHandler` delegates close to `ActionHandler.resolveBlockAttempt`; compares intercept vs stealth to succeed or fail the block |
+| ~~Directed action blocking~~ | `enforceBlockEligibility` rejects non-target blockers for directed actions; wake permission stored in `wakePermissionByCardId` bypasses locked-minion gate |
+| ~~Blocks declined window~~ | `ImpulseHandler.handlePassImpulse` sets `blocksDeclined=true` and reopens impulse window (acting player first) when all players pass with no active block attempt; `AttemptBlock` rejected while `blocksDeclined` |
+| ~~Action redirect~~ | `RedirectAction` command: requires `blocksDeclined=true`; updates target player; clears `blocksDeclined` and `passedBlockWindowsByPlayer`; reopens impulse window |
+| ~~Wake effects~~ | `GrantWake` command adds locked minion's card ID to `wakePermissionByCardId`; `enforceBlockEligibility` allows those minions to block even when locked |
+| ~~TypeScript mirror~~ | `AddStealthCommand`, `AddInterceptCommand`, `RedirectActionCommand`, `GrantWakeCommand` added to `gameCommands.ts` |
+| ~~Tests~~ | 11 Cucumber scenarios in `blocking.feature`; all 366 tests pass |
+
+### Tranche 6 — Combat and Advanced Interactions
 
 Combat remains a larger subsystem and should build on the shared card-play and timing primitives.
 
@@ -162,9 +175,9 @@ Combat remains a larger subsystem and should build on the shared card-play and t
 | **P1**   | Card play legality and lifecycle                                           | Prevents illegal plays; prerequisite for modifiers, reactions, combat cards, cancellation, replacement timing, and action-card limbo. See [Card Play](./card-play.md).                                                              |
 | **P1**   | Voting / Referendum engine                                                 | Required for political-action decks and mandatory blood hunt after diablerie. See [Referendums](./referendums.md).                                                                                                                  |
 | **P1**   | Game end — simultaneous oust, timeout, GW recording                        | Predator VP+pool and last-survivor VP are partially done; simultaneous oust pool-withholding, timeout scoring, and GW field still missing. See [Game State](./game-state.md#game-end-detection).                                    |
-| **P2**   | Stealth / intercept accumulation model                                     | Required for correct action/block enforcement. See [Blocking](./blocking.md).                                                                                                                                                       |
-| **P2**   | Directed / undirected action blocking                                      | Only eligible Methuselahs and minions may block. See [Blocking](./blocking.md).                                                                                                                                                     |
-| **P2**   | NRA tracking + block-redirect + Action Continuing                          | NRA lock per minion per turn; modifier persistence on redirect; `ACTION_CONTINUING` status. See [Actions](./actions.md) and [Blocking](./blocking.md).                                                                              |
+| ~~P2~~   | ~~Stealth / intercept accumulation model~~                                 | **Done** — `AddStealth`/`AddIntercept` with "only when needed" enforcement; BLOCK_ATTEMPT sequencing sub-window resolves each attempt. See [Tranche 5](#tranche-5--blocking-correctness-complete).                                  |
+| ~~P2~~   | ~~Directed / undirected action blocking~~                                  | **Done** — `enforceBlockEligibility` rejects non-target blockers; `GrantWake` permits locked minions; `RedirectAction` reopens block window. See [Tranche 5](#tranche-5--blocking-correctness-complete).                            |
+| ~~P2~~   | ~~NRA tracking + block-redirect + Action Continuing~~                      | **Done (NRA + redirect)** — NRA per minion recorded on both block and resolve paths; `RedirectAction` preserves stealth/intercept context. `ACTION_CONTINUING` status deferred to Tranche 6 combat. See [Actions](./actions.md).   |
 | **P2**   | Withdrawal and timeout lifecycle                                           | Common end-game scenarios; timeout also affects GW assignment. See [Game State](./game-state.md#withdrawal).                                                                                                                        |
 | **P2**   | Diablerie full resolution                                                  | Blood transfer, equipment choice, discipline gain, Red List timing, Blood Cursed restriction, blood hunt. See [Combat](./combat.md#diablerie).                                                                                      |
 | **P2**   | Rule-bearing minion trait enforcement                                      | `infernal` field exists; broader trait parsing and enforcement are missing. See [Card Keywords](./card-keywords.md#enforcement-hooks) and [Game State](./game-state.md#minion-traits).                                              |

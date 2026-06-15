@@ -76,13 +76,17 @@ public final class ActionHandler {
         if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
             throw new GameRuleException("No action in progress to block");
         }
+        if (pending.isBlocksDeclined()) {
+            throw new GameRuleException("Block attempts are closed — blocks have already been declined");
+        }
 
         CardData blocker = GameRules.requireCard(game, cmd.blockerRef());
         GameRules.requireCardInRegion(blocker, RegionType.READY);
         if (!blocker.isMinion()) {
             throw new GameRuleException("Only minions can block");
         }
-        if (blocker.isLocked()) {
+        boolean wakeGranted = pending.getWakePermissionByCardId().contains(blocker.getId());
+        if (blocker.isLocked() && !wakeGranted) {
             throw new GameRuleException("A locked minion cannot block");
         }
         if (!actor.equals(blocker.getOwnerName())) {
@@ -99,25 +103,184 @@ public final class ActionHandler {
                     "This minion cannot block this action");
         }
 
-        CardData actorCard = game.getCardByRef(pending.getActorRef());
-        String nraKey = nraKey(pending.getActionType());
+        PendingActionState updated = new PendingActionState(pending);
+        updated.setCurrentBlockerRef(cmd.blockerRef());
+        updated.setCurrentBlockerCardId(blocker.getId());
 
-        PendingActionState updated = pending.withStatus(ActionStatus.BLOCKED);
-        updated.setBlockerRef(cmd.blockerRef());
-        updated.setReachedResolution(true);
+        List<String> passOrder = List.of(actingPlayer != null ? actingPlayer : actor, actor);
+        SequencingWindowState seq = new SequencingWindowState();
+        seq.setActive(true);
+        seq.setWindowType(SequencingWindowType.BLOCK_ATTEMPT);
+        seq.setPassOrder(passOrder);
+        seq.setConsecutivePasses(0);
+        seq.setCurrentHolder(passOrder.get(0));
 
-        List<GameEffect> effects = new ArrayList<>();
-        effects.add(new CardLockedEffect(blocker.getId(), true));
-        effects.add(new PendingActionChangedEffect(true, updated));
-        effects.add(new ImpulseWindowChangedEffect(false));
-        if (nraKey != null && actorCard != null) {
-            effects.add(new NraRecordedEffect(actorCard.getId(), nraKey));
-        }
-
-        String msg = actor + " blocked with " + blocker.getName() + " — impulse window closed";
+        String msg = actor + " attempts to block with " + blocker.getName() + " — stealth/intercept window opens";
         return new CommandResult(game, msg,
                 new CommandLogData.AttemptBlockLog(actor, blocker.getName()),
+                List.of(new PendingActionChangedEffect(true, updated),
+                        new SequencingWindowChangedEffect(true, seq)));
+    }
+
+    public static CommandResult handleAddStealth(GameData game, AddStealth cmd, String actor) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
+            throw new GameRuleException("No action in progress");
+        }
+        String blockerId = pending.getCurrentBlockerCardId();
+        if (blockerId == null) {
+            throw new GameRuleException("Stealth can only be added during an active block attempt");
+        }
+        int intercept = pending.getInterceptsByBlockerRef().getOrDefault(blockerId, 0);
+        if (intercept < pending.getStealth()) {
+            throw new GameRuleException("Stealth is not needed — the blocker's intercept cannot currently succeed");
+        }
+
+        PendingActionState updated = new PendingActionState(pending);
+        updated.setStealth(pending.getStealth() + cmd.amount());
+
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new PendingActionChangedEffect(true, updated));
+        resetBlockAttemptWindow(game, actor, effects);
+
+        String msg = actor + " adds " + cmd.amount() + " stealth (total: " + updated.getStealth() + ")";
+        return new CommandResult(game, msg,
+                new CommandLogData.GenericLog(actor, "add_stealth"),
                 effects);
+    }
+
+    public static CommandResult handleAddIntercept(GameData game, AddIntercept cmd, String actor) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
+            throw new GameRuleException("No action in progress");
+        }
+        String blockerId = pending.getCurrentBlockerCardId();
+        if (blockerId == null) {
+            throw new GameRuleException("Intercept can only be added during an active block attempt");
+        }
+        int currentIntercept = pending.getInterceptsByBlockerRef().getOrDefault(blockerId, 0);
+        if (currentIntercept >= pending.getStealth()) {
+            throw new GameRuleException("Intercept is not needed — the blocker already has enough intercept to succeed");
+        }
+
+        PendingActionState updated = new PendingActionState(pending);
+        updated.getInterceptsByBlockerRef().put(blockerId, currentIntercept + cmd.amount());
+
+        List<GameEffect> effects = new ArrayList<>();
+        effects.add(new PendingActionChangedEffect(true, updated));
+        resetBlockAttemptWindow(game, actor, effects);
+
+        int newIntercept = currentIntercept + cmd.amount();
+        String msg = actor + " adds " + cmd.amount() + " intercept (total for blocker: " + newIntercept + ")";
+        return new CommandResult(game, msg,
+                new CommandLogData.GenericLog(actor, "add_intercept"),
+                effects);
+    }
+
+    public static CommandResult handleRedirectAction(GameData game, RedirectAction cmd, String actor) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
+            throw new GameRuleException("No action in progress to redirect");
+        }
+        if (!pending.isBlocksDeclined()) {
+            throw new GameRuleException("Redirects are only legal after blocks have been declined");
+        }
+
+        PendingActionState updated = new PendingActionState(pending);
+        updated.setTargetPlayerName(cmd.newTargetPlayer());
+        updated.setBlocksDeclined(false);
+        updated.setPassedBlockWindowsByPlayer(new java.util.HashSet<>());
+
+        String actingPlayer = pending.getActorRef().playerName();
+        ImpulseContext context = cmd.newTargetPlayer() != null
+                ? ImpulseContext.DIRECTED_SINGLE
+                : ImpulseContext.UNDIRECTED;
+        ImpulseState newImpulse = ImpulseEngine.open(game, context, actingPlayer, cmd.newTargetPlayer());
+
+        String msg = actor + " redirected the action to " + cmd.newTargetPlayer() + " — block window reopens";
+        return new CommandResult(game, msg,
+                new CommandLogData.GenericLog(actor, "redirect_action"),
+                List.of(new PendingActionChangedEffect(true, updated),
+                        new ImpulseWindowChangedEffect(true, newImpulse)));
+    }
+
+    public static CommandResult handleGrantWake(GameData game, GrantWake cmd, String actor) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null || pending.getStatus() != ActionStatus.DURING_ACTION) {
+            throw new GameRuleException("No action in progress");
+        }
+        CardData minion = GameRules.requireCard(game, cmd.minionRef());
+        if (!minion.isMinion()) {
+            throw new GameRuleException("Only minions can receive wake permission");
+        }
+        if (!minion.isLocked()) {
+            throw new GameRuleException("Wake permission is only needed for locked minions");
+        }
+        if (!actor.equals(minion.getOwnerName())) {
+            throw new GameRuleException("You do not control this minion");
+        }
+
+        PendingActionState updated = new PendingActionState(pending);
+        updated.getWakePermissionByCardId().add(minion.getId());
+
+        String msg = actor + " granted wake permission to " + minion.getName();
+        return new CommandResult(game, msg,
+                new CommandLogData.GenericLog(actor, "grant_wake"),
+                List.of(new PendingActionChangedEffect(true, updated)));
+    }
+
+    /** Resolves the active block attempt after both players pass in the BLOCK_ATTEMPT window. */
+    public static List<GameEffect> resolveBlockAttempt(GameData game) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null || pending.getCurrentBlockerCardId() == null) return List.of();
+
+        String blockerId = pending.getCurrentBlockerCardId();
+        CardRef blockerRef = pending.getCurrentBlockerRef();
+        int intercept = pending.getInterceptsByBlockerRef().getOrDefault(blockerId, 0);
+        int stealth = pending.getStealth();
+
+        List<GameEffect> effects = new ArrayList<>();
+        if (intercept >= stealth) {
+            // Block succeeds
+            String nraKey = nraKey(pending.getActionType());
+            CardData actorCard = game.getCardByRef(pending.getActorRef());
+
+            PendingActionState blocked = pending.withStatus(ActionStatus.BLOCKED);
+            blocked.setBlockerRef(blockerRef);
+            blocked.setCurrentBlockerRef(null);
+            blocked.setCurrentBlockerCardId(null);
+            blocked.setReachedResolution(true);
+
+            effects.add(new CardLockedEffect(blockerId, true));
+            effects.add(new PendingActionChangedEffect(true, blocked));
+            effects.add(new ImpulseWindowChangedEffect(false));
+            if (nraKey != null && actorCard != null) {
+                effects.add(new NraRecordedEffect(actorCard.getId(), nraKey));
+            }
+        } else {
+            // Block fails — clear currentBlockerRef; keep impulse window open
+            PendingActionState failed = new PendingActionState(pending);
+            failed.setCurrentBlockerRef(null);
+            failed.setCurrentBlockerCardId(null);
+            effects.add(new PendingActionChangedEffect(true, failed));
+        }
+        return effects;
+    }
+
+    private static void resetBlockAttemptWindow(GameData game, String actor, List<GameEffect> effects) {
+        SequencingWindowState seq = game.getSequencingWindow();
+        if (seq != null && seq.isActive() && seq.getWindowType() == SequencingWindowType.BLOCK_ATTEMPT) {
+            List<String> order = seq.getPassOrder();
+            int idx = order.indexOf(actor);
+            String nextHolder = order.get((idx + 1) % order.size());
+            SequencingWindowState reset = new SequencingWindowState();
+            reset.setActive(true);
+            reset.setWindowType(SequencingWindowType.BLOCK_ATTEMPT);
+            reset.setPassOrder(order);
+            reset.setConsecutivePasses(0);
+            reset.setCurrentHolder(nextHolder);
+            effects.add(new SequencingWindowChangedEffect(true, reset));
+        }
     }
 
     public static CommandResult handleResolveAction(GameData game, ResolveAction cmd, String actor) {
@@ -180,6 +343,19 @@ public final class ActionHandler {
 
         String msg = actor + " aborted the action";
         return new CommandResult(game, msg, new CommandLogData.AbortActionLog(actor), effects);
+    }
+
+    public static CommandResult handleResumeBlockWindow(GameData game, String actingPlayer) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null) return null;
+        PendingActionState updated = new PendingActionState(pending);
+        updated.setBlocksDeclined(true);
+        ImpulseState blocksDeclinedWindow = ImpulseEngine.open(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
+        return new CommandResult(game,
+                "All players passed — blocks declined; acting player has priority before resolution",
+                null,
+                List.of(new PendingActionChangedEffect(true, updated),
+                        new ImpulseWindowChangedEffect(true, blocksDeclinedWindow)));
     }
 
     // ── Declaration guards ────────────────────────────────────────────────────

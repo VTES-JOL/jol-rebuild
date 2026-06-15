@@ -76,6 +76,8 @@ public final class SequencingHandler {
                     }
                 }
             }
+        } else if (windowType == SequencingWindowType.BLOCK_ATTEMPT) {
+            effects.addAll(ActionHandler.resolveBlockAttempt(game));
         }
         // Always clear a pending action that reached after-resolution, regardless of which window closed.
         PendingActionState pending = game.getPendingAction();

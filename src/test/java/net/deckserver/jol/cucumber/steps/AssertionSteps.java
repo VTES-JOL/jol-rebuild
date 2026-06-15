@@ -149,4 +149,18 @@ public class AssertionSteps {
                         .contains(actionKey),
                 minionName + " should be NRA-locked from " + actionKey);
     }
+
+    @Then("blocks should be declined")
+    public void assertBlocksDeclined() {
+        assertNotNull(world.game.getPendingAction(), "No pending action");
+        assertTrue(world.game.getPendingAction().isBlocksDeclined(),
+                "Expected blocksDeclined = true but was false");
+    }
+
+    @Then("blocks should not be declined")
+    public void assertBlocksNotDeclined() {
+        assertNotNull(world.game.getPendingAction(), "No pending action");
+        assertFalse(world.game.getPendingAction().isBlocksDeclined(),
+                "Expected blocksDeclined = false but was true");
+    }
 }

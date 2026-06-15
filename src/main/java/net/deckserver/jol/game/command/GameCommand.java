@@ -57,6 +57,10 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = BurnEdgeForVote.class,          name = "BURN_EDGE_FOR_VOTE"),
     @JsonSubTypes.Type(value = CastPrisciBallot.class,         name = "CAST_PRISCI_BALLOT"),
     @JsonSubTypes.Type(value = ClosePolling.class,             name = "CLOSE_POLLING"),
+    @JsonSubTypes.Type(value = AddStealth.class,               name = "ADD_STEALTH"),
+    @JsonSubTypes.Type(value = AddIntercept.class,             name = "ADD_INTERCEPT"),
+    @JsonSubTypes.Type(value = RedirectAction.class,           name = "REDIRECT_ACTION"),
+    @JsonSubTypes.Type(value = GrantWake.class,                name = "GRANT_WAKE"),
 })
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
@@ -73,7 +77,8 @@ public sealed interface GameCommand
             DeclareAction, AttemptBlock, ResolveAction, AbortAction,
             PassSequencing, CloseSequencingWindow,
             SetRulesMode,
-            OpenPolling, CastVotes, BurnCardForVote, BurnEdgeForVote, CastPrisciBallot, ClosePolling {
+            OpenPolling, CastVotes, BurnCardForVote, BurnEdgeForVote, CastPrisciBallot, ClosePolling,
+            AddStealth, AddIntercept, RedirectAction, GrantWake {
 
     String gameId();
 

@@ -15,6 +15,8 @@ import net.deckserver.jol.game.effect.GameEffectApplicator;
 import net.deckserver.jol.game.effect.RestrictionAddedEffect;
 import net.deckserver.jol.services.GameCommandService;
 
+import java.util.List;
+
 public class ActionSteps {
 
     private final GameWorld world;
@@ -161,6 +163,98 @@ public class ActionSteps {
         try {
             commandService.execute(world.game.getCurrentPlayerName(),
                     new CloseSequencingWindow(world.gameId));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} passes sequencing")
+    public void passSequencing(String player) {
+        world.lastException = null;
+        try {
+            commandService.execute(player, new PassSequencing(world.gameId, player));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} adds {int} stealth")
+    public void addStealth(String player, int amount) {
+        world.lastException = null;
+        CardRef ref = firstMinionOf(player);
+        try {
+            commandService.execute(player, new AddStealth(world.gameId, ref, amount));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} adds {int} intercept to {string}")
+    public void addIntercept(String player, int amount, String minionName) {
+        world.lastException = null;
+        CardRef ref = world.minionRefs.get(minionName);
+        try {
+            commandService.execute(player, new AddIntercept(world.gameId, ref, amount));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} adds {int} more intercept to {string} expecting failure")
+    public void addInterceptExpectingFailure(String player, int amount, String minionName) {
+        world.lastException = null;
+        CardRef ref = world.minionRefs.get(minionName);
+        try {
+            commandService.execute(player, new AddIntercept(world.gameId, ref, amount));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} adds stealth outside a block attempt expecting failure")
+    public void addStealthOutsideBlockAttempt(String player) {
+        world.lastException = null;
+        CardRef ref = firstMinionOf(player);
+        try {
+            commandService.execute(player, new AddStealth(world.gameId, ref, 1));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("all players pass the block window")
+    public void passAllBlockWindow() {
+        world.lastException = null;
+        try {
+            for (int safety = 0; safety < 10; safety++) {
+                net.deckserver.jol.game.ImpulseState impulse = world.game.getImpulseWindow();
+                if (impulse == null || !impulse.isActive()) break;
+                net.deckserver.jol.game.PendingActionState pending = world.game.getPendingAction();
+                if (pending != null && pending.isBlocksDeclined()) break;
+                String holder = impulse.getCurrentImpulseHolder();
+                commandService.execute(holder, new PassImpulse(world.gameId, holder));
+            }
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} redirects the action to {string}")
+    public void redirectAction(String player, String newTarget) {
+        world.lastException = null;
+        try {
+            commandService.execute(player, new RedirectAction(world.gameId, newTarget));
+        } catch (Exception e) {
+            world.lastException = e;
+        }
+    }
+
+    @When("{string} grants wake to {string}")
+    public void grantWake(String player, String minionName) {
+        world.lastException = null;
+        CardRef ref = world.minionRefs.get(minionName);
+        try {
+            commandService.execute(player, new GrantWake(world.gameId, ref));
         } catch (Exception e) {
             world.lastException = e;
         }

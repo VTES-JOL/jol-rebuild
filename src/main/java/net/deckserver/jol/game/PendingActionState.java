@@ -7,9 +7,11 @@ import net.deckserver.jol.enums.RestrictionType;
 import net.deckserver.jol.game.command.CardRef;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.LinkedHashMap;
 
 @RegisterForReflection
 public class PendingActionState {
@@ -28,6 +30,13 @@ public class PendingActionState {
     private String referendumTerms;
     private Set<String> playedCardNames = new HashSet<>();
     private Map<RestrictionType, Set<CardRef>> actionRestrictions = new EnumMap<>(RestrictionType.class);
+    private int stealth;
+    private Map<String, Integer> interceptsByBlockerRef = new LinkedHashMap<>();
+    private Set<String> passedBlockWindowsByPlayer = new HashSet<>();
+    private Set<String> wakePermissionByCardId = new HashSet<>();
+    private boolean blocksDeclined;
+    private CardRef currentBlockerRef;
+    private String currentBlockerCardId;
 
     public PendingActionState() {}
 
@@ -48,6 +57,13 @@ public class PendingActionState {
         this.playedCardNames = new HashSet<>(src.playedCardNames);
         this.actionRestrictions = new EnumMap<>(RestrictionType.class);
         src.actionRestrictions.forEach((k, v) -> this.actionRestrictions.put(k, new HashSet<>(v)));
+        this.stealth = src.stealth;
+        this.interceptsByBlockerRef = new LinkedHashMap<>(src.interceptsByBlockerRef);
+        this.passedBlockWindowsByPlayer = new HashSet<>(src.passedBlockWindowsByPlayer);
+        this.wakePermissionByCardId = new HashSet<>(src.wakePermissionByCardId);
+        this.blocksDeclined = src.blocksDeclined;
+        this.currentBlockerRef = src.currentBlockerRef;
+        this.currentBlockerCardId = src.currentBlockerCardId;
     }
 
     public PendingActionState withStatus(ActionStatus newStatus) {
@@ -104,4 +120,25 @@ public class PendingActionState {
     public boolean isRestricted(RestrictionType type, CardRef ref) {
         return actionRestrictions.getOrDefault(type, Set.of()).contains(ref);
     }
+
+    public int getStealth() { return stealth; }
+    public void setStealth(int stealth) { this.stealth = stealth; }
+
+    public Map<String, Integer> getInterceptsByBlockerRef() { return interceptsByBlockerRef; }
+    public void setInterceptsByBlockerRef(Map<String, Integer> interceptsByBlockerRef) { this.interceptsByBlockerRef = interceptsByBlockerRef; }
+
+    public Set<String> getPassedBlockWindowsByPlayer() { return passedBlockWindowsByPlayer; }
+    public void setPassedBlockWindowsByPlayer(Set<String> passedBlockWindowsByPlayer) { this.passedBlockWindowsByPlayer = passedBlockWindowsByPlayer; }
+
+    public Set<String> getWakePermissionByCardId() { return wakePermissionByCardId; }
+    public void setWakePermissionByCardId(Set<String> wakePermissionByCardId) { this.wakePermissionByCardId = wakePermissionByCardId; }
+
+    public boolean isBlocksDeclined() { return blocksDeclined; }
+    public void setBlocksDeclined(boolean blocksDeclined) { this.blocksDeclined = blocksDeclined; }
+
+    public CardRef getCurrentBlockerRef() { return currentBlockerRef; }
+    public void setCurrentBlockerRef(CardRef currentBlockerRef) { this.currentBlockerRef = currentBlockerRef; }
+
+    public String getCurrentBlockerCardId() { return currentBlockerCardId; }
+    public void setCurrentBlockerCardId(String currentBlockerCardId) { this.currentBlockerCardId = currentBlockerCardId; }
 }
