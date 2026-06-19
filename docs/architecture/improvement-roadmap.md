@@ -12,7 +12,7 @@ The rules-engine implementation plan now lives in [Mechanics Gaps](../implementa
 
 `ImpulseEngine` is extracted to `net.deckserver.jol.game.ImpulseEngine` with `open()`, `pass()` (returns `null` when all players pass), and `claim()`. `buildPassOrder` is public static on the engine. `ImpulseHandler`, `TurnPhaseHandler`, and `ActionHandler` all delegate to it; `HandlerUtils.buildPassOrder` is removed. 11 plain JUnit5 unit tests in `ImpulseEngineTest` cover all methods independently of the HTTP stack. Later card-play work should use this engine for `CARD_AS_PLAYED` and action/referendum/combat windows.
 
-### 2. Phase State Machine (high priority; Tranche 1 dependency)
+### 2. Phase State Machine (deferred; needed before MASTER and UNLOCK phase enforcement)
 
 `TurnPhaseHandler.handleAdvancePhase` cycles phases with a raw modulo and inline `if` for INFLUENCE setup. Formalise as a transition table:
 
@@ -166,24 +166,19 @@ Rules-enforced features also need new command types and controls as their backen
    - ~~DUEL contest-rule representation~~
    - ~~enforced-mode phase impulse cleanup~~
    - ~~`ImpulseEngine` extraction~~
-4. Enforced influence phase:
-   - phase-entry transfer budget
-   - ownership/current-player gates
-   - blood capacity ceiling
-   - frontend parity for `DrawCryptToUncontrolled` and `MergeAdvanced`
-5. Basic action resolution by `ActionType` + card targeting mode:
-   - declaration legality
-   - deterministic bleed/hunt/rescue/leave-torpor shell effects
-   - NRA tracking
-   - baseline block eligibility
-6. Card play legality and lifecycle + contextual playable-card controls:
-   - source/type/phase/timing gates
-   - `CARD_AS_PLAYED`
-   - replacement timing
-   - action-card limbo
-7. Voting / referendum engine + referendum modal
-8. Game end completion gaps: simultaneous oust, timeout, GW recording, tournament result propagation
-9. Blocking correctness: stealth/intercept, directed/undirected eligibility, redirects, wake effects, action continuation
-10. Diablerie full resolution and rule-bearing minion trait enforcement
-11. Combat system and combat panel
-12. Remaining mechanics from [Mechanics Gaps](../implementation/mechanics-gaps.md#implementation-priority): master action accounting, unlock-phase automatic effects, named counters, keyword/subtype parsing, anarch conversion, control transfer, hunting-ground effects, and broader trait enforcement.
+4. ~~Enforced influence phase~~ — **Done (Tranche 1)**
+5. ~~Basic action resolution by `ActionType` + card targeting mode~~ — **Done (Tranche 2)**
+6. ~~Card play legality and lifecycle~~ — **Done (Tranche 3)**
+7. ~~Voting / referendum engine~~ — **Done (Tranche 4)**
+8. ~~Blocking correctness: stealth/intercept, directed/undirected eligibility, redirects, wake effects~~ — **Done (Tranche 5)**
+9. ~~Combat state machine, damage, torpor, combat queue~~ — **Done (Tranche 6 partial)**; action continuing (card-play wiring) still open
+10. Game end completion gaps: simultaneous oust, timeout / withdrawal, GW recording
+11. Diablerie full resolution: blood transfer, equipment choice, discipline gain, Trophy award, blood hunt auto-trigger
+12. Leave Torpor blocked → diablerize decision prompt (controller of blocking vampire)
+13. EQUIP / EMPLOY_RETAINER / RECRUIT_ALLY / RESCUE resolution effects
+14. Contest upkeep (UNLOCK phase): 1 pool per contested unique, 1 blood per contested title
+15. Master phase action accounting: `masterActionsRemaining` on `GameData`, trifle bonus, out-of-turn debt tracking
+16. `ACTION_AS_ANNOUNCED` declaration window: wire `ActionStatus.AS_ANNOUNCED` between action-card play and block impulse
+17. Combat refinements: weapon damage parsing (`CardData.ranged`), prevention ordering + fractional rounding, `WOULD_GO_TO_TORPOR` / `WOULD_BE_BURNED` replacement windows, environmental damage
+18. Keyword parsing + trait enforcement: Scarce / Slave / Sterile / Blood Cursed / Red List / Trophy; rush action command
+19. Remaining P3/P4 items: named counters, anarch conversion, `TransferControl`, `AddCounter` blood capacity ceiling, conviction attachment gain on imbued entering play

@@ -78,7 +78,7 @@ Feature: Block eligibility
     Given "Carol" controls a ready vampire "Camille" with 3 blood and capacity 5
     When "Alice" declares a BLEED action targeting "Bob"
     And all players pass the block window
-    And "Alice" redirects the action to "Carol"
+    And "Bob" redirects the action to "Carol"
     Then blocks should not be declined
     And no rule violation should occur
 
