@@ -71,7 +71,7 @@ After the as-played window closes (Stage 1 complete), the playing player draws b
 
 ## Cancelled Cards
 
-A cancelled card is treated as though it was played for the purpose of uniqueness limiting. The cancelled card moves to `ASH_HEAP`. Hand size is not permanently reduced: draw replacement normally, and ignore any delayed-replacement clause printed on the cancelled card.
+A cancelled card is treated as though it was played by card name for any rule that limits how often a card can be played (uniqueness, once-per-game limits, once-per-action limits, etc.). The cancelled card moves to `ASH_HEAP`. Hand size is not permanently reduced: draw replacement normally, and ignore any delayed-replacement clause printed on the cancelled card.
 
 Cancellation cost handling is type-specific:
 - `ACTION` cards: do not pay cost; do not lock the acting minion; do not record an NRA key; allow the same action card to be attempted again.
@@ -139,14 +139,9 @@ Examples:
 
 ---
 
-## Missing Enum Values
+## CardType Enum Notes
 
-The following `CardType` enum values must be added before phase enforcement can be implemented:
-
-| Type         | Current state                                              |
-|--------------|------------------------------------------------------------|
-| `CONVICTION` | Maps to `CardType.NONE` in `GameInitService.toCardType()`  |
-| `POWER`      | Maps to `CardType.NONE` in `GameInitService.toCardType()`  |
+`CONVICTION` and `POWER` are correctly mapped in `GameInitService.toCardType()` (resolved in Tranche 0).
 
 `CardType.LOCATION` exists in the enum but is unreachable via normal CSV import (location cards arrive typed as `MASTER`). See [Card Keywords](./card-keywords.md) for keyword parsing.
 

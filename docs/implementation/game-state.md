@@ -348,7 +348,7 @@ Commands that move a card to a region (`MoveCard`, `PlayCard`) identify the targ
 
 ### Enforced-mode phase transitions
 
-`AdvancePhase` and `NextTurn` are permissive-only. In enforced mode the server drives phase transitions automatically. The current gap is that `TurnPhaseHandler` opens a generic undirected impulse window on `AdvancePhase` / `NextTurn`; impulse must be opened only by protocol events (action declarations, combat steps, referendum polling), not by entering a phase. This auto-open must be removed when enforced phase protocol is added.
+`AdvancePhase` and `NextTurn` are permissive-only. In enforced mode the server drives phase transitions automatically. `TurnPhaseHandler` gates the automatic undirected impulse window creation on `!game.isRulesEnforced()` — in enforced mode, impulse windows open only from protocol events (action declarations, combat steps, referendum polling), not from entering a phase.
 
 ### Influence phase implementation status
 
@@ -398,6 +398,16 @@ Remaining integration points:
 ### Blood capacity overflow
 
 In rules-enforced mode, `AddCounter` should cap `counters` at `capacity` when `capacity > 0` and the card is `VAMPIRE` or `IMBUED`. The same cap applies in `InfluenceCard` and `RescueFromTorpor`. Excess blood returns to the bank (no effect on other state).
+
+### DUEL contest exceptions
+
+DUEL (2-player) format has two contest rule exceptions that differ from STANDARD and V5:
+
+1. **Contested crypt cards remain usable.** In STANDARD/V5, a vampire that becomes contested drains to zero blood and is unusable until the contest resolves. In DUEL, the contested crypt card stays at its current blood and both controllers may continue using it. The `contested` flag is still set, but the blood-drain effect is not applied.
+
+2. **Duplicate vampire titles are not contested.** In STANDARD/V5, holding the same title (e.g. two players each control a Prince of the same city) triggers a contest that must be resolved at upkeep. In DUEL this title-contest rule does not apply.
+
+These exceptions are not yet enforced. `ContestHandler.isDuelContestExempt(GameData)` is the future enforcement branch point — it returns `true` when `game.getFormat() == GameFormat.DUEL` and is where DUEL-specific contest logic will be gated when automated contest enforcement is added.
 
 ### Minion traits
 

@@ -1,11 +1,11 @@
 package net.deckserver.jol.game.effect;
 
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
-import net.deckserver.jol.game.CardData;
-import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.PlayerData;
-import net.deckserver.jol.game.RegionData;
+import net.deckserver.jol.game.*;
+
+import java.util.List;
 
 /**
  * Applies a GameEffect to a GameData instance and returns a human-readable description
@@ -37,7 +37,23 @@ public final class GameEffectApplicator {
             case GameModeChangedEffect e        -> applyGameMode(game, e);
             case GameCompletedEffect e          -> applyGameCompleted(game, e);
             case OrderOfPlayReversedEffect e    -> applyOrderReversed(game, e);
+            case NraRecordedEffect e            -> applyNraRecorded(game, e);
+            case CardPlayChangedEffect e        -> applyCardPlayChanged(game, e);
+            case DrawCardEffect e               -> applyDrawCard(game, e);
+            case RestrictionAddedEffect e       -> applyRestrictionAdded(game, e);
+            case ReferendumStateChangedEffect e -> applyReferendumChanged(game, e);
+            case CombatStateChangedEffect e     -> applyCombatStateChanged(game, e);
+            case CombatQueueChangedEffect e -> {
+                game.setCombatQueue(new java.util.ArrayList<>(e.queue()));
+                yield null;
+            }
         };
+    }
+
+    private static String applyCombatStateChanged(GameData game, CombatStateChangedEffect e) {
+        game.setCombatState(e.combatState());
+        if (e.combatState() == null) return "Combat state cleared";
+        return "Combat: " + e.combatState().getAttackerRef() + " vs " + e.combatState().getDefenderRef();
     }
 
     private static String applyCardMoved(GameData game, CardMovedEffect e) {
@@ -138,6 +154,8 @@ public final class GameEffectApplicator {
         PlayerData player = game.getPlayer(e.currentPlayerName());
         if (player != null) game.setCurrentPlayer(player);
         game.setTransfersRemaining(0);
+        game.getNraActionsByCardId().clear();
+        game.getRecruitedThisTurn().clear();
         return "Turn " + e.turn() + " — " + e.currentPlayerName() + " begins";
     }
 
@@ -181,11 +199,61 @@ public final class GameEffectApplicator {
         return "Order of play is now " + (e.reversed() ? "reversed" : "normal");
     }
 
+    private static String applyNraRecorded(GameData game, NraRecordedEffect e) {
+        game.getNraActionsByCardId()
+                .computeIfAbsent(e.cardId(), k -> new java.util.HashSet<>())
+                .add(e.nraKey());
+        return null;
+    }
+
+    private static String applyCardPlayChanged(GameData game, CardPlayChangedEffect e) {
+        game.setCardPlayState(e.active() ? e.cardPlayState() : null);
+        if (e.active() && e.cardPlayState() != null) {
+            CardData card = game.getCard(e.cardPlayState().getCardId());
+            String name = card != null ? card.getName() : e.cardPlayState().getCardId();
+            return e.cardPlayState().getActingPlayer() + " played " + name + " — CARD_AS_PLAYED window open";
+        }
+        return null;
+    }
+
+    private static String applyRestrictionAdded(GameData game, RestrictionAddedEffect e) {
+        PendingActionState pending = game.getPendingAction();
+        if (pending == null) return null;
+        pending.getActionRestrictions()
+                .computeIfAbsent(e.type(), k -> new java.util.HashSet<>())
+                .add(e.targetRef());
+        CardData card = game.getCardByRef(e.targetRef());
+        String name = card != null ? card.getName() : e.targetRef().toString();
+        return name + " restricted: " + e.reason();
+    }
+
+    private static String applyDrawCard(GameData game, DrawCardEffect e) {
+        PlayerData player = game.getPlayer(e.playerName());
+        if (player == null) return null;
+        List<CardData> library = player.getRegion(RegionType.LIBRARY).getCards();
+        RegionData hand = player.getRegion(RegionType.HAND);
+        int drawn = 0;
+        for (int i = 0; i < e.count() && !library.isEmpty(); i++) {
+            hand.addCard(library.get(0), false);
+            drawn++;
+        }
+        return drawn > 0 ? e.playerName() + " drew " + drawn + " replacement card(s)" : null;
+    }
+
+    private static String applyReferendumChanged(GameData game, ReferendumStateChangedEffect e) {
+        game.setReferendum(e.referendum());
+        if (e.referendum() == null) return "Referendum closed";
+        return "Referendum opened: " + e.referendum().getTerms();
+    }
+
     static int computeTransferBudget(GameData game) {
         String[] parts = game.getTurn().split("\\.");
         int major = Integer.parseInt(parts[0]);
         if (major >= 2) return 4;
         int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 1;
+        if (game.getFormat() == GameFormat.DUEL) {
+            return minor == 1 ? 3 : 4;
+        }
         return Math.min(minor, 4);
     }
 }

@@ -15,6 +15,7 @@ The parsing script at `scripts/split_card_modes.py` reads `vteslib.csv` and prod
 | `csv/modes/vteslib_modes.csv` | One row per declaration mode per card (~3,500 rows) |
 | `csv/modes/vteslib_index.csv` | One row per original card with mode count and mode list |
 | `csv/modes/vteslib_as_above_review.csv` | Non-additive `As above` clauses that were not transformed automatically and need review |
+| `csv/modes/vteslib_mechanic_blocks.csv` | Unique newline-separated mechanic text blocks from resolved mode text, with counts and examples |
 
 ---
 
@@ -273,3 +274,13 @@ python3 scripts/split_card_modes.py
 ```
 
 Re-run whenever `vteslib.csv` is updated. The script is idempotent and overwrites `csv/modes/` on each run.
+
+To regenerate the unique mechanic-block inventory used for DSL modelling:
+
+```bash
+python3 scripts/extract_mechanic_blocks.py
+```
+
+This reads `csv/modes/vteslib_modes.csv`, splits each resolved `CardText` value
+on newlines, normalizes internal whitespace, deduplicates exact block text, and
+writes the sorted list to `csv/modes/vteslib_mechanic_blocks.csv`.

@@ -1,5 +1,6 @@
 package net.deckserver.jol.services.handler;
 
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.command.*;
@@ -27,6 +28,14 @@ public final class ContestHandler {
         String msg = actor + " uncontested " + HandlerUtils.cardToken(card);
         return new CommandResult(game, msg, new CommandLogData.ClearContestCardLog(actor, logRef),
                 List.of(new CardContestedEffect(card.getId(), false)));
+    }
+
+    /**
+     * In DUEL format, contested crypt cards remain usable and duplicate titles are not contested.
+     * This hook is the future enforcement branch point for DUEL contest exceptions.
+     */
+    static boolean isDuelContestExempt(GameData game) {
+        return game.getFormat() == GameFormat.DUEL;
     }
 
     public static CommandResult handleSetTitle(GameData game, SetTitle cmd, String actor) {

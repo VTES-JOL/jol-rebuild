@@ -13,6 +13,10 @@ public sealed interface GameEffect
                 EdgeChangedEffect, PhaseChangedEffect, TurnChangedEffect,
                 TransfersRemainingChangedEffect,
                 ImpulseWindowChangedEffect, PendingActionChangedEffect,
-                SequencingWindowChangedEffect, GameNotesChangedEffect,
-                GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect {
+                SequencingWindowChangedEffect, CardPlayChangedEffect, DrawCardEffect,
+                GameNotesChangedEffect,
+                GameModeChangedEffect, GameCompletedEffect, OrderOfPlayReversedEffect,
+                NraRecordedEffect, RestrictionAddedEffect,
+                ReferendumStateChangedEffect,
+                CombatStateChangedEffect, CombatQueueChangedEffect {
 }

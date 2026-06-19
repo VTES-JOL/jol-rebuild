@@ -8,8 +8,13 @@ public record DeclareAction(
         String gameId,
         CardRef actorRef,
         ActionType actionType,
-        String targetPlayerName
+        String targetPlayerName,
+        String referendumTerms
 ) implements GameCommand {
+    public DeclareAction(String gameId, CardRef actorRef, ActionType actionType, String targetPlayerName) {
+        this(gameId, actorRef, actionType, targetPlayerName, null);
+    }
+
     @Override public boolean isImpulseExempt()    { return true; }
     @Override public boolean isSequencingExempt() { return true; }
     @Override public boolean isEnforcedOnly() { return true; }

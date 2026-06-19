@@ -129,10 +129,27 @@ public class GameCommandService {
             case CloseImpulseWindow c   -> ImpulseHandler.handleCloseImpulseWindow(game, c, actor);
             case DeclareAction c        -> ActionHandler.handleDeclareAction(game, c, actor);
             case AttemptBlock c         -> ActionHandler.handleAttemptBlock(game, c, actor);
+            case AddStealth c           -> ActionHandler.handleAddStealth(game, c, actor);
+            case AddIntercept c         -> ActionHandler.handleAddIntercept(game, c, actor);
+            case RedirectAction c       -> ActionHandler.handleRedirectAction(game, c, actor);
+            case GrantWake c            -> ActionHandler.handleGrantWake(game, c, actor);
             case ResolveAction c        -> ActionHandler.handleResolveAction(game, c, actor);
             case AbortAction c          -> ActionHandler.handleAbortAction(game, c, actor);
             case PassSequencing c       -> SequencingHandler.handlePassSequencing(game, c, actor);
             case CloseSequencingWindow c -> SequencingHandler.handleCloseSequencingWindow(game, c, actor);
+            case OpenPolling c          -> ReferendumHandler.handleOpenPolling(game, c, actor);
+            case CastVotes c            -> ReferendumHandler.handleCastVotes(game, c, actor);
+            case BurnCardForVote c      -> ReferendumHandler.handleBurnCardForVote(game, c, actor);
+            case BurnEdgeForVote c      -> ReferendumHandler.handleBurnEdgeForVote(game, c, actor);
+            case CastPrisciBallot c     -> ReferendumHandler.handleCastPrisciBallot(game, c, actor);
+            case ClosePolling c         -> ReferendumHandler.handleClosePolling(game, c, actor);
+            case StartCombat c          -> CombatHandler.handleStartCombat(game, c, actor);
+            case Maneuver c             -> CombatHandler.handleManeuver(game, c, actor);
+            case DeclareStrike c        -> CombatHandler.handleDeclareStrike(game, c, actor);
+            case PreventDamage c        -> CombatHandler.handlePreventDamage(game, c, actor);
+            case DeclarePress c         -> CombatHandler.handleDeclarePress(game, c, actor);
+            case BeginCombatEnding c    -> CombatHandler.handleBeginCombatEnding(game, c, actor);
+            case ClearCombatState c     -> CombatHandler.handleClearCombatState(game, c, actor);
             case SetRulesMode c         -> { // available in both modes — intentionally not permissive-only or enforced-only
                 String label = c.enforced() ? "rules-enforced" : "permissive";
                 yield new CommandResult(game, actor + " switched the game to " + label + " mode",

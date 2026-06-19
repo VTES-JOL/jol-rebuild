@@ -8,6 +8,7 @@ import net.deckserver.jol.entity.Game;
 import net.deckserver.jol.entity.Registration;
 import net.deckserver.jol.entity.User;
 import net.deckserver.jol.enums.*;
+import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.model.krcg.*;
@@ -119,7 +120,42 @@ class GameInitServiceTest {
         assertEquals(playerNames.getFirst(), cursor.getName(), "Prey pointers do not form a closed ring");
     }
 
+    @Test
+    void initGame_convictionAndPowerCardsImportWithCorrectType() throws Exception {
+        // 101557 = React with Conviction (Conviction type), 100007 = Abjure (Power type)
+        var crypt   = new KrcgCrypt(12, List.of(new KrcgCard("200076", 12, "Anarch Convert")));
+        var library = new KrcgLibrary(60, List.of(
+                new KrcgLibraryGroup("Conviction", 30, List.of(new KrcgCard("101557", 30, "React with Conviction"))),
+                new KrcgLibraryGroup("Power", 30, List.of(new KrcgCard("100007", 30, "Abjure")))));
+        KrcgDeck deck = new KrcgDeck(null, null, crypt, library);
+
+        String deckJson = mapper.writeValueAsString(deck);
+        updateAllRegistrationDecks(deckJson);
+
+        GameData gd = initGame();
+
+        boolean hasConviction = gd.getCards().values().stream()
+                .anyMatch(c -> c.getType() == CardType.CONVICTION);
+        boolean hasPower = gd.getCards().values().stream()
+                .anyMatch(c -> c.getType() == CardType.POWER);
+        boolean hasNoneType = gd.getCards().values().stream()
+                .filter(c -> !c.isMinion())
+                .anyMatch(c -> c.getType() == CardType.NONE);
+
+        assertTrue(hasConviction, "No CONVICTION cards found");
+        assertTrue(hasPower, "No POWER cards found");
+        assertFalse(hasNoneType, "Some library cards imported as NONE");
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    @Transactional
+    void updateAllRegistrationDecks(String deckJson) {
+        for (String name : playerNames) {
+            Registration reg = Registration.find("user.username = ?1 and game.id = ?2", name, gameId).firstResult();
+            if (reg != null) reg.deck = deckJson;
+        }
+    }
 
     @Transactional
     GameData initGame() {

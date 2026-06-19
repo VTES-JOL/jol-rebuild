@@ -3,7 +3,15 @@ package net.deckserver.jol.game;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.ActionType;
+import net.deckserver.jol.enums.RestrictionType;
 import net.deckserver.jol.game.command.CardRef;
+
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.LinkedHashMap;
 
 @RegisterForReflection
 public class PendingActionState {
@@ -12,6 +20,23 @@ public class PendingActionState {
     private String targetPlayerName;
     private ActionStatus status;
     private CardRef blockerRef;
+    private boolean reachedResolution;
+    private boolean actionSuccessful;
+    private boolean bleedSuccessful;
+    private int bleedAmount;
+    private String actionCardId;
+    private boolean bleedLimitedUsed;
+    private boolean referendumSuccessful;
+    private String referendumTerms;
+    private Set<String> playedCardNames = new HashSet<>();
+    private Map<RestrictionType, Set<CardRef>> actionRestrictions = new EnumMap<>(RestrictionType.class);
+    private int stealth;
+    private Map<String, Integer> interceptsByBlockerRef = new LinkedHashMap<>();
+    private Set<String> passedBlockWindowsByPlayer = new HashSet<>();
+    private Set<String> wakePermissionByCardId = new HashSet<>();
+    private boolean blocksDeclined;
+    private CardRef currentBlockerRef;
+    private String currentBlockerCardId;
 
     public PendingActionState() {}
 
@@ -21,6 +46,24 @@ public class PendingActionState {
         this.targetPlayerName = src.targetPlayerName;
         this.status = src.status;
         this.blockerRef = src.blockerRef;
+        this.reachedResolution = src.reachedResolution;
+        this.actionSuccessful = src.actionSuccessful;
+        this.bleedSuccessful = src.bleedSuccessful;
+        this.bleedAmount = src.bleedAmount;
+        this.actionCardId = src.actionCardId;
+        this.bleedLimitedUsed = src.bleedLimitedUsed;
+        this.referendumSuccessful = src.referendumSuccessful;
+        this.referendumTerms = src.referendumTerms;
+        this.playedCardNames = new HashSet<>(src.playedCardNames);
+        this.actionRestrictions = new EnumMap<>(RestrictionType.class);
+        src.actionRestrictions.forEach((k, v) -> this.actionRestrictions.put(k, new HashSet<>(v)));
+        this.stealth = src.stealth;
+        this.interceptsByBlockerRef = new LinkedHashMap<>(src.interceptsByBlockerRef);
+        this.passedBlockWindowsByPlayer = new HashSet<>(src.passedBlockWindowsByPlayer);
+        this.wakePermissionByCardId = new HashSet<>(src.wakePermissionByCardId);
+        this.blocksDeclined = src.blocksDeclined;
+        this.currentBlockerRef = src.currentBlockerRef;
+        this.currentBlockerCardId = src.currentBlockerCardId;
     }
 
     public PendingActionState withStatus(ActionStatus newStatus) {
@@ -43,4 +86,59 @@ public class PendingActionState {
 
     public CardRef getBlockerRef() { return blockerRef; }
     public void setBlockerRef(CardRef blockerRef) { this.blockerRef = blockerRef; }
+
+    public boolean isReachedResolution() { return reachedResolution; }
+    public void setReachedResolution(boolean reachedResolution) { this.reachedResolution = reachedResolution; }
+
+    public boolean isActionSuccessful() { return actionSuccessful; }
+    public void setActionSuccessful(boolean actionSuccessful) { this.actionSuccessful = actionSuccessful; }
+
+    public boolean isBleedSuccessful() { return bleedSuccessful; }
+    public void setBleedSuccessful(boolean bleedSuccessful) { this.bleedSuccessful = bleedSuccessful; }
+
+    public int getBleedAmount() { return bleedAmount; }
+    public void setBleedAmount(int bleedAmount) { this.bleedAmount = bleedAmount; }
+
+    public String getActionCardId() { return actionCardId; }
+    public void setActionCardId(String actionCardId) { this.actionCardId = actionCardId; }
+
+    public boolean isBleedLimitedUsed() { return bleedLimitedUsed; }
+    public void setBleedLimitedUsed(boolean bleedLimitedUsed) { this.bleedLimitedUsed = bleedLimitedUsed; }
+
+    public boolean isReferendumSuccessful() { return referendumSuccessful; }
+    public void setReferendumSuccessful(boolean referendumSuccessful) { this.referendumSuccessful = referendumSuccessful; }
+
+    public String getReferendumTerms() { return referendumTerms; }
+    public void setReferendumTerms(String referendumTerms) { this.referendumTerms = referendumTerms; }
+
+    public Set<String> getPlayedCardNames() { return playedCardNames; }
+    public void setPlayedCardNames(Set<String> playedCardNames) { this.playedCardNames = playedCardNames; }
+
+    public Map<RestrictionType, Set<CardRef>> getActionRestrictions() { return actionRestrictions; }
+    public void setActionRestrictions(Map<RestrictionType, Set<CardRef>> actionRestrictions) { this.actionRestrictions = actionRestrictions; }
+
+    public boolean isRestricted(RestrictionType type, CardRef ref) {
+        return actionRestrictions.getOrDefault(type, Set.of()).contains(ref);
+    }
+
+    public int getStealth() { return stealth; }
+    public void setStealth(int stealth) { this.stealth = stealth; }
+
+    public Map<String, Integer> getInterceptsByBlockerRef() { return interceptsByBlockerRef; }
+    public void setInterceptsByBlockerRef(Map<String, Integer> interceptsByBlockerRef) { this.interceptsByBlockerRef = interceptsByBlockerRef; }
+
+    public Set<String> getPassedBlockWindowsByPlayer() { return passedBlockWindowsByPlayer; }
+    public void setPassedBlockWindowsByPlayer(Set<String> passedBlockWindowsByPlayer) { this.passedBlockWindowsByPlayer = passedBlockWindowsByPlayer; }
+
+    public Set<String> getWakePermissionByCardId() { return wakePermissionByCardId; }
+    public void setWakePermissionByCardId(Set<String> wakePermissionByCardId) { this.wakePermissionByCardId = wakePermissionByCardId; }
+
+    public boolean isBlocksDeclined() { return blocksDeclined; }
+    public void setBlocksDeclined(boolean blocksDeclined) { this.blocksDeclined = blocksDeclined; }
+
+    public CardRef getCurrentBlockerRef() { return currentBlockerRef; }
+    public void setCurrentBlockerRef(CardRef currentBlockerRef) { this.currentBlockerRef = currentBlockerRef; }
+
+    public String getCurrentBlockerCardId() { return currentBlockerCardId; }
+    public void setCurrentBlockerCardId(String currentBlockerCardId) { this.currentBlockerCardId = currentBlockerCardId; }
 }

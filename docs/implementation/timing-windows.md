@@ -65,6 +65,8 @@ This separates generic card lifecycle from workflow timing. For example, a react
 
 The canonical diagram source is [action-state-machine.puml](./action-state-machine.puml).
 
+For rules review, use the companion [Timing Window Review Guide](./timing-window-review-guide.md), which presents the same mechanics as scenario checklists, common-path tables, and return-point summaries.
+
 ```bash
 plantuml -tsvg docs/implementation/action-state-machine.puml
 ```

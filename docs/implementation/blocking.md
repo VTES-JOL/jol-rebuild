@@ -72,14 +72,14 @@ Both totals accumulate on `PendingActionState` and carry across all block window
 
 ### State fields on `PendingActionState`
 
-| Field                        | Type                    | Description                                                                               |
-|------------------------------|-------------------------|-------------------------------------------------------------------------------------------|
-| `stealth`                    | `int`                   | Action-wide running stealth total                                                         |
-| `interceptsByBlockerRef`     | `Map<CardRef, Integer>` | Per-blocker intercept; each blocker has their own accumulator; carries forward on redirect |
-| `passedBlockWindowsByPlayer` | `Set<String>`           | Players who have passed in the current block window; reset when a redirect opens a new window |
-| `cannotBlockRefs`            | `Set<CardRef>`          | Minions prohibited from blocking for the duration of this action                         |
-| `currentBlockerRef`          | `CardRef?`              | Active blocker in a current attempt; null when no attempt in progress                    |
-| `blocksDeclined`             | `boolean`               | True after all eligible Methuselahs have declined block attempts and before action resolution; reset on redirect |
+| Field                        | Type                                         | Description                                                                               |
+|------------------------------|----------------------------------------------|-------------------------------------------------------------------------------------------|
+| `stealth`                    | `int`                                        | Action-wide running stealth total                                                         |
+| `interceptsByBlockerRef`     | `Map<CardRef, Integer>`                      | Per-blocker intercept; each blocker has their own accumulator; carries forward on redirect |
+| `passedBlockWindowsByPlayer` | `Set<String>`                                | Players who have passed in the current block window; reset when a redirect opens a new window |
+| `actionRestrictions`         | `Map<RestrictionType, Set<CardRef>>`         | Per-type set of restricted minions; use `CANNOT_BLOCK` key for block restriction. Replaces the earlier `cannotBlockRefs` design. See [Action Restrictions](./action-restrictions.md). |
+| `currentBlockerRef`          | `CardRef?`                                   | Active blocker in a current attempt; null when no attempt in progress                    |
+| `blocksDeclined`             | `boolean`                                    | True after all eligible Methuselahs have declined block attempts and before action resolution; reset on redirect |
 
 ### Comparison rule
 
@@ -105,7 +105,7 @@ When a reaction card redirects an action to a new target:
 1. Update `PendingActionState.targetPlayerName` to the new target.
 2. Carry all accumulated modifiers: `stealth`, `interceptsByBlockerRef`, `bleedAmount`.
 3. Clear `passedBlockWindowsByPlayer` — players who passed in the previous window may attempt again.
-4. Minions in `cannotBlockRefs` remain ineligible for the full action.
+4. Minions in `actionRestrictions[CANNOT_BLOCK]` remain ineligible for the full action.
 5. Set `blocksDeclined = false`.
 6. Re-open the block-attempt impulse window with the appropriate context for the new target.
 
@@ -134,7 +134,10 @@ Wake effects are reaction cards, so they can be played during normal reaction-ca
 
 That includes the Blocks Declined pre-resolution window. For example, after a bleed's block attempts have been declined and before `ResolveAction`, a locked minion can play a wake effect, then play a legal bleed-redirect reaction such as Deflection.
 
-Wake effects also have one special timing permission: a locked minion may play a wake effect during the nested `CARD_AS_PLAYED` workflow when that wake effect is needed to play another reaction/effect that itself is legal there (for example, an "as it is played" canceller). This is not the `ACTION_AS_ANNOUNCED` window. Cards playable "as the action is announced" use `ACTION_AS_ANNOUNCED`; wake effects do not automatically use that window unless their own card text says so.
+Wake effects have two special timing permissions beyond normal reaction-card windows:
+
+1. **`CARD_AS_PLAYED` window:** a locked minion may play a wake effect during the nested `CARD_AS_PLAYED` workflow when that wake effect is needed to play another reaction/effect that itself is legal there (for example, an "as it is played" canceller).
+2. **`ACTION_AS_ANNOUNCED` window:** a locked minion may play a wake effect as the action is announced when needed to play another effect that itself must be played in that `ACTION_AS_ANNOUNCED` window.
 
 A reaction card that unlocks a minion but does not grant wake-style "as though unlocked" permission does not get the as-played exception.
 
@@ -146,9 +149,11 @@ A reaction card that unlocks a minion but does not grant wake-style "as though u
 
 - All accumulated modifiers (`stealth`, `interceptsByBlockerRef`, `bleedAmount`) are preserved.
 - `passedBlockWindowsByPlayer` is cleared — players who passed in the pre-combat window may attempt again.
-- `cannotBlockRefs` remains — minions that could not block before still cannot block.
+- `actionRestrictions[CANNOT_BLOCK]` remains — minions that could not block before still cannot block.
 
 `ACTION_CONTINUING` must be added to the `ActionStatus` Java enum before this path can be wired — see [Actions § ActionStatus Enum](./actions.md#actionstatus-enum). The detection logic (a continue-the-action card play after combat triggers the status change and re-opens the block window) is not yet implemented.
+
+In the `ACTION_CONTINUING` window, "after combat ends" and "after block resolution" effects triggered by the preceding block are playable alongside the continue-the-action effect. There is no mandatory ordering between them. The continue-the-action effect itself opens this window; other eligible "after combat ends" / "after block resolution" effects may also be played here before block attempts re-open.
 
 ---
 
@@ -166,6 +171,6 @@ A minion may attempt to block if **all** of the following hold:
 2. Minion is unlocked, **or** the minion is in `wakePermissionByCardId`.
 3. Minion's controller is the current `currentImpulseHolder`.
 4. For directed actions: minion's controller = `targetPlayerName` (or card text explicitly grants them permission).
-5. Minion's card ID is not in `cannotBlockRefs`.
+5. Minion is not in `actionRestrictions[CANNOT_BLOCK]` (see [Action Restrictions](./action-restrictions.md)).
 6. Minion is not the acting minion.
 7. Minion is not contested (`CardData.contested = false`).

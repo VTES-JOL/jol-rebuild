@@ -231,6 +231,77 @@ class DeckValidatorTest {
         assertEquals(GameFormat.DUEL, duel.validate(deck, GameFormat.DUEL).format());
     }
 
+    // ── Crypt group validation ────────────────────────────────────────────────
+    // Card groups: 200016=G1(Adrianne), 200001=G2(Aabbt Kindred),
+    //              200012=G3(Adelaide Davis), 200002=G4(Aaron Bathurst), 200076=ANY(Anarch Convert)
+
+    @Test
+    void standard_cryptGroups_singleGroup_valid() {
+        KrcgDeck deck = deckMultiCrypt(
+                List.of(new KrcgCard("200001", 6, "Aabbt Kindred"),
+                        new KrcgCard("200001", 6, "Aabbt Kindred")),
+                "100518", "Deflection", 60);
+        assertTrue(standard.validate(deck, GameFormat.STANDARD).valid());
+    }
+
+    @Test
+    void standard_cryptGroups_allAny_valid() {
+        KrcgDeck deck = deck("200076", "Anarch Convert", 12, "100518", "Deflection", 60);
+        assertTrue(standard.validate(deck, GameFormat.STANDARD).valid());
+    }
+
+    @Test
+    void standard_cryptGroups_adjacentGroups_valid() {
+        KrcgDeck deck = deckMultiCrypt(
+                List.of(new KrcgCard("200001", 6, "Aabbt Kindred"),
+                        new KrcgCard("200012", 6, "Adelaide Davis")),
+                "100518", "Deflection", 60);
+        assertTrue(standard.validate(deck, GameFormat.STANDARD).valid());
+    }
+
+    @Test
+    void standard_cryptGroups_anyPlusOneGroup_valid() {
+        KrcgDeck deck = deckMultiCrypt(
+                List.of(new KrcgCard("200076", 6, "Anarch Convert"),
+                        new KrcgCard("200001", 6, "Aabbt Kindred")),
+                "100518", "Deflection", 60);
+        assertTrue(standard.validate(deck, GameFormat.STANDARD).valid());
+    }
+
+    @Test
+    void standard_cryptGroups_nonAdjacentGroups_invalid() {
+        KrcgDeck deck = deckMultiCrypt(
+                List.of(new KrcgCard("200001", 6, "Aabbt Kindred"),
+                        new KrcgCard("200002", 6, "Aaron Bathurst")),
+                "100518", "Deflection", 60);
+        ValidationResult result = standard.validate(deck, GameFormat.STANDARD);
+        assertFalse(result.valid());
+        assertThat(result.errors(), hasItem(containsStringIgnoringCase("consecutive")));
+    }
+
+    @Test
+    void standard_cryptGroups_threeGroups_invalid() {
+        KrcgDeck deck = deckMultiCrypt(
+                List.of(new KrcgCard("200016", 4, "Adrianne"),
+                        new KrcgCard("200001", 4, "Aabbt Kindred"),
+                        new KrcgCard("200012", 4, "Adelaide Davis")),
+                "100518", "Deflection", 60);
+        ValidationResult result = standard.validate(deck, GameFormat.STANDARD);
+        assertFalse(result.valid());
+        assertThat(result.errors(), hasItem(containsStringIgnoringCase("consecutive")));
+    }
+
+    @Test
+    void standard_cryptGroups_anyPlusNonAdjacentGroups_invalid() {
+        KrcgDeck deck = deckMultiCrypt(
+                List.of(new KrcgCard("200076", 4, "Anarch Convert"),
+                        new KrcgCard("200001", 4, "Aabbt Kindred"),
+                        new KrcgCard("200002", 4, "Aaron Bathurst")),
+                "100518", "Deflection", 60);
+        ValidationResult result = standard.validate(deck, GameFormat.STANDARD);
+        assertFalse(result.valid());
+    }
+
     // ── V5DeckValidator ───────────────────────────────────────────────────────
 
     @Test

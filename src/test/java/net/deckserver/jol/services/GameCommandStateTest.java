@@ -3,6 +3,7 @@ package net.deckserver.jol.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.exception.GameRuleException;
@@ -10,6 +11,8 @@ import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.*;
+import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
+import net.deckserver.jol.services.handler.TurnPhaseHandler;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,6 +96,34 @@ class GameCommandStateTest {
         assertNotEquals(first, gameData.getCurrentPlayerName());
         assertEquals("1.2", gameData.getTurn());
         assertEquals(Phase.UNLOCK, gameData.getPhase());
+    }
+
+    @Test
+    void advancePhase_permissive_createsImpulseWindow() {
+        String actor = gameData.getCurrentPlayerName();
+        gameCommandService.execute(actor, new AdvancePhase(gameId));
+        assertNotNull(gameData.getImpulseWindow(), "Permissive advance should open an impulse window");
+        assertTrue(gameData.getImpulseWindow().isActive());
+    }
+
+    @Test
+    void advancePhase_enforced_doesNotCreateImpulseWindow() {
+        gameData.setRulesEnforced(true);
+        String actor = gameData.getCurrentPlayerName();
+        var result = TurnPhaseHandler.handleAdvancePhase(gameData, new AdvancePhase(gameId), actor);
+        boolean hasImpulse = result.effects().stream()
+                .anyMatch(e -> e instanceof ImpulseWindowChangedEffect i && i.active());
+        assertFalse(hasImpulse, "Enforced advance must not include an active ImpulseWindowChangedEffect");
+    }
+
+    @Test
+    void nextTurn_enforced_doesNotCreateImpulseWindow() {
+        gameData.setRulesEnforced(true);
+        String actor = gameData.getCurrentPlayerName();
+        var result = TurnPhaseHandler.handleNextTurn(gameData, new NextTurn(gameId), actor);
+        boolean hasImpulse = result.effects().stream()
+                .anyMatch(e -> e instanceof ImpulseWindowChangedEffect i && i.active());
+        assertFalse(hasImpulse, "Enforced NextTurn must not include an active ImpulseWindowChangedEffect");
     }
 
     // ── Pool ──────────────────────────────────────────────────────────────────
@@ -201,6 +232,29 @@ class GameCommandStateTest {
 
     @Test
     void advancePhase_toInfluence_round2Plus_budgetAlways4() {
+        gameData.setTurn("2.1");
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(4, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_duel_turn1_1_budgetIs3() {
+        gameData.setFormat(GameFormat.DUEL);
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(3, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_duel_turn1_2_budgetIs4() {
+        gameData.setFormat(GameFormat.DUEL);
+        gameData.setTurn("1.2");
+        advanceToInfluence(gameData.getCurrentPlayerName());
+        assertEquals(4, gameData.getTransfersRemaining());
+    }
+
+    @Test
+    void advancePhase_toInfluence_duel_round2Plus_budgetAlways4() {
+        gameData.setFormat(GameFormat.DUEL);
         gameData.setTurn("2.1");
         advanceToInfluence(gameData.getCurrentPlayerName());
         assertEquals(4, gameData.getTransfersRemaining());
@@ -608,6 +662,78 @@ class GameCommandStateTest {
         gameCommandService.execute(ACTOR, new SetPool(gameId, ACTOR, current - 1000));
 
         assertEquals(0, gameData.getPlayer(ACTOR).getPool());
+    }
+
+    // ── Enforced mode ─────────────────────────────────────────────────────────
+
+    @Test
+    void advancePhase_enforced_blockedForNonCurrentPlayer() {
+        gameData.setRulesEnforced(true);
+        // Current player is Player5; ACTOR is Player1
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new AdvancePhase(gameId)));
+    }
+
+    @Test
+    void nextTurn_enforced_blockedForNonCurrentPlayer() {
+        gameData.setRulesEnforced(true);
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(ACTOR, new NextTurn(gameId)));
+    }
+
+    @Test
+    void advancePhase_enforced_allowedForCurrentPlayer() {
+        gameData.setRulesEnforced(true);
+        String actor = gameData.getCurrentPlayerName();
+        gameCommandService.execute(actor, new AdvancePhase(gameId));
+        assertEquals(Phase.MASTER, gameData.getPhase());
+    }
+
+    @Test
+    void transferBlood_enforced_blockedWhenOverCapacity() {
+        gameData.setRulesEnforced(true);
+        gameData.setPhase(Phase.INFLUENCE);
+        String actor = gameData.getCurrentPlayerName(); // Player5
+        gameData.setCurrentPlayer(gameData.getPlayer(actor));
+        gameData.setTransfersRemaining(4);
+        CardData card = firstUncontrolled(actor);
+        card.setCounters(card.getCapacity()); // already at capacity
+
+        assertThrows(GameRuleException.class,
+                () -> gameCommandService.execute(actor,
+                        new TransferBlood(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0), 1)));
+    }
+
+    @Test
+    void transferBlood_permissive_allowedOverCapacity() {
+        gameData.setRulesEnforced(false);
+        gameData.setPhase(Phase.INFLUENCE);
+        String actor = gameData.getCurrentPlayerName();
+        gameData.setCurrentPlayer(gameData.getPlayer(actor));
+        gameData.setTransfersRemaining(4);
+        CardData card = firstUncontrolled(actor);
+        int cap = card.getCapacity();
+        card.setCounters(cap); // already at capacity
+
+        // Should not throw in permissive mode
+        gameCommandService.execute(actor,
+                new TransferBlood(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0), 1));
+        assertEquals(cap + 1, card.getCounters());
+    }
+
+    @Test
+    void influenceCard_enforced_worksForCurrentPlayer() {
+        gameData.setRulesEnforced(true);
+        gameData.setPhase(Phase.INFLUENCE);
+        String actor = gameData.getCurrentPlayerName();
+        gameData.setCurrentPlayer(gameData.getPlayer(actor));
+        CardData card = firstUncontrolled(actor);
+        card.setCounters(card.getCapacity());
+
+        // Should succeed
+        gameCommandService.execute(actor,
+                new InfluenceCard(gameId, CardRef.of(actor, RegionType.UNCONTROLLED, 0)));
+        assertTrue(gameData.getPlayer(actor).getRegion(RegionType.READY).getCards().contains(card));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

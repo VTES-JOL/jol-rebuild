@@ -3,6 +3,7 @@ package net.deckserver.jol.services.handler;
 import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.ImpulseEngine;
 import net.deckserver.jol.game.ImpulseState;
 import net.deckserver.jol.game.PlayerData;
 import net.deckserver.jol.game.command.AdvancePhase;
@@ -13,6 +14,7 @@ import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
 import net.deckserver.jol.game.effect.PhaseChangedEffect;
 import net.deckserver.jol.game.effect.TurnChangedEffect;
 import net.deckserver.jol.services.CommandResult;
+import net.deckserver.jol.services.GameRules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ public final class TurnPhaseHandler {
     private TurnPhaseHandler() {}
 
     public static CommandResult handleAdvancePhase(GameData game, AdvancePhase cmd, String actor) {
+        if (game.isRulesEnforced()) GameRules.requireCurrentPlayer(game, actor);
         Phase[] phases = Phase.values();
         int current = game.getPhase() != null ? game.getPhase().ordinal() : 0;
         int next = (current + 1) % phases.length;
@@ -34,7 +37,7 @@ public final class TurnPhaseHandler {
         List<GameEffect> effects = new ArrayList<>();
         effects.add(new PhaseChangedEffect(nextPhase.name()));
         String currentPlayerName = game.getCurrentPlayerName();
-        if (currentPlayerName != null) {
+        if (currentPlayerName != null && !game.isRulesEnforced()) {
             effects.add(buildAutoImpulseEffect(game, currentPlayerName));
         }
         String msg = actor + " advanced to " + nextPhase.getDescription() + " phase";
@@ -42,6 +45,7 @@ public final class TurnPhaseHandler {
     }
 
     public static CommandResult handleNextTurn(GameData game, NextTurn cmd, String actor) {
+        if (game.isRulesEnforced()) GameRules.requireCurrentPlayer(game, actor);
         List<GameEffect> effects = computeNextTurnEffects(game, cmd.gameId(), Set.of(), actor);
         if (effects.isEmpty()) return CommandResult.silent(game);
         TurnChangedEffect turnEffect = (TurnChangedEffect) effects.getFirst();
@@ -82,18 +86,14 @@ public final class TurnPhaseHandler {
         effects.add(new TurnChangedEffect(turn, nextPlayer.getName()));
         effects.add(new PhaseChangedEffect(Phase.UNLOCK.name()));
         effects.addAll(HandlerUtils.buildUnlockEffects(nextPlayer));
-        effects.add(buildAutoImpulseEffect(game, nextPlayer.getName()));
+        if (!game.isRulesEnforced()) {
+            effects.add(buildAutoImpulseEffect(game, nextPlayer.getName()));
+        }
         return effects;
     }
 
     static ImpulseWindowChangedEffect buildAutoImpulseEffect(GameData game, String actingPlayer) {
-        ImpulseState state = new ImpulseState();
-        state.setActive(true);
-        state.setContext(ImpulseContext.UNDIRECTED);
-        state.setActingPlayer(actingPlayer);
-        state.setCurrentImpulseHolder(actingPlayer);
-        state.setConsecutivePasses(0);
-        state.setPassOrder(HandlerUtils.buildPassOrder(game, ImpulseContext.UNDIRECTED, actingPlayer, null));
+        ImpulseState state = ImpulseEngine.open(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
         return new ImpulseWindowChangedEffect(true, state);
     }
 }

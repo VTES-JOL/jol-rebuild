@@ -12,10 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BaseValidator implements DeckValidator {
@@ -44,6 +41,7 @@ public class BaseValidator implements DeckValidator {
 
         errors.addAll(containsBannedCards(deck));
         errors.addAll(outsideWhitelistCards(deck));
+        errors.addAll(validateCryptGroups(deck));
 
         return new ValidationResult(format, errors.isEmpty(), errors);
     }
@@ -64,6 +62,30 @@ public class BaseValidator implements DeckValidator {
                 .filter(card -> !whitelist.contains(card.id()))
                 .map(card -> card.name() + " is not allowed in this format.")
                 .toList();
+    }
+
+    List<String> validateCryptGroups(KrcgDeck deck) {
+        List<String> errors = new ArrayList<>();
+        TreeSet<Integer> groups = new TreeSet<>();
+
+        for (KrcgCard card : deck.cryptCards()) {
+            String group = service.getCryptGroup(card.id());
+            if (group == null) {
+                errors.add("Unrecognised crypt card '" + card.name() + "' — group could not be verified.");
+            } else if (!group.equals("ANY")) {
+                groups.add(Integer.parseInt(group));
+            }
+        }
+
+        if (groups.size() >= 2) {
+            int min = groups.first();
+            int max = groups.last();
+            if (!(groups.size() == 2 && max - min == 1)) {
+                errors.add("Crypt must use vampires from one group or two consecutive groups.");
+            }
+        }
+
+        return errors;
     }
 
     /** Override in subclasses to provide an ID-based card whitelist. */

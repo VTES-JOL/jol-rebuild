@@ -43,6 +43,8 @@ export type GainEdgeCommand = { type: 'GAIN_EDGE'; gameId: string };
 export type TransferBloodCommand = { type: 'TRANSFER_BLOOD'; gameId: string; ref: CardRef; amount: number };
 export type InfluenceCardCommand = { type: 'INFLUENCE_CARD'; gameId: string; ref: CardRef };
 export type MoveToCryptCommand = { type: 'MOVE_TO_CRYPT'; gameId: string; ref: CardRef };
+export type DrawCryptToUncontrolledCommand = { type: 'DRAW_CRYPT_TO_UNCONTROLLED'; gameId: string };
+export type MergeAdvancedCommand = { type: 'MERGE_ADVANCED'; gameId: string; ref: CardRef; targetRef: CardRef };
 export type MoveToTorporCommand = { type: 'MOVE_TO_TORPOR'; gameId: string; ref: CardRef };
 export type RescueFromTorporCommand = { type: 'RESCUE_FROM_TORPOR'; gameId: string; ref: CardRef };
 export type BurnMinionCommand = { type: 'BURN_MINION'; gameId: string; ref: CardRef };
@@ -76,6 +78,10 @@ export type ResolveActionCommand = { type: 'RESOLVE_ACTION'; gameId: string };
 export type AbortActionCommand = { type: 'ABORT_ACTION'; gameId: string };
 export type PassSequencingCommand = { type: 'PASS_SEQUENCING'; gameId: string; playerName: string };
 export type CloseSequencingWindowCommand = { type: 'CLOSE_SEQUENCING_WINDOW'; gameId: string };
+export type AddStealthCommand = { type: 'ADD_STEALTH'; gameId: string; actorRef: import('./types').CardRef; amount: number };
+export type AddInterceptCommand = { type: 'ADD_INTERCEPT'; gameId: string; blockerRef: import('./types').CardRef; amount: number };
+export type RedirectActionCommand = { type: 'REDIRECT_ACTION'; gameId: string; newTargetPlayer: string };
+export type GrantWakeCommand = { type: 'GRANT_WAKE'; gameId: string; minionRef: import('./types').CardRef };
 
 export type GameCommand =
     | AdvancePhaseCommand | NextTurnCommand
@@ -85,13 +91,19 @@ export type GameCommand =
     | AddCounterCommand | RemoveCounterCommand | SetCardNotesCommand
     | SetPoolCommand | GainEdgeCommand
     | TransferBloodCommand | InfluenceCardCommand | MoveToCryptCommand
+    | DrawCryptToUncontrolledCommand | MergeAdvancedCommand
     | MoveToTorporCommand | RescueFromTorporCommand | BurnMinionCommand
     | ContestCardCommand | ClearContestCardCommand | SetTitleCommand
     | OustPlayerCommand | SetChoiceCommand | ReverseOrderCommand | SetGameNotesCommand
     | OpenImpulseWindowCommand | PassImpulseCommand | ClaimImpulseCommand | CloseImpulseWindowCommand
     | DeclareActionCommand | AttemptBlockCommand | ResolveActionCommand | AbortActionCommand
     | PassSequencingCommand | CloseSequencingWindowCommand
-    | SetRulesModeCommand;
+    | AddStealthCommand | AddInterceptCommand | RedirectActionCommand | GrantWakeCommand
+    | SetRulesModeCommand
+    | OpenPollingCommand | CastVotesCommand | BurnCardForVoteCommand
+    | BurnEdgeForVoteCommand | CastPrisciBallotCommand | ClosePollingCommand
+    | StartCombatCommand | ManeuverCommand | DeclareStrikeCommand | PreventDamageCommand
+    | DeclarePressCommand | BeginCombatEndingCommand | ClearCombatStateCommand;
 
 export function moveCard(gameId: string, ref: CardRef, targetPlayerName: string, targetRegionType: RegionType, position = -1): MoveCardCommand {
     return {type: 'MOVE_CARD', gameId, ref, targetPlayerName, targetRegionType, position};
@@ -135,6 +147,14 @@ export function rescueFromTorpor(gameId: string, ref: CardRef): RescueFromTorpor
 
 export function moveToCrypt(gameId: string, ref: CardRef): MoveToCryptCommand {
     return {type: 'MOVE_TO_CRYPT', gameId, ref};
+}
+
+export function drawCryptToUncontrolled(gameId: string): DrawCryptToUncontrolledCommand {
+    return {type: 'DRAW_CRYPT_TO_UNCONTROLLED', gameId};
+}
+
+export function mergeAdvanced(gameId: string, ref: CardRef, targetRef: CardRef): MergeAdvancedCommand {
+    return {type: 'MERGE_ADVANCED', gameId, ref, targetRef};
 }
 
 export function burnMinion(gameId: string, ref: CardRef): BurnMinionCommand {
@@ -257,8 +277,95 @@ export function closeSequencingWindow(gameId: string): CloseSequencingWindowComm
     return {type: 'CLOSE_SEQUENCING_WINDOW', gameId};
 }
 
+export function addStealth(gameId: string, actorRef: import('./types').CardRef, amount: number): AddStealthCommand {
+    return {type: 'ADD_STEALTH', gameId, actorRef, amount};
+}
+
+export function addIntercept(gameId: string, blockerRef: import('./types').CardRef, amount: number): AddInterceptCommand {
+    return {type: 'ADD_INTERCEPT', gameId, blockerRef, amount};
+}
+
+export function redirectAction(gameId: string, newTargetPlayer: string): RedirectActionCommand {
+    return {type: 'REDIRECT_ACTION', gameId, newTargetPlayer};
+}
+
+export function grantWake(gameId: string, minionRef: import('./types').CardRef): GrantWakeCommand {
+    return {type: 'GRANT_WAKE', gameId, minionRef};
+}
+
+export type OpenPollingCommand = { type: 'OPEN_POLLING'; gameId: string };
+export type CastVotesCommand = { type: 'CAST_VOTES'; gameId: string; playerName: string; cardRef: CardRef; amount: number; forOrAgainst: 'FOR' | 'AGAINST' };
+export type BurnCardForVoteCommand = { type: 'BURN_CARD_FOR_VOTE'; gameId: string; playerName: string; cardRef: CardRef; forOrAgainst: 'FOR' | 'AGAINST' };
+export type BurnEdgeForVoteCommand = { type: 'BURN_EDGE_FOR_VOTE'; gameId: string; playerName: string; forOrAgainst: 'FOR' | 'AGAINST' };
+export type CastPrisciBallotCommand = { type: 'CAST_PRISCI_BALLOT'; gameId: string; cardRef: CardRef; forOrAgainst: 'FOR' | 'AGAINST' };
+export type ClosePollingCommand = { type: 'CLOSE_POLLING'; gameId: string };
+
+export type Range = 'CLOSE' | 'LONG';
+export type StrikeType = 'HAND' | 'MELEE_WEAPON' | 'FIREARM' | 'OTHER_RANGED' | 'FIXED_DAMAGE' | 'DODGE' | 'COMBAT_ENDS' | 'FIRST_STRIKE' | 'STEAL_BLOOD';
+export type PressDecision = 'CONTINUE' | 'END';
+
+export type StartCombatCommand = { type: 'START_COMBAT'; gameId: string; attackerRef: CardRef; defenderRef: CardRef };
+export type ManeuverCommand = { type: 'MANEUVER'; gameId: string; combatantRef: CardRef; toRange: Range };
+export type DeclareStrikeCommand = { type: 'DECLARE_STRIKE'; gameId: string; combatantRef: CardRef; strikeType: StrikeType; weaponRef?: CardRef | null; damage: number };
+export type PreventDamageCommand = { type: 'PREVENT_DAMAGE'; gameId: string; combatantRef: CardRef; amount: number };
+export type DeclarePressCommand = { type: 'DECLARE_PRESS'; gameId: string; combatantRef: CardRef; decision: PressDecision };
+export type BeginCombatEndingCommand = { type: 'BEGIN_COMBAT_ENDING'; gameId: string };
+export type ClearCombatStateCommand = { type: 'CLEAR_COMBAT_STATE'; gameId: string };
+
+export function startCombat(gameId: string, attackerRef: CardRef, defenderRef: CardRef): StartCombatCommand {
+    return {type: 'START_COMBAT', gameId, attackerRef, defenderRef};
+}
+
+export function maneuver(gameId: string, combatantRef: CardRef, toRange: Range): ManeuverCommand {
+    return {type: 'MANEUVER', gameId, combatantRef, toRange};
+}
+
+export function declareStrike(gameId: string, combatantRef: CardRef, strikeType: StrikeType, weaponRef?: CardRef | null, damage: number = 1): DeclareStrikeCommand {
+    return {type: 'DECLARE_STRIKE', gameId, combatantRef, strikeType, weaponRef, damage};
+}
+
+export function preventDamage(gameId: string, combatantRef: CardRef, amount: number): PreventDamageCommand {
+    return {type: 'PREVENT_DAMAGE', gameId, combatantRef, amount};
+}
+
+export function declarePress(gameId: string, combatantRef: CardRef, decision: PressDecision): DeclarePressCommand {
+    return {type: 'DECLARE_PRESS', gameId, combatantRef, decision};
+}
+
+export function beginCombatEnding(gameId: string): BeginCombatEndingCommand {
+    return {type: 'BEGIN_COMBAT_ENDING', gameId};
+}
+
+export function clearCombatState(gameId: string): ClearCombatStateCommand {
+    return {type: 'CLEAR_COMBAT_STATE', gameId};
+}
+
 export type SetRulesModeCommand = { type: 'SET_RULES_MODE'; gameId: string; enforced: boolean };
 
 export function setRulesMode(gameId: string, enforced: boolean): SetRulesModeCommand {
     return {type: 'SET_RULES_MODE', gameId, enforced};
+}
+
+export function openPolling(gameId: string): OpenPollingCommand {
+    return {type: 'OPEN_POLLING', gameId};
+}
+
+export function castVotes(gameId: string, playerName: string, cardRef: CardRef, amount: number, forOrAgainst: 'FOR' | 'AGAINST'): CastVotesCommand {
+    return {type: 'CAST_VOTES', gameId, playerName, cardRef, amount, forOrAgainst};
+}
+
+export function burnCardForVote(gameId: string, playerName: string, cardRef: CardRef, forOrAgainst: 'FOR' | 'AGAINST'): BurnCardForVoteCommand {
+    return {type: 'BURN_CARD_FOR_VOTE', gameId, playerName, cardRef, forOrAgainst};
+}
+
+export function burnEdgeForVote(gameId: string, playerName: string, forOrAgainst: 'FOR' | 'AGAINST'): BurnEdgeForVoteCommand {
+    return {type: 'BURN_EDGE_FOR_VOTE', gameId, playerName, forOrAgainst};
+}
+
+export function castPrisciBallot(gameId: string, cardRef: CardRef, forOrAgainst: 'FOR' | 'AGAINST'): CastPrisciBallotCommand {
+    return {type: 'CAST_PRISCI_BALLOT', gameId, cardRef, forOrAgainst};
+}
+
+export function closePolling(gameId: string): ClosePollingCommand {
+    return {type: 'CLOSE_POLLING', gameId};
 }

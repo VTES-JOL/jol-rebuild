@@ -1,10 +1,12 @@
 package net.deckserver.jol.services.handler;
 
+import net.deckserver.jol.enums.ActionStatus;
+import net.deckserver.jol.enums.ImpulseContext;
 import net.deckserver.jol.exception.GameRuleException;
-import net.deckserver.jol.game.GameData;
-import net.deckserver.jol.game.ImpulseState;
+import net.deckserver.jol.game.*;
 import net.deckserver.jol.game.command.*;
 import net.deckserver.jol.game.effect.ImpulseWindowChangedEffect;
+import net.deckserver.jol.game.effect.PendingActionChangedEffect;
 import net.deckserver.jol.services.CommandResult;
 
 import java.util.List;
@@ -13,13 +15,7 @@ public final class ImpulseHandler {
     private ImpulseHandler() {}
 
     public static CommandResult handleOpenImpulseWindow(GameData game, OpenImpulseWindow cmd, String actor) {
-        ImpulseState state = new ImpulseState();
-        state.setActive(true);
-        state.setContext(cmd.context());
-        state.setActingPlayer(cmd.actingPlayer());
-        state.setCurrentImpulseHolder(cmd.actingPlayer());
-        state.setConsecutivePasses(0);
-        state.setPassOrder(HandlerUtils.buildPassOrder(game, cmd.context(), cmd.actingPlayer(), cmd.targetPlayerName()));
+        ImpulseState state = ImpulseEngine.open(game, cmd.context(), cmd.actingPlayer(), cmd.targetPlayerName());
         String contextLabel = cmd.context().name().toLowerCase().replace('_', ' ');
         String msg = actor + " opened an impulse window (" + contextLabel + ") — " + cmd.actingPlayer() + " has first impulse";
         return new CommandResult(game, msg,
@@ -34,25 +30,41 @@ public final class ImpulseHandler {
             throw new GameRuleException("It is not your impulse to pass");
         }
 
-        int passes = current.getConsecutivePasses() + 1;
-        if (passes >= current.getPassOrder().size()) {
-            ImpulseState closed = new ImpulseState(current);
-            closed.setActive(false);
-            closed.setConsecutivePasses(passes);
-            String msg = actor + " passed — all players have passed; impulse window closes";
-            return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
-                    List.of(new ImpulseWindowChangedEffect(false, closed)));
+        ImpulseState updated = ImpulseEngine.pass(current);
+        if (updated == null) {
+            if (current.getContext() == ImpulseContext.COMBAT && game.getCombatState() != null) {
+                java.util.List<net.deckserver.jol.game.effect.GameEffect> effects = new java.util.ArrayList<>();
+                effects.add(new ImpulseWindowChangedEffect(false));
+                effects.addAll(CombatHandler.advanceCombatStepAfterImpulse(game));
+                return new CommandResult(game, actor + " passed — advancing combat step",
+                        new CommandLogData.PassImpulseLog(actor), effects);
+            }
+            PendingActionState pending = game.getPendingAction();
+            if (pending != null && pending.getStatus() == ActionStatus.DURING_ACTION
+                    && pending.getCurrentBlockerRef() == null) {
+                if (!pending.isBlocksDeclined()) {
+                    // All players passed the block window — open blocks-declined window
+                    PendingActionState withDeclined = new PendingActionState(pending);
+                    withDeclined.setBlocksDeclined(true);
+                    String actingPlayer = pending.getActorRef().playerName();
+                    ImpulseState declinedWindow = ImpulseEngine.open(game, ImpulseContext.UNDIRECTED, actingPlayer, null);
+                    String msg = actor + " passed — blocks declined; acting player has priority before resolution";
+                    return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
+                            List.of(new PendingActionChangedEffect(true, withDeclined),
+                                    new ImpulseWindowChangedEffect(true, declinedWindow)));
+                } else {
+                    // All players passed the blocks-declined window — close; ResolveAction is now available
+                    String msg = actor + " passed — impulse window closes; action may now be resolved";
+                    return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
+                            List.of(new ImpulseWindowChangedEffect(false)));
+                }
+            }
+            String closeMsg = actor + " passed — all players have passed; impulse window closes";
+            return new CommandResult(game, closeMsg, new CommandLogData.PassImpulseLog(actor),
+                    List.of(new ImpulseWindowChangedEffect(false)));
         }
 
-        List<String> order = current.getPassOrder();
-        int idx = order.indexOf(current.getCurrentImpulseHolder());
-        String nextHolder = order.get((idx + 1) % order.size());
-
-        ImpulseState updated = new ImpulseState(current);
-        updated.setCurrentImpulseHolder(nextHolder);
-        updated.setConsecutivePasses(passes);
-
-        String msg = actor + " passed impulse to " + nextHolder;
+        String msg = actor + " passed impulse to " + updated.getCurrentImpulseHolder();
         return new CommandResult(game, msg, new CommandLogData.PassImpulseLog(actor),
                 List.of(new ImpulseWindowChangedEffect(true, updated)));
     }
@@ -67,10 +79,7 @@ public final class ImpulseHandler {
             throw new GameRuleException("You are the acting player — pass or act, do not claim your own impulse");
         }
 
-        ImpulseState updated = new ImpulseState(current);
-        updated.setCurrentImpulseHolder(current.getActingPlayer());
-        updated.setConsecutivePasses(0);
-
+        ImpulseState updated = ImpulseEngine.claim(current);
         String msg = actor + " used their impulse — impulse returns to " + current.getActingPlayer();
         return new CommandResult(game, msg, new CommandLogData.ClaimImpulseLog(actor),
                 List.of(new ImpulseWindowChangedEffect(true, updated)));

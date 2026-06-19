@@ -43,6 +43,10 @@ The KRCG deck format is a structured document where cards are listed with their 
 
 Decks are validated on import or save against the format rules defined in [VTES Rules — Deck Building](../rules/deck-building.md). Satisfying the criteria allows the deck to be registered in a game created with the matching format. Any errors are reported back to the user with an explanation of the reason.
 
+### Crypt Group Restriction
+
+Enforced by `BaseValidator.validateCryptGroups()`, which applies to all formats. All non-`ANY`-group crypt cards must belong to a single group or two consecutive groups. `ANY`-group vampires are exempt and may be included regardless of the groups in use. If non-consecutive groups are present the validator rejects the deck with a descriptive error.
+
 ### Duel Format
 
 Card eligibility is checked against the allowlist `valid-duel-cards.txt`.

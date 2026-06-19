@@ -45,6 +45,12 @@ public class CardSearchService {
         return card != null && card.banned();
     }
 
+    /** Returns the group string ("1"–"7" or "ANY") for a crypt card, or null if not found or not a crypt card. */
+    public String getCryptGroup(String id) {
+        Card card = registry.findById(id);
+        return card instanceof CryptCard c ? c.group() : null;
+    }
+
     public List<CardDetailDto> autocomplete(String q) {
         String normalizedQuery = StringUtils.stripAccents(q).toLowerCase();
 

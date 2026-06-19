@@ -54,6 +54,7 @@ abilities:
     cost: {}
     limit: {}
     choices: []
+    clauses: []
     effects: []
     applies: {}
     permission: {}
@@ -69,6 +70,52 @@ Guideline:
 - Costs may exist on initial declaration abilities, later granted abilities, activated crypt abilities, or individual choices.
 - Choices are explicit branches, similar to declaration modes.
 - Actions, referendums, and permissions are first-class enough that they should not be hidden inside generic effects.
+- Complex English text should be decomposed into clauses rather than encoded as one opaque effect. A newline-delimited mechanic block often contains timing, requirements, target selection, one or more effects, a conditional follow-up, a duration, and a limit.
+
+---
+
+## Clause Decomposition
+
+The extracted mechanic-block inventory shows that most card text lines are not atomic. Treat each line as a source block for review, then split the block into typed clauses.
+
+```yaml
+clauses:
+  - timing: {}
+  - requirements: {}
+  - choose: {}
+  - effects: []
+  - if: {}
+  - replace: {}
+  - duration: {}
+  - limit: {}
+```
+
+Guidelines:
+
+- Prefer top-level ability fields when a clause applies to the whole ability. Use `clauses` when the English block contains multiple independently scoped subclauses.
+- `timing` and `requirements` answer whether the ability or branch can be used.
+- `choose` captures a target or value selected while resolving the ability.
+- `if` captures a conditional follow-up whose condition is checked later or after a prior effect.
+- `replace` captures "would ... instead" behavior and should normally be paired with `kind: replacement` for standalone replacement abilities.
+- `duration` captures text such as "this action", "this turn", "for the remainder of combat", "until after combat", and "as long as this card is in play".
+- Keep source text traceability outside the compiled meaning when useful:
+
+```yaml
+sourceText:
+  block: "Only usable during a bleed action. +1 bleed (limited)."
+```
+
+Example decomposition:
+
+```yaml
+requirements:
+  action:
+    type: bleed
+effects:
+  - bleed:
+      amount: +1
+      limited: true
+```
 
 ---
 
@@ -89,6 +136,25 @@ Guidelines:
 - Use `lifecycle` for text such as `Unique`, `Trifle`, and "Do not replace as long as this card is in play."
 - Use triggered abilities for burn or state checks that happen because of game events, phases, or card counters.
 - Use ordinary effects for immediate destination changes such as attaching or putting the card in play.
+- `doNotReplace` must support delayed-replacement variants, not just permanents:
+
+```yaml
+lifecycle:
+  doNotReplace:
+    until:
+      event: combat-ended
+```
+
+```yaml
+lifecycle:
+  doNotReplace:
+    until:
+      phase: UNLOCK
+      player: controller
+      next: true
+```
+
+- Replacement draw hooks such as "If you would replace this card, instead take it from your ash heap" should be represented as replacement abilities, because they replace a draw/replacement event rather than merely delaying it.
 
 ---
 
@@ -252,6 +318,32 @@ Guidelines:
 - Stealth that is intrinsic to the action declaration, such as "+1 stealth action", belongs in the `action` block.
 - Stealth added during an action by a modifier or passive ability belongs in `effects` or `applies`.
 
+### Granted Actions
+
+Permanents frequently grant future actions such as "Any minion can burn this card as a +1 stealth action" or "the attached vampire can enter combat as a (D) action." Model these as `granted` or `activated` abilities, not as text attached to the original declaration effect.
+
+```yaml
+abilities:
+  - id: burn-attached-card
+    kind: granted
+    source: attached-card
+    user: any-minion
+    timing: [MINION_PHASE_DECLARE_ACTION]
+    action:
+      type: generic
+      stealth: +1
+      target:
+        card: self
+    effects:
+      - burn: self
+```
+
+Guidelines:
+
+- Use `granted` when the card creates an option for another object or player.
+- Use `activated` when the card itself offers an option to its controller.
+- The granted action has its own requirements, costs, target, and resolution effects.
+
 ---
 
 ## Referendums
@@ -295,6 +387,44 @@ Guidelines:
 
 ---
 
+## Target Selectors
+
+Use a reusable target-selector vocabulary instead of ad hoc target shapes. Selectors should be composable, because card text often combines controller, state, capacity, clan, title, age comparison, region, and table position.
+
+```yaml
+target:
+  minion:
+    controller: prey
+    state: ready
+    kind: vampire
+    age:
+      relation: younger-than
+      than: acting-minion
+    capacity:
+      lt: 8
+    clan: nosferatu
+    title: prince
+```
+
+Common selector atoms:
+
+| Atom | Meaning |
+|---|---|
+| `prey`, `predator`, `next-methuselah` | Table-relative Methuselah selectors. |
+| `acting-minion`, `blocking-minion`, `opposing-minion`, `bearer`, `host`, `attached-minion` | Workflow-relative card/minion selectors. |
+| `ready`, `locked`, `unlocked`, `torpor`, `controlled`, `uncontrolled` | State or region selectors. |
+| `younger-than`, `older-than`, `not-older-than`, `capacity.lt/gte` | Age and capacity comparisons. |
+| `same-clan-as`, `same-circle-as`, `same-name-as` | Identity relationship selectors. |
+
+Guidelines:
+
+- `bearer` means the minion carrying an equipment, retainer, or attached card.
+- `host` means the card or minion a card is placed on when the source text uses host-style wording.
+- `attached-minion` is preferred for "the vampire/minion with this card."
+- Keep target selection separate from effects. "Choose a vampire. The chosen vampire cannot block" should have a `choose` clause and a later `restrict` effect against `chosen-target`.
+
+---
+
 ## Permissions
 
 Some text changes what a player, minion, or card is allowed to do rather than adding a numeric modifier or resolving an effect. These should use `permission` for passive abilities or `effects.restrictChoices` / `effects.grantPermission` for temporary changes.
@@ -335,9 +465,49 @@ effects:
 Guidelines:
 
 - Use `applies` for numeric modifiers such as bleed, stealth, intercept, strength, hand size, or cost reduction.
-- Use `permission` when the text changes eligibility or legal actions.
-- Use `restrictChoices` when a resolving effect narrows future legal options for a duration.
-- Use `grantPermission` if a resolving effect temporarily broadens future legal options.
+- Use `permission` on a `passive` ability when a card permanently changes eligibility while it remains in play (e.g. Pentex Subversion's `block: allowed: false`, Signet of King Saul's capacity gate). Passive permission is evaluated live at eligibility-check time via `PassiveRestrictionChecker`.
+- Use `restrict` as a one-shot effect when a card imposes an action-scoped or combat-scoped eligibility ban on a specific minion as it resolves (e.g. Seduction's `cannot-block`, Elder Impersonation's `cannot-block`). This records a `RestrictionAddedEffect` that lives until the action or combat ends.
+- Use `restrictChoices` when a resolving effect narrows the *set of legal variants* within a category rather than eliminating the category entirely (e.g. Immortal Grapple forces hand strikes — the minion may still declare a strike, just not a ranged one).
+- Use `grantPermission` if a resolving effect temporarily broadens future legal options (e.g. wake effects).
+- Permission and restriction capabilities must cover more than blocking and strikes. Use stable capability names for recurring text:
+
+```yaml
+capabilities:
+  - block
+  - react
+  - bleed
+  - hunt
+  - perform-action
+  - directed-action
+  - cast-votes
+  - cast-ballots
+  - gain-blood
+  - gain-life
+  - enter-combat
+  - commit-diablerie
+  - contest
+  - use-equipment
+  - use-melee-weapon
+  - use-ranged-strike
+  - maneuver
+  - press
+  - additional-strike
+```
+
+- Costs to attempt a capability, such as "Minions must burn 1 blood to attempt to block this action", are permission modifiers rather than ordinary costs on the acting card:
+
+```yaml
+effects:
+  - modifyCapabilityCost:
+      capability: block
+      target:
+        minion: any
+      cost:
+        blood:
+          from: attempting-minion
+          amount: 1
+      duration: action
+```
 
 ---
 
@@ -422,6 +592,46 @@ effects:
   - lock: user
 ```
 
+### Cost Modifiers
+
+Use `modifyCost` for effects that change another card, action, or capability cost.
+
+```yaml
+effects:
+  - modifyCost:
+      appliesTo:
+        cardType: reaction
+        requiresAny: [aus, chi, dom, pre, ser]
+      payer: playing-minion
+      amount:
+        blood: +1
+      duration: while-source-in-play
+```
+
+```yaml
+effects:
+  - modifyCost:
+      appliesTo:
+        action:
+          source: ash-heap
+      amount:
+        pool: -1
+        blood: -1
+      minimum: 0
+```
+
+Guidelines:
+
+- Dynamic costs use `formula`, for example `formula: count(copies-on-minions-you-control)`.
+- Cancellation cost text belongs on the cancel effect:
+
+```yaml
+effects:
+  - cancel:
+      target: played-card
+      costHandling: not-paid | still-paid | normal
+```
+
 ---
 
 ## Choices
@@ -432,6 +642,7 @@ Choices are explicit branches. This applies to:
 - Cards where multiple disciplines may be used.
 - Optional branches in one timing window.
 - Branches that create later obligations.
+- Branches expressed as "or" or "alternatively" in one mechanic block.
 
 ```yaml
 choices:
@@ -452,6 +663,20 @@ choices:
 ```
 
 For cards where more than one discipline may be used together, model each supported combination explicitly rather than relying on implicit merging.
+
+When a card says "or" between two effects, preserve the branch point:
+
+```yaml
+choices:
+  - id: burn-retainer
+    effects:
+      - burn: chosen-retainer
+  - id: attach-to-ally
+    effects:
+      - attach:
+          card: self
+          to: chosen-ally
+```
 
 ---
 
@@ -496,14 +721,106 @@ effects:
   - unlock: {}
   - pool: -2
   - blood: -1
+  - restrict: {}
   - restrictChoices: {}
   - createObligation: {}
   - createDelayedEffect: {}
+  - replace: {}
   - addCounter: {}
   - removeCounter: {}
   - modifyHandSize: {}
   - modifyCost: {}
+  - modifyCapabilityCost: {}
+  - search: {}
+  - reveal: {}
+  - shuffle: {}
+  - discardDown: {}
 ```
+
+### Replacement Effects
+
+Use `replace` for "would ... instead" text. Replacement effects define the pending event they watch, the result they suppress, and the replacement result.
+
+```yaml
+abilities:
+  - id: burn-to-remove
+    kind: replacement
+    source: attached-card
+    trigger:
+      event: would-burn
+      card: attached-minion
+    replace:
+      original:
+        burn: attached-minion
+      with:
+        move:
+          card: attached-minion
+          to: removed-from-game
+```
+
+Guidelines:
+
+- Use replacement abilities for ongoing "if/would/instead" text.
+- Use one-shot `effects.replace` only when the replacement is created by a resolving card for a known pending result.
+- Replacement abilities should specify the owning workflow window where possible, such as `COMBAT_WOULD_GO_TO_TORPOR`, `COMBAT_WOULD_BE_BURNED`, `BLOOD_HUNT_WOULD_BURN_DIABLERIST`, or `CARD_REPLACEMENT_DRAW`.
+- Replacement of contesting, gaining blood/life, hunting, drawing, or replacing a card should not be forced into combat/action-specific structures.
+
+### Search and Zone Movement
+
+Search effects should describe the searched zone, the filter, visibility, destination, and cleanup.
+
+```yaml
+effects:
+  - search:
+      zones: [library]
+      controller: self
+      filter:
+        type: equipment
+        nonUnique: true
+        location: false
+      revealTo: all
+      destination:
+        attachTo: chosen-minion
+      ignore:
+        requirements: true
+        cost: true
+      after:
+        shuffle: true
+        discardDown: false
+```
+
+Guidelines:
+
+- Use `zones` for library, crypt, hand, ash heap, uncontrolled region, research area, and cards on another card.
+- `revealTo: all` covers "show it to all players."
+- `after.shuffle: true` covers "shuffle afterward"; `after.discardDown: true` covers "discard afterward" / "discard down afterward."
+- Requirements and costs must be explicit: `ignore`, `applyAsNormal`, or a specific override.
+- Searching from the top until a match is found should use `method: first-match-from-top`.
+
+### restrict
+
+`restrict` removes a minion's eligibility to perform an entire capability category for the duration of the current action or combat. This is distinct from `restrictChoices`, which narrows legal options *within* a category rather than eliminating it entirely.
+
+```yaml
+effects:
+  - restrict:
+      target: blocker | self | chosen-target | both-combatants
+      type: cannot-block | cannot-react | cannot-play-modifier | cannot-vote
+               | cannot-maneuver | cannot-press
+               | cannot-use-strike-hand | cannot-use-strike-ranged
+               | cannot-use-additional-strike
+      duration: action | combat | combat-round
+```
+
+`duration: action` — restriction lives for the rest of the current action; cleared when the action ends. Maps to `PendingActionState.actionRestrictions[type]`.
+
+`duration: combat` — restriction lives for the current combat instance; cleared when `CombatState` is cleared. Maps to `CombatState.combatRestrictions[type]` (implemented when the combat tranche lands).
+
+`duration: combat-round` — restriction covers only the current combat round; reset at `END_OF_ROUND`.
+
+Passive block prevention that persists while a card is in play belongs in a `passive` ability's `permission` block (see the Pentex Subversion worked example), not in `restrict`. Use `restrict` only for one-shot effects that impose the restriction as part of resolving a card.
+
+`restrictChoices` remains the correct form when a minion may still perform the category but is limited in which variant is legal — for example, may still strike but only with hand strikes.
 
 ---
 
@@ -527,6 +844,18 @@ limit:
   frequency: once
   scope: combat-round
   key: user + card-name
+```
+
+Structured form:
+
+```yaml
+limit:
+  frequency: once
+  subject: user
+  object: card-name
+  category: hunting-ground
+  scope: turn
+  key: user + card-name + scope
 ```
 
 The intended default interpretation for an effect-level combat limit is:
@@ -566,6 +895,8 @@ Guidelines:
 - Use effect-level limits for text such as "with 1 optional maneuver each combat".
 - Use ability-level limits for text such as "A vampire can play only one [named card] each round."
 - Use card-level or source-instance keys when the physical permanent is the limited object.
+- Use `category` when the limit applies across different card names or instances, such as "a vampire can gain blood from only one hunting ground each turn" or "a minion can play only one aim each strike."
+- Use `scope: in-play` for "A Methuselah can have only one [named permanent]" style limits.
 - A restarted or newly created combat has a new `combat-instance`, so `once-per-combat` limits reset unless card text says otherwise.
 
 ---
@@ -1096,6 +1427,104 @@ abilities:
           target: pending-damage
           aggravated: false
           duration: this-combat
+```
+
+---
+
+## Worked Example: Action-Scoped Restriction (Seduction / Elder Impersonation)
+
+Seduction is a reaction card that cancels a block attempt and prevents the same minion from blocking again for the rest of the action.
+
+```yaml
+id: 101842
+name: Seduction
+kind: library
+types: [reaction]
+automation:
+  status: partial
+  reason: draft-example
+
+abilities:
+  - id: cancel-block
+    kind: declaration
+    source: hand
+    timing: [ACTION_BLOCK_ATTEMPT]
+    user: controller
+    requirements:
+      action: has-active-block-attempt
+    effects:
+      - cancelBlockAttempt: {}
+      - restrict:
+          target: blocker
+          type: cannot-block
+          duration: action
+```
+
+Elder Impersonation (action modifier) produces the same restriction from the acting player's side:
+
+```yaml
+id: 100698
+name: Elder Impersonation
+kind: library
+types: [modifier]
+automation:
+  status: partial
+  reason: draft-example
+
+abilities:
+  - id: cancel-block
+    kind: declaration
+    source: hand
+    timing: [ACTION_BLOCK_ATTEMPT]
+    user: actor
+    requirements:
+      action: has-active-block-attempt
+    effects:
+      - cancelBlockAttempt: {}
+      - restrict:
+          target: blocker
+          type: cannot-block
+          duration: action
+```
+
+The Signet of King Saul demonstrates a passive block restriction from equipment. Unlike Seduction this is not a one-shot effect — it applies continuously while the equipment is attached, so it belongs in a `passive` ability using `permission` rather than in a `restrict` effect:
+
+```yaml
+id: 101909
+name: The Signet of King Saul
+kind: library
+types: [equipment]
+keywords: [unique, weapon, melee]
+automation:
+  status: partial
+  reason: draft-example
+
+abilities:
+  - id: play
+    kind: declaration
+    source: hand
+    timing: [MINION_PHASE_DECLARE_ACTION]
+    user: actor
+    cost:
+      pool: 1
+    effects:
+      - attach:
+          card: self
+          to: actor
+
+  - id: capacity-block-gate
+    kind: passive
+    source: attached-card
+    user: controller
+    permission:
+      block:
+        allowed: false
+    condition:
+      blockAttempt:
+        blocker:
+          capacityAtLeast: 8
+        action:
+          actor: bearer
 ```
 
 ---

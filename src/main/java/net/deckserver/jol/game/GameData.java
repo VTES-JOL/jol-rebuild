@@ -3,13 +3,14 @@ package net.deckserver.jol.game;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import net.deckserver.jol.enums.GameFormat;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.command.CardRef;
 
 import java.util.*;
 
-@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "cards", "players", "currentPlayer", "edge"})
+@JsonPropertyOrder({"id", "name", "playerOrder", "orderOfPlayReversed", "turn", "phase", "notes", "impulseWindow", "pendingAction", "sequencingWindow", "referendum", "combatState", "combatQueue", "cards", "players", "currentPlayer", "edge"})
 public class GameData {
     private String id;
     private String name;
@@ -36,6 +37,13 @@ public class GameData {
     private SequencingWindowState sequencingWindow;
     private boolean completed = false;
     private boolean rulesEnforced = false;
+    private GameFormat format;
+    private Map<String, Set<String>> nraActionsByCardId = new HashMap<>();
+    private Set<String> recruitedThisTurn = new HashSet<>();
+    private CardPlayState cardPlayState;
+    private ReferendumState referendum;
+    private CombatState combatState;
+    private List<CombatPair> combatQueue = new ArrayList<>();
 
     public GameData(String id, String name) {
         this.id = id;
@@ -205,6 +213,24 @@ public class GameData {
     public void setCompleted(boolean completed) { this.completed = completed; }
     public boolean isRulesEnforced() { return rulesEnforced; }
     public void setRulesEnforced(boolean rulesEnforced) { this.rulesEnforced = rulesEnforced; }
+    public GameFormat getFormat() { return format; }
+    public void setFormat(GameFormat format) { this.format = format; }
+    public Map<String, Set<String>> getNraActionsByCardId() { return nraActionsByCardId; }
+    public void setNraActionsByCardId(Map<String, Set<String>> nraActionsByCardId) { this.nraActionsByCardId = nraActionsByCardId; }
+    public Set<String> getRecruitedThisTurn() { return recruitedThisTurn; }
+    public void setRecruitedThisTurn(Set<String> recruitedThisTurn) { this.recruitedThisTurn = recruitedThisTurn; }
+
+    public CardPlayState getCardPlayState() { return cardPlayState; }
+    public void setCardPlayState(CardPlayState cardPlayState) { this.cardPlayState = cardPlayState; }
+
+    public ReferendumState getReferendum() { return referendum; }
+    public void setReferendum(ReferendumState referendum) { this.referendum = referendum; }
+
+    public CombatState getCombatState() { return combatState; }
+    public void setCombatState(CombatState combatState) { this.combatState = combatState; }
+
+    public List<CombatPair> getCombatQueue() { return combatQueue; }
+    public void setCombatQueue(List<CombatPair> combatQueue) { this.combatQueue = combatQueue; }
 
     public void replacePlayer(String oldPlayer, String newPlayer) {
         PlayerData playerData = players.get(oldPlayer);

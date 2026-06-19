@@ -50,6 +50,7 @@ public class CardData {
     private boolean playtest;
     private boolean infernal;
     private boolean unique;
+    private boolean outOfTurn;
 
     private List<String> disciplines = new ArrayList<>();
     private List<CardType> types = new ArrayList<>();
@@ -296,6 +297,9 @@ public class CardData {
     public void setUnique(boolean unique) {
         this.unique = unique;
     }
+
+    public boolean isOutOfTurn() { return outOfTurn; }
+    public void setOutOfTurn(boolean outOfTurn) { this.outOfTurn = outOfTurn; }
 
     public List<String> getDisciplines() {
         return disciplines;

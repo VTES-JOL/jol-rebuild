@@ -2,25 +2,17 @@
 
 Identified during the 2026-05 architectural review. The backend refactor (command handlers + GameRules) is already implemented. Items below are deferred but tracked here so they are not lost.
 
+The rules-engine implementation plan now lives in [Mechanics Gaps](../implementation/mechanics-gaps.md#rules-engine-starter-tranches). This roadmap tracks the architectural changes that should be pulled into those tranches rather than implemented as detached refactors.
+
 ---
 
 ## Backend
 
-### 1. `ImpulseEngine` Extraction (medium priority)
+### ~~1. `ImpulseEngine` Extraction~~ — **Done 2026-06**
 
-`ImpulseState` is still mutated in two places: auto-open during `TurnPhaseHandler` and explicit commands in `ImpulseHandler`. `buildPassOrder` lives in `HandlerUtils`. Consolidate into a single `ImpulseEngine` class:
+`ImpulseEngine` is extracted to `net.deckserver.jol.game.ImpulseEngine` with `open()`, `pass()` (returns `null` when all players pass), and `claim()`. `buildPassOrder` is public static on the engine. `ImpulseHandler`, `TurnPhaseHandler`, and `ActionHandler` all delegate to it; `HandlerUtils.buildPassOrder` is removed. 11 plain JUnit5 unit tests in `ImpulseEngineTest` cover all methods independently of the HTTP stack. Later card-play work should use this engine for `CARD_AS_PLAYED` and action/referendum/combat windows.
 
-```java
-class ImpulseEngine {
-    static ImpulseState open(GameData game, ImpulseContext ctx, String actingPlayer, String targetPlayer);
-    static ImpulseState pass(ImpulseState state);     // returns null when window closes
-    static ImpulseState claim(ImpulseState state);
-}
-```
-
-This makes the sequencing engine independently testable and co-located.
-
-### 2. Phase State Machine (medium priority)
+### 2. Phase State Machine (deferred; needed before MASTER and UNLOCK phase enforcement)
 
 `TurnPhaseHandler.handleAdvancePhase` cycles phases with a raw modulo and inline `if` for INFLUENCE setup. Formalise as a transition table:
 
@@ -30,7 +22,9 @@ record PhaseTransition(Phase from, Phase to, Consumer<GameData> onEntry) {}
 
 `AdvancePhase` looks up the next transition and calls `onEntry`. Prevents illegal phase skips and makes phase entry side-effects explicit and testable.
 
-### 3. `CardData` Rule Queries (low priority)
+This should start with the enforced influence phase in [Mechanics Gaps Tranche 1](../implementation/mechanics-gaps.md#tranche-1--enforced-influence-phase): INFLUENCE entry sets `transfersRemaining`, and enforced flow rejects direct phase skipping while an action, referendum, combat, impulse, or sequencing window is active.
+
+### 3. `CardData` Rule Queries (medium priority; Tranche 0/2 dependency)
 
 `CardData` is a property bag of 15+ nullable fields. Add a `CardRules` query layer rather than refactoring the serialized data class:
 
@@ -41,6 +35,12 @@ class CardRules {
     static int voteCount(CardData card) { ... }   // needed for referendum engine
 }
 ```
+
+Start with query methods needed by the first rules-engine slices:
+- `isVampire`, `isImbued`, `isReadyMinion`, `isControlledBy`
+- `capacityCeiling`, `canReceiveBlood`, `hasBloodAtCapacity`
+- `isConviction`, `isPower`, `playableTypes`
+- `nraKeyFor(ActionType, CardData actionCard)`
 
 ### 4. ~~Game End Detection~~ — **Done 2026-05**
 
@@ -160,12 +160,25 @@ Rules-enforced features also need new command types and controls as their backen
 
 1. ~~Backend refactor (handlers + GameRules)~~ — **Done 2026-05**
 2. ~~Game end detection~~ — **Done 2026-05**
-3. Rules-enforced turn and phase protocol + phase-contextual action panel
-4. Basic action resolution by `ActionType` + card targeting mode
-5. Card play legality and lifecycle + contextual playable-card controls
-6. Voting / referendum engine + referendum modal
-7. Game end completion gaps: simultaneous oust, timeout, GW recording, tournament result propagation
-8. Blocking correctness: stealth/intercept, directed/undirected eligibility, redirects, wake effects, action continuation
-9. Diablerie full resolution and rule-bearing minion trait enforcement
-10. Combat system and combat panel
-11. Remaining P3/P4 mechanics from [Mechanics Gaps](../implementation/mechanics-gaps.md#implementation-priority): master action accounting, unlock-phase automatic effects, named counters, keyword/subtype parsing, anarch conversion, control transfer, hunting-ground effects, blood capacity overflow, and ACTION_AS_ANNOUNCED.
+3. ~~Rules/data correctness baseline~~ — **Done 2026-06**
+   - ~~crypt group deck validation~~
+   - ~~Conviction/Power type mapping~~
+   - ~~DUEL contest-rule representation~~
+   - ~~enforced-mode phase impulse cleanup~~
+   - ~~`ImpulseEngine` extraction~~
+4. ~~Enforced influence phase~~ — **Done (Tranche 1)**
+5. ~~Basic action resolution by `ActionType` + card targeting mode~~ — **Done (Tranche 2)**
+6. ~~Card play legality and lifecycle~~ — **Done (Tranche 3)**
+7. ~~Voting / referendum engine~~ — **Done (Tranche 4)**
+8. ~~Blocking correctness: stealth/intercept, directed/undirected eligibility, redirects, wake effects~~ — **Done (Tranche 5)**
+9. ~~Combat state machine, damage, torpor, combat queue~~ — **Done (Tranche 6 partial)**; action continuing (card-play wiring) still open
+10. Game end completion gaps: simultaneous oust, timeout / withdrawal, GW recording
+11. Diablerie full resolution: blood transfer, equipment choice, discipline gain, Trophy award, blood hunt auto-trigger
+12. Leave Torpor blocked → diablerize decision prompt (controller of blocking vampire)
+13. EQUIP / EMPLOY_RETAINER / RECRUIT_ALLY / RESCUE resolution effects
+14. Contest upkeep (UNLOCK phase): 1 pool per contested unique, 1 blood per contested title
+15. Master phase action accounting: `masterActionsRemaining` on `GameData`, trifle bonus, out-of-turn debt tracking
+16. `ACTION_AS_ANNOUNCED` declaration window: wire `ActionStatus.AS_ANNOUNCED` between action-card play and block impulse
+17. Combat refinements: weapon damage parsing (`CardData.ranged`), prevention ordering + fractional rounding, `WOULD_GO_TO_TORPOR` / `WOULD_BE_BURNED` replacement windows, environmental damage
+18. Keyword parsing + trait enforcement: Scarce / Slave / Sterile / Blood Cursed / Red List / Trophy; rush action command
+19. Remaining P3/P4 items: named counters, anarch conversion, `TransferControl`, `AddCounter` blood capacity ceiling, conviction attachment gain on imbued entering play

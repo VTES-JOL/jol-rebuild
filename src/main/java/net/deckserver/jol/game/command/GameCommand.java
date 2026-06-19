@@ -51,6 +51,23 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
     @JsonSubTypes.Type(value = PassSequencing.class,            name = "PASS_SEQUENCING"),
     @JsonSubTypes.Type(value = CloseSequencingWindow.class,     name = "CLOSE_SEQUENCING_WINDOW"),
     @JsonSubTypes.Type(value = SetRulesMode.class,              name = "SET_RULES_MODE"),
+    @JsonSubTypes.Type(value = OpenPolling.class,              name = "OPEN_POLLING"),
+    @JsonSubTypes.Type(value = CastVotes.class,                name = "CAST_VOTES"),
+    @JsonSubTypes.Type(value = BurnCardForVote.class,          name = "BURN_CARD_FOR_VOTE"),
+    @JsonSubTypes.Type(value = BurnEdgeForVote.class,          name = "BURN_EDGE_FOR_VOTE"),
+    @JsonSubTypes.Type(value = CastPrisciBallot.class,         name = "CAST_PRISCI_BALLOT"),
+    @JsonSubTypes.Type(value = ClosePolling.class,             name = "CLOSE_POLLING"),
+    @JsonSubTypes.Type(value = AddStealth.class,               name = "ADD_STEALTH"),
+    @JsonSubTypes.Type(value = AddIntercept.class,             name = "ADD_INTERCEPT"),
+    @JsonSubTypes.Type(value = RedirectAction.class,           name = "REDIRECT_ACTION"),
+    @JsonSubTypes.Type(value = GrantWake.class,                name = "GRANT_WAKE"),
+    @JsonSubTypes.Type(value = StartCombat.class,              name = "START_COMBAT"),
+    @JsonSubTypes.Type(value = Maneuver.class,                 name = "MANEUVER"),
+    @JsonSubTypes.Type(value = DeclareStrike.class,            name = "DECLARE_STRIKE"),
+    @JsonSubTypes.Type(value = PreventDamage.class,            name = "PREVENT_DAMAGE"),
+    @JsonSubTypes.Type(value = DeclarePress.class,             name = "DECLARE_PRESS"),
+    @JsonSubTypes.Type(value = BeginCombatEnding.class,        name = "BEGIN_COMBAT_ENDING"),
+    @JsonSubTypes.Type(value = ClearCombatState.class,         name = "CLEAR_COMBAT_STATE"),
 })
 public sealed interface GameCommand
     permits AdvancePhase, NextTurn,
@@ -66,7 +83,11 @@ public sealed interface GameCommand
             OpenImpulseWindow, PassImpulse, ClaimImpulse, CloseImpulseWindow,
             DeclareAction, AttemptBlock, ResolveAction, AbortAction,
             PassSequencing, CloseSequencingWindow,
-            SetRulesMode {
+            SetRulesMode,
+            OpenPolling, CastVotes, BurnCardForVote, BurnEdgeForVote, CastPrisciBallot, ClosePolling,
+            AddStealth, AddIntercept, RedirectAction, GrantWake,
+            StartCombat, Maneuver, DeclareStrike, PreventDamage, DeclarePress,
+            BeginCombatEnding, ClearCombatState {
 
     String gameId();
 
