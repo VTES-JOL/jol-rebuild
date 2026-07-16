@@ -1,0 +1,46 @@
+@startuml
+title Swimlane Sequence - Action Workflow Ownership
+
+participant "Acting controller" as A
+participant "Other Methuselahs" as O
+participant "Card Play" as CP
+participant "Action workflow" as ACT
+participant "Combat" as C
+participant "Referendum / Blood Hunt" as R
+
+A -> ACT: Declare action
+opt Action card from hand
+    ACT -> CP: Run Card Play
+    CP -> O: CARD_AS_PLAYED responses
+    CP --> ACT: Card not canceled
+end
+
+ACT -> O: ACTION_AS_ANNOUNCED responses
+ACT -> O: ACTION_DURING_ACTION responses
+O -> ACT: Block attempt
+ACT -> O: ACTION_STEALTH_INTERCEPT exchange
+
+alt Block succeeds
+    ACT -> O: ACTION_BLOCK_RESOLUTION_PRE_COMBAT responses
+    ACT -> C: Run combat
+    C --> ACT: Combat ends
+    alt Action continues
+        ACT -> O: ACTION_CONTINUING
+        ACT -> O: Return to ACTION_DURING_ACTION
+    else Action ends
+        ACT -> O: ACTION_AFTER_RESOLUTION
+    end
+else Blocks declined
+    ACT -> O: ACTION_BLOCKS_DECLINED responses
+    alt Political action
+        ACT -> R: Run referendum
+        R --> ACT: Referendum complete
+    else Diablerie action
+        ACT -> R: Run diablerie and blood hunt
+        R --> ACT: Blood hunt complete
+    else Other action
+        ACT -> A: Resolve action effect
+    end
+    ACT -> O: ACTION_AFTER_RESOLUTION
+end
+@enduml

@@ -1,6 +1,8 @@
 # Board Layouts
 
 > No corresponding rules document — board layouts are JOL-specific UI features.
+>
+> **Superseded.** The target board architecture is [Board Design — Stage & Ring](./board-design.md). This document describes the current Strip / Table / Text implementations, which remain in the codebase until that design replaces them; the region visibility rules and drag-and-drop tables below stay accurate for the existing code.
 
 `GamePage` offers three interchangeable board layouts controlled by the `boardLayout` state. The selector in the top-right cycles between **Strip** (`linear`), **Table** (`circular`), and **Text** (`text`).
 
