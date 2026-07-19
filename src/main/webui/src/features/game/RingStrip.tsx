@@ -161,6 +161,9 @@ export function RingStrip({gameState, currentUser, onFocusPlayer}: {
     // highlight already marks the current player during their own phases.
     const status = nowStatus(gameState, currentUser);
     const awaited = status.kind === 'phase' ? null : status.awaited;
+    // The server's viewer-relative flag is authoritative for the viewer's own
+    // chip whenever an interrupt surface is open.
+    const viewerAwaited = awaited !== null && (gameState.youAreAwaited ?? awaited === currentUser);
     // Play travels toward prey (seat order); reversal flips the arrows.
     const arrow = gameState.orderReversed ? '◂' : '▸';
     const arrowTitle = gameState.orderReversed ? 'play direction (reversed)' : 'play direction';
@@ -183,7 +186,7 @@ export function RingStrip({gameState, currentUser, onFocusPlayer}: {
                         isViewer={player.name === currentUser}
                         isTurn={player.name === gameState.currentPlayer}
                         hasEdge={gameState.edgeHolder === player.name}
-                        isAwaited={awaited === player.name && !player.ousted}
+                        isAwaited={(player.name === currentUser ? viewerAwaited : awaited === player.name) && !player.ousted}
                         onClick={onFocusPlayer ? () => onFocusPlayer(player.name) : undefined}
                     />
                 </Fragment>

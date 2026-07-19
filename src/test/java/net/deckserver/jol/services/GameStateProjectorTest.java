@@ -5,11 +5,16 @@ import jakarta.inject.Inject;
 import net.deckserver.jol.dto.GameStateDto;
 import net.deckserver.jol.dto.PlayerStateDto;
 import net.deckserver.jol.dto.RegionStateDto;
+import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.Phase;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.CardData;
 import net.deckserver.jol.game.GameData;
+import net.deckserver.jol.game.ImpulseState;
+import net.deckserver.jol.game.PendingActionState;
 import net.deckserver.jol.game.PlayerData;
+import net.deckserver.jol.game.SequencingWindowState;
+import net.deckserver.jol.game.command.CardRef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -236,6 +241,71 @@ class GameStateProjectorTest {
         assertEquals(card.getId(),     cardDto.id);
         assertEquals("Anarch Convert", cardDto.name);
         assertEquals("alice",          cardDto.ownerName);
+    }
+
+    // ── Attention flags (viewer-relative, nowStatus precedence) ──────────────
+
+    @Test
+    void project_awaited_fallsBackToTurnPlayer() {
+        GameStateDto aliceView = projector.project(game, "alice");
+        GameStateDto bobView   = projector.project(game, "bob");
+
+        assertTrue(aliceView.youAreAwaited);   // alice is the current player
+        assertFalse(bobView.youAreAwaited);
+        assertFalse(aliceView.youAreTargeted);
+    }
+
+    @Test
+    void project_awaited_impulseHolderOutranksTurnPlayer() {
+        ImpulseState impulse = new ImpulseState();
+        impulse.setActive(true);
+        impulse.setActingPlayer("alice");
+        impulse.setCurrentImpulseHolder("bob");
+        game.setImpulseWindow(impulse);
+
+        assertFalse(projector.project(game, "alice").youAreAwaited);
+        assertTrue(projector.project(game, "bob").youAreAwaited);
+    }
+
+    @Test
+    void project_awaited_sequencingHolder() {
+        SequencingWindowState seq = new SequencingWindowState();
+        seq.setActive(true);
+        seq.setCurrentHolder("bob");
+        game.setSequencingWindow(seq);
+
+        assertFalse(projector.project(game, "alice").youAreAwaited);
+        assertTrue(projector.project(game, "bob").youAreAwaited);
+    }
+
+    @Test
+    void project_pendingAction_targetIsAwaitedAndTargetedDuringBlockWindow() {
+        PendingActionState pending = new PendingActionState();
+        pending.setActorRef(CardRef.of("alice", RegionType.READY, 0));
+        pending.setTargetPlayerName("bob");
+        pending.setStatus(ActionStatus.DURING_ACTION);
+        game.setPendingAction(pending);
+
+        GameStateDto bobView   = projector.project(game, "bob");
+        GameStateDto aliceView = projector.project(game, "alice");
+
+        assertTrue(bobView.youAreAwaited);     // the target decides whether to block
+        assertTrue(bobView.youAreTargeted);
+        assertFalse(aliceView.youAreAwaited);
+        assertFalse(aliceView.youAreTargeted);
+    }
+
+    @Test
+    void project_pendingAction_actorDrivesAfterResolutionStarts() {
+        PendingActionState pending = new PendingActionState();
+        pending.setActorRef(CardRef.of("alice", RegionType.READY, 0));
+        pending.setTargetPlayerName("bob");
+        pending.setStatus(ActionStatus.AFTER_RESOLUTION);
+        game.setPendingAction(pending);
+
+        assertTrue(projector.project(game, "alice").youAreAwaited);
+        assertFalse(projector.project(game, "bob").youAreAwaited);
+        assertTrue(projector.project(game, "bob").youAreTargeted); // still the target
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

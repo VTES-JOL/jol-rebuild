@@ -2,6 +2,7 @@ package net.deckserver.jol.services;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import net.deckserver.jol.dto.*;
+import net.deckserver.jol.enums.ActionStatus;
 import net.deckserver.jol.enums.RegionType;
 import net.deckserver.jol.game.*;
 
@@ -35,9 +36,33 @@ public class GameStateProjector {
         dto.pendingAction = toPendingActionStateDto(game.getPendingAction());
         dto.sequencingWindow = toSequencingWindowStateDto(game.getSequencingWindow());
         dto.rulesEnforced = game.isRulesEnforced();
+        dto.youAreAwaited = viewerUsername != null && viewerUsername.equals(awaitedPlayer(game));
+        dto.youAreTargeted = game.getPendingAction() != null && viewerUsername != null
+                && viewerUsername.equals(game.getPendingAction().getTargetPlayerName());
         dto.players = buildPlayerStates(game, viewerUsername);
         dto.cards = buildCardMap(game, viewerUsername);
         return dto;
+    }
+
+    /**
+     * The single player the game is waiting on, most specific timing surface
+     * first: impulse holder > sequencing holder > pending-action decider
+     * (the target while the block window is open, else the actor) > turn player.
+     * Must match the client-side nowStatus derivation.
+     */
+    private String awaitedPlayer(GameData game) {
+        ImpulseState impulse = game.getImpulseWindow();
+        if (impulse != null && impulse.isActive()) return impulse.getCurrentImpulseHolder();
+        SequencingWindowState seq = game.getSequencingWindow();
+        if (seq != null && seq.isActive()) return seq.getCurrentHolder();
+        PendingActionState pending = game.getPendingAction();
+        if (pending != null) {
+            if (pending.getStatus() == ActionStatus.DURING_ACTION && pending.getTargetPlayerName() != null) {
+                return pending.getTargetPlayerName();
+            }
+            return pending.getActorRef() != null ? pending.getActorRef().playerName() : null;
+        }
+        return game.getCurrentPlayerName();
     }
 
     private List<PlayerStateDto> buildPlayerStates(GameData game, String viewer) {

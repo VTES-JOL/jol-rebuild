@@ -31,4 +31,12 @@ public class GameStateDto {
     public SequencingWindowStateDto sequencingWindow;
     /** Whether rules are enforced (true) or permissive free-form play (false, default). */
     public boolean rulesEnforced;
+    /**
+     * Viewer-relative: the game is waiting on this viewer — impulse holder,
+     * then sequencing holder, then pending-action decider, then turn player.
+     * Mirrors the client's nowStatus precedence so the two never disagree.
+     */
+    public boolean youAreAwaited;
+    /** Viewer-relative: this viewer is the target of the pending action. */
+    public boolean youAreTargeted;
 }

@@ -30,6 +30,8 @@ export function makeState(overrides: Partial<GameState> = {}): GameState {
         cards: {},
         transfersRemaining: 0,
         rulesEnforced: false,
+        youAreAwaited: false,
+        youAreTargeted: false,
         ...overrides,
     };
 }

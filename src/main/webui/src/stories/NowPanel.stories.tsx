@@ -82,6 +82,29 @@ export const BlockWindowOnYou: Story = {
     },
 };
 
+export const TargetedByServerFlag: Story = {
+    args: {
+        gameState: makeState({
+            rulesEnforced: true,
+            youAreAwaited: true,
+            youAreTargeted: true,
+            players: [player('Seraphina'), playerWithReady('Alice', ['c1']), player('Marcus')],
+            pendingAction: {
+                actorRef: {playerName: 'Seraphina', regionType: 'READY', position: 0, childIndex: -1},
+                actionType: 'BLEED',
+                targetPlayerName: 'Alice',
+                status: 'DURING_ACTION',
+                blockerRef: null,
+            },
+        }),
+    },
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // The server-derived flags drive the strongest treatment: red is semantic.
+        await expect(canvas.getByText('targeted')).toBeInTheDocument();
+    },
+};
+
 export const YourImpulse: Story = {
     args: {
         gameState: makeState({

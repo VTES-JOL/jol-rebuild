@@ -125,4 +125,11 @@ export type GameState = {
     sequencingWindow?: SequencingWindowState | null;
     /** Whether rules are enforced (true) or permissive free-form play (false, default). */
     rulesEnforced: boolean;
+    /**
+     * Viewer-relative, server-derived: the game is waiting on this viewer.
+     * Same precedence as the client's nowStatus; authoritative when present.
+     */
+    youAreAwaited?: boolean;
+    /** Viewer-relative, server-derived: this viewer is the pending action's target. */
+    youAreTargeted?: boolean;
 };

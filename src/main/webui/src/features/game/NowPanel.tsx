@@ -130,7 +130,9 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
     isSpectator: boolean;
 }) {
     const status = nowStatus(gameState, currentUser);
-    const attention = status.yourMove && !isSpectator;
+    // The server flag is authoritative when present; the client derivation covers older payloads.
+    const attention = (gameState.youAreAwaited ?? status.yourMove) && !isSpectator;
+    const targeted = (gameState.youAreTargeted ?? false) && !isSpectator;
 
     return (
         <div className="flex flex-col gap-1 pb-1.5 shrink-0 min-w-0">
@@ -146,9 +148,9 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
                     aria-live="polite"
                     className={[
                         'flex items-center gap-1.5 text-xs min-w-0 px-2 py-0.5 rounded border-l-2',
-                        attention
-                            ? 'border-blood bg-blood/5 text-ink font-medium'
-                            : 'border-line/40 text-ink-muted',
+                        targeted  ? 'border-blood bg-blood/15 text-ink font-semibold' :
+                        attention ? 'border-blood bg-blood/5 text-ink font-medium' :
+                                    'border-line/40 text-ink-muted',
                     ].join(' ')}
                 >
                     {attention && (
@@ -158,6 +160,9 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
                         />
                     )}
                     <span className="truncate">{status.headline}</span>
+                    {targeted && (
+                        <span className="text-[9px] uppercase tracking-wider text-blood shrink-0">targeted</span>
+                    )}
                 </div>
                 {gameState.edgeHolder && (
                     <span className="text-xs text-ink-muted shrink-0" title={`${gameState.edgeHolder} holds the Edge`}>
