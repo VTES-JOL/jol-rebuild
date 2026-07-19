@@ -16,16 +16,30 @@ type HandStripProps = {
     gameId?: string;
     onCommand?: (cmd: GameCommand) => void;
     onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
+    /** 'fanned' overlaps the cards in a shallow arc (the Dock); 'row' is a flat scrollable strip. */
+    variant?: 'row' | 'fanned';
 };
 
 const getOriginalIdx = (id: string) => parseInt(id.slice('hand-'.length), 10);
 
-function SortableHandCard({id, card, activeId, playerName, stackIndex, onCardContextMenu}: {
+/** Shallow physical arc: rotation and drop grow with distance from the hand's center. */
+function fanGeometry(position: number, count: number) {
+    const offset = position - (count - 1) / 2;
+    return {
+        rotate: `${Math.max(-10, Math.min(10, offset * 2.5))}deg`,
+        drop: Math.abs(offset) * 3,
+    };
+}
+
+function SortableHandCard({id, card, activeId, playerName, stackIndex, fanned, position, count, onCardContextMenu}: {
     id: string;
     card: CardData;
     activeId: string | null;
     playerName: string;
     stackIndex: number;
+    fanned: boolean;
+    position: number;
+    count: number;
     onCardContextMenu?: HandStripProps['onCardContextMenu'];
 }) {
     const {attributes, listeners, setNodeRef, transform, transition} = useSortable({id});
@@ -34,12 +48,28 @@ function SortableHandCard({id, card, activeId, playerName, stackIndex, onCardCon
         e.preventDefault();
         onCardContextMenu?.(card, ref, e.clientX, e.clientY);
     };
+    const fan = fanned ? fanGeometry(position, count) : null;
     return (
         <div
             ref={setNodeRef}
             data-flip-id={card.id}
-            style={{width: 'var(--card-w, 72px)', transform: CSS.Transform.toString(transform), transition}}
-            className={`shrink-0 cursor-grab active:cursor-grabbing${activeId === id ? ' opacity-30' : ''}`}
+            style={{
+                width: 'var(--card-w, 72px)',
+                transform: CSS.Transform.toString(transform),
+                transition,
+                // Tailwind 4's translate utilities use the independent `translate`
+                // property, so the hover lift composes with the inline rotate/margins.
+                ...(fan && {
+                    rotate: fan.rotate,
+                    marginTop: fan.drop,
+                    marginLeft: position > 0 ? 'calc(var(--card-w, 72px) * -0.3)' : undefined,
+                }),
+            }}
+            className={[
+                'shrink-0 cursor-grab active:cursor-grabbing',
+                activeId === id && 'opacity-30',
+                fanned && 'transition-[translate,rotate] duration-150 motion-reduce:transition-none hover:-translate-y-3 focus-within:-translate-y-3 hover:z-10 focus-within:z-10',
+            ].filter(Boolean).join(' ')}
             {...attributes}
             {...listeners}
             onClick={interact}
@@ -50,7 +80,7 @@ function SortableHandCard({id, card, activeId, playerName, stackIndex, onCardCon
     );
 }
 
-export function HandStrip({playerName, hand, cards, gameId, onCommand, onCardContextMenu}: HandStripProps) {
+export function HandStrip({playerName, hand, cards, gameId, onCommand, onCardContextMenu, variant = 'row'}: HandStripProps) {
     const stacks = useMemo(() => regionToStacks(hand, cards), [hand, cards]);
     const count = stacks.length;
 
@@ -112,8 +142,10 @@ export function HandStrip({playerName, hand, cards, gameId, onCommand, onCardCon
                     }}
                 >
                     <SortableContext items={sortedIds} strategy={horizontalListSortingStrategy}>
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                            {sortedIds.map(id => {
+                        <div className={variant === 'fanned'
+                            ? 'flex justify-center overflow-x-auto px-2 pt-3 pb-1'
+                            : 'flex gap-2 overflow-x-auto pb-1'}>
+                            {sortedIds.map((id, position) => {
                                 const stackIdx = getOriginalIdx(id);
                                 const card = stacks[stackIdx]?.[0];
                                 if (!card) return null;
@@ -125,6 +157,9 @@ export function HandStrip({playerName, hand, cards, gameId, onCommand, onCardCon
                                         activeId={activeId}
                                         playerName={playerName}
                                         stackIndex={stackIdx}
+                                        fanned={variant === 'fanned'}
+                                        position={position}
+                                        count={sortedIds.length}
                                         onCardContextMenu={onCardContextMenu}
                                     />
                                 );

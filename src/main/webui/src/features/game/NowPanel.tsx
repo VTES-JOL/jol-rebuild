@@ -70,13 +70,57 @@ function PhaseTrack({gameState, gameId, currentUser, onCommand, isSpectator}: {
 }
 
 /**
- * The persistent answer to "what is happening, and can I act?" — phase track,
- * a viewer-relative headline for the open situation, and the active timing
- * window's controls. See docs/implementation/board-design.md — Now panel.
+ * The active timing window's controls — the actionable block of the Now
+ * panel. Rendered by NowPanel from sm up and repeated by the Dock below sm,
+ * per the blueprint: "the Now panel's action buttons repeat in the Dock on
+ * breakpoints where the Now panel collapses."
  *
  * Legal-command buttons for enforced mode arrive with the server-side
  * legal-command enumeration (blueprint Gaps table); until then the composed
  * window panels carry the available responses.
+ */
+export function NowActions({gameState, gameId, currentUser, onCommand}: {
+    gameState: GameState;
+    gameId: string;
+    currentUser: string;
+    onCommand: (cmd: GameCommand) => void;
+}) {
+    if (!gameState.rulesEnforced) return null;
+    return (
+        <>
+            {gameState.impulseWindow?.active && (
+                <ImpulsePanel
+                    impulse={gameState.impulseWindow}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    onCommand={onCommand}
+                />
+            )}
+            {gameState.pendingAction && (
+                <ActionDeclarationPanel
+                    pending={gameState.pendingAction}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    players={gameState.players}
+                    onCommand={onCommand}
+                />
+            )}
+            {gameState.sequencingWindow?.active && (
+                <SequencingPanel
+                    seq={gameState.sequencingWindow}
+                    currentUser={currentUser}
+                    gameId={gameId}
+                    onCommand={onCommand}
+                />
+            )}
+        </>
+    );
+}
+
+/**
+ * The persistent answer to "what is happening, and can I act?" — phase track,
+ * a viewer-relative headline for the open situation, and the active timing
+ * window's controls. See docs/implementation/board-design.md — Now panel.
  */
 export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator}: {
     gameState: GameState;
@@ -122,31 +166,10 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
                 )}
             </div>
 
-            {gameState.rulesEnforced && gameState.impulseWindow?.active && (
-                <ImpulsePanel
-                    impulse={gameState.impulseWindow}
-                    currentUser={currentUser}
-                    gameId={gameId}
-                    onCommand={onCommand}
-                />
-            )}
-            {gameState.rulesEnforced && gameState.pendingAction && (
-                <ActionDeclarationPanel
-                    pending={gameState.pendingAction}
-                    currentUser={currentUser}
-                    gameId={gameId}
-                    players={gameState.players}
-                    onCommand={onCommand}
-                />
-            )}
-            {gameState.rulesEnforced && gameState.sequencingWindow?.active && (
-                <SequencingPanel
-                    seq={gameState.sequencingWindow}
-                    currentUser={currentUser}
-                    gameId={gameId}
-                    onCommand={onCommand}
-                />
-            )}
+            {/* Below sm the Dock repeats these next to the thumbs — see Dock.tsx */}
+            <div className="hidden sm:flex flex-col gap-1 empty:hidden">
+                <NowActions gameState={gameState} gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
+            </div>
         </div>
     );
 }

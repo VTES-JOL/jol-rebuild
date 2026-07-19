@@ -3,10 +3,9 @@ import {useEffect, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
+import {lastReadKey, unreadTalkCount} from './chatUnread.ts';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
-
-const lastReadKey = (gameId: string) => `jol.game.${gameId}.lastRead`;
 
 export type GameChatRailProps = {
     gameId: string;
@@ -15,20 +14,29 @@ export type GameChatRailProps = {
     currentUser: string;
     onSend: (content: string, replyToId?: string) => void;
     onReact: (messageId: string, emoji: string) => void;
+    /** Controlled drawer state (the Dock's Chat tab); omit for the rail's own toggle. */
+    drawerOpen?: boolean;
+    onDrawerOpenChange?: (open: boolean) => void;
 };
 
 /**
  * Table talk and the game log as one stream (log lines render quieter; the
  * Full/Brief/Off chips filter them). Presence follows the blueprint's density
- * map: a permanent rail from lg up, a badged toggle opening a slide-over
- * below. The unread divider marks where the viewer left off — the last-read
- * position persists per game in localStorage until the server-side marker
- * from the blueprint's Gaps table exists.
+ * map: a permanent rail from lg up, a badged toggle opening a slide-over on
+ * tablet, and below sm the Dock's Chat tab driving the same slide-over via
+ * the controlled props. The unread divider marks where the viewer left off —
+ * the last-read position persists per game in localStorage until the
+ * server-side marker from the blueprint's Gaps table exists.
  */
-export function GameChatRail({gameId, messages, status, currentUser, onSend, onReact}: GameChatRailProps) {
+export function GameChatRail({gameId, messages, status, currentUser, onSend, onReact, drawerOpen: drawerOpenProp, onDrawerOpenChange}: GameChatRailProps) {
     // Frozen at mount so the divider doesn't chase the reader down the stream.
     const [unreadAfterId] = useState<string | null>(() => localStorage.getItem(lastReadKey(gameId)));
-    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [drawerOpenState, setDrawerOpenState] = useState(false);
+    const drawerOpen = drawerOpenProp ?? drawerOpenState;
+    const setDrawerOpen = (open: boolean) => {
+        setDrawerOpenState(open);
+        onDrawerOpenChange?.(open);
+    };
     const [railVisible, setRailVisible] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
 
     useEffect(() => {
@@ -49,10 +57,7 @@ export function GameChatRail({gameId, messages, status, currentUser, onSend, onR
     // Unread badge (collapsed state only): talk messages after the persisted
     // last-read. Reading localStorage at render time is deliberate — it only
     // advances while the stream is visible, when the badge is hidden anyway.
-    const storedLastRead = localStorage.getItem(lastReadKey(gameId));
-    const storedIdx = storedLastRead ? messages.findIndex(m => m.id === storedLastRead) : -1;
-    const unreadTalk = messages.slice(storedIdx + 1)
-        .filter(m => m.type === 'CHAT' && m.sender !== currentUser).length;
+    const unreadTalk = unreadTalkCount(messages, localStorage.getItem(lastReadKey(gameId)), currentUser);
 
     const panel = (
         <ChatPanel
@@ -76,9 +81,10 @@ export function GameChatRail({gameId, messages, status, currentUser, onSend, onR
                 {panel}
             </aside>
 
+            {/* Tablet toggle — below sm the Dock's Chat tab owns this entry point */}
             <button
                 type="button"
-                className="lg:hidden fixed bottom-4 right-4 z-40 flex items-center justify-center w-11 h-11 rounded-full border border-line/60 bg-panel shadow-lg text-ink-muted hover:text-ink transition-colors"
+                className="hidden sm:flex lg:hidden fixed bottom-4 right-4 z-40 items-center justify-center w-11 h-11 rounded-full border border-line/60 bg-panel shadow-lg text-ink-muted hover:text-ink transition-colors"
                 onClick={() => setDrawerOpen(true)}
                 aria-label={unreadTalk > 0 ? `Open table talk, ${unreadTalk} unread` : 'Open table talk'}
             >

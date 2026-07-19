@@ -8,7 +8,8 @@ import {PlayerBoard} from './PlayerBoard.tsx';
 import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
-import {HandTray} from './HandTray.tsx';
+import {Dock} from './Dock.tsx';
+import {lastReadKey, unreadTalkCount} from './chatUnread.ts';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {oustPlayer} from './gameCommands.ts';
@@ -222,6 +223,7 @@ export default function GamePage() {
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
     const [cardScale, setCardScale] = useCardScale();
+    const [chatOpen, setChatOpen] = useState(false);
     const [layoutReady, setLayoutReady] = useState(false);
     const layoutInitialized = useRef(false);
     useEffect(() => {
@@ -372,15 +374,19 @@ export default function GamePage() {
                         </div>
                     )}
 
-                    {/* Hand tray — below board (text layout uses TextHandPanel instead) */}
-                    {boardLayout !== 'text' && currentUserHand && gameState && user && (
-                        <HandTray
+                    {/* Dock — hand + mobile tab bar below the board (text layout uses TextHandPanel instead) */}
+                    {boardLayout !== 'text' && gameState && user && (
+                        <Dock
                             playerName={user.username}
                             hand={currentUserHand}
                             cards={gameState.cards}
+                            gameState={gameState}
                             gameId={gameId}
+                            currentUser={currentUser}
                             onCommand={handleCommand}
                             onCardContextMenu={handleCardContextMenu}
+                            onOpenChat={() => setChatOpen(true)}
+                            chatUnread={unreadTalkCount(messages, localStorage.getItem(lastReadKey(gameId)), user.username)}
                         />
                     )}
                 </div>
@@ -393,6 +399,8 @@ export default function GamePage() {
                         currentUser={user.username}
                         onSend={send}
                         onReact={react}
+                        drawerOpen={chatOpen}
+                        onDrawerOpenChange={setChatOpen}
                     />
                 )}
             </div>
