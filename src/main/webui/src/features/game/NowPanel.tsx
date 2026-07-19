@@ -1,9 +1,12 @@
+import {useState} from 'react';
 import type {GameCommand} from './gameCommands.ts';
 import {ActionDeclarationPanel} from './ActionDeclarationPanel.tsx';
 import {ImpulsePanel} from './ImpulsePanel.tsx';
 import type {GamePhase} from './nowStatus.ts';
 import {nowStatus, PHASE_LABELS, PHASES} from './nowStatus.ts';
 import {SequencingPanel} from './SequencingPanel.tsx';
+import type {SinceDigest} from './sinceDigest.ts';
+import {digestLines} from './sinceDigest.ts';
 import type {GameState} from './types.ts';
 
 function PhaseTrack({gameState, gameId, currentUser, onCommand, isSpectator}: {
@@ -122,13 +125,16 @@ export function NowActions({gameState, gameId, currentUser, onCommand}: {
  * a viewer-relative headline for the open situation, and the active timing
  * window's controls. See docs/implementation/board-design.md — Now panel.
  */
-export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator}: {
+export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator, digest}: {
     gameState: GameState;
     gameId: string;
     currentUser: string;
     onCommand: (cmd: GameCommand) => void;
     isSpectator: boolean;
+    /** Reconnect summary compiled from the effect-log slice; null when caught up. */
+    digest?: SinceDigest | null;
 }) {
+    const [digestDismissed, setDigestDismissed] = useState(false);
     const status = nowStatus(gameState, currentUser);
     // The server flag is authoritative when present; the client derivation covers older payloads.
     const attention = (gameState.youAreAwaited ?? status.yourMove) && !isSpectator;
@@ -136,6 +142,20 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
 
     return (
         <div className="flex flex-col gap-1 pb-1.5 shrink-0 min-w-0">
+            {digest && !digestDismissed && (
+                <div className="flex items-center gap-2 rounded border border-gold/30 bg-gold/5 px-2 py-1 text-xs min-w-0">
+                    <span className="font-medium text-gold shrink-0">Since you left</span>
+                    <span className="text-ink-secondary min-w-0 truncate">{digestLines(digest).join(' · ')}</span>
+                    <button
+                        type="button"
+                        className="ml-auto text-ink-muted hover:text-ink transition-colors leading-none shrink-0"
+                        onClick={() => setDigestDismissed(true)}
+                        aria-label="Dismiss summary"
+                    >
+                        ✕
+                    </button>
+                </div>
+            )}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
                 <PhaseTrack
                     gameState={gameState}

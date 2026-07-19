@@ -9,7 +9,11 @@ import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
 import {Dock} from './Dock.tsx';
-import {lastReadKey, unreadTalkCount} from './chatUnread.ts';
+import gameApi from './api.ts';
+import {unreadTalkCount} from './chatUnread.ts';
+import type {SinceDigest} from './sinceDigest.ts';
+import {compileDigest} from './sinceDigest.ts';
+import {useLastRead} from './useLastRead.ts';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {oustPlayer} from './gameCommands.ts';
@@ -224,6 +228,19 @@ export default function GamePage() {
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
     const [cardScale, setCardScale] = useCardScale();
     const [chatOpen, setChatOpen] = useState(false);
+
+    // "Since you left": one effect-log slice fetch per visit, anchored on the
+    // last-read marker frozen at mount, compiled client-side into the digest.
+    const {initialLastRead, readLastRead} = useLastRead(gameId);
+    const [digest, setDigest] = useState<SinceDigest | null>(null);
+    const digestFetched = useRef(false);
+    useEffect(() => {
+        if (digestFetched.current || !initialLastRead || !user) return;
+        digestFetched.current = true;
+        gameApi.getMessagesSince(gameId, initialLastRead)
+            .then(slice => setDigest(compileDigest(slice, user.username)))
+            .catch(() => setDigest(null)); // the digest is a nicety — never block the board on it
+    }, [gameId, initialLastRead, user]);
     const [layoutReady, setLayoutReady] = useState(false);
     const layoutInitialized = useRef(false);
     useEffect(() => {
@@ -295,6 +312,7 @@ export default function GamePage() {
                             currentUser={currentUser}
                             onCommand={handleCommand}
                             isSpectator={isSpectator}
+                            digest={digest}
                         />
                     )}
 
@@ -386,7 +404,7 @@ export default function GamePage() {
                             onCommand={handleCommand}
                             onCardContextMenu={handleCardContextMenu}
                             onOpenChat={() => setChatOpen(true)}
-                            chatUnread={unreadTalkCount(messages, localStorage.getItem(lastReadKey(gameId)), user.username)}
+                            chatUnread={unreadTalkCount(messages, readLastRead(), user.username)}
                         />
                     )}
                 </div>

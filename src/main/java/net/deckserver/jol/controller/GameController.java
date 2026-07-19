@@ -255,6 +255,21 @@ public class GameController {
         return chatService.getHistory(id, page, limit);
     }
 
+    /** Reconnect digest: everything after a known message, oldest first (capped). */
+    @GET
+    @Path("/{id}/messages/since")
+    @RolesAllowed("USER")
+    public List<ChatMessageDto> getMessagesSince(
+        @PathParam("id") String id,
+        @QueryParam("after") String afterMessageId) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+        if (afterMessageId == null || afterMessageId.isBlank()) {
+            throw new WebApplicationException("after is required", Response.Status.BAD_REQUEST);
+        }
+        return chatService.getMessagesSince(id, afterMessageId);
+    }
+
     @POST
     @Path("/{id}/register")
     @Transactional

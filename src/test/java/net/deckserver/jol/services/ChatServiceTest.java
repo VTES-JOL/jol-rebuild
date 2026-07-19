@@ -174,6 +174,46 @@ class ChatServiceTest {
                 "Messages not in chronological order");
     }
 
+    // ── getMessagesSince ──────────────────────────────────────────────────────
+
+    @Test
+    @TestTransaction
+    void getMessagesSince_returnsOnlyMessagesAfterAnchor_oldestFirst() {
+        ChatMessageDto first  = service.save(GAME_ID, "alice", "first",  null);
+        ChatMessageDto second = service.save(GAME_ID, "bob",   "second", null);
+        ChatMessageDto third  = service.save(GAME_ID, "carol", "third",  null);
+
+        List<ChatMessageDto> since = service.getMessagesSince(GAME_ID, first.id);
+
+        assertEquals(List.of(second.id, third.id), since.stream().map(m -> m.id).toList());
+    }
+
+    @Test
+    @TestTransaction
+    void getMessagesSince_emptyWhenCaughtUp() {
+        service.save(GAME_ID, "alice", "first", null);
+        ChatMessageDto last = service.save(GAME_ID, "bob", "last", null);
+
+        assertThat(service.getMessagesSince(GAME_ID, last.id), empty());
+    }
+
+    @Test
+    @TestTransaction
+    void getMessagesSince_unknownAnchor_returnsEmpty() {
+        service.save(GAME_ID, "alice", "msg", null);
+
+        assertThat(service.getMessagesSince(GAME_ID, "nonexistent-id"), empty());
+    }
+
+    @Test
+    @TestTransaction
+    void getMessagesSince_anchorFromAnotherGame_returnsEmpty() {
+        ChatMessageDto foreign = service.save("other-game", "alice", "elsewhere", null);
+        service.save(GAME_ID, "bob", "here", null);
+
+        assertThat(service.getMessagesSince(GAME_ID, foreign.id), empty());
+    }
+
     // ── getHistory ────────────────────────────────────────────────────────────
 
     @Test

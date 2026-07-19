@@ -3,7 +3,8 @@ import {useEffect, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
 import type {ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
-import {lastReadKey, unreadTalkCount} from './chatUnread.ts';
+import {unreadTalkCount} from './chatUnread.ts';
+import {useLastRead} from './useLastRead.ts';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -29,8 +30,8 @@ export type GameChatRailProps = {
  * server-side marker from the blueprint's Gaps table exists.
  */
 export function GameChatRail({gameId, messages, status, currentUser, onSend, onReact, drawerOpen: drawerOpenProp, onDrawerOpenChange}: GameChatRailProps) {
-    // Frozen at mount so the divider doesn't chase the reader down the stream.
-    const [unreadAfterId] = useState<string | null>(() => localStorage.getItem(lastReadKey(gameId)));
+    // The divider position is frozen at mount inside the hook.
+    const {initialLastRead: unreadAfterId, readLastRead, markRead} = useLastRead(gameId);
     const [drawerOpenState, setDrawerOpenState] = useState(false);
     const drawerOpen = drawerOpenProp ?? drawerOpenState;
     const setDrawerOpen = (open: boolean) => {
@@ -50,14 +51,14 @@ export function GameChatRail({gameId, messages, status, currentUser, onSend, onR
     const latestId = messages.length > 0 ? messages[messages.length - 1].id : null;
     useEffect(() => {
         if (latestId && (railVisible || drawerOpen)) {
-            localStorage.setItem(lastReadKey(gameId), latestId);
+            markRead(latestId);
         }
-    }, [latestId, railVisible, drawerOpen, gameId]);
+    }, [latestId, railVisible, drawerOpen, markRead]);
 
     // Unread badge (collapsed state only): talk messages after the persisted
-    // last-read. Reading localStorage at render time is deliberate — it only
+    // last-read. Reading the store at render time is deliberate — it only
     // advances while the stream is visible, when the badge is hidden anyway.
-    const unreadTalk = unreadTalkCount(messages, localStorage.getItem(lastReadKey(gameId)), currentUser);
+    const unreadTalk = unreadTalkCount(messages, readLastRead(), currentUser);
 
     const panel = (
         <ChatPanel

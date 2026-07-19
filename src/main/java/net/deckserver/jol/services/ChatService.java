@@ -79,6 +79,22 @@ public class ChatService {
         return ChatMessageDto.history(messages);
     }
 
+    /** Upper bound on a reconnect digest slice — a very long absence degrades to "and more". */
+    static final int SINCE_LIMIT = 500;
+
+    /**
+     * Everything after the given message, oldest first — the reconnect-digest
+     * slice. An unknown anchor, or one from another game, yields an empty list.
+     */
+    @Transactional
+    public List<ChatMessageDto> getMessagesSince(String gameId, String afterMessageId) {
+        ChatMessage anchor = ChatMessage.findById(afterMessageId);
+        if (anchor == null || !gameId.equals(anchor.gameId)) return List.of();
+        return ChatMessage.findAfter(gameId, anchor.timestamp, SINCE_LIMIT).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     @Transactional
     public List<ChatMessageDto> getHistory(String gameId, int page, int limit) {
         int effectiveLimit = Math.min(limit, 200);

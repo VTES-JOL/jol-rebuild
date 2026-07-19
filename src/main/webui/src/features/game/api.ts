@@ -1,4 +1,5 @@
 import {baseFetch, json} from "@/shared/api/client.ts";
+import type {ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
 
 export interface GameDto {
     id: string;
@@ -108,6 +109,11 @@ const gameApi = {
         const res = await baseFetch(`/api/games/${id}/start`, { ...OPTS, method: 'POST' });
         if (!res.ok) throw new Error(await res.text().catch(() => `${res.status} ${res.statusText}`));
         return res.json();
+    },
+
+    /** Reconnect-digest slice: everything after a known message, oldest first (server-capped). */
+    async getMessagesSince(id: string, afterMessageId: string): Promise<(ChatMsg | CommandLogMsg)[]> {
+        return json(await baseFetch(`/api/games/${id}/messages/since?after=${encodeURIComponent(afterMessageId)}`, OPTS));
     },
 
     async invitePlayer(gameId: string, username: string): Promise<void> {

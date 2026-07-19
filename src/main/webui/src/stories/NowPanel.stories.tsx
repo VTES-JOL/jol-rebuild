@@ -82,6 +82,21 @@ export const BlockWindowOnYou: Story = {
     },
 };
 
+export const SinceYouLeftDigest: Story = {
+    args: {
+        gameState: makeState(),
+        digest: {ousts: ['Marcus'], poolChanges: 2, turnsAdvanced: 3, talkCount: 5, truncated: false},
+    },
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // The reconnect banner summarizes the away-time slice, then dismisses to the live view.
+        await expect(canvas.getByText('Since you left')).toBeInTheDocument();
+        await expect(canvas.getByText(/ousted: Marcus/)).toBeInTheDocument();
+        await userEvent.click(canvas.getByRole('button', {name: 'Dismiss summary'}));
+        await expect(canvas.queryByText('Since you left')).not.toBeInTheDocument();
+    },
+};
+
 export const TargetedByServerFlag: Story = {
     args: {
         gameState: makeState({

@@ -90,6 +90,24 @@ public class ChatMessage extends PanacheEntityBase {
         return find("gameId = ?1 AND turn = ?2 AND messageType = 'COMMAND_LOG'", gameId, turn).list();
     }
 
+    /** Ascending slice of everything after a point in time — the reconnect-digest query. */
+    public static List<ChatMessage> findAfter(String gameId, Instant after, int limit) {
+        List<ChatMessage> slice = find("gameId = ?1 AND timestamp > ?2 ORDER BY timestamp ASC", gameId, after)
+                .page(0, limit)
+                .list();
+
+        List<String> ids = slice.stream().map(m -> m.id).toList();
+        if (ids.isEmpty()) return List.of();
+
+        return find(
+                "SELECT DISTINCT m FROM ChatMessage m " +
+                        "LEFT JOIN FETCH m.reactions " +
+                        "LEFT JOIN FETCH m.replyTo " +
+                        "WHERE m.id IN ?1 " +
+                        "ORDER BY m.timestamp ASC", ids)
+                .list();
+    }
+
     public static List<ChatMessage> findRecent(String gameId, int limit) {
         String query = gameId == null ? "gameId IS NULL" : "gameId = ?1";
         Object[] params = gameId == null ? new Object[]{} : new Object[]{gameId};

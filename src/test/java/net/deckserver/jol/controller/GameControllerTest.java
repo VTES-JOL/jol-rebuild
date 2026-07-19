@@ -32,6 +32,9 @@ import static org.hamcrest.Matchers.*;
 @QuarkusTest
 public class GameControllerTest {
 
+    @jakarta.inject.Inject
+    net.deckserver.jol.services.ChatService chatService;
+
     @BeforeEach
     @Transactional
     void setup() {
@@ -326,6 +329,55 @@ public class GameControllerTest {
         given().get("/api/games/open")
                 .then().statusCode(HttpStatus.SC_OK)
                 .body("id", hasItem(privateGameId));
+    }
+
+    // ── Messages since (reconnect digest slice) ───────────────────────────────
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void messagesSince_returnsSliceAfterAnchorOldestFirst() {
+        String gameId = createGame("Digest Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String anchorId = chatService.save(gameId, "alice", "anchor", null).id;
+        chatService.save(gameId, "bob",   "later-1", null);
+        chatService.save(gameId, "carol", "later-2", null);
+
+        given().queryParam("after", anchorId)
+                .get("/api/games/{id}/messages/since", gameId)
+                .then().statusCode(HttpStatus.SC_OK)
+                .body("size()", is(2))
+                .body("[0].content", is("later-1"))
+                .body("[1].content", is("later-2"));
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void messagesSince_missingAfterParam_isBadRequest() {
+        String gameId = createGame("Digest Game", Visibility.PUBLIC, GameFormat.STANDARD);
+
+        given().get("/api/games/{id}/messages/since", gameId)
+                .then().statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void messagesSince_unknownGame_isNotFound() {
+        given().queryParam("after", "whatever")
+                .get("/api/games/{id}/messages/since", "no-such-game")
+                .then().statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void messagesSince_foreignAnchor_returnsEmpty() {
+        String gameId  = createGame("Digest Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String otherId = createGame("Other Game",  Visibility.PUBLIC, GameFormat.STANDARD);
+        String foreignAnchor = chatService.save(otherId, "alice", "elsewhere", null).id;
+        chatService.save(gameId, "bob", "here", null);
+
+        given().queryParam("after", foreignAnchor)
+                .get("/api/games/{id}/messages/since", gameId)
+                .then().statusCode(HttpStatus.SC_OK)
+                .body("size()", is(0));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
