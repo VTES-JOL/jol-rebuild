@@ -380,6 +380,47 @@ public class GameControllerTest {
                 .body("size()", is(0));
     }
 
+    // ── Read markers ──────────────────────────────────────────────────────────
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void readMarker_roundTrip() {
+        String gameId = createGame("Marker Game", Visibility.PUBLIC, GameFormat.STANDARD);
+        String messageId = chatService.save(gameId, "alice", "hello", null).id;
+
+        given().get("/api/games/{id}/read-marker", gameId)
+                .then().statusCode(HttpStatus.SC_OK)
+                .body("messageId", nullValue());
+
+        given().contentType(MediaType.APPLICATION_JSON)
+                .body(new GameController.ReadMarkerDto(messageId))
+                .put("/api/games/{id}/read-marker", gameId)
+                .then().statusCode(HttpStatus.SC_OK)
+                .body("messageId", is(messageId));
+
+        given().get("/api/games/{id}/read-marker", gameId)
+                .then().statusCode(HttpStatus.SC_OK)
+                .body("messageId", is(messageId));
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void readMarker_invalidMessage_isBadRequest() {
+        String gameId = createGame("Marker Game", Visibility.PUBLIC, GameFormat.STANDARD);
+
+        given().contentType(MediaType.APPLICATION_JSON)
+                .body(new GameController.ReadMarkerDto("no-such-message"))
+                .put("/api/games/{id}/read-marker", gameId)
+                .then().statusCode(HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    @TestSecurity(user = "testuser", roles = {"USER"})
+    public void readMarker_unknownGame_isNotFound() {
+        given().get("/api/games/{id}/read-marker", "no-such-game")
+                .then().statusCode(HttpStatus.SC_NOT_FOUND);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /** Creates a game via the API as testuser and returns the game ID. */

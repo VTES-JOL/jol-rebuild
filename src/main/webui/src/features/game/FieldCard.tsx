@@ -50,7 +50,7 @@ export const FieldCard = memo(function FieldCard(props: FieldCardProps) {
             </div>
 
             {contested && !faceDown && (
-                <div className="absolute -left-1 -right-1 top-[24%] -rotate-3 bg-blood text-center py-px shadow-md pointer-events-none z-10">
+                <div className="absolute -left-1 -right-1 top-[24%] -rotate-3 bg-blood/80 text-center py-px shadow-md pointer-events-none z-10">
                     <span className="text-white font-bold uppercase tracking-widest drop-shadow"
                           style={{fontSize: 'calc(var(--card-w, 96px) * 0.085)'}}>Contested</span>
                 </div>
@@ -87,7 +87,7 @@ export const FieldCard = memo(function FieldCard(props: FieldCardProps) {
                                           style={{
                                               fontSize: 'calc(var(--card-w, 96px) * 0.075)',
                                               textShadow: '0 1px 2px rgba(0,0,0,0.8)',
-                                          }}>{i + 1}</span>
+                                          }}/>
                                 </div>
                             ))}
                         </div>

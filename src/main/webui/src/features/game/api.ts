@@ -111,6 +111,20 @@ const gameApi = {
         return res.json();
     },
 
+    /** The caller's persisted chat read position (null when never marked). */
+    async getReadMarker(id: string): Promise<{messageId: string | null}> {
+        return json(await baseFetch(`/api/games/${id}/read-marker`, OPTS));
+    },
+
+    /** Advances the caller's read position; the server ignores regressions. */
+    async setReadMarker(id: string, messageId: string): Promise<{messageId: string | null}> {
+        return json(await baseFetch(`/api/games/${id}/read-marker`, {
+            ...OPTS, method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({messageId}),
+        }));
+    },
+
     /** Reconnect-digest slice: everything after a known message, oldest first (server-capped). */
     async getMessagesSince(id: string, afterMessageId: string): Promise<(ChatMsg | CommandLogMsg)[]> {
         return json(await baseFetch(`/api/games/${id}/messages/since?after=${encodeURIComponent(afterMessageId)}`, OPTS));

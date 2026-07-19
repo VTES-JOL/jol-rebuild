@@ -94,8 +94,7 @@ export const NamedWithBlood: Story = {
     args: {id: 'v11', cardId: '200584', crypt: true, faceDown: false, locked: false, name: 'Theo Bell', capacity: 7, counters: 5, type: 'Vampire'},
     play: async ({canvasElement}) => {
         const canvas = within(canvasElement);
-        // Beads carry a numeral twin — the count is readable as text, not just countable.
-        await expect(canvas.getByText('5')).toBeInTheDocument();
+        // The count stays readable without counting beads via the accessible name.
         await expect(canvas.getByRole('img', {name: 'Theo Bell, 5 blood, capacity 7'})).toBeInTheDocument();
     },
 };

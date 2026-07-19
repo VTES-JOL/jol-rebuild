@@ -255,6 +255,37 @@ public class GameController {
         return chatService.getHistory(id, page, limit);
     }
 
+    public record ReadMarkerDto(String messageId) {}
+
+    /** The caller's persisted chat read position in this game (null messageId when never marked). */
+    @GET
+    @Path("/{id}/read-marker")
+    @RolesAllowed("USER")
+    public ReadMarkerDto getReadMarker(@PathParam("id") String id) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+        String username = identity.getPrincipal().getName();
+        return new ReadMarkerDto(chatService.getReadMarker(id, username));
+    }
+
+    /** Advances the caller's read position; regressions are ignored (returns the effective marker). */
+    @PUT
+    @Path("/{id}/read-marker")
+    @RolesAllowed("USER")
+    public ReadMarkerDto setReadMarker(@PathParam("id") String id, ReadMarkerDto body) {
+        Game game = Game.findById(id);
+        if (game == null) throw new NotFoundException();
+        if (body == null || body.messageId() == null || body.messageId().isBlank()) {
+            throw new WebApplicationException("messageId is required", Response.Status.BAD_REQUEST);
+        }
+        String username = identity.getPrincipal().getName();
+        try {
+            return new ReadMarkerDto(chatService.setReadMarker(id, username, body.messageId()));
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(e.getMessage(), Response.Status.BAD_REQUEST);
+        }
+    }
+
     /** Reconnect digest: everything after a known message, oldest first (capped). */
     @GET
     @Path("/{id}/messages/since")

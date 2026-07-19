@@ -11,6 +11,7 @@ import net.deckserver.jol.dto.ReactionDto;
 import net.deckserver.jol.dto.ReplySnapshotDto;
 import net.deckserver.jol.entity.ChatMessage;
 import net.deckserver.jol.entity.ChatMessageReaction;
+import net.deckserver.jol.entity.ChatReadMarker;
 import net.deckserver.jol.game.command.CommandContext;
 import org.jboss.logging.Logger;
 
@@ -81,6 +82,45 @@ public class ChatService {
 
     /** Upper bound on a reconnect digest slice — a very long absence degrades to "and more". */
     static final int SINCE_LIMIT = 500;
+
+    /** The player's persisted read position in this game, or null when never marked. */
+    public String getReadMarker(String gameId, String username) {
+        ChatReadMarker marker = ChatReadMarker.findByGameAndUser(gameId, username);
+        return marker != null ? marker.lastReadMessageId : null;
+    }
+
+    /**
+     * Advances the player's read position. The message must belong to the
+     * game; regressions (marking an older message than the current marker)
+     * are ignored so racing devices can only move the marker forward.
+     * Returns the effective marker after the call.
+     */
+    @Transactional
+    public String setReadMarker(String gameId, String username, String messageId) {
+        ChatMessage target = ChatMessage.findById(messageId);
+        if (target == null || !gameId.equals(target.gameId)) {
+            throw new IllegalArgumentException("Message not found in game: " + messageId);
+        }
+
+        ChatReadMarker marker = ChatReadMarker.findByGameAndUser(gameId, username);
+        if (marker == null) {
+            marker = new ChatReadMarker();
+            marker.gameId = gameId;
+            marker.username = username;
+            marker.lastReadMessageId = messageId;
+            marker.updatedAt = target.timestamp;
+            marker.persist();
+            return messageId;
+        }
+
+        ChatMessage current = ChatMessage.findById(marker.lastReadMessageId);
+        if (current == null || !target.timestamp.isBefore(current.timestamp)) {
+            marker.lastReadMessageId = messageId;
+            marker.updatedAt = target.timestamp;
+            return messageId;
+        }
+        return marker.lastReadMessageId; // regression ignored
+    }
 
     /**
      * Everything after the given message, oldest first — the reconnect-digest

@@ -214,6 +214,75 @@ class ChatServiceTest {
         assertThat(service.getMessagesSince(GAME_ID, foreign.id), empty());
     }
 
+    // ── read markers ──────────────────────────────────────────────────────────
+
+    @Test
+    @TestTransaction
+    void readMarker_nullWhenNeverMarked() {
+        assertNull(service.getReadMarker(GAME_ID, "alice"));
+    }
+
+    @Test
+    @TestTransaction
+    void setReadMarker_createsAndReturnsMarker() {
+        ChatMessageDto msg = service.save(GAME_ID, "alice", "hi", null);
+
+        assertEquals(msg.id, service.setReadMarker(GAME_ID, "bob", msg.id));
+        assertEquals(msg.id, service.getReadMarker(GAME_ID, "bob"));
+    }
+
+    @Test
+    @TestTransaction
+    void setReadMarker_advancesToNewerMessage() {
+        ChatMessageDto first  = service.save(GAME_ID, "alice", "first",  null);
+        ChatMessageDto second = service.save(GAME_ID, "alice", "second", null);
+        service.setReadMarker(GAME_ID, "bob", first.id);
+
+        assertEquals(second.id, service.setReadMarker(GAME_ID, "bob", second.id));
+        assertEquals(second.id, service.getReadMarker(GAME_ID, "bob"));
+    }
+
+    @Test
+    @TestTransaction
+    void setReadMarker_ignoresRegression() {
+        ChatMessageDto first  = service.save(GAME_ID, "alice", "first",  null);
+        ChatMessageDto second = service.save(GAME_ID, "alice", "second", null);
+        service.setReadMarker(GAME_ID, "bob", second.id);
+
+        // A stale device marking the older message must not move the marker back.
+        assertEquals(second.id, service.setReadMarker(GAME_ID, "bob", first.id));
+        assertEquals(second.id, service.getReadMarker(GAME_ID, "bob"));
+    }
+
+    @Test
+    @TestTransaction
+    void setReadMarker_rejectsMessageFromAnotherGame() {
+        ChatMessageDto foreign = service.save("other-game", "alice", "elsewhere", null);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.setReadMarker(GAME_ID, "bob", foreign.id));
+    }
+
+    @Test
+    @TestTransaction
+    void setReadMarker_rejectsUnknownMessage() {
+        assertThrows(IllegalArgumentException.class,
+                () -> service.setReadMarker(GAME_ID, "bob", "nonexistent-id"));
+    }
+
+    @Test
+    @TestTransaction
+    void readMarkers_areScopedPerPlayerAndGame() {
+        ChatMessageDto here  = service.save(GAME_ID, "alice", "here", null);
+        ChatMessageDto there = service.save("other-game", "alice", "there", null);
+        service.setReadMarker(GAME_ID, "bob", here.id);
+        service.setReadMarker("other-game", "bob", there.id);
+
+        assertEquals(here.id,  service.getReadMarker(GAME_ID, "bob"));
+        assertEquals(there.id, service.getReadMarker("other-game", "bob"));
+        assertNull(service.getReadMarker(GAME_ID, "carol"));
+    }
+
     // ── getHistory ────────────────────────────────────────────────────────────
 
     @Test
