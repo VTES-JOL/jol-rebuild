@@ -451,7 +451,7 @@ function PlayerColumn({
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
         >
-            <div className={[
+            <div data-player-section={player.name} className={[
                 'flex-1 min-w-52 flex flex-col min-h-0 overflow-y-auto rounded-lg border px-2 py-2',
                 isCurrentUser ? 'bg-arcane/5 border-arcane/40' : 'bg-panel/50 border-line/75',
             ].join(' ')}>

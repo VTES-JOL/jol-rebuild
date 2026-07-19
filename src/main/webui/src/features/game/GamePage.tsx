@@ -16,6 +16,11 @@ import {regionToStacks} from './gameUtils.tsx';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
 import type {BoardLayout} from './GameStatusBar.tsx';
 import {CommandErrorBanner, ConnectionBanner, GameStatusBar} from './GameStatusBar.tsx';
+import {NowPanel} from './NowPanel.tsx';
+import {RingStrip} from './RingStrip.tsx';
+import {GameChatRail} from './GameChatRail.tsx';
+import {StageBoard} from './StageBoard.tsx';
+import {useCardTravel} from './useCardTravel.ts';
 
 
 function ZeroPoolOustModal({
@@ -124,7 +129,7 @@ export default function GamePage() {
         ? `${protocol}//${window.location.host}/ws/game/${encodeURIComponent(gameId)}`
         : null;
 
-    const {gameState, status, sendCommand, commandError, clearCommandError} = useGameChannel({
+    const {gameState, status, sendCommand, commandError, clearCommandError, messages, send, react} = useGameChannel({
         url: wsUrl,
         username: user?.username ?? '',
     });
@@ -134,6 +139,24 @@ export default function GamePage() {
             .map(name => gameState.players.find(p => p.name === name))
             .filter((p): p is PlayerState => !!p && !p.ousted))
         : [];
+
+    // Card travel: FLIP-animate any card that changes position between state
+    // broadcasts, across every layout that renders inside the board wrapper.
+    const boardRootRef = useRef<HTMLDivElement>(null);
+    useCardTravel(boardRootRef);
+
+    // Ring strip chip tap: focus the player on the circular board, or scroll
+    // their section into view on the linear/text boards.
+    const [circularFocus, setCircularFocus] = useState<{name: string; seq: number} | null>(null);
+    const handleFocusPlayer = useCallback((name: string) => {
+        setCircularFocus(prev => ({name, seq: (prev?.seq ?? 0) + 1}));
+        const section = document.querySelector(`[data-player-section="${CSS.escape(name)}"]`);
+        section?.scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+            block: 'start',
+            inline: 'nearest',
+        });
+    }, []);
 
     const prevCardIdsRef = useRef<Set<string>>(new Set());
     useEffect(() => {
@@ -204,7 +227,7 @@ export default function GamePage() {
         layoutInitialized.current = true;
         if (user) {
             const pref = user.defaultBoard;
-            if (pref === 'linear' || pref === 'circular' || pref === 'text') {
+            if (pref === 'stage' || pref === 'linear' || pref === 'circular' || pref === 'text') {
                 setBoardLayout(pref);
             }
         }
@@ -238,8 +261,8 @@ export default function GamePage() {
                     onDismiss={dismissZeroPool}
                 />
             )}
-            <div className="flex flex-col h-full min-h-0 px-4 pb-4">
-                <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+            <div className="flex h-full min-h-0 gap-3 px-4 pb-4">
+                <div ref={boardRootRef} className="flex-1 min-w-0 min-h-0 flex flex-col">
 
                     <GameStatusBar
                         gameState={gameState}
@@ -251,6 +274,24 @@ export default function GamePage() {
                         isSpectator={isSpectator}
                     />
 
+                    {gameState && (
+                        <RingStrip
+                            gameState={gameState}
+                            currentUser={currentUser}
+                            onFocusPlayer={handleFocusPlayer}
+                        />
+                    )}
+
+                    {gameState && (
+                        <NowPanel
+                            gameState={gameState}
+                            gameId={gameId}
+                            currentUser={currentUser}
+                            onCommand={handleCommand}
+                            isSpectator={isSpectator}
+                        />
+                    )}
+
                     {!isConnected && <ConnectionBanner status={status} />}
 
                     {commandError && (
@@ -260,6 +301,19 @@ export default function GamePage() {
                     {!layoutReady ? (
                         <div className="flex items-center justify-center h-32 text-ink-muted text-sm">
                             Loading…
+                        </div>
+                    ) : boardLayout === 'stage' && gameState ? (
+                        <div className="flex-1 min-h-0 overflow-hidden">
+                            <StageBoard
+                                orderedPlayers={orderedPlayers}
+                                cards={gameState.cards}
+                                currentUser={currentUser}
+                                gameState={gameState}
+                                gameId={gameId}
+                                onCommand={handleCommand}
+                                onCardContextMenu={handleCardContextMenu}
+                                focusRequest={circularFocus}
+                            />
                         </div>
                     ) : boardLayout === 'circular' && gameState ? (
                         <div className="flex-1 min-h-0 overflow-hidden">
@@ -271,6 +325,7 @@ export default function GamePage() {
                                 gameId={gameId}
                                 onCommand={handleCommand}
                                 onCardContextMenu={handleCardContextMenu}
+                                focusRequest={circularFocus}
                             />
                         </div>
                     ) : boardLayout === 'text' && gameState ? (
@@ -292,15 +347,16 @@ export default function GamePage() {
                                     style={{'--card-w': 'clamp(90px, 8.25vw, 108px)'} as CSSProperties}
                                 >
                                     {orderedPlayers.map(player => (
-                                        <PlayerBoard
-                                            key={player.name}
-                                            player={player}
-                                            cards={gameState.cards}
-                                            isCurrentPlayer={player.name === currentUser}
-                                            gameId={gameId}
-                                            onCommand={handleCommand}
-                                            onCardContextMenu={handleCardContextMenu}
-                                        />
+                                        <div key={player.name} data-player-section={player.name}>
+                                            <PlayerBoard
+                                                player={player}
+                                                cards={gameState.cards}
+                                                isCurrentPlayer={player.name === currentUser}
+                                                gameId={gameId}
+                                                onCommand={handleCommand}
+                                                onCardContextMenu={handleCardContextMenu}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
@@ -323,6 +379,17 @@ export default function GamePage() {
                         />
                     )}
                 </div>
+
+                {user && (
+                    <GameChatRail
+                        gameId={gameId}
+                        messages={messages}
+                        status={status}
+                        currentUser={user.username}
+                        onSend={send}
+                        onReact={react}
+                    />
+                )}
             </div>
         </GameLayout>
     );

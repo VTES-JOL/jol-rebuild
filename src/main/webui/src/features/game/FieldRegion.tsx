@@ -6,9 +6,11 @@ import {GripHorizontal} from 'lucide-react';
 import type {CSSProperties, ReactNode} from 'react';
 import {useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import type {CardData} from './CardStack.tsx';
-import {CARD_WIDTH, CardStack} from './CardStack.tsx';
+import {CARD_WIDTH} from './cardDisplay.ts';
 import {FieldCard} from './FieldCard.tsx';
+import type {CardData} from './types.ts';
+import type {TuckParentFrameProps, TuckStripProps} from './TuckStack.tsx';
+import {TuckParentFrame, TuckStack, TuckStrip} from './TuckStack.tsx';
 
 
 const GAP_WIDE = 32;
@@ -50,7 +52,7 @@ function CompactCardStack({cards, onClick, onContextMenu}: {
                     }}
                 />
             ))}
-            <div className="relative" style={{zIndex: ghostCount + 1}}>
+            <div className="relative" style={{zIndex: ghostCount + 1}} data-flip-id={cards[0].id}>
                 <FieldCard {...cards[0]} />
             </div>
         </div>
@@ -73,28 +75,15 @@ const rEmptyId = (rk: string, i: number)              => `${rk}//e//${i}`;
 const rCardId  = (rk: string, si: number, ci: number) => `${rk}//c//${si}//${ci}`;
 const rGetIdx  = (id: string)                         => parseInt(id.split('//')[2], 10);
 
-// ── Draggable card item ────────────────────────────────────────────────────────
+// ── Draggable tuck strip ──────────────────────────────────────────────────────
+// An attached card's name strip as a drag source: pull it out to detach/re-attach.
 
-function DraggableCardItem({
-    card,
-    regionKey,
-    stackIndex,
-    cardIndex,
-    activeDragId,
-    suppressTransition,
-    style,
-    onClick,
-    onContextMenu,
-}: {
-    card: CardData;
+function DraggableTuckStrip({stripProps, regionKey, stackIndex, cardIndex, activeDragId}: {
+    stripProps: TuckStripProps;
     regionKey: string;
     stackIndex: number;
     cardIndex: number;
     activeDragId: string | null;
-    suppressTransition: boolean;
-    style: CSSProperties;
-    onClick?: () => void;
-    onContextMenu?: (x: number, y: number) => void;
 }) {
     const id = rCardId(regionKey, stackIndex, cardIndex);
     const {attributes, listeners, setNodeRef} = useDraggable({
@@ -102,23 +91,46 @@ function DraggableCardItem({
         data: {type: 'card', regionKey, stackIndex, cardIndex} satisfies CardDragData,
     });
     return (
-        <div
+        <TuckStrip
             ref={setNodeRef}
-            style={style}
-            className={`cursor-grab active:cursor-grabbing${activeDragId === id ? ' opacity-30' : ''}`}
+            {...stripProps}
+            dimmed={activeDragId === id}
+            dragCursor
             {...attributes}
             {...listeners}
-            onClick={onClick}
-            onContextMenu={onContextMenu ? e => { e.preventDefault(); onContextMenu(e.clientX, e.clientY); } : undefined}
-        >
-            <FieldCard {...card} suppressTransition={suppressTransition} />
-        </div>
+        />
     );
 }
 
-// ── Draggable card stack ───────────────────────────────────────────────────────
+// ── Draggable tuck parent ─────────────────────────────────────────────────────
+// The stack's front card as a drag source (cardIndex 0).
 
-function DraggableCardStack({
+function DraggableTuckParent({parentProps, regionKey, stackIndex, activeDragId}: {
+    parentProps: TuckParentFrameProps;
+    regionKey: string;
+    stackIndex: number;
+    activeDragId: string | null;
+}) {
+    const id = rCardId(regionKey, stackIndex, 0);
+    const {attributes, listeners, setNodeRef} = useDraggable({
+        id,
+        data: {type: 'card', regionKey, stackIndex, cardIndex: 0} satisfies CardDragData,
+    });
+    return (
+        <TuckParentFrame
+            ref={setNodeRef}
+            {...parentProps}
+            dimmed={activeDragId === id}
+            dragCursor
+            {...attributes}
+            {...listeners}
+        />
+    );
+}
+
+// ── Draggable tuck stack ──────────────────────────────────────────────────────
+
+function DraggableTuckStack({
     cards,
     regionKey,
     stackIndex,
@@ -136,19 +148,26 @@ function DraggableCardStack({
     suppressTransition: boolean;
 }) {
     return (
-        <CardStack
+        <TuckStack
             cards={cards}
-            renderCard={(card, i, style) => (
-                <DraggableCardItem
-                    card={card}
+            onCardClick={onCardClick}
+            onCardContextMenu={onCardContextMenu}
+            suppressTransition={suppressTransition}
+            renderStrip={(_card, cardIndex, stripProps) => (
+                <DraggableTuckStrip
+                    stripProps={stripProps}
                     regionKey={regionKey}
                     stackIndex={stackIndex}
-                    cardIndex={i}
+                    cardIndex={cardIndex}
                     activeDragId={activeDragId}
-                    suppressTransition={suppressTransition}
-                    style={style}
-                    onClick={() => onCardClick?.(i)}
-                    onContextMenu={(x, y) => onCardContextMenu?.(i, x, y)}
+                />
+            )}
+            renderParent={(_card, parentProps) => (
+                <DraggableTuckParent
+                    parentProps={parentProps}
+                    regionKey={regionKey}
+                    stackIndex={stackIndex}
+                    activeDragId={activeDragId}
                 />
             )}
         />
@@ -203,7 +222,7 @@ function SortableStackSlot({
             >
                 <GripHorizontal size={14} />
             </div>
-            <DraggableCardStack
+            <DraggableTuckStack
                 cards={stack}
                 regionKey={regionKey}
                 stackIndex={stackIndex}
@@ -564,8 +583,8 @@ export function FieldRegion({
         if (!activeDrag) return null;
         if (activeDrag.type === 'stack') {
             return (
-                <div style={{width: `calc(var(--card-w, ${CARD_WIDTH}px) * 1.33)`}} className="opacity-80 pointer-events-none">
-                    <CardStack cards={stacks[activeDrag.stackIndex]} />
+                <div style={{width: `var(--card-w, ${CARD_WIDTH}px)`}} className="opacity-80 pointer-events-none">
+                    <TuckStack cards={stacks[activeDrag.stackIndex]} suppressTransition />
                 </div>
             );
         }
@@ -803,8 +822,8 @@ export function FieldRegionDndGroup({regions, compactRegions, onCrossRegionMove,
         if (!region) return null;
         if (activeDrag.type === 'stack') {
             return (
-                <div style={{width: `calc(var(--card-w, ${CARD_WIDTH}px) * 1.33)`}} className="opacity-80 pointer-events-none">
-                    <CardStack cards={region.stacks[activeDrag.stackIndex]} />
+                <div style={{width: `var(--card-w, ${CARD_WIDTH}px)`}} className="opacity-80 pointer-events-none">
+                    <TuckStack cards={region.stacks[activeDrag.stackIndex]} suppressTransition />
                 </div>
             );
         }

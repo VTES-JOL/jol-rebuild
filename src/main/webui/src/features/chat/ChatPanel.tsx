@@ -14,6 +14,8 @@ type BaseChatPanelProps = {
     enableDivider?: boolean;
     enableCommandLogFilter?: boolean;
     chatDisabled?: boolean;
+    /** Id of the last message the viewer had read — an unread divider renders after it. */
+    unreadAfterId?: string | null;
 };
 
 type LiveChatPanelProps = BaseChatPanelProps & {
@@ -40,6 +42,7 @@ function LiveChatPanel({
                            enableDivider = true,
                            enableCommandLogFilter = false,
                            chatDisabled = false,
+                           unreadAfterId = null,
                        }: LiveChatPanelProps) {
     const { messages, status, send, react } = useChat({
         url,
@@ -61,6 +64,7 @@ function LiveChatPanel({
             enableDivider={enableDivider}
             enableCommandLogFilter={enableCommandLogFilter}
             chatDisabled={chatDisabled}
+            unreadAfterId={unreadAfterId}
         />
     );
 }
@@ -79,6 +83,7 @@ function ManualChatPanel({
                              enableDivider = true,
                              enableCommandLogFilter = false,
                              chatDisabled = false,
+                             unreadAfterId = null,
                          }: ManualChatPanelProps) {
     return (
         <ChatPanelView
@@ -95,6 +100,7 @@ function ManualChatPanel({
             enableDivider={enableDivider}
             enableCommandLogFilter={enableCommandLogFilter}
             chatDisabled={chatDisabled}
+            unreadAfterId={unreadAfterId}
         />
     );
 }

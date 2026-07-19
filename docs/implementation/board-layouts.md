@@ -196,7 +196,7 @@ Strip and Circular boards wrap each player's regions in a single `FieldRegionDnd
 
 ### Card stacks
 
-Active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) render cards as `CardStack` — a vertical fan with individual cards draggable out. The parent card (vampire) sits at index 0; attached library cards follow at indices 1+.
+Active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) render cards as `TuckStack` — the parent card (vampire) in front at index 0, with attached cards (indices 1+) tucked behind it showing only their name strips. Strips are buttons (click, right-click, keyboard) and drag sources; on touch, a first tap fans the strips to full touch-target height and a second tap selects. See [Board Design — Card anatomy](./board-design.md#card-anatomy) for the interaction model. (`TuckStack` replaced the earlier `CardStack` vertical fan.)
 
 Compact regions (HAND, LIBRARY, CRYPT, ASH_HEAP) render as `CompactCardStack` — a layered ghost-card pile showing at most 3 ghost layers. The top card is draggable into active regions.
 

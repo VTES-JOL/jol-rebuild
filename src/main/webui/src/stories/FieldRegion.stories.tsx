@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
 import {useState} from 'react';
 import {CompactRegion, FieldRegion} from '../features/game/FieldRegion.tsx';
-import type {CardData} from '../features/game/CardStack.tsx';
+import type {CardData} from '../features/game/types.ts';
 
 const meta = {
     title: 'Game/FieldRegion',

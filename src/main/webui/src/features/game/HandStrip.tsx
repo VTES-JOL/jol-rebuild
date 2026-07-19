@@ -37,6 +37,7 @@ function SortableHandCard({id, card, activeId, playerName, stackIndex, onCardCon
     return (
         <div
             ref={setNodeRef}
+            data-flip-id={card.id}
             style={{width: 'var(--card-w, 72px)', transform: CSS.Transform.toString(transform), transition}}
             className={`shrink-0 cursor-grab active:cursor-grabbing${activeId === id ? ' opacity-30' : ''}`}
             {...attributes}

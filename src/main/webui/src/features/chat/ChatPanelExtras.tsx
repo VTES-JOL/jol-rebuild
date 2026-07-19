@@ -38,3 +38,14 @@ export function TimestampDivider({ label }: { label: string }) {
         </div>
     );
 }
+
+/** Marks the reader's last-read position — the async player's "welcome back" line. */
+export function UnreadDivider() {
+    return (
+        <div className="flex items-center gap-2 my-2" role="separator" aria-label="New messages since your last visit">
+            <div className="flex-1 h-px bg-blood/40" />
+            <span className="text-[10px] uppercase tracking-widest text-blood/80 whitespace-nowrap">new since your last visit</span>
+            <div className="flex-1 h-px bg-blood/40" />
+        </div>
+    );
+}

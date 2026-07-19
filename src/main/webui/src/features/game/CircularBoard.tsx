@@ -27,9 +27,11 @@ export type CircularBoardProps = {
     gameId?: string;
     onCommand?: (cmd: GameCommand) => void;
     onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
+    /** External focus request (e.g. a Ring strip chip tap); `seq` distinguishes repeats of the same name. */
+    focusRequest?: {name: string; seq: number} | null;
 };
 
-export function CircularBoard({orderedPlayers, cards, currentUser, gameState, gameId, onCommand, onCardContextMenu}: CircularBoardProps) {
+export function CircularBoard({orderedPlayers, cards, currentUser, gameState, gameId, onCommand, onCardContextMenu, focusRequest}: CircularBoardProps) {
     const initialFocus =
         orderedPlayers.find(p => p.name === currentUser)?.name ??
         gameState.currentPlayer ??
@@ -37,6 +39,17 @@ export function CircularBoard({orderedPlayers, cards, currentUser, gameState, ga
 
     const [focusedName, setFocusedName] = useState(initialFocus);
     const [colWidth, setColWidth] = useState(0);
+
+    // Adopt an external focus request during render (not in an effect) so the
+    // new slot content commits in the same pass; seq tracking makes re-taps of
+    // the same chip re-focus after the user has swiped elsewhere.
+    const [handledFocusSeq, setHandledFocusSeq] = useState(0);
+    if (focusRequest && focusRequest.seq !== handledFocusSeq) {
+        setHandledFocusSeq(focusRequest.seq);
+        if (orderedPlayers.some(p => p.name === focusRequest.name)) {
+            setFocusedName(focusRequest.name);
+        }
+    }
 
     // If the focused player has been ousted and removed from the list, shift focus to the first remaining player.
     useEffect(() => {

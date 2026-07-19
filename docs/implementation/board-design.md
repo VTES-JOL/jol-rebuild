@@ -128,7 +128,10 @@ Chat and the game log interleave in a single stream — in an async game the log
 | < 640px         | Chips (scrollable)    | 1 tableau (tap chip to switch)         | Tab + message ticker       | Action buttons + tab bar      |
 | 640–1024px      | Chips                 | Viewer + focused opponent              | Pinnable slide-over        | Hand dock + actions           |
 | 1024–1600px     | Chips + minion strips | Predator \| viewer \| prey             | Permanent rail             | Hand dock + actions           |
-| > 1600px        | Mini-tableaus         | Predator \| viewer \| prey \| 4th slot | Wider rail + card preview  | Hand dock + actions           |
+| 1600–1880px     | Mini-tableaus         | Predator \| viewer \| prey \| 4th slot | Wider rail + card preview  | Hand dock + actions           |
+| ≥ 1880px        | Mini-tableaus         | Full table — all five seats, viewer centered | Wider rail + card preview  | Hand dock + actions           |
+
+Stage breakpoints are measured on the Stage's own container (not the viewport), so a docked chat rail correctly reduces the tableau count.
 
 Nothing is mobile-only or desktop-only; density is the only variable. A user card-size slider adjusts stage card width independently of browser zoom.
 
@@ -189,5 +192,5 @@ The Ledger renderer evolves from `TextBoard` in parallel and is never removed.
 |------------------------------|------------------------------------------------------------------------------------------------------------|
 | Legal-command enumeration    | Enforced mode needs a per-viewer list of currently legal commands in `GameStateDto` (or a companion message) to drive Now panel / action sheet buttons |
 | Async digest source          | A queryable effect-log slice ("effects since timestamp / last-read marker") to compile the reconnect digest |
-| Last-read markers            | Per-player chat read position persisted for the unread divider                                             |
+| Last-read markers            | Per-player chat read position persisted server-side for the unread divider (interim: `GameChatRail` keeps it in localStorage, so it doesn't follow the player across devices) |
 | Attention events             | A viewer-relative "you are awaited / targeted" flag derivable from `ActiveTimingWindow` pass order          |

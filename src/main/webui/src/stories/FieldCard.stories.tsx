@@ -1,5 +1,6 @@
 import type {CSSProperties} from 'react';
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {expect, within} from 'storybook/test';
 import {FieldCard} from '../features/game/FieldCard.tsx';
 
 const meta = {
@@ -65,4 +66,36 @@ export const LibraryWithCounters: Story = {
 
 export const FaceDownWithBlood: Story = {
     args: {id: 'v8', cardId: '200183', crypt: true, faceDown: true, locked: false, capacity: 10, counters: 5, type: 'Vampire'},
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // Hidden identity, visible state: no name, but blood is announced.
+        await expect(canvas.getByRole('img', {name: 'Face-down crypt card, 5 blood'})).toBeInTheDocument();
+    },
+};
+
+export const Contested: Story = {
+    args: {id: 'v9', cardId: '200905', crypt: true, faceDown: false, locked: false, contested: true, name: 'Lucinde, Alastor', capacity: 9, counters: 9, type: 'Vampire'},
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByText('Contested')).toBeInTheDocument();
+        await expect(canvas.getByRole('img', {name: 'Lucinde, Alastor, contested, 9 blood, capacity 9'})).toBeInTheDocument();
+    },
+};
+
+export const ContestedAndLocked: Story = {
+    args: {id: 'v10', cardId: '200905', crypt: true, faceDown: false, locked: true, contested: true, name: 'Lucinde, Alastor', capacity: 9, type: 'Vampire'},
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        await expect(canvas.getByRole('img', {name: 'Lucinde, Alastor, locked, contested, capacity 9'})).toBeInTheDocument();
+    },
+};
+
+export const NamedWithBlood: Story = {
+    args: {id: 'v11', cardId: '200584', crypt: true, faceDown: false, locked: false, name: 'Theo Bell', capacity: 7, counters: 5, type: 'Vampire'},
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // Beads carry a numeral twin — the count is readable as text, not just countable.
+        await expect(canvas.getByText('5')).toBeInTheDocument();
+        await expect(canvas.getByRole('img', {name: 'Theo Bell, 5 blood, capacity 7'})).toBeInTheDocument();
+    },
 };

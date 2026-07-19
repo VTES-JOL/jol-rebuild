@@ -8,7 +8,7 @@ import Panel from '@/shared/components/Panel';
 import Button from '@/shared/components/Button';
 import EmptyState from '@/shared/components/EmptyState';
 import {CardSuggestions} from '@/features/chat/CardSuggestions.tsx';
-import {ReplyBanner, TimestampDivider} from './ChatPanelExtras.tsx';
+import {ReplyBanner, TimestampDivider, UnreadDivider} from './ChatPanelExtras.tsx';
 import {MessageGroupView} from './MessageGroupView';
 
 type Status = 'connecting' | 'connected' | 'disconnected' | 'error';
@@ -32,6 +32,8 @@ export type ChatPanelViewProps = {
     enableDivider?: boolean;
     enableCommandLogFilter?: boolean;
     chatDisabled?: boolean;
+    /** Id of the last message the viewer had read — an unread divider renders after it. */
+    unreadAfterId?: string | null;
 };
 
 const STATUS_LABELS: Record<Status, { label: string; dotClass: string }> = {
@@ -56,6 +58,7 @@ export function ChatPanelView({
                                   enableDivider = true,
                                   enableCommandLogFilter = false,
                                   chatDisabled = false,
+                                  unreadAfterId = null,
                               }: ChatPanelViewProps) {
     const [commandLogDetail, setCommandLogDetailState] = useState<CommandLogDetail>(
         () => (localStorage.getItem(COMMAND_LOG_DETAIL_KEY) as CommandLogDetail | null) ?? 'full'
@@ -122,6 +125,12 @@ export function ChatPanelView({
     const groups = groupMessages(visibleMessages, currentUser);
     const effectiveDetail: 'full' | 'brief' = commandLogDetail === 'off' ? 'full' : commandLogDetail;
 
+    // The unread divider sits before the first message after the last-read one.
+    const unreadIdx = unreadAfterId ? visibleMessages.findIndex(m => m.id === unreadAfterId) : -1;
+    const firstUnreadId = unreadIdx >= 0 && unreadIdx < visibleMessages.length - 1
+        ? visibleMessages[unreadIdx + 1].id
+        : null;
+
     return (
         <Panel
             title={title}
@@ -171,6 +180,7 @@ export function ChatPanelView({
                             }}
                         >
                             {group.dividerTimestamp && enableDivider && <TimestampDivider label={group.dividerTimestamp}/>}
+                            {firstUnreadId != null && group.lines.some(line => line.id === firstUnreadId) && <UnreadDivider/>}
                             <MessageGroupView
                                 group={group}
                                 showLine={i < groups.length - 1 && !groups[i + 1].dividerTimestamp}

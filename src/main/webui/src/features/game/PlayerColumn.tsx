@@ -7,7 +7,7 @@ import type {CardRef, GameCommand} from './gameCommands.ts';
 import {setChoice, setPool} from './gameCommands.ts';
 import {usePlayerRegions} from './usePlayerRegions.ts';
 
-export type PlayerColumnRole = 'predator' | 'focused' | 'prey';
+export type PlayerColumnRole = 'predator' | 'focused' | 'prey' | 'you' | 'cross-table';
 
 type PlayerColumnProps = {
     player: PlayerState;

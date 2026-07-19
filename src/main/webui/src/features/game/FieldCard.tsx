@@ -1,18 +1,17 @@
 import {memo} from 'react';
+import {CARD_IMAGE_BASE, CRYPT_BACK, describeCard, isCryptCard, LIBRARY_BACK} from './cardDisplay.ts';
 import type {CardData} from './types.ts';
 import {useCardPreview} from '@/hooks/useCardPreview.tsx';
 
 type FieldCardProps = CardData & {suppressTransition?: boolean};
 
-const CRYPT_BACK = 'https://static.deckserver.net/images/crypt.jpg';
-const LIBRARY_BACK = 'https://static.deckserver.net/images/library.jpg';
-
-export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceDown = false, locked = false, suppressTransition = false, capacity, counters}: FieldCardProps) {
-    const isCrypt = type === 'Vampire' || type === 'Imbued' || crypt === true;
+export const FieldCard = memo(function FieldCard(props: FieldCardProps) {
+    const {cardId, crypt, type, faceDown = false, locked = false, contested = false, suppressTransition = false, capacity, counters} = props;
+    const isCrypt = isCryptCard({type, crypt});
     const src = (faceDown || !cardId)
         ? (isCrypt ? CRYPT_BACK : LIBRARY_BACK)
-        : `https://static.deckserver.net/images/${cardId}`;
-    const alt = faceDown ? `${isCrypt ? 'Crypt' : 'Library'} card back` : `Card ${cardId ?? id}`;
+        : `${CARD_IMAGE_BASE}${cardId}`;
+    const label = describeCard(props);
 
     const showPreview = !faceDown && !!cardId;
     const {anchorRef, onClick, tooltip} = useCardPreview<HTMLDivElement>(cardId ?? '');
@@ -27,9 +26,12 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
         <div
             ref={showPreview ? anchorRef : undefined}
             onClick={showPreview ? onClick : undefined}
+            role="img"
+            aria-label={label}
+            title={locked ? 'Locked' : undefined}
             className={[
             'relative aspect-5/7 rounded shadow-md',
-            !suppressTransition && 'transition-transform duration-200',
+            !suppressTransition && 'transition-transform duration-200 motion-reduce:transition-none',
             locked && 'rotate-90',
         ].filter(Boolean).join(' ')}>
             <div
@@ -38,13 +40,21 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
             >
                 <img
                     src={src}
-                    alt={alt}
+                    alt=""
+                    aria-hidden="true"
                     className="w-full h-full object-cover"
                     style={needsLoadingBack ? {opacity: 0, transition: 'opacity 150ms'} : undefined}
                     onLoad={needsLoadingBack ? (e => { e.currentTarget.style.opacity = '1'; }) : undefined}
                     onError={needsLoadingBack ? (e => { e.currentTarget.style.display = 'none'; }) : undefined}
                 />
             </div>
+
+            {contested && !faceDown && (
+                <div className="absolute -left-1 -right-1 top-[24%] -rotate-3 bg-blood text-center py-px shadow-md pointer-events-none z-10">
+                    <span className="text-white font-bold uppercase tracking-widest drop-shadow"
+                          style={{fontSize: 'calc(var(--card-w, 96px) * 0.085)'}}>Contested</span>
+                </div>
+            )}
 
             {!faceDown && capacity != null && isCrypt && (
                 <div className="absolute bottom-1 right-1 min-w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg border border-white/40 px-1 pointer-events-none">
@@ -66,12 +76,19 @@ export const FieldCard = memo(function FieldCard({id, cardId, crypt, type, faceD
                             }}
                         >
                             {Array.from({length: counters}, (_, i) => (
-                                <div key={i} className="rounded-full border border-white/70"
+                                <div key={i} className="rounded-full border border-white/70 flex items-center justify-center"
                                      style={{
                                          aspectRatio: '1',
                                          background: 'radial-gradient(circle at 35% 35%, #fca5a5, #b91c1c)',
                                          boxShadow: '0 1px 4px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.3)',
-                                     }} />
+                                     }}>
+                                    {/* Numeral twin: the top bead reads as the total, no counting needed. */}
+                                    <span className="text-white font-semibold leading-none"
+                                          style={{
+                                              fontSize: 'calc(var(--card-w, 96px) * 0.075)',
+                                              textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                                          }}>{i + 1}</span>
+                                </div>
                             ))}
                         </div>
                     )
