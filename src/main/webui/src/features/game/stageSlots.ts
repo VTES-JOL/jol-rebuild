@@ -71,6 +71,17 @@ export function stageSlots(order: string[], viewer: string, focused: string | nu
         .map(name => ({name, role: roleOf(name)}));
 }
 
+/**
+ * Suggest focusing the awaited player when their tableau is off-stage.
+ * Suggest, never force: the caller renders this as a dismissible affordance.
+ * Returns null when there is no awaited player, they aren't seated, or their
+ * tableau is already on stage.
+ */
+export function focusSuggestion(awaited: string | null, slotNames: string[], order: string[]): string | null {
+    if (!awaited || !order.includes(awaited)) return null;
+    return slotNames.includes(awaited) ? null : awaited;
+}
+
 /** Stage density: how many tableaus fit at this container width (~400px each from 4 up). */
 export function stageSlotCount(width: number): number {
     if (width < 640) return 1;

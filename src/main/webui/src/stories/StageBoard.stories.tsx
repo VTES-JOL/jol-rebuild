@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {expect, fn, waitFor, within} from 'storybook/test';
+import {expect, fn, userEvent, waitFor, within} from 'storybook/test';
 import {StageBoard} from '../features/game/StageBoard.tsx';
 import type {PlayerState} from '../features/game/types.ts';
 import {makeState, player, playerWithReady} from './fixtures/gameState.ts';
@@ -122,5 +122,58 @@ export const SpectatorView: Story = {
         // Spectators anchor on the first seat with a "focused" label.
         await waitFor(() => expect(canvas.getByText('focused')).toBeInTheDocument());
         await expect(canvas.queryByText('you')).not.toBeInTheDocument();
+    },
+};
+
+export const TurnMarker: Story = {
+    decorators: [atWidth(2100)],
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // The current player's column carries an explicit turn badge — the focus
+        // highlight belongs to the tapped-focus player, not the turn.
+        await waitFor(() => expect(canvas.getByText('turn')).toBeInTheDocument());
+    },
+};
+
+const impulseOnOffStagePlayer = makeState({
+    playerOrder: seatOrder,
+    players: seatedPlayers,
+    currentPlayer: 'Seraphina',
+    rulesEnforced: true,
+    impulseWindow: {
+        active: true,
+        context: 'UNDIRECTED',
+        actingPlayer: 'Seraphina',
+        currentImpulseHolder: 'Seraphina',
+        passOrder: seatOrder,
+        consecutivePasses: 0,
+    },
+});
+
+export const FocusSuggestionChip: Story = {
+    decorators: [atWidth(1200)],
+    args: {gameState: impulseOnOffStagePlayer},
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // Seraphina holds the impulse but is off-stage at three slots → suggested, never forced.
+        await waitFor(() => expect(canvas.getByText('Focus Seraphina ▸')).toBeInTheDocument());
+        await expect(canvas.queryByText('Seraphina')).not.toBeInTheDocument();
+        await userEvent.click(canvas.getByText('Focus Seraphina ▸'));
+        // Accepting the suggestion swaps her tableau in and retires the chip.
+        await waitFor(() => expect(canvas.getByText('Seraphina')).toBeInTheDocument());
+        await expect(canvas.queryByText('Focus Seraphina ▸')).not.toBeInTheDocument();
+    },
+};
+
+export const FocusSuggestionDismiss: Story = {
+    decorators: [atWidth(1200)],
+    args: {gameState: impulseOnOffStagePlayer},
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        await waitFor(() => expect(canvas.getByText('Focus Seraphina ▸')).toBeInTheDocument());
+        await userEvent.click(canvas.getByRole('button', {name: 'Dismiss focus suggestion'}));
+        // Dismissal sticks for this window; the stage stays as it was.
+        await expect(canvas.queryByText('Focus Seraphina ▸')).not.toBeInTheDocument();
+        await expect(canvas.queryByText('Seraphina')).not.toBeInTheDocument();
     },
 };

@@ -14,6 +14,7 @@ import {
     unlockAll
 } from './gameCommands.ts';
 import {OpenImpulseButton} from './ImpulsePanel.tsx';
+import {CARD_SCALE_MAX, CARD_SCALE_MIN, CARD_SCALE_STEP} from './useCardScale.ts';
 
 export type BoardLayout = 'stage' | 'linear' | 'circular' | 'text';
 
@@ -118,9 +119,12 @@ type GameStatusBarProps = {
     onLayoutChange: (layout: BoardLayout) => void;
     onCommand: (cmd: GameCommand) => void;
     isSpectator: boolean;
+    /** Stage card-size slider value; the slider renders only when both props are set and the Stage is active. */
+    cardScale?: number;
+    onCardScaleChange?: (value: number) => void;
 };
 
-export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand, isSpectator}: GameStatusBarProps) {
+export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLayoutChange, onCommand, isSpectator, cardScale, onCardScaleChange}: GameStatusBarProps) {
     const hasEdge = gameState?.edgeHolder != null;
     const [oustOpen, setOustOpen] = useState(false);
     const eligibleToOust = gameState?.players.filter(p => p.pool > 0 && p.name !== currentUser) ?? [];
@@ -210,6 +214,19 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                         >
                             {gameState.orderReversed ? '←' : '→'}
                         </button>
+                    )}
+                    {boardLayout === 'stage' && cardScale != null && onCardScaleChange && (
+                        <input
+                            type="range"
+                            min={CARD_SCALE_MIN}
+                            max={CARD_SCALE_MAX}
+                            step={CARD_SCALE_STEP}
+                            value={cardScale}
+                            onChange={e => onCardScaleChange(parseFloat(e.target.value))}
+                            aria-label="Card size"
+                            title={`Card size ×${cardScale.toFixed(2)}`}
+                            className="w-20 accent-gold cursor-pointer"
+                        />
                     )}
                     <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5">
                     {(['stage', 'linear', 'circular', 'text'] as const).map(l => (

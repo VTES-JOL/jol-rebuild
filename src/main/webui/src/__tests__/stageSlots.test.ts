@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {stageSlotCount, stageSlots} from '../features/game/stageSlots.ts';
+import {focusSuggestion, stageSlotCount, stageSlots} from '../features/game/stageSlots.ts';
 
 const order = ['Ana', 'Ben', 'Cat', 'Dev', 'Eli']; // seat order: predator of Cat is Ben, prey is Dev
 
@@ -75,6 +75,21 @@ describe('stageSlots', () => {
 
     it('handles an empty table', () => {
         expect(stageSlots([], 'Cat', null, 3)).toEqual([]);
+    });
+});
+
+describe('focusSuggestion', () => {
+    it('suggests the awaited player when their tableau is off-stage', () => {
+        expect(focusSuggestion('Eli', ['Ben', 'Cat', 'Dev'], order)).toBe('Eli');
+    });
+
+    it('stays quiet when the awaited player is already on stage', () => {
+        expect(focusSuggestion('Dev', ['Ben', 'Cat', 'Dev'], order)).toBeNull();
+    });
+
+    it('stays quiet with no awaited player or an unseated one', () => {
+        expect(focusSuggestion(null, ['Ben', 'Cat', 'Dev'], order)).toBeNull();
+        expect(focusSuggestion('someJudge', ['Ben', 'Cat', 'Dev'], order)).toBeNull();
     });
 });
 

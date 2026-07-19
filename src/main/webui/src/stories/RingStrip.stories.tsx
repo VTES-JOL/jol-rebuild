@@ -140,3 +140,39 @@ export const WithMinionStrips: Story = {
         await expect(canvas.getByTitle('Beast, The Leatherface (locked)')).toBeInTheDocument();
     },
 };
+
+export const MiniTableauTier: Story = {
+    args: {
+        gameState: fivePlayerState({
+            cards: {
+                ...minionCards,
+                m1: {...minionCards.m1, counters: 5},
+                m2: {...minionCards.m2, counters: 2},
+            },
+            players: [
+                player('Seraphina', {pool: 24}),
+                playerWithReady('Marcus', ['m1', 'm2'], {
+                    pool: 11,
+                    regions: {
+                        READY: {id: 'Marcus-READY', type: 'READY', count: 2, visible: true, cardIds: ['m1', 'm2']},
+                        TORPOR: {id: 'Marcus-TORPOR', type: 'TORPOR', count: 1, visible: true, cardIds: ['m3']},
+                        UNCONTROLLED: {id: 'Marcus-UNC', type: 'UNCONTROLLED', count: 3, visible: false, cardIds: []},
+                    },
+                }),
+                player('Alice', {pool: 18}),
+                player('Isabel'),
+                player('Dmitri', {pool: 0, ousted: true}),
+            ],
+        }),
+    },
+    play: async ({canvasElement}) => {
+        const canvas = within(canvasElement);
+        // Tier-3 density (≥1600px): blood totals join the strips, torpor and
+        // uncontrolled counts join the chip — all redundantly encoded for AT.
+        await expect(canvas.getByTitle('Theo Bell, 5 blood')).toBeInTheDocument();
+        await expect(canvas.getByTitle('Beast, The Leatherface, 2 blood (locked)')).toBeInTheDocument();
+        await expect(canvas.getByRole('button', {name: /Marcus.*1 in torpor.*3 uncontrolled/})).toBeInTheDocument();
+        await expect(canvas.getByTitle('minions in torpor')).toHaveTextContent('torpor 1');
+        await expect(canvas.getByTitle('uncontrolled cards')).toHaveTextContent('uncontrolled 3');
+    },
+};

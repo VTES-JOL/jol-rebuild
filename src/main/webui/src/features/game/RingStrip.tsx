@@ -9,7 +9,8 @@ import type {CardData, GameState, PlayerState} from './types.ts';
  * See docs/implementation/board-design.md — Ring strip.
  *
  * Density tiers: the base chip is always shown; ready-minion strips appear
- * from lg upward. The mini-tableau tier arrives with the Stage.
+ * from lg upward; from 1600px the strips gain per-minion blood numerals plus
+ * torpor / uncontrolled counts (the mini-tableau tier).
  */
 
 /** Rotate seat order so the viewer sits at the visual center. */
@@ -34,12 +35,13 @@ function MinionStrips({player, cards}: {player: PlayerState; cards: Record<strin
             {shown.map(id => {
                 const card = cards[id];
                 const locked = card?.locked === true;
+                const blood = card?.counters ?? 0;
                 return (
                     <span
                         key={id}
-                        title={card?.name ? `${card.name}${locked ? ' (locked)' : ''}` : undefined}
+                        title={card?.name ? `${card.name}${blood > 0 ? `, ${blood} blood` : ''}${locked ? ' (locked)' : ''}` : undefined}
                         className={[
-                            'text-[9px] leading-none px-1 py-0.5 rounded-sm border max-w-16 truncate',
+                            'text-[9px] leading-none px-1 py-0.5 rounded-sm border max-w-16 min-[1600px]:max-w-24 truncate',
                             locked
                                 ? 'border-line/30 text-ink-muted/40'
                                 : 'border-line/50 text-ink-muted',
@@ -47,6 +49,9 @@ function MinionStrips({player, cards}: {player: PlayerState; cards: Record<strin
                     >
                         {locked && <span aria-hidden="true">⟳ </span>}
                         {card?.name ?? '·····'}
+                        {blood > 0 && (
+                            <span className={`hidden min-[1600px]:inline font-medium ${locked ? 'text-blood/40' : 'text-blood/80'}`}> {blood}</span>
+                        )}
                     </span>
                 );
             })}
@@ -54,6 +59,19 @@ function MinionStrips({player, cards}: {player: PlayerState; cards: Record<strin
                 <span className="text-[9px] leading-none text-ink-muted/60">+{overflow}</span>
             )}
         </div>
+    );
+}
+
+/** Mini-tableau tier (≥1600px): off-board minion presence at a glance. */
+function RegionCounts({player}: {player: PlayerState}) {
+    const torpor = player.regions.TORPOR?.count ?? 0;
+    const uncontrolled = player.regions.UNCONTROLLED?.count ?? 0;
+    if (torpor === 0 && uncontrolled === 0) return null;
+    return (
+        <span className="hidden min-[1600px]:flex items-center gap-2 mt-0.5 text-[9px] leading-none text-ink-muted whitespace-nowrap">
+            {torpor > 0 && <span title="minions in torpor">torpor {torpor}</span>}
+            {uncontrolled > 0 && <span title="uncontrolled cards">uncontrolled {uncontrolled}</span>}
+        </span>
     );
 }
 
@@ -72,6 +90,8 @@ function PlayerChip({player, cards, isViewer, isTurn, hasEdge, isAwaited, onClic
         player.ousted ? 'ousted' : `${player.pool} pool`,
         player.victoryPoints > 0 && `${player.victoryPoints} VP`,
         !player.ousted && `${handCount} cards in hand`,
+        (player.regions.TORPOR?.count ?? 0) > 0 && `${player.regions.TORPOR!.count} in torpor`,
+        (player.regions.UNCONTROLLED?.count ?? 0) > 0 && `${player.regions.UNCONTROLLED!.count} uncontrolled`,
         hasEdge && 'holds the Edge',
         isTurn && 'current turn',
         isAwaited && 'awaiting their action',
@@ -121,6 +141,7 @@ function PlayerChip({player, cards, isViewer, isTurn, hasEdge, isAwaited, onClic
                 {!player.ousted && <span>🂠 {handCount}</span>}
             </span>
             <MinionStrips player={player} cards={cards} />
+            <RegionCounts player={player} />
         </button>
     );
 }

@@ -20,6 +20,7 @@ import {NowPanel} from './NowPanel.tsx';
 import {RingStrip} from './RingStrip.tsx';
 import {GameChatRail} from './GameChatRail.tsx';
 import {StageBoard} from './StageBoard.tsx';
+import {useCardScale} from './useCardScale.ts';
 import {useCardTravel} from './useCardTravel.ts';
 
 
@@ -220,6 +221,7 @@ export default function GamePage() {
     }, [isSpectator]);
 
     const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
+    const [cardScale, setCardScale] = useCardScale();
     const [layoutReady, setLayoutReady] = useState(false);
     const layoutInitialized = useRef(false);
     useEffect(() => {
@@ -272,6 +274,8 @@ export default function GamePage() {
                         onLayoutChange={setBoardLayout}
                         onCommand={handleCommand}
                         isSpectator={isSpectator}
+                        cardScale={cardScale}
+                        onCardScaleChange={setCardScale}
                     />
 
                     {gameState && (
@@ -313,6 +317,7 @@ export default function GamePage() {
                                 onCommand={handleCommand}
                                 onCardContextMenu={handleCardContextMenu}
                                 focusRequest={circularFocus}
+                                cardScale={cardScale}
                             />
                         </div>
                     ) : boardLayout === 'circular' && gameState ? (

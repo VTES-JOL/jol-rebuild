@@ -14,13 +14,14 @@ type PlayerColumnProps = {
     cards: Record<string, CardData>;
     role: PlayerColumnRole;
     isFocused?: boolean;
+    isTurn?: boolean;
     isCurrentUser?: boolean;
     gameId?: string;
     onCommand?: (cmd: GameCommand) => void;
     onCardContextMenu?: (card: CardData, ref: CardRef, x: number, y: number) => void;
 };
 
-export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gameId, onCommand, onCardContextMenu}: PlayerColumnProps) {
+export function PlayerColumn({player, cards, role, isFocused, isTurn, isCurrentUser, gameId, onCommand, onCardContextMenu}: PlayerColumnProps) {
     const [choiceEditing, setChoiceEditing] = useState(false);
     const [choiceInput, setChoiceInput] = useState('');
 
@@ -78,6 +79,11 @@ export function PlayerColumn({player, cards, role, isFocused, isCurrentUser, gam
                 <span className={`text-sm font-semibold truncate ${isCurrentUser ? 'text-ink' : 'text-ink-secondary'}`}>
                     {player.name}
                 </span>
+                {isTurn && (
+                    <span className="text-[9px] uppercase tracking-wide text-arcane border border-arcane/40 bg-arcane/10 rounded-sm px-1 py-0.5 shrink-0">
+                        turn
+                    </span>
+                )}
                 {gameId && onCommand ? (
                     <div className="flex items-center gap-0.5 shrink-0">
                         <button
