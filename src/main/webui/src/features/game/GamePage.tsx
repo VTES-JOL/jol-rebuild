@@ -1,11 +1,8 @@
-import type {CSSProperties} from 'react';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
-import {PlayerBoard} from './PlayerBoard.tsx';
-import {CircularBoard} from './CircularBoard.tsx';
 import {TextBoard} from './TextBoard.tsx';
 import {CardContextMenu} from './CardContextMenu.tsx';
 import {Dock} from './Dock.tsx';
@@ -225,7 +222,7 @@ export default function GamePage() {
         setContextMenu({ref, x, y});
     }, [isSpectator]);
 
-    const [boardLayout, setBoardLayout] = useState<BoardLayout>('linear');
+    const [boardLayout, setBoardLayout] = useState<BoardLayout>('stage');
     const [cardScale, setCardScale] = useCardScale();
     const [chatOpen, setChatOpen] = useState(false);
 
@@ -248,8 +245,11 @@ export default function GamePage() {
         layoutInitialized.current = true;
         if (user) {
             const pref = user.defaultBoard;
-            if (pref === 'stage' || pref === 'linear' || pref === 'circular' || pref === 'text') {
-                setBoardLayout(pref);
+            // Retired Strip/Table preferences fold into the Stage.
+            if (pref === 'text') {
+                setBoardLayout('text');
+            } else if (pref != null) {
+                setBoardLayout('stage');
             }
         }
         setLayoutReady(true);
@@ -340,19 +340,6 @@ export default function GamePage() {
                                 cardScale={cardScale}
                             />
                         </div>
-                    ) : boardLayout === 'circular' && gameState ? (
-                        <div className="flex-1 min-h-0 overflow-hidden">
-                            <CircularBoard
-                                orderedPlayers={orderedPlayers}
-                                cards={gameState.cards}
-                                currentUser={currentUser}
-                                gameState={gameState}
-                                gameId={gameId}
-                                onCommand={handleCommand}
-                                onCardContextMenu={handleCardContextMenu}
-                                focusRequest={circularFocus}
-                            />
-                        </div>
                     ) : boardLayout === 'text' && gameState ? (
                         <div className="flex-1 min-h-0 overflow-hidden">
                             <TextBoard
@@ -365,30 +352,8 @@ export default function GamePage() {
                             />
                         </div>
                     ) : (
-                        <div className="flex-1 min-h-0 overflow-y-auto">
-                            {gameState ? (
-                                <div
-                                    className="flex flex-col gap-1.5"
-                                    style={{'--card-w': 'clamp(90px, 8.25vw, 108px)'} as CSSProperties}
-                                >
-                                    {orderedPlayers.map(player => (
-                                        <div key={player.name} data-player-section={player.name}>
-                                            <PlayerBoard
-                                                player={player}
-                                                cards={gameState.cards}
-                                                isCurrentPlayer={player.name === currentUser}
-                                                gameId={gameId}
-                                                onCommand={handleCommand}
-                                                onCardContextMenu={handleCardContextMenu}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-center h-32 text-ink-muted text-sm">
-                                    {loading ? 'Loading…' : 'Waiting for game state…'}
-                                </div>
-                            )}
+                        <div className="flex items-center justify-center h-32 text-ink-muted text-sm">
+                            {loading ? 'Loading…' : 'Waiting for game state…'}
                         </div>
                     )}
 

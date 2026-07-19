@@ -2,7 +2,7 @@
 
 > No corresponding rules document — board design is a JOL-specific UI feature.
 >
-> This document is the **target architecture** for the game board. It supersedes [Board Layouts](./board-layouts.md), which describes the current Strip / Table / Text implementations. Those layouts remain in the codebase (and their documentation remains accurate) until the components described here replace them.
+> This document is the **implemented architecture** for the game board. The former Strip (`PlayerBoard`) and Table (`CircularBoard`) layouts have been retired — the Stage replaced them. [Board Regions & Interactions](./board-layouts.md) holds the shared display rules: region visibility, the Text (Ledger) board, drag-and-drop, and the card context menu.
 
 ---
 
@@ -27,10 +27,10 @@ Two invariants follow:
 
 Two first-class renderers consume the same `GameState` and dispatch the same commands:
 
-| Renderer         | Description                                                                                          | Replaces                    |
+| Renderer         | Description                                                                                          | Status                    |
 |------------------|--------------------------------------------------------------------------------------------------------|-----------------------------|
-| **Stage & Ring** | The visual tabletop board described in this document                                                 | Strip (`PlayerBoard`), Table (`CircularBoard`) |
-| **Ledger**       | Dense, fully semantic text board — evolution of the existing `TextBoard`                             | Text (`TextBoard`)          |
+| **Stage & Ring** | The visual tabletop board described in this document                                                 | Live — replaced Strip (`PlayerBoard`) and Table (`CircularBoard`), both retired |
+| **Ledger**       | Dense, fully semantic text board — evolution of the existing `TextBoard`                             | `TextBoard` remains; Ledger parity work pending |
 
 The Ledger is not a fallback. It is the accessibility, low-bandwidth, and async-review story, and must maintain command parity with the visual renderer. Any mutation available on the Stage must be available from a Ledger row.
 
@@ -101,7 +101,7 @@ Renders one to three (four on ultrawide) full tableaus. Default arrangement: **p
 
 - Tapping a Ring chip swaps that player into the focused slot.
 - When a timing window opens, the acting player's tableau is auto-suggested (never auto-forced) for focus.
-- Each tableau renders READY, TORPOR, UNCONTROLLED, and RESEARCH as felt zones, with compact piles for HAND / LIBRARY / CRYPT / ASH_HEAP and count badges for REMOVED_FROM_GAME — same per-region display rules as today ([Board Layouts](./board-layouts.md#region-visibility-rules)).
+- Each tableau renders READY, TORPOR, UNCONTROLLED, and RESEARCH as felt zones, with compact piles for HAND / LIBRARY / CRYPT / ASH_HEAP and count badges for REMOVED_FROM_GAME — same per-region display rules as today ([Board Regions & Interactions](./board-layouts.md#region-visibility-rules)).
 - Card travel between regions animates as physical motion (snap under `prefers-reduced-motion`), so state changes read as movement on a table.
 
 ### Dock
@@ -174,23 +174,24 @@ The tap-to-select + bottom action sheet is the entire mobile strategy: selecting
 
 ## Migration Path
 
-Build order chosen so each step is shippable inside the current `GamePage` without committing to the full chassis:
+Build order chosen so each step was shippable inside the current `GamePage` without committing to the full chassis. **All steps are complete**, plus the Dock layer and the retirement of the Strip/Table layouts:
 
-| Step | Component        | Builds on / replaces                                                                 |
+| Step | Component        | Status                                                                                  |
 |------|------------------|----------------------------------------------------------------------------------------|
-| 1    | Card anatomy     | Replaces `CardStack` / `CompactCardStack` rendering; keeps `usePlayerRegions` and `CardContextMenu` wiring; Storybook-testable in isolation |
-| 2    | Now panel        | New; reads existing phase / turn / `ImpulseState`; buttons arrive with legal-command enumeration |
-| 3    | Ring strip       | New; replaces the layout switcher's "see everyone" job; can sit above any existing layout |
-| 4    | Stage            | Replaces `PlayerBoard` and `CircularBoard`; density map applied                        |
-| 5    | Chat rail        | Unifies chat + effect log; unread divider; async digest                                |
+| 1    | Card anatomy     | ✅ `FieldCard` + `TuckStack` (replaced `CardStack`); `usePlayerRegions` and `CardContextMenu` wiring kept |
+| 2    | Now panel        | ✅ Phase track, situation headline, impulse line, digest banner; legal-command buttons still pending server enumeration — composed window panels carry the responses |
+| 3    | Ring strip       | ✅ Chip, minion-strip, and mini-tableau density tiers                                   |
+| 4    | Stage            | ✅ Replaced `PlayerBoard` and `CircularBoard` (both deleted); density map + card-size slider applied |
+| 5    | Chat rail        | ✅ Unified chat + effect log; unread divider (server-synced marker); async digest        |
+| 6    | Dock             | ✅ Fanned hand (replaced `HandTray`), mobile table/hand/chat tab bar with hand bottom sheet, NowActions repeated below `sm` |
 
-The Ledger renderer evolves from `TextBoard` in parallel and is never removed.
+The Ledger renderer evolves from `TextBoard` in parallel and is never removed. Legacy `defaultBoard` preferences (`linear` / `circular`) are folded into `stage` by Flyway migration `V5__default_board_stage.sql` and normalized on write.
 
 ### Gaps (server-side prerequisites)
 
-| Gap                          | Description                                                                                              |
+| Gap                          | Status                                                                                                     |
 |------------------------------|------------------------------------------------------------------------------------------------------------|
-| Legal-command enumeration    | Enforced mode needs a per-viewer list of currently legal commands in `GameStateDto` (or a companion message) to drive Now panel / action sheet buttons |
-| Async digest source          | A queryable effect-log slice ("effects since timestamp / last-read marker") to compile the reconnect digest |
-| Last-read markers            | Per-player chat read position persisted server-side for the unread divider (interim: `GameChatRail` keeps it in localStorage, so it doesn't follow the player across devices) |
-| Attention events             | A viewer-relative "you are awaited / targeted" flag derivable from `ActiveTimingWindow` pass order          |
+| Legal-command enumeration    | **Open.** Enforced mode needs a per-viewer list of currently legal commands in `GameStateDto` (or a companion message) to drive Now panel / action sheet buttons |
+| Async digest source          | ✅ `GET /api/games/{id}/messages/since?after={messageId}` returns the capped effect-log slice; `sinceDigest` compiles it client-side |
+| Last-read markers            | ✅ `ChatReadMarker` entity + `GET/PUT /api/games/{id}/read-marker` (advance-only); `useLastRead` syncs with localStorage as the immediate store |
+| Attention events             | ✅ `GameStateDto.youAreAwaited` / `youAreTargeted`, derived per viewer in `GameStateProjector` with the client's `nowStatus` precedence |

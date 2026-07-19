@@ -39,7 +39,7 @@ export function StageBoard({orderedPlayers, cards, currentUser, gameState, gameI
         return () => ro.disconnect();
     }, []);
 
-    // Adopt a focus request during render (same seq pattern as CircularBoard).
+    // Adopt a focus request during render; `seq` distinguishes repeated taps.
     const [focused, setFocused] = useState<string | null>(null);
     const [handledFocusSeq, setHandledFocusSeq] = useState(0);
     if (focusRequest && focusRequest.seq !== handledFocusSeq) {

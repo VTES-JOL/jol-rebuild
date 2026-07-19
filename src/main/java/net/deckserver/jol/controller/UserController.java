@@ -110,7 +110,7 @@ public class UserController {
             user.preferences.zoneId = body.zoneId();
         }
         user.preferences.enableImages = body.enableImages();
-        user.preferences.defaultBoard = body.defaultBoard();
+        user.preferences.defaultBoard = normalizeBoard(body.defaultBoard());
         return Response.ok().build();
     }
 
@@ -128,5 +128,14 @@ public class UserController {
 
     @RegisterForReflection
     public record UpdatePreferences(String countryCode, String zoneId, boolean enableImages, String defaultBoard) {
+    }
+
+    /** The retired Strip ('linear') and Table ('circular') layouts fold into the Stage. */
+    private static String normalizeBoard(String board) {
+        if (board == null) return null;
+        return switch (board) {
+            case "linear", "circular" -> "stage";
+            default -> board;
+        };
     }
 }

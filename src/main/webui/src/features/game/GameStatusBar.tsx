@@ -16,12 +16,10 @@ import {
 import {OpenImpulseButton} from './ImpulsePanel.tsx';
 import {CARD_SCALE_MAX, CARD_SCALE_MIN, CARD_SCALE_STEP} from './useCardScale.ts';
 
-export type BoardLayout = 'stage' | 'linear' | 'circular' | 'text';
+export type BoardLayout = 'stage' | 'text';
 
 export const LAYOUT_LABELS: Record<BoardLayout, string> = {
     stage: 'Stage',
-    linear: 'Strip',
-    circular: 'Table',
     text: 'Text',
 };
 
@@ -229,7 +227,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                         />
                     )}
                     <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5">
-                    {(['stage', 'linear', 'circular', 'text'] as const).map(l => (
+                    {(['stage', 'text'] as const).map(l => (
                         <button
                             key={l}
                             className={[

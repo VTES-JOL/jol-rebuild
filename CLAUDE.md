@@ -29,7 +29,7 @@ Each topic has a paired rules doc and implementation doc. Rules docs explain tab
 | [Tournament](docs/rules/tournament.md)                | [Tournament Lobby](docs/implementation/tournament-lobby.md)                                  |
 | —                                                     | [Game Lobby](docs/implementation/game-lobby.md)                                              |
 | —                                                     | [Game Modes](docs/implementation/game-modes.md)                                              |
-| —                                                     | [Board Design](docs/implementation/board-design.md), [Board Layouts](docs/implementation/board-layouts.md) (superseded) |
+| —                                                     | [Board Design](docs/implementation/board-design.md), [Board Regions & Interactions](docs/implementation/board-layouts.md) |
 | —                                                     | [Chat System](docs/implementation/chat.md)                                                   |
 | —                                                     | [Card Text Parsing](docs/implementation/card-text-parsing.md)                                |
 | —                                                     | [Card Language](docs/implementation/card-language.md)                                        |

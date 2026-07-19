@@ -1,12 +1,12 @@
-# Board Layouts
+# Board Regions & Interactions
 
-> No corresponding rules document — board layouts are JOL-specific UI features.
+> No corresponding rules document — board rendering is a JOL-specific UI feature.
 >
-> **Superseded.** The target board architecture is [Board Design — Stage & Ring](./board-design.md). This document describes the current Strip / Table / Text implementations, which remain in the codebase until that design replaces them; the region visibility rules and drag-and-drop tables below stay accurate for the existing code.
+> Companion to [Board Design — Stage & Ring](./board-design.md), which describes the board architecture. This document holds the display rules shared by every renderer: region visibility, the Text (Ledger) board, the drag-and-drop model, and the card context menu. The former Strip (`PlayerBoard`) and Table (`CircularBoard`) layouts described in earlier revisions have been retired — the Stage replaced them.
 
-`GamePage` offers three interchangeable board layouts controlled by the `boardLayout` state. The selector in the top-right cycles between **Strip** (`linear`), **Table** (`circular`), and **Text** (`text`).
+`GamePage` offers two renderers controlled by the `boardLayout` state: **Stage** (`stage`, the default) and **Text** (`text`). Legacy `linear` / `circular` preference values fold into `stage`.
 
-All three layouts receive the same `GameState` and render the same nine `RegionType` values:
+Both renderers receive the same `GameState` and render the same nine `RegionType` values:
 
 ```
 READY | UNCONTROLLED | TORPOR | RESEARCH | HAND | LIBRARY | CRYPT | ASH_HEAP | REMOVED_FROM_GAME
@@ -16,88 +16,34 @@ READY | UNCONTROLLED | TORPOR | RESEARCH | HAND | LIBRARY | CRYPT | ASH_HEAP | R
 
 ## Region visibility rules
 
-These rules apply across all layouts. Each `RegionState` carries a `visible` flag from the server; client code enforces additional display rules on top.
+These rules apply across all renderers. Each `RegionState` carries a `visible` flag from the server; client code enforces additional display rules on top.
 
 | Region            | Always shown?                                  | Hidden when empty | Visibility of card content                                                                  |
 |-------------------|------------------------------------------------|-------------------|---------------------------------------------------------------------------------------------|
 | READY             | Yes                                            | No                | Always visible                                                                              |
-| UNCONTROLLED      | Yes (Strip/Circular); hidden when empty (Text) | Text only         | Visible to owner; Hidden from opponents — slots shown with counter/lock state, no card UUID |
+| UNCONTROLLED      | Yes (Stage); hidden when empty (Text)          | Text only         | Visible to owner; Hidden from opponents — slots shown with counter/lock state, no card UUID |
 | TORPOR            | Only when `count > 0`                          | Yes               | Always visible                                                                              |
 | RESEARCH          | Only when `count > 0`                          | Yes               | Visible to owner; Hidden from opponents                                                     |
 | HAND              | Yes                                            | No                | Visible to owner; Hidden from opponents — shown as face-down compact stack                  |
 | LIBRARY           | Yes                                            | No                | Hidden — shown as face-down compact stack                                                   |
 | CRYPT             | Yes                                            | No                | Hidden — shown as face-down compact stack                                                   |
-| ASH_HEAP          | Context-dependent (see per-layout rules below) | No                | Visible when `region.visible === true`; otherwise `RegionBadge` count                       |
-| REMOVED_FROM_GAME | Only when `count > 0`                          | Yes               | Text layout: visible; Compact layouts: `RegionBadge` count                                  |
+| ASH_HEAP          | Context-dependent (see per-renderer rules)     | No                | Visible when `region.visible === true`; otherwise `RegionBadge` count                       |
+| REMOVED_FROM_GAME | Only when `count > 0`                          | Yes               | Text layout: visible; Stage: `RegionBadge` count                                            |
 
-**Hidden card rendering**: when `region.visible === false` or `card.faceDown === true`, card rows render as `***********` (Text) or a blank card image (Strip/Circular), with no card identity information exposed.
+**Hidden card rendering**: when `region.visible === false` or `card.faceDown === true`, card rows render as `***********` (Text) or a card back (Stage), with no card identity information exposed.
 
 **UNCONTROLLED slots**: because the region is not visible to opponents, the server returns `slots` instead of card UUIDs — each slot carries counters, lock state, and child count. This lets the owning player see positional info without leaking identities to others.
 
 ---
 
-## Strip layout (`linear`) — `PlayerBoard`
+## Stage columns — `PlayerColumn`
 
-**File**: `PlayerBoard.tsx`
+**Files**: `StageBoard.tsx`, `PlayerColumn.tsx`
 
-Each player occupies a horizontal row that wraps onto multiple lines at smaller widths. All players are visible simultaneously, stacked vertically.
-
-### Layout structure
+The Stage renders one to five `PlayerColumn` tableaus per the density map in [Board Design](./board-design.md#responsive-density-map). Each `PlayerColumn` is a full-height scrollable panel:
 
 ```
-[ Player info (name, pool, VP, predator/prey) ]
-[ READY (≤5 columns) ] [ TORPOR ] [ RESEARCH ] [ UNCONTROLLED (narrow gap) ]
-                                  [ HAND | LIBRARY | CRYPT | ASH_HEAP | RFG ]
-```
-
-- **Active field regions** (READY, TORPOR, RESEARCH, UNCONTROLLED) render as `FieldRegion` grids in a flex-wrap row.
-- **Compact regions** (HAND, LIBRARY, CRYPT, ASH_HEAP) render as stacked face-down piles aligned to the right column.
-- TORPOR and RESEARCH are omitted entirely when `count === 0`.
-- ASH_HEAP renders as a `RegionBadge` (count only) when `region.visible === false`; as a compact stack when visible.
-- REMOVED_FROM_GAME always renders as a `RegionBadge` count only.
-- The current user's row is highlighted with an arcane tint border (`bg-arcane/5 border-arcane/40`).
-- Card width: `clamp(60px, 5.5vw, 72px)` (CSS `--card-w` custom property).
-
-### Interactions
-
-All active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) and compact regions share **one `DndContext`** per player row, enabling cross-region drag-and-drop within that player's board.
-
-**Cross-player drag-and-drop is not supported.** Each `PlayerBoard` has its own isolated `DndContext`. Moving a card to another player's region must be done via a context menu command, not by dragging.
-
-| Gesture | Drop target | Result |
-|---|---|---|
-| Drag stack (grip handle) | Stack in same region | Reorder (`MOVE_CARD`, same region, new index) |
-| Drag stack (grip handle) | Stack or empty slot in different region | Move top-level card to target region (`MOVE_CARD`) |
-| Drag child card | Stack slot in same region | Attach to target vampire (`ATTACH_CARD`) |
-| Drag child card | Empty slot in same region | Detach into own stack (`MOVE_CARD`, same region) |
-| Drag child card | Stack in different region: target is minion AND dragged is library | Attach to target vampire (`ATTACH_CARD`) |
-| Drag child card | Stack in different region (any other case) | Move to target region (`MOVE_CARD`) |
-| Drag child card | Empty slot in different region | Move to target region, append (`MOVE_CARD`) |
-| Drag any card | Compact region (HAND/LIBRARY/CRYPT/ASH_HEAP) droppable area | Move to that region, insert at top (`MOVE_CARD`, position 0) |
-
-HAND, LIBRARY, CRYPT, and ASH_HEAP have no within-region DnD callbacks (no reorder, no internal attach). They are valid drop targets from other regions but cards cannot be rearranged within them via DnD.
-
----
-
-## Table layout (`circular`) — `CircularBoard`
-
-**File**: `CircularBoard.tsx`, `PlayerColumn.tsx`
-
-Shows three players at once: **predator | focused | prey**. The focused player starts as the current user, or falls back to `gameState.currentPlayer`, then `orderedPlayers[0]`. Navigation buttons in the top bar shift focus along the seating order.
-
-### Layout structure
-
-```
-[ Turn / Phase / Edge info ]   [ ◀ Predator | Prey ▶ ]
-┌────────────────────────────────────────────────────────────┐
-│  [ Predator column ]  [ Focused column ]  [ Prey column ]  │
-└────────────────────────────────────────────────────────────┘
-```
-
-Each `PlayerColumn` is a full-height scrollable panel with:
-
-```
-[ Role label (predator/focused/prey) | name | pool | VP ]
+[ Role label (predator/you/prey/…) | name | turn badge | pool | VP ]
 [ READY (≤4 columns, minRows=2) ]
 [ TORPOR ]          (when count > 0)
 [ RESEARCH ]        (when count > 0)
@@ -106,18 +52,9 @@ Each `PlayerColumn` is a full-height scrollable panel with:
 [ HAND | LIBRARY | CRYPT | ASH_HEAP | RFG ]   (pinned bottom)
 ```
 
-- UNCONTROLLED is suppressed when empty (unlike Strip which always shows it).
 - Ousted players render at 50% opacity.
-- Card width: `clamp(44px, 3.5vw, 56px)` — narrower than Strip to fit three columns.
-- The focused column has arcane tint styling; predator/prey columns use standard panel styling.
-
-### Interactions
-
-Same drag-and-drop model as Strip (one `DndContext` per `PlayerColumn`, shared across all regions). The same cross-player limitation applies — DnD is isolated to a single column. DnD commands are only wired for the focused player when `gameId` and `onCommand` are provided — predator and prey columns receive the same props but the user can only issue commands for cards they control (enforced server-side).
-
-Navigation:
-- **◀ predator** button — shifts focus to `focused.predator`; disabled when no predator exists.
-- **prey ▶** button — shifts focus to `focused.prey`; disabled when no prey exists.
+- The tapped-focus column carries the arcane tint; the turn player carries an explicit `turn` badge.
+- Card width comes from the density map's `--card-w`, multiplied by the user card-size slider.
 
 ---
 
@@ -125,7 +62,7 @@ Navigation:
 
 **File**: `TextBoard.tsx`
 
-All players rendered as side-by-side scrollable columns (`min-w-52`, horizontal scroll when overflow). Optimised for low bandwidth and accessibility — no card images, all data as text.
+All players rendered as side-by-side scrollable columns (`min-w-52`, horizontal scroll when overflow). Optimised for low bandwidth and accessibility — no card images, all data as text. This is the seed of the **Ledger** renderer in [Board Design](./board-design.md#renderers) and is never removed.
 
 ### Layout structure per column
 
@@ -179,11 +116,32 @@ During a cross-region drag, the destination region highlights with a blue ring. 
 
 ---
 
+## Drag-and-drop model (Stage)
+
+All active regions (READY, TORPOR, RESEARCH, UNCONTROLLED) and compact regions share **one `DndContext`** per player column, enabling cross-region drag-and-drop within that player's tableau.
+
+**Cross-player drag-and-drop is not supported.** Each `PlayerColumn` has its own isolated `DndContext`. Moving a card to another player's region must be done via a context menu command, not by dragging.
+
+| Gesture | Drop target | Result |
+|---|---|---|
+| Drag stack (grip handle) | Stack in same region | Reorder (`MOVE_CARD`, same region, new index) |
+| Drag stack (grip handle) | Stack or empty slot in different region | Move top-level card to target region (`MOVE_CARD`) |
+| Drag child card | Stack slot in same region | Attach to target vampire (`ATTACH_CARD`) |
+| Drag child card | Empty slot in same region | Detach into own stack (`MOVE_CARD`, same region) |
+| Drag child card | Stack in different region: target is minion AND dragged is library | Attach to target vampire (`ATTACH_CARD`) |
+| Drag child card | Stack in different region (any other case) | Move to target region (`MOVE_CARD`) |
+| Drag child card | Empty slot in different region | Move to target region, append (`MOVE_CARD`) |
+| Drag any card | Compact region (HAND/LIBRARY/CRYPT/ASH_HEAP) droppable area | Move to that region, insert at top (`MOVE_CARD`, position 0) |
+
+HAND, LIBRARY, CRYPT, and ASH_HEAP have no within-region DnD callbacks (no reorder, no internal attach). They are valid drop targets from other regions but cards cannot be rearranged within them via DnD. The viewer's own hand in the Dock supports drag reorder via `HandStrip`.
+
+---
+
 ## Shared infrastructure
 
 ### `usePlayerRegions`
 
-All visual boards call `usePlayerRegions(player, cards, gameId, onCommand)` to derive per-region stacks and cross-region move callbacks. The hook:
+The Stage calls `usePlayerRegions(player, cards, gameId, onCommand)` to derive per-region stacks and cross-region move callbacks. The hook:
 
 - Derives the nine regions from `player.regions`.
 - Converts each `RegionState` into `CardData[][]` (array of stacks) via `regionToStacks`.
@@ -192,7 +150,7 @@ All visual boards call `usePlayerRegions(player, cards, gameId, onCommand)` to d
 
 ### `FieldRegionDndGroup`
 
-Strip and Circular boards wrap each player's regions in a single `FieldRegionDndGroup`, which creates one `DndContext` for all regions. This is what makes dragging a card from a compact HAND stack directly into READY work without a separate context boundary.
+Each player column wraps its regions in a single `FieldRegionDndGroup`, which creates one `DndContext` for all regions. This is what makes dragging a card from a compact HAND stack directly into READY work without a separate context boundary.
 
 ### Card stacks
 
@@ -206,9 +164,9 @@ Compact regions (HAND, LIBRARY, CRYPT, ASH_HEAP) render as `CompactCardStack` �
 
 **File**: `CardContextMenu.tsx`
 
-Right-clicking any card that renders a `CardStack` or `CompactCardStack` opens a floating context menu. The menu is mounted via a React portal on `document.body` and dismissed by pressing Escape or clicking outside it.
+Right-clicking any card opens a floating context menu. The menu is mounted via a React portal on `document.body` and dismissed by pressing Escape or clicking outside it.
 
-The menu is opened via `onCardContextMenu` callbacks wired in `PlayerBoard` for every region. Counter and pool values in the open menu stay live — on each render the card is looked up fresh from `gameState.cards` using the stored card UUID, so increments and decrements are reflected immediately without closing the menu.
+The menu is opened via `onCardContextMenu` callbacks wired for every region. Counter and pool values in the open menu stay live — on each render the card is looked up fresh from `gameState.cards` using the stored card UUID, so increments and decrements are reflected immediately without closing the menu.
 
 ### Items shown by condition
 

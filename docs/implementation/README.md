@@ -26,7 +26,7 @@ For the game rules themselves, see [VTES Rules](../rules/README.md).
 | [Card Language](./card-language.md)       | Draft structured source-of-truth language for card automation, generated abilities, passive modifiers, limits, and obligations |
 | [Combat](./combat.md)                     | Combat system gaps, proposed commands, diablerie resolution                                                                 |
 | [Board Design](./board-design.md)         | Target board architecture: Stage & Ring layers, card anatomy, responsive density map, input parity, migration path         |
-| [Board Layouts](./board-layouts.md)       | *(superseded by Board Design)* Current Strip, Table, and Text layouts; region visibility rules and drag-and-drop            |
+| [Board Regions & Interactions](./board-layouts.md) | Display rules shared by every renderer: region visibility, the Text (Ledger) board, drag-and-drop, card context menu |
 | [Chat](./chat.md)                         | WebSocket protocol, DB schema, command log integration, and configuration                                                   |
 | [Tournament Lobby](./tournament-lobby.md) | Tournament lifecycle, seating administration, activation constraints, and game creation                                     |
 | [Mechanics Gaps](./mechanics-gaps.md)     | Cross-reference index, already-implemented summary, frontend gaps, and implementation priority                              |

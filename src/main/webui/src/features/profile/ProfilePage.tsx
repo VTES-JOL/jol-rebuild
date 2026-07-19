@@ -28,7 +28,7 @@ export default function ProfilePage() {
     const [countryCode, setCountryCode] = useState<string>("")
     const [zoneId, setZoneId] = useState<string>("")
     const [enableImages, setEnableImages] = useState(true)
-    const [defaultBoard, setDefaultBoard] = useState<string>("linear")
+    const [defaultBoard, setDefaultBoard] = useState<string>("stage")
     const [saving, setSaving] = useState(false)
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -40,7 +40,8 @@ export default function ProfilePage() {
             setCountryCode(user.countryCode ?? "")
             setZoneId(user.zoneId ?? Intl.DateTimeFormat().resolvedOptions().timeZone)
             setEnableImages(user.enableImages ?? true)
-            setDefaultBoard(user.defaultBoard ?? "linear")
+            // Retired Strip/Table values fold into the Stage.
+            setDefaultBoard(user.defaultBoard === "text" ? "text" : "stage")
         }
     }, [user])
 
@@ -157,7 +158,7 @@ export default function ProfilePage() {
                                         <div className="text-xs text-ink-muted mt-0.5">Which board view to use when entering a game</div>
                                     </div>
                                     <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5 w-fit">
-                                        {([["linear", "Strip"], ["circular", "Table"], ["text", "Text"]] as const).map(([value, label]) => (
+                                        {([["stage", "Stage"], ["text", "Text"]] as const).map(([value, label]) => (
                                             <button
                                                 key={value}
                                                 type="button"
