@@ -2,6 +2,7 @@ import type {CSSProperties} from 'react';
 import {Hand, LayoutGrid, MessageSquare, X} from 'lucide-react';
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
+import {useMediaQuery} from '@/hooks/useMediaQuery.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
 import {HandStrip} from './HandStrip.tsx';
 import {NowActions} from './NowPanel.tsx';
@@ -39,6 +40,9 @@ export function Dock({playerName, hand, cards, gameState, gameId, currentUser, o
     const [cardW, setCardW] = useState(MAX_CARD_W);
     const [sheetOpen, setSheetOpen] = useState(false);
     const count = hand?.cardIds.length ?? 0;
+    // Mirrors NowPanel's `showActionsHere` query so exactly one copy of the
+    // stateful response panels (Impulse/ActionDeclaration/Sequencing) mounts.
+    const isPhone = !useMediaQuery('(min-width: 640px)');
 
     useEffect(() => {
         const el = containerRef.current;
@@ -86,9 +90,11 @@ export function Dock({playerName, hand, cards, gameState, gameId, currentUser, o
 
             {/* Phone: action buttons + tab bar where thumbs are */}
             <div className="sm:hidden shrink-0 flex flex-col gap-1 border-t border-line/30 pt-1">
-                <div className="flex flex-col gap-1 empty:hidden">
-                    <NowActions gameState={gameState} gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
-                </div>
+                {isPhone && (
+                    <div className="flex flex-col gap-1 empty:hidden">
+                        <NowActions gameState={gameState} gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
+                    </div>
+                )}
                 <nav className="flex items-stretch" aria-label="Board sections">
                     <button type="button" className={tabClass(!sheetOpen)} onClick={() => setSheetOpen(false)}>
                         <LayoutGrid size={16} aria-hidden="true" />

@@ -8,9 +8,11 @@ import type {CardData, GameState, PlayerState} from './types.ts';
  * proceeds along the arrows and wraps from the last chip back to the first.
  * See docs/implementation/board-design.md — Ring strip.
  *
- * Density tiers: the base chip is always shown; ready-minion strips appear
- * from lg upward; from 1600px the strips gain per-minion blood numerals plus
- * torpor / uncontrolled counts (the mini-tableau tier).
+ * Density tiers: the base chip is always shown; from lg upward the strips
+ * gain ready-minion names, per-minion blood numerals, and torpor / uncontrolled
+ * counts (the mini-tableau tier) — lg is the threshold because Stage itself
+ * caps at 3 on-stage tableaus below 1600px, and off-stage players need this
+ * tier's resource visibility precisely on that common laptop-width range.
  */
 
 /** Rotate seat order so the viewer sits at the visual center. */
@@ -41,7 +43,7 @@ function MinionStrips({player, cards}: {player: PlayerState; cards: Record<strin
                         key={id}
                         title={card?.name ? `${card.name}${blood > 0 ? `, ${blood} blood` : ''}${locked ? ' (locked)' : ''}` : undefined}
                         className={[
-                            'text-[9px] leading-none px-1 py-0.5 rounded-sm border max-w-16 min-[1600px]:max-w-24 truncate',
+                            'text-[9px] leading-none px-1 py-0.5 rounded-sm border max-w-16 lg:max-w-24 truncate',
                             locked
                                 ? 'border-line/30 text-ink-muted/40'
                                 : 'border-line/50 text-ink-muted',
@@ -50,7 +52,7 @@ function MinionStrips({player, cards}: {player: PlayerState; cards: Record<strin
                         {locked && <span aria-hidden="true">⟳ </span>}
                         {card?.name ?? '·····'}
                         {blood > 0 && (
-                            <span className={`hidden min-[1600px]:inline font-medium ${locked ? 'text-blood/40' : 'text-blood/80'}`}> {blood}</span>
+                            <span className={`font-medium ${locked ? 'text-blood/40' : 'text-blood/80'}`}> {blood}</span>
                         )}
                     </span>
                 );
@@ -62,13 +64,13 @@ function MinionStrips({player, cards}: {player: PlayerState; cards: Record<strin
     );
 }
 
-/** Mini-tableau tier (≥1600px): off-board minion presence at a glance. */
+/** Mini-tableau tier (≥lg): off-board minion presence at a glance. */
 function RegionCounts({player}: {player: PlayerState}) {
     const torpor = player.regions.TORPOR?.count ?? 0;
     const uncontrolled = player.regions.UNCONTROLLED?.count ?? 0;
     if (torpor === 0 && uncontrolled === 0) return null;
     return (
-        <span className="hidden min-[1600px]:flex items-center gap-2 mt-0.5 text-[9px] leading-none text-ink-muted whitespace-nowrap">
+        <span className="hidden lg:flex items-center gap-2 mt-0.5 text-[9px] leading-none text-ink-muted whitespace-nowrap">
             {torpor > 0 && <span title="minions in torpor">torpor {torpor}</span>}
             {uncontrolled > 0 && <span title="uncontrolled cards">uncontrolled {uncontrolled}</span>}
         </span>

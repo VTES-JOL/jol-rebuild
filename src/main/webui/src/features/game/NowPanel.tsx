@@ -1,5 +1,6 @@
 import {useState} from 'react';
 import type {GameCommand} from './gameCommands.ts';
+import {useMediaQuery} from '@/hooks/useMediaQuery.ts';
 import {ActionDeclarationPanel} from './ActionDeclarationPanel.tsx';
 import {ImpulsePanel} from './ImpulsePanel.tsx';
 import type {GamePhase} from './nowStatus.ts';
@@ -135,6 +136,11 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
     digest?: SinceDigest | null;
 }) {
     const [digestDismissed, setDigestDismissed] = useState(false);
+    // The Dock mounts its own copy below `sm` (docs/implementation/board-design.md
+    // — "the Now panel's action buttons repeat in the Dock"); gating on the real
+    // breakpoint, rather than hiding one copy with CSS, keeps only one instance
+    // of the stateful response panels mounted at a time.
+    const showActionsHere = useMediaQuery('(min-width: 640px)');
     const status = nowStatus(gameState, currentUser);
     // The server flag is authoritative when present; the client derivation covers older payloads.
     const attention = (gameState.youAreAwaited ?? status.yourMove) && !isSpectator;
@@ -191,10 +197,12 @@ export function NowPanel({gameState, gameId, currentUser, onCommand, isSpectator
                 )}
             </div>
 
-            {/* Below sm the Dock repeats these next to the thumbs — see Dock.tsx */}
-            <div className="hidden sm:flex flex-col gap-1 empty:hidden">
-                <NowActions gameState={gameState} gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
-            </div>
+            {/* Below sm the Dock mounts its own copy next to the thumbs — see Dock.tsx */}
+            {showActionsHere && (
+                <div className="flex flex-col gap-1 empty:hidden">
+                    <NowActions gameState={gameState} gameId={gameId} currentUser={currentUser} onCommand={onCommand} />
+                </div>
+            )}
         </div>
     );
 }

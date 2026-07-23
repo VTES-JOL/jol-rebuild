@@ -2,6 +2,7 @@ import {MessageSquare, X} from 'lucide-react';
 import {useEffect, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {ChatPanel} from '@/features/chat/ChatPanel.tsx';
+import {useMediaQuery} from '@/hooks/useMediaQuery.ts';
 import type {ChatMsg, CommandLogMsg} from '@/hooks/useWebSocket.ts';
 import {unreadTalkCount} from './chatUnread.ts';
 import {useLastRead} from './useLastRead.ts';
@@ -38,14 +39,7 @@ export function GameChatRail({gameId, messages, status, currentUser, onSend, onR
         setDrawerOpenState(open);
         onDrawerOpenChange?.(open);
     };
-    const [railVisible, setRailVisible] = useState(() => window.matchMedia('(min-width: 1024px)').matches);
-
-    useEffect(() => {
-        const mq = window.matchMedia('(min-width: 1024px)');
-        const onChange = (e: MediaQueryListEvent) => setRailVisible(e.matches);
-        mq.addEventListener('change', onChange);
-        return () => mq.removeEventListener('change', onChange);
-    }, []);
+    const railVisible = useMediaQuery('(min-width: 1024px)');
 
     // Mark read only while the stream is actually on screen.
     const latestId = messages.length > 0 ? messages[messages.length - 1].id : null;

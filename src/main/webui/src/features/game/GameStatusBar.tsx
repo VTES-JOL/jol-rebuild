@@ -1,4 +1,3 @@
-import {createPortal} from 'react-dom';
 import {useState} from 'react';
 import type {GameState} from './types.ts';
 import type {GameCommand} from './gameCommands.ts';
@@ -6,7 +5,6 @@ import {
     drawCard,
     drawCrypt,
     gainEdge,
-    oustPlayer,
     reverseOrder,
     setRulesMode,
     shuffleCrypt,
@@ -14,100 +12,12 @@ import {
     unlockAll
 } from './gameCommands.ts';
 import {OpenImpulseButton} from './ImpulsePanel.tsx';
+import {OustConfirmModal} from './OustConfirmModal.tsx';
+import type {BoardLayout} from './boardLayout.ts';
+import {LAYOUT_LABELS} from './boardLayout.ts';
 import {CARD_SCALE_MAX, CARD_SCALE_MIN, CARD_SCALE_STEP} from './useCardScale.ts';
 
-export type BoardLayout = 'stage' | 'text';
-
-export const LAYOUT_LABELS: Record<BoardLayout, string> = {
-    stage: 'Stage',
-    text: 'Text',
-};
-
 const ACTION_BTN = 'text-[11px] px-1.5 py-0.5 rounded border transition-colors leading-none border-line/40 text-ink-muted hover:text-ink hover:border-line/70 cursor-pointer';
-
-type OustModalState = { step: 'select' } | { step: 'confirm'; playerName: string };
-
-function OustPlayerModal({
-    players,
-    currentUser,
-    gameId,
-    onCommand,
-    onClose,
-}: {
-    players: GameState['players'];
-    currentUser: string;
-    gameId: string;
-    onCommand: (cmd: GameCommand) => void;
-    onClose: () => void;
-}) {
-    const [state, setState] = useState<OustModalState>({step: 'select'});
-    const eligible = players.filter(p => p.pool > 0 && p.name !== currentUser);
-
-    const confirm = (name: string) => {
-        onCommand(oustPlayer(gameId, name));
-        onClose();
-    };
-
-    return createPortal(
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-        >
-            <div
-                className="bg-surface border border-line/60 rounded-xl shadow-2xl w-full max-w-xs mx-4 overflow-hidden"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="flex items-center justify-between px-4 py-3 border-b border-line/40">
-                    <span className="text-sm font-semibold text-ink">
-                        {state.step === 'confirm' ? `Oust ${state.playerName}?` : 'Oust Player'}
-                    </span>
-                    <button
-                        className="text-ink-muted hover:text-ink transition-colors leading-none"
-                        onClick={onClose}
-                        aria-label="Close"
-                    >✕</button>
-                </div>
-
-                {state.step === 'select' ? (
-                    eligible.length === 0 ? (
-                        <p className="px-4 py-6 text-sm text-ink-muted text-center italic">No eligible players to oust.</p>
-                    ) : (
-                        <ul className="divide-y divide-line/20">
-                            {eligible.map(p => (
-                                <li key={p.name}>
-                                    <button
-                                        className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-ink hover:bg-hover transition-colors text-left"
-                                        onClick={() => setState({step: 'confirm', playerName: p.name})}
-                                    >
-                                        <span className="font-medium">{p.name}</span>
-                                        <span className="text-xs text-blood font-mono">{p.pool} pool</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    )
-                ) : (
-                    <div className="px-4 py-4 space-y-4">
-                        <p className="text-xs text-ink-muted">
-                            Their predator gains <span className="text-online font-semibold">+6 pool</span> and <span className="text-gold font-semibold">+1 VP</span>.
-                        </p>
-                        <div className="flex gap-2 justify-end">
-                            <button
-                                className="text-xs px-3 py-1.5 rounded border border-line/40 text-ink-muted hover:text-ink transition-colors"
-                                onClick={() => setState({step: 'select'})}
-                            >Back</button>
-                            <button
-                                className="text-xs px-3 py-1.5 rounded bg-blood/20 border border-blood/40 text-blood hover:bg-blood/30 transition-colors font-medium"
-                                onClick={() => confirm((state as {step: 'confirm'; playerName: string}).playerName)}
-                            >Confirm Oust</button>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>,
-        document.body
-    );
-}
 
 type GameStatusBarProps = {
     gameState: GameState | null;
@@ -159,8 +69,15 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                                             Gain Edge
                                         </button>
                                     )}
+                                    {/* Filled and set apart from the utility buttons — irreversible,
+                                        affects every player's pool/VP, so it shouldn't read as a peer of "Draw". */}
                                     <button
-                                        className={[ACTION_BTN, 'border-blood/30 text-blood/60 hover:text-blood hover:border-blood/50', (!canAct || eligibleToOust.length === 0) ? 'opacity-40 cursor-not-allowed' : ''].join(' ')}
+                                        className={[
+                                            'text-[11px] px-2 py-0.5 rounded transition-colors leading-none font-medium cursor-pointer ml-1',
+                                            (!canAct || eligibleToOust.length === 0)
+                                                ? 'bg-blood/20 text-blood/40 opacity-60 cursor-not-allowed'
+                                                : 'bg-blood text-white hover:bg-blood/90 shadow-sm',
+                                        ].join(' ')}
                                         disabled={!canAct || eligibleToOust.length === 0}
                                         onClick={() => setOustOpen(true)}
                                         title={!canAct ? 'Not your impulse' : 'Oust a player'}
@@ -214,17 +131,22 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
                         </button>
                     )}
                     {boardLayout === 'stage' && cardScale != null && onCardScaleChange && (
-                        <input
-                            type="range"
-                            min={CARD_SCALE_MIN}
-                            max={CARD_SCALE_MAX}
-                            step={CARD_SCALE_STEP}
-                            value={cardScale}
-                            onChange={e => onCardScaleChange(parseFloat(e.target.value))}
-                            aria-label="Card size"
-                            title={`Card size ×${cardScale.toFixed(2)}`}
-                            className="w-20 accent-gold cursor-pointer"
-                        />
+                        <label className="flex items-center gap-1 shrink-0" title="Card size">
+                            <span className="text-[10px] text-ink-muted" aria-hidden="true">🂠</span>
+                            <input
+                                type="range"
+                                min={CARD_SCALE_MIN}
+                                max={CARD_SCALE_MAX}
+                                step={CARD_SCALE_STEP}
+                                value={cardScale}
+                                onChange={e => onCardScaleChange(parseFloat(e.target.value))}
+                                aria-label="Card size"
+                                className="w-16 accent-gold cursor-pointer"
+                            />
+                            <span className="text-[10px] text-ink-muted font-mono tabular-nums w-8 shrink-0" aria-hidden="true">
+                                ×{cardScale.toFixed(2)}
+                            </span>
+                        </label>
                     )}
                     <div className="flex items-center gap-0.5 rounded border border-line/50 p-0.5">
                     {(['stage', 'text'] as const).map(l => (
@@ -246,7 +168,7 @@ export function GameStatusBar({gameState, gameId, currentUser, boardLayout, onLa
             </div>
 
             {oustOpen && gameState && !rulesEnforced && (
-                <OustPlayerModal
+                <OustConfirmModal
                     players={gameState.players}
                     currentUser={currentUser}
                     gameId={gameId}

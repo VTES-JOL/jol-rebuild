@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
 import {useAuthContext} from '@/contexts/AuthContext.tsx';
 import {useParams} from 'react-router-dom';
 import {useGameChannel} from '@/hooks/useGameChannel.ts';
@@ -13,73 +12,17 @@ import {compileDigest} from './sinceDigest.ts';
 import {useLastRead} from './useLastRead.ts';
 import type {CardData, GameState, PlayerState} from './types.ts';
 import type {CardRef, GameCommand} from './gameCommands.ts';
-import {oustPlayer} from './gameCommands.ts';
 import {regionToStacks} from './gameUtils.tsx';
 import GameLayout from "@/shared/layout/GameLayout.tsx";
-import type {BoardLayout} from './GameStatusBar.tsx';
+import type {BoardLayout} from './boardLayout.ts';
 import {CommandErrorBanner, ConnectionBanner, GameStatusBar} from './GameStatusBar.tsx';
 import {NowPanel} from './NowPanel.tsx';
+import {OustConfirmModal} from './OustConfirmModal.tsx';
 import {RingStrip} from './RingStrip.tsx';
 import {GameChatRail} from './GameChatRail.tsx';
 import {StageBoard} from './StageBoard.tsx';
 import {useCardScale} from './useCardScale.ts';
 import {useCardTravel} from './useCardTravel.ts';
-
-
-function ZeroPoolOustModal({
-    playerName,
-    gameId,
-    onConfirm,
-    onDismiss,
-}: {
-    playerName: string;
-    gameId: string;
-    onConfirm: (cmd: GameCommand) => void;
-    onDismiss: () => void;
-}) {
-    return createPortal(
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={onDismiss}
-        >
-            <div
-                className="bg-surface border border-line/60 rounded-xl shadow-2xl w-full max-w-xs mx-4 overflow-hidden"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="flex items-center justify-between px-4 py-3 border-b border-line/40">
-                    <span className="text-sm font-semibold text-ink">Oust {playerName}?</span>
-                    <button
-                        className="text-ink-muted hover:text-ink transition-colors leading-none"
-                        onClick={onDismiss}
-                        aria-label="Close"
-                    >✕</button>
-                </div>
-                <div className="px-4 py-4 space-y-4">
-                    <p className="text-xs text-ink-muted">
-                        <span className="font-semibold text-blood">{playerName}</span>'s pool has reached 0.
-                        Their predator gains <span className="text-online font-semibold">+6 pool</span> and{' '}
-                        <span className="text-gold font-semibold">+1 VP</span>.
-                    </p>
-                    <div className="flex gap-2 justify-end">
-                        <button
-                            className="text-xs px-3 py-1.5 rounded border border-line/40 text-ink-muted hover:text-ink transition-colors"
-                            onClick={onDismiss}
-                        >
-                            Dismiss
-                        </button>
-                        <button
-                            className="text-xs px-3 py-1.5 rounded bg-blood/20 border border-blood/40 text-blood hover:bg-blood/30 transition-colors font-medium"
-                            onClick={() => { onConfirm(oustPlayer(gameId, playerName)); onDismiss(); }}
-                        >
-                            Confirm Oust
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>,
-        document.body
-    );
-}
 
 type GameContextMenuOverlayProps = {
     contextMenu: {ref: CardRef; x: number; y: number} | null;
@@ -148,11 +91,13 @@ export default function GamePage() {
     const boardRootRef = useRef<HTMLDivElement>(null);
     useCardTravel(boardRootRef);
 
-    // Ring strip chip tap: focus the player on the circular board, or scroll
-    // their section into view on the linear/text boards.
-    const [circularFocus, setCircularFocus] = useState<{name: string; seq: number} | null>(null);
+    // Ring strip chip tap: on Stage, swaps the player into a slot via
+    // `focusRequest`; on Text, Stage's `focusRequest` prop doesn't apply, so
+    // scrolling their section into view is what actually moves the player
+    // on-screen there.
+    const [focusRequest, setFocusRequest] = useState<{name: string; seq: number} | null>(null);
     const handleFocusPlayer = useCallback((name: string) => {
-        setCircularFocus(prev => ({name, seq: (prev?.seq ?? 0) + 1}));
+        setFocusRequest(prev => ({name, seq: (prev?.seq ?? 0) + 1}));
         const section = document.querySelector(`[data-player-section="${CSS.escape(name)}"]`);
         section?.scrollIntoView({
             behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
@@ -201,7 +146,14 @@ export default function GamePage() {
             }
             prev.set(player.name, player.pool);
         }
-        if (newOusts.length > 0) {
+        // OUST_PLAYER is permissive-only on the backend (no enforced-mode oust
+        // automation yet — docs/implementation/mechanics-gaps.md P1); prompting
+        // for it in enforced mode would only end in a rejected command.
+        if (newOusts.length > 0 && !gameState.rulesEnforced) {
+            // Subscribing to an external system (server-pushed gameState) and
+            // reacting to a transition it can't be recomputed from directly —
+            // the diff needs the previous pool, which only this effect tracks.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setZeroPoolQueue(q => [...q, ...newOusts]);
         }
     }, [gameState]);
@@ -245,8 +197,12 @@ export default function GamePage() {
         layoutInitialized.current = true;
         if (user) {
             const pref = user.defaultBoard;
+            // Adopting a one-time value from an external system (the profile,
+            // loaded asynchronously via AuthContext) once it arrives — the
+            // `layoutInitialized` ref already guards this to a single run.
             // Retired Strip/Table preferences fold into the Stage.
             if (pref === 'text') {
+                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setBoardLayout('text');
             } else if (pref != null) {
                 setBoardLayout('stage');
@@ -274,28 +230,18 @@ export default function GamePage() {
                 onCommand={handleCommand}
                 onClose={() => setContextMenu(null)}
             />
-            {zeroPoolQueue.length > 0 && (
-                <ZeroPoolOustModal
-                    playerName={zeroPoolQueue[0]}
+            {zeroPoolQueue.length > 0 && gameState && (
+                <OustConfirmModal
+                    players={gameState.players}
+                    currentUser={currentUser}
+                    initialPlayerName={zeroPoolQueue[0]}
                     gameId={gameId}
-                    onConfirm={handleCommand}
-                    onDismiss={dismissZeroPool}
+                    onCommand={handleCommand}
+                    onClose={dismissZeroPool}
                 />
             )}
             <div className="flex h-full min-h-0 gap-3 px-4 pb-4">
                 <div ref={boardRootRef} className="flex-1 min-w-0 min-h-0 flex flex-col">
-
-                    <GameStatusBar
-                        gameState={gameState}
-                        gameId={gameId}
-                        currentUser={currentUser}
-                        boardLayout={boardLayout}
-                        onLayoutChange={setBoardLayout}
-                        onCommand={handleCommand}
-                        isSpectator={isSpectator}
-                        cardScale={cardScale}
-                        onCardScaleChange={setCardScale}
-                    />
 
                     {gameState && (
                         <RingStrip
@@ -315,6 +261,20 @@ export default function GamePage() {
                             digest={digest}
                         />
                     )}
+
+                    {/* Utility chrome (mode, quick actions, layout, card size) sits below
+                        the awareness/situation layers — it's the least urgent row on the page. */}
+                    <GameStatusBar
+                        gameState={gameState}
+                        gameId={gameId}
+                        currentUser={currentUser}
+                        boardLayout={boardLayout}
+                        onLayoutChange={setBoardLayout}
+                        onCommand={handleCommand}
+                        isSpectator={isSpectator}
+                        cardScale={cardScale}
+                        onCardScaleChange={setCardScale}
+                    />
 
                     {!isConnected && <ConnectionBanner status={status} />}
 
@@ -336,7 +296,7 @@ export default function GamePage() {
                                 gameId={gameId}
                                 onCommand={handleCommand}
                                 onCardContextMenu={handleCardContextMenu}
-                                focusRequest={circularFocus}
+                                focusRequest={focusRequest}
                                 cardScale={cardScale}
                             />
                         </div>
